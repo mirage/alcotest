@@ -1,0 +1,12 @@
+# OASIS_START
+# DO NOT EDIT (digest: 87cdc75e576908e945795dc5f096732e)
+version = "0.1.0"
+description = "A light and colored test framework"
+requires = "oUnit re.str cmdliner"
+archive(byte) = "alcotest.cma"
+archive(byte, plugin) = "alcotest.cma"
+archive(native) = "alcotest.cmxa"
+archive(native, plugin) = "alcotest.cmxs"
+exists_if = "alcotest.cma"
+# OASIS_STOP
+
