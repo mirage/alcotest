@@ -64,9 +64,6 @@ let with_process_in cmd f =
 let dup oc =
   Unix.out_channel_of_descr (Unix.dup (Unix.descr_of_out_channel oc))
 
-let mystdout = dup stdout
-let mystderr = dup stderr
-
 let terminal_columns =
   let split s c =
     Re_str.split (Re_str.regexp (Printf.sprintf "[%c]" c)) s in
@@ -113,14 +110,11 @@ let right_column () =
   - left_column ()
   + 15
 
-let printf fmt =
-  Printf.fprintf mystdout fmt
-
 let right s =
-  printf "%s\n%!" (indent_right s (right_column ()))
+  Printf.printf "%s\n%!" (indent_right s (right_column ()))
 
 let left s =
-  printf "%s%!" (indent_left s (left_column ()))
+  Printf.printf "%s%!" (indent_left s (left_column ()))
 
 let string_of_channel ic =
   let n = 32768 in
@@ -214,11 +208,22 @@ let has_run = function
   | OUnit.RSkip _
   | OUnit.RTodo _    -> false
 
-let redirect oc file =
-  let oc = Unix.descr_of_out_channel oc in
-  let fd = Unix.(openfile file [O_WRONLY; O_TRUNC; O_CREAT] 0o666) in
-  Unix.dup2 fd oc;
-  Unix.close fd
+let with_redirect oc file fn =
+  flush oc;
+  let fd_oc = Unix.descr_of_out_channel oc in
+  let fd_old = Unix.dup fd_oc in
+  let fd_file = Unix.(openfile file [O_WRONLY; O_TRUNC; O_CREAT] 0o666) in
+  Unix.dup2 fd_file fd_oc;
+  Unix.close fd_file;
+  let r =
+    try `Ok (fn ())
+    with e -> `Error e in
+  flush oc;
+  Unix.dup2 fd_old fd_oc;
+  Unix.close fd_old;
+  match r with
+  | `Ok x -> x
+  | `Error e -> raise e
 
 let map_test fn test =
   let rec aux path = function
@@ -293,9 +298,10 @@ let redirect_test_output labels test_fun =
   else fun () ->
     let output_file = output_file labels in
     if not (Sys.file_exists !log_dir) then Unix.mkdir !log_dir 0o755;
-    redirect stdout output_file;
-    redirect stderr output_file;
-    test_fun ()
+    with_redirect stdout output_file (fun () ->
+        with_redirect stderr output_file
+          test_fun
+      )
 
 let select_speed labels test_fun =
   if compare_speed_level (speed_of_path labels) !speed_level >= 0 then test_fun
@@ -311,14 +317,14 @@ let run test =
   let s = if runs = 1 then "" else "s" in
   match List.filter failure results with
   | [] ->
-    printf "%s in %.3fs. %d test%s ran.\n%!"
+    Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
       (green "Test Successfull") total_time runs s
   | l  ->
-    if !verbose then
-      List.iter (fun error -> printf "%s\n" error) (List.rev !errors);
+    if !verbose || runs = 1 then
+      List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
     let s1 = if List.length l = 1 then "" else "s" in
     let msg = Printf.sprintf "%d error%s!" (List.length l) s1 in
-    printf "%s in %.3fs. %d test%s ran.\n%!"
+    Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
       (red_s msg) total_time runs s;
     exit 1
 
@@ -326,7 +332,7 @@ let list_tests () =
   let list = Hashtbl.fold (fun k v l -> (k,v) :: l) docs [] in
   let list = List.sort (fun (x,_) (y,_) -> compare (List.rev x) (List.rev y)) list in
   List.iter (fun (path, doc) ->
-      printf "%s    %s\n" (string_of_path path) doc
+      Printf.printf "%s    %s\n" (string_of_path path) doc
     ) list
 
 let register name (ts:test_case list) =
@@ -355,7 +361,7 @@ let run_subtest dir verb quick labels =
   log_dir := dir;
   let is_empty = filter_tests ~subst:false labels !tests = [] in
   if is_empty then (
-    printf "%s\n" (red "Invalid request!"); exit 1
+    Printf.printf "%s\n" (red "Invalid request!"); exit 1
   ) else
     let tests = filter_tests ~subst:true labels !tests in
     run (OUnit.TestList tests)
