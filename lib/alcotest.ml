@@ -318,7 +318,7 @@ let run test =
   match List.filter failure results with
   | [] ->
     Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
-      (green "Test Successfull") total_time runs s
+      (green "Test Successful") total_time runs s
   | l  ->
     if !verbose || runs = 1 then
       List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
