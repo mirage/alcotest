@@ -184,7 +184,7 @@ let error path fmt =
 let print_result = function
   | OUnit.RSuccess p     -> right (green "[OK]")
   | OUnit.RFailure (p,s) -> error p "Failure: %s" s
-  | OUnit.RError (p, s)  -> error p "%s" s
+  | OUnit.RError (p, s)  -> error p "%s\n%s" s (Printexc.get_backtrace ())
   | OUnit.RSkip _        -> right (yellow "[SKIP]")
   | OUnit.RTodo _        -> right (yellow "[TODO]")
 
