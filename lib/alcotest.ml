@@ -317,14 +317,14 @@ let run test =
   let s = if runs = 1 then "" else "s" in
   match List.filter failure results with
   | [] ->
-    Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
+    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
       (green "Test Successful") total_time runs s
   | l  ->
     if !verbose || runs = 1 then
       List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
     let s1 = if List.length l = 1 then "" else "s" in
     let msg = Printf.sprintf "%d error%s!" (List.length l) s1 in
-    Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
+    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
       (red_s msg) total_time runs s;
     exit 1
 
