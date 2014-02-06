@@ -299,9 +299,15 @@ let redirect_test_output labels test_fun =
     let output_file = output_file labels in
     if not (Sys.file_exists !log_dir) then Unix.mkdir !log_dir 0o755;
     with_redirect stdout output_file (fun () ->
-        with_redirect stderr output_file
-          test_fun
-      )
+        with_redirect stderr output_file (fun () ->
+          try test_fun ()
+          with exn -> begin
+            Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
+            Printexc.print_backtrace stderr;
+            raise exn
+          end
+        )
+    )
 
 let select_speed labels test_fun =
   if compare_speed_level (speed_of_path labels) !speed_level >= 0 then test_fun
@@ -317,14 +323,14 @@ let run test =
   let s = if runs = 1 then "" else "s" in
   match List.filter failure results with
   | [] ->
-    Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
+    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
       (green "Test Successful") total_time runs s
   | l  ->
     if !verbose || runs = 1 then
       List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
     let s1 = if List.length l = 1 then "" else "s" in
     let msg = Printf.sprintf "%d error%s!" (List.length l) s1 in
-    Printf.printf "%s in %.3fs. %d test%s ran.\n%!"
+    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
       (red_s msg) total_time runs s;
     exit 1
 
