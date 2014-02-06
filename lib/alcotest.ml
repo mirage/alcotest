@@ -184,7 +184,7 @@ let error path fmt =
 let print_result = function
   | OUnit.RSuccess p     -> right (green "[OK]")
   | OUnit.RFailure (p,s) -> error p "Failure: %s" s
-  | OUnit.RError (p, s)  -> error p "%s\n%s" s (Printexc.get_backtrace ())
+  | OUnit.RError (p, s)  -> error p "%s" s
   | OUnit.RSkip _        -> right (yellow "[SKIP]")
   | OUnit.RTodo _        -> right (yellow "[TODO]")
 
@@ -299,9 +299,15 @@ let redirect_test_output labels test_fun =
     let output_file = output_file labels in
     if not (Sys.file_exists !log_dir) then Unix.mkdir !log_dir 0o755;
     with_redirect stdout output_file (fun () ->
-        with_redirect stderr output_file
-          test_fun
-      )
+        with_redirect stderr output_file (fun () ->
+          try test_fun ()
+          with exn -> begin
+            Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
+            Printexc.print_backtrace stderr;
+            raise exn
+          end
+        )
+    )
 
 let select_speed labels test_fun =
   if compare_speed_level (speed_of_path labels) !speed_level >= 0 then test_fun
