@@ -20,7 +20,7 @@ type speed_level = [`Quick | `Slow]
 (** Speed level for a test. *)
 
 type test_case = string * speed_level * (unit -> unit)
-(** A test case is a documenation string, a speed level as well as an
+(** A test case is a documentation string, a speed level as well as an
     anyonymous function. *)
 
 type test = string * test_case list
