@@ -36,3 +36,16 @@ setup.data:
 .PHONY: build doc test all install uninstall reinstall clean distclean configure
 
 # OASIS_STOP
+
+VERSION = $(shell grep 'Version:' _oasis | sed 's/Version: *//')
+NAME    = $(shell grep 'Name:' _oasis    | sed 's/Name: *//')
+ARCHIVE = https://github.com/samoht/alcotest/archive/$(VERSION).tar.gz
+
+release:
+	git tag -a $(VERSION) -m "Version $(VERSION)."
+	git push origin $(VERSION)
+	$(MAKE) pr
+
+pr:
+	opam publish prepare $(NAME).$(VERSION) $(ARCHIVE)
+	OPAMYES=1 opam publish submit $(NAME).$(VERSION) && rm -rf $(NAME).$(VERSION)
