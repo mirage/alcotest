@@ -1,5 +1,5 @@
 (* OASIS_START *)
-(* DO NOT EDIT (digest: 9391a8584c650b18ad9148b7d234084a) *)
+(* DO NOT EDIT (digest: f0c1bc8b53444073f22cdfccb1c9b785) *)
 module OASISGettext = struct
 (* # 22 "src/oasis/OASISGettext.ml" *)
 
@@ -39,10 +39,10 @@ module OASISExpr = struct
   open OASISGettext
 
 
-  type test = string 
+  type test = string
 
 
-  type flag = string 
+  type flag = string
 
 
   type t =
@@ -52,10 +52,10 @@ module OASISExpr = struct
     | EOr of t * t
     | EFlag of flag
     | ETest of test * string
-    
 
 
-  type 'a choices = (t * 'a) list 
+
+  type 'a choices = (t * 'a) list
 
 
   let eval var_get t =
@@ -204,26 +204,27 @@ module BaseEnvLight = struct
       end
 
 
-  let var_get name env =
-    let rec var_expand str =
-      let buff =
-        Buffer.create ((String.length str) * 2)
-      in
-        Buffer.add_substitute
-          buff
-          (fun var ->
-             try
-               var_expand (MapString.find var env)
-             with Not_found ->
-               failwith
-                 (Printf.sprintf
-                    "No variable %s defined when trying to expand %S."
-                    var
-                    str))
-          str;
-        Buffer.contents buff
+  let rec var_expand str env =
+    let buff =
+      Buffer.create ((String.length str) * 2)
     in
-      var_expand (MapString.find name env)
+      Buffer.add_substitute
+        buff
+        (fun var ->
+           try
+             var_expand (MapString.find var env) env
+           with Not_found ->
+             failwith
+               (Printf.sprintf
+                  "No variable %s defined when trying to expand %S."
+                  var
+                  str))
+        str;
+      Buffer.contents buff
+
+
+  let var_get name env =
+    var_expand (MapString.find name env) env
 
 
   let var_choose lst env =
@@ -233,7 +234,7 @@ module BaseEnvLight = struct
 end
 
 
-# 236 "myocamlbuild.ml"
+# 237 "myocamlbuild.ml"
 module MyOCamlbuildFindlib = struct
 (* # 22 "src/plugins/ocamlbuild/MyOCamlbuildFindlib.ml" *)
 
@@ -248,6 +249,9 @@ module MyOCamlbuildFindlib = struct
     *)
   open Ocamlbuild_plugin
 
+  type conf =
+    { no_automatic_syntax: bool;
+    }
 
   (* these functions are not really officially exported *)
   let run_and_read =
@@ -257,6 +261,31 @@ module MyOCamlbuildFindlib = struct
   let blank_sep_strings =
     Ocamlbuild_pack.Lexers.blank_sep_strings
 
+
+  let exec_from_conf exec =
+    let exec =
+      let env_filename = Pathname.basename BaseEnvLight.default_filename in
+      let env = BaseEnvLight.load ~filename:env_filename ~allow_empty:true () in
+      try
+        BaseEnvLight.var_get exec env
+      with Not_found ->
+        Printf.eprintf "W: Cannot get variable %s\n" exec;
+        exec
+    in
+    let fix_win32 str =
+      if Sys.os_type = "Win32" then begin
+        let buff = Buffer.create (String.length str) in
+        (* Adapt for windowsi, ocamlbuild + win32 has a hard time to handle '\\'.
+         *)
+        String.iter
+          (fun c -> Buffer.add_char buff (if c = '\\' then '/' else c))
+          str;
+        Buffer.contents buff
+      end else begin
+        str
+      end
+    in
+      fix_win32 exec
 
   let split s ch =
     let buf = Buffer.create 13 in
@@ -285,30 +314,36 @@ module MyOCamlbuildFindlib = struct
     with Not_found -> s
 
   (* ocamlfind command *)
-  let ocamlfind x =
-    let ocamlfind_prog =
-      let env_filename = Pathname.basename BaseEnvLight.default_filename in
-      let env = BaseEnvLight.load ~filename:env_filename ~allow_empty:true () in
-      try
-        BaseEnvLight.var_get "ocamlfind" env
-      with Not_found ->
-        Printf.eprintf "W: Cannot get variable ocamlfind";
-        "ocamlfind"
-    in
-      S[Sh ocamlfind_prog; x]
+  let ocamlfind x = S[Sh (exec_from_conf "ocamlfind"); x]
 
   (* This lists all supported packages. *)
   let find_packages () =
-    List.map before_space (split_nl & run_and_read "ocamlfind list")
+    List.map before_space (split_nl & run_and_read (exec_from_conf "ocamlfind" ^ " list"))
 
 
   (* Mock to list available syntaxes. *)
   let find_syntaxes () = ["camlp4o"; "camlp4r"]
 
 
-  let dispatch =
+  let well_known_syntax = [
+    "camlp4.quotations.o";
+    "camlp4.quotations.r";
+    "camlp4.exceptiontracer";
+    "camlp4.extend";
+    "camlp4.foldgenerator";
+    "camlp4.listcomprehension";
+    "camlp4.locationstripper";
+    "camlp4.macro";
+    "camlp4.mapgenerator";
+    "camlp4.metagenerator";
+    "camlp4.profiler";
+    "camlp4.tracer"
+  ]
+
+
+  let dispatch conf =
     function
-      | Before_options ->
+      | After_options ->
           (* By using Before_options one let command line options have an higher
            * priority on the contrary using After_options will guarantee to have
            * the higher priority override default commands by ocamlfind ones *)
@@ -325,27 +360,39 @@ module MyOCamlbuildFindlib = struct
            * -linkpkg *)
           flag ["ocaml"; "link"; "program"] & A"-linkpkg";
 
-          (* For each ocamlfind package one inject the -package option when
-           * compiling, computing dependencies, generating documentation and
-           * linking. *)
-          List.iter
-            begin fun pkg ->
-              let base_args = [A"-package"; A pkg] in
-              let syn_args = [A"-syntax"; A "camlp4o"] in
-              let args =
-          (* Heuristic to identify syntax extensions: whether they end in
-           * ".syntax"; some might not *)
-                if Filename.check_suffix pkg "syntax"
-                then syn_args @ base_args
-                else base_args
-              in
-              flag ["ocaml"; "compile";  "pkg_"^pkg] & S args;
-              flag ["ocaml"; "ocamldep"; "pkg_"^pkg] & S args;
-              flag ["ocaml"; "doc";      "pkg_"^pkg] & S args;
-              flag ["ocaml"; "link";     "pkg_"^pkg] & S base_args;
-              flag ["ocaml"; "infer_interface"; "pkg_"^pkg] & S args;
-            end
-            (find_packages ());
+          if not (conf.no_automatic_syntax) then begin
+            (* For each ocamlfind package one inject the -package option when
+             * compiling, computing dependencies, generating documentation and
+             * linking. *)
+            List.iter
+              begin fun pkg ->
+                let base_args = [A"-package"; A pkg] in
+                (* TODO: consider how to really choose camlp4o or camlp4r. *)
+                let syn_args = [A"-syntax"; A "camlp4o"] in
+                let (args, pargs) =
+                  (* Heuristic to identify syntax extensions: whether they end in
+                     ".syntax"; some might not.
+                  *)
+                  if Filename.check_suffix pkg "syntax" ||
+                     List.mem pkg well_known_syntax then
+                    (syn_args @ base_args, syn_args)
+                  else
+                    (base_args, [])
+                in
+                flag ["ocaml"; "compile";  "pkg_"^pkg] & S args;
+                flag ["ocaml"; "ocamldep"; "pkg_"^pkg] & S args;
+                flag ["ocaml"; "doc";      "pkg_"^pkg] & S args;
+                flag ["ocaml"; "link";     "pkg_"^pkg] & S base_args;
+                flag ["ocaml"; "infer_interface"; "pkg_"^pkg] & S args;
+
+                (* TODO: Check if this is allowed for OCaml < 3.12.1 *)
+                flag ["ocaml"; "compile";  "package("^pkg^")"] & S pargs;
+                flag ["ocaml"; "ocamldep"; "package("^pkg^")"] & S pargs;
+                flag ["ocaml"; "doc";      "package("^pkg^")"] & S pargs;
+                flag ["ocaml"; "infer_interface"; "package("^pkg^")"] & S pargs;
+              end
+              (find_packages ());
+          end;
 
           (* Like -package but for extensions syntax. Morover -syntax is useless
            * when linking. *)
@@ -368,7 +415,11 @@ module MyOCamlbuildFindlib = struct
           flag ["ocaml"; "pkg_threads"; "compile"] (S[A "-thread"]);
           flag ["ocaml"; "pkg_threads"; "doc"] (S[A "-I"; A "+threads"]);
           flag ["ocaml"; "pkg_threads"; "link"] (S[A "-thread"]);
-          flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"])
+          flag ["ocaml"; "pkg_threads"; "infer_interface"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "compile"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "doc"] (S[A "-I"; A "+threads"]);
+          flag ["ocaml"; "package(threads)"; "link"] (S[A "-thread"]);
+          flag ["ocaml"; "package(threads)"; "infer_interface"] (S[A "-thread"]);
 
       | _ ->
           ()
@@ -390,10 +441,10 @@ module MyOCamlbuildBase = struct
   module OC = Ocamlbuild_pack.Ocaml_compiler
 
 
-  type dir = string 
-  type file = string 
-  type name = string 
-  type tag = string 
+  type dir = string
+  type file = string
+  type name = string
+  type tag = string
 
 
 (* # 62 "src/plugins/ocamlbuild/MyOCamlbuildBase.ml" *)
@@ -408,7 +459,7 @@ module MyOCamlbuildBase = struct
          * directory.
          *)
         includes:  (dir * dir list) list;
-      } 
+      }
 
 
   let env_filename =
@@ -451,7 +502,7 @@ module MyOCamlbuildBase = struct
                    try
                      opt := no_trailing_dot (BaseEnvLight.var_get var env)
                    with Not_found ->
-                     Printf.eprintf "W: Cannot get variable %s" var)
+                     Printf.eprintf "W: Cannot get variable %s\n" var)
                 [
                   Options.ext_obj, "ext_obj";
                   Options.ext_lib, "ext_lib";
@@ -506,12 +557,13 @@ module MyOCamlbuildBase = struct
 
                    (* When ocaml link something that use the C library, then one
                       need that file to be up to date.
+                      This holds both for programs and for libraries.
                     *)
-                   dep ["link"; "ocaml"; "program"; tag_libstubs lib]
-                     [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
+  		 dep ["link"; "ocaml"; tag_libstubs lib]
+  		     [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
 
-                   dep  ["compile"; "ocaml"; "program"; tag_libstubs lib]
-                     [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
+  		 dep  ["compile"; "ocaml"; tag_libstubs lib]
+  		      [dir/"lib"^(nm_libstubs lib)^"."^(!Options.ext_lib)];
 
                    (* TODO: be more specific about what depends on headers *)
                    (* Depends on .h files *)
@@ -527,27 +579,31 @@ module MyOCamlbuildBase = struct
               (* Add flags *)
               List.iter
               (fun (tags, cond_specs) ->
-                 let spec =
-                   BaseEnvLight.var_choose cond_specs env
+                 let spec = BaseEnvLight.var_choose cond_specs env in
+                 let rec eval_specs =
+                   function
+                     | S lst -> S (List.map eval_specs lst)
+                     | A str -> A (BaseEnvLight.var_expand str env)
+                     | spec -> spec
                  in
-                   flag tags & spec)
+                   flag tags & (eval_specs spec))
               t.flags
         | _ ->
             ()
 
 
-  let dispatch_default t =
+  let dispatch_default conf t =
     dispatch_combine
       [
         dispatch t;
-        MyOCamlbuildFindlib.dispatch;
+        MyOCamlbuildFindlib.dispatch conf;
       ]
 
 
 end
 
 
-# 550 "myocamlbuild.ml"
+# 606 "myocamlbuild.ml"
 open Ocamlbuild_plugin;;
 let package_default =
   {
@@ -558,8 +614,10 @@ let package_default =
   }
   ;;
 
-let dispatch_default = MyOCamlbuildBase.dispatch_default package_default;;
+let conf = {MyOCamlbuildFindlib.no_automatic_syntax = false}
 
-# 564 "myocamlbuild.ml"
+let dispatch_default = MyOCamlbuildBase.dispatch_default conf package_default;;
+
+# 622 "myocamlbuild.ml"
 (* OASIS_STOP *)
 Ocamlbuild_plugin.dispatch dispatch_default;;

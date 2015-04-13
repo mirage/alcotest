@@ -1,8 +1,9 @@
 # OASIS_START
-# DO NOT EDIT (digest: f87e83990a4e1c61704bf153143ab2c9)
+# DO NOT EDIT (digest: bf671dcd931fef4c478012c94f836f84)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
+true: annot, bin_annot
 <**/.svn>: -traverse
 <**/.svn>: not_hygienic
 ".bzr": -traverse
@@ -15,7 +16,7 @@
 "_darcs": not_hygienic
 # Library alcotest
 "lib/alcotest.cmxs": use_alcotest
-<lib/*.ml{,i}>: pkg_oUnit
-<lib/*.ml{,i}>: pkg_re.str
-<lib/*.ml{,i}>: pkg_cmdliner
+<lib/*.ml{,i,y}>: pkg_cmdliner
+<lib/*.ml{,i,y}>: pkg_oUnit
+<lib/*.ml{,i,y}>: pkg_re.str
 # OASIS_STOP
