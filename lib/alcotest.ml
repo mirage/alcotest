@@ -32,6 +32,7 @@ let max_label = ref 0
 let max_doc = ref 0
 let verbose = ref false
 let speed_level = ref `Slow
+let show_errors = ref false
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
@@ -326,7 +327,7 @@ let run test =
     Printf.printf "%s in %.3fs. %d test%s run.\n%!"
       (green "Test Successful") total_time runs s
   | l  ->
-    if !verbose || runs = 1 then
+    if !verbose || !show_errors || runs = 1 then
       List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
     let s1 = if List.length l = 1 then "" else "s" in
     let msg = Printf.sprintf "%d error%s!" (List.length l) s1 in
@@ -361,8 +362,9 @@ let run_registred_tests dir verb quick =
   speed_level := (if quick then `Quick else `Slow);
   run (OUnit.TestList !tests)
 
-let run_subtest dir verb quick labels =
-  verbose := verb;
+let run_subtest dir verb err quick labels =
+  verbose     := verb;
+  show_errors := err;
   speed_level := (if quick then `Quick else `Slow);
   log_dir := dir;
   let is_empty = filter_tests ~subst:false labels !tests = [] in
@@ -382,6 +384,10 @@ let verbose =
   let doc = "Display the test outputs." in
   Arg.(value & flag & info ["v"; "verbose"] ~docv:"" ~doc)
 
+let show_errors =
+  let doc = "Display the test errors." in
+  Arg.(value & flag & info ["e"; "show-errors"] ~docv:"" ~doc)
+
 let quicktests =
   let doc = "Run only the quick tests." in
   Arg.(value & flag & info ["q"; "quick-tests"] ~docv:"" ~doc)
@@ -396,7 +402,7 @@ let test_cmd =
   let test =
     let doc = "The list of labels identifying a subsets of the tests to run" in
     Arg.(value & pos_all string [] & info [] ~doc ~docv:"LABEL") in
-  Term.(pure run_subtest $ test_dir $ verbose $ quicktests $ test),
+  Term.(pure run_subtest $ test_dir $ verbose $ show_errors $ quicktests $ test),
   Term.info "test" ~doc
 
 let list_cmd =
