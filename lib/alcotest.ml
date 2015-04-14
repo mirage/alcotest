@@ -118,7 +118,7 @@ let left s =
 
 let string_of_channel ic =
   let n = 32768 in
-  let s = String.create n in
+  let s = Bytes.create n in
   let b = Buffer.create 1024 in
   let rec iter ic b s =
     let nread =
