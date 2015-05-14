@@ -17,7 +17,7 @@ expressive) query language to select the tests to run.
 
 ```ocaml
 (* Build with
- * ocamlbuild -pkg alcotest to_test.byte *)
+ * ocamlbuild -pkg alcotest simple.byte *)
 
 (* A module with functions to test *)
 module To_test = struct
@@ -42,6 +42,16 @@ let () =
   Alcotest.run "My first test" [
     "test_set", test_set;
   ]
+```
+
+The result is a self-contained binary which display the test results. Use
+`./simple.byte --help` to see more runtime options.
+
+```shell
+$ ./simple.byte
+test_set  0   Capitalize.                                                   [OK]
+test_set  1   Add entries.                                                  [OK]
+Test Successful in 0.001s. 2 tests run.
 ```
 
 See the [examples](https://github.com/samoht/alcotest/tree/master/examples)
