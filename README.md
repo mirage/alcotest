@@ -15,9 +15,10 @@ expressive) query language to select the tests to run.
 
 ### Examples
 
+A simple example:
+
 ```ocaml
-(* Build with
- * ocamlbuild -pkg alcotest simple.byte *)
+(* Build with `ocamlbuild -pkg alcotest simple.byte` *)
 
 (* A module with functions to test *)
 module To_test = struct
@@ -44,8 +45,8 @@ let () =
   ]
 ```
 
-The result is a self-contained binary which display the test results. Use
-`./simple.byte --help` to see more runtime options.
+The result is a self-contained binary which displays the test results. Use
+`./simple.byte --help` to see the runtime options.
 
 ```shell
 $ ./simple.byte
