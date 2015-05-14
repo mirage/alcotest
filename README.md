@@ -12,3 +12,7 @@ This limitation enables Alcotest to provide a quiet and colorful
 output where only faulty runs are fully displayed at the end of the
 run (with the full logs ready to inspect), with a simple (yet
 expressive) query language to select the tests to run.
+
+### Examples
+
+See [examples/simple.ml](examples/simple.ml) for a simple example.
