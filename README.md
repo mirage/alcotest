@@ -1,4 +1,4 @@
-## ![Alcotest logo](https://raw.githubusercontent.com/samoht/alcotest/master/alcotest-logo.png)
+## ![Alcotest logo](https://raw.githubusercontent.com/mirage/alcotest/master/alcotest-logo.png)
 
 Alcotest is a lightweight and colourful test framework, based on OUnit.
 
