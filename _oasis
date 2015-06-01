@@ -1,17 +1,17 @@
 OASISFormat: 0.4
 Name:        alcotest
-Version:     0.3.1
+Version:     0.3.2
 Synopsis:    A lightweight and colourful test framework
 Authors:     Thomas Gazagnaire
 License:     ISC
-Plugins:     META (0.3), DevFiles (0.3)
+Plugins:     META (0.4), DevFiles (0.4)
 BuildTools:  ocamlbuild
 
 Library alcotest
   Path: lib
   Findlibname: alcotest
   Modules: Alcotest
-  BuildDepends:	oUnit, re.str, cmdliner
+  BuildDepends:	oUnit, re.str, cmdliner, bytes
 
 Document alcotest
   Title:                Alcotest docs
