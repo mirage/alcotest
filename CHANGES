@@ -1,5 +1,6 @@
 0.4.0:
 * Add a simple example (#10, by @leowzukw)
+* Add a logo (#12, by @leowzukw)
 
 0.3.1 (2015-04-18)
 * Fix OCaml 4.01.0 and earlier support (regressed in 0.3.0).
