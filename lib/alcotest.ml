@@ -423,8 +423,8 @@ let run_subtest dir verb err quick labels =
 open Cmdliner
 
 let api_flag =
-      let doc = "Display JSON for the results, to be used by a script." in
-      Arg.(value & flag & info ["a"; "api"] ~docv:"" ~doc)
+  let doc = "Display JSON for the results, to be used by a script." in
+  Arg.(value & flag & info ["a"; "api"] ~docv:"" ~doc)
 
 let test_dir =
   let doc = "Where to store the log files of the tests." in
