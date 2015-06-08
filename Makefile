@@ -42,7 +42,7 @@ configure:
 
 VERSION = $(shell grep 'Version:' _oasis | sed 's/Version: *//')
 NAME    = $(shell grep 'Name:' _oasis    | sed 's/Name: *//')
-ARCHIVE = https://github.com/samoht/alcotest/archive/$(VERSION).tar.gz
+ARCHIVE = https://github.com/mirage/alcotest/archive/$(VERSION).tar.gz
 
 release:
 	git tag -a $(VERSION) -m "Version $(VERSION)."
