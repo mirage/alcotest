@@ -46,7 +46,7 @@ ARCHIVE = https://github.com/mirage/alcotest/archive/$(VERSION).tar.gz
 
 release:
 	git tag -a $(VERSION) -m "Version $(VERSION)."
-	git push origin $(VERSION)
+	git push upstream $(VERSION)
 	$(MAKE) pr
 
 pr:
