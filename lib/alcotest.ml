@@ -141,6 +141,9 @@ let file_of_path path ext =
 let output_file path =
   Filename.concat !log_dir (file_of_path path "output")
 
+let prepare () =
+  if not (Sys.file_exists !log_dir) then Unix.mkdir !log_dir 0o755
+
 let string_of_node = function
   | OUnit.ListItem i -> Printf.sprintf "%3d" i
   | OUnit.Label l    -> indent_left (Printf.sprintf "%s" (blue_s l)) (!max_label+8)
@@ -168,9 +171,14 @@ let short_string_of_path path =
 
 let error path fmt =
   let filename = output_file path in
-  let file = open_in filename in
-  let output = string_of_channel file in
-  close_in file;
+  let output =
+    if not (Sys.file_exists filename) then "--"
+    else
+      let file = open_in filename in
+      let output = string_of_channel file in
+      close_in file;
+      output
+  in
   right (red "[ERROR]");
   Printf.kprintf (fun str ->
       let error =
@@ -298,7 +306,6 @@ let redirect_test_output labels test_fun =
   if !verbose then test_fun
   else fun () ->
     let output_file = output_file labels in
-    if not (Sys.file_exists !log_dir) then Unix.mkdir !log_dir 0o755;
     with_redirect stdout output_file (fun () ->
         with_redirect stderr output_file (fun () ->
           try test_fun ()
@@ -315,6 +322,7 @@ let select_speed labels test_fun =
   else skip_fun
 
 let run test =
+  prepare ();
   let start_time = Sys.time () in
   let test = map_test redirect_test_output test in
   let test = map_test select_speed test in
