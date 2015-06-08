@@ -1,4 +1,5 @@
-0.3.2: (trunk)
+0.3.2: (2015-06-08)
+* Do not fail if the output file does not exist
 * Add a simple example (#10, by @leowzukw)
 * Add a logo (#12, by @leowzukw)
 
