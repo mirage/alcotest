@@ -302,14 +302,14 @@ let redirect_test_output labels test_fun =
     if not (Sys.file_exists !log_dir) then Unix.mkdir !log_dir 0o755;
     with_redirect stdout output_file (fun () ->
         with_redirect stderr output_file (fun () ->
-          try test_fun ()
-          with exn -> begin
-            Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
-            Printexc.print_backtrace stderr;
-            raise exn
-          end
-        )
-    )
+            try test_fun ()
+            with exn -> begin
+                Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
+                Printexc.print_backtrace stderr;
+                raise exn
+              end
+          )
+      )
 
 let select_speed labels test_fun =
   if compare_speed_level (speed_of_path labels) !speed_level >= 0 then test_fun
@@ -317,16 +317,16 @@ let select_speed labels test_fun =
 
 (* Type for the json api *)
 type api_content =
-    {
-        success: int;
-        failure: int;
-        time: float
-    }
+  {
+    success: int;
+    failure: int;
+    time: float
+  }
 ;;
 
 (* Return the json for the api, dirty out, to avoid new dependencies *)
 let api_json api_content =
-    Printf.sprintf
+  Printf.sprintf
     "{\"s\":%i,\"f\":%i,\"t\":%f}"
     api_content.success
     api_content.failure
@@ -340,27 +340,27 @@ let api_json api_content =
    failure_results: results returned when failing
    optionnal_s: an optionnal mark of the plural *)
 let selective_display msg time ?(failure_results=[]) success =
-    let n_failure = List.length failure_results in
-    let msg = msg n_failure in
-    (* Function to display errors for each test *)
-    let display_errors () =
-        match n_failure with
-        | 0 -> ()
-        | _ -> if !verbose || !show_errors || success = 1 then
-            List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
-    in
-    match !api with
-    | true -> print_endline (api_json
-        {
-            time;
-            success;
-            failure = n_failure
-        })
-    | false ->
-            let optionnal_s = success |> (function 1 -> "s" | _ -> "") in
-            display_errors ();
-            Printf.printf "%s in %.3fs. %d test%s run.\n%!"
-            msg time success optionnal_s
+  let n_failure = List.length failure_results in
+  let msg = msg n_failure in
+  (* Function to display errors for each test *)
+  let display_errors () =
+    match n_failure with
+    | 0 -> ()
+    | _ -> if !verbose || !show_errors || success = 1 then
+        List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
+  in
+  match !api with
+  | true -> print_endline (api_json
+                             {
+                               time;
+                               success;
+                               failure = n_failure
+                             })
+  | false ->
+    let optionnal_s = success |> (function 1 -> "s" | _ -> "") in
+    display_errors ();
+    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
+      msg time success optionnal_s
 
 let run test =
   let start_time = Sys.time () in
@@ -371,13 +371,13 @@ let run test =
   let runs = List.length (List.filter has_run results) in
   match List.filter failure results with
   | [] ->
-      selective_display
+    selective_display
       (fun _ -> green "Test Successful") total_time runs
   | l  ->
     selective_display ~failure_results:l
       (fun n ->
-                let s1 = if n = 1 then "" else "s" in
-                red_s (Printf.sprintf "%d error%s!" n s1)
+         let s1 = if n = 1 then "" else "s" in
+         red_s (Printf.sprintf "%d error%s!" n s1)
       ) total_time runs;
     exit 1
 
