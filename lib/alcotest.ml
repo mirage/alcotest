@@ -444,7 +444,7 @@ let quicktests =
 
 let default_cmd =
   let doc = "Run all the tests." in
-  Term.(pure run_registred_tests $ test_dir $ verbose $ quicktests),
+  Term.(pure run_registred_tests $ test_dir $ verbose $ quicktests $ api_flag),
   Term.info !global_name ~version:"0.1.0" ~doc
 
 let test_cmd =
