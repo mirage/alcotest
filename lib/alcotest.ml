@@ -402,10 +402,11 @@ let register name (ts:test_case list) =
     ) ts in
   tests := !tests @ [ OUnit.TestLabel (name, OUnit.TestList ts) ]
 
-let run_registred_tests dir verb quick =
+let run_registred_tests dir verb quick api_flag =
   verbose := verb;
   log_dir := dir;
   speed_level := (if quick then `Quick else `Slow);
+  api := api_flag;
   run (OUnit.TestList !tests)
 
 let run_subtest dir verb err quick labels =
