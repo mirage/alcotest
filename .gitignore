@@ -2,3 +2,6 @@ setup.data
 setup.log
 .*.swp
 _build/
+# Example file
+_tests
+*.byte

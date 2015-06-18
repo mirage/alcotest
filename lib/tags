@@ -1,0 +1,75 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+&	alcotest.ml	/^      Arg.(value & flag & info ["a"; "api"] ~docv:"" ~doc)$/;"	f
+&	alcotest.ml	/^    Arg.(value & pos_all string [] & info [] ~doc ~docv:"LABEL") in$/;"	f
+Alcotest	alcotest.ml	1;"	M
+Alcotest	alcotest.mli	1;"	M
+Quick	alcotest.ml	/^type speed_level = [`Quick | `Slow]$/;"	C	type:speed_level
+Quick	alcotest.mli	/^type speed_level = [`Quick | `Slow]$/;"	C	type:speed_level
+Slow	alcotest.ml	/^type speed_level = [`Quick | `Slow]$/;"	C	type:speed_level
+Slow	alcotest.mli	/^type speed_level = [`Quick | `Slow]$/;"	C	type:speed_level
+api	alcotest.ml	/^let api = ref false$/;"	v
+api_flag	alcotest.ml	/^let api_flag =$/;"	v
+compare_speed_level	alcotest.ml	/^let compare_speed_level s1 s2 =$/;"	v
+doc_of_path	alcotest.ml	/^let doc_of_path path =$/;"	v
+docs	alcotest.ml	/^let docs = Hashtbl.create 16$/;"	v
+dup	alcotest.ml	/^let dup oc =$/;"	v
+error	alcotest.ml	/^let error path fmt =$/;"	v
+errors	alcotest.ml	/^let errors = ref []$/;"	v
+failure	alcotest.ml	/^let failure = function$/;"	v
+file_of_path	alcotest.ml	/^let file_of_path path ext =$/;"	v
+filter_test	alcotest.ml	/^let filter_test ~subst labels test =$/;"	v
+filter_tests	alcotest.ml	/^let filter_tests ~subst labels tests =$/;"	v
+global_name	alcotest.ml	/^let global_name = ref (Filename.basename Sys.argv.(0))$/;"	v
+has_run	alcotest.ml	/^let has_run = function$/;"	v
+indent_left	alcotest.ml	/^let indent_left s nb =$/;"	v
+indent_right	alcotest.ml	/^let indent_right s nb =$/;"	v
+left	alcotest.ml	/^let left s =$/;"	v
+left_column	alcotest.ml	/^let left_column () =$/;"	v
+line	alcotest.ml	/^let line oc ?color c =$/;"	v
+line	alcotest.mli	/^val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit$/;"	v
+list_tests	alcotest.ml	/^let list_tests () =$/;"	v
+log_dir	alcotest.ml	/^let log_dir = ref (Sys.getcwd ())$/;"	v
+map_test	alcotest.ml	/^let map_test fn test =$/;"	v
+max_doc	alcotest.ml	/^let max_doc = ref 0$/;"	v
+max_label	alcotest.ml	/^let max_label = ref 0$/;"	v
+output_file	alcotest.ml	/^let output_file path =$/;"	v
+print_event	alcotest.ml	/^let print_event = function$/;"	v
+r	alcotest.ml	/^    let r = f ic in$/;"	v
+redirect_test_output	alcotest.ml	/^let redirect_test_output labels test_fun =$/;"	v
+right	alcotest.ml	/^let right s =$/;"	v
+right_column	alcotest.ml	/^let right_column () =$/;"	v
+run	alcotest.ml	/^let run name (tl:test list) =$/;"	v
+run	alcotest.ml	/^let run test =$/;"	v
+run	alcotest.mli	/^val run: string -> test list -> unit$/;"	v
+run_registred_tests	alcotest.ml	/^let run_registred_tests dir verb quick =$/;"	v
+run_subtest	alcotest.ml	/^let run_subtest dir verb err quick labels =$/;"	v
+s1	alcotest.ml	/^                let s1 = if failure = 1 then "" else "s" in$/;"	v
+same_label	alcotest.ml	/^let same_label x y =$/;"	v
+short_string_of_path	alcotest.ml	/^let short_string_of_path path =$/;"	v
+show_errors	alcotest.ml	/^let show_errors = ref false$/;"	v
+skip	alcotest.ml	/^let skip =$/;"	v
+skip_fun	alcotest.ml	/^let skip_fun () =$/;"	v
+skip_label	alcotest.ml	/^let skip_label l =$/;"	v
+speed_level	alcotest.ml	/^let speed_level = ref `Slow$/;"	v
+speed_level	alcotest.ml	/^type speed_level = [`Quick | `Slow]$/;"	t
+speed_level	alcotest.mli	/^type speed_level = [`Quick | `Slow]$/;"	t
+speed_of_path	alcotest.ml	/^let speed_of_path path =$/;"	v
+speeds	alcotest.ml	/^let speeds = Hashtbl.create 16$/;"	v
+string_of_channel	alcotest.ml	/^let string_of_channel ic =$/;"	v
+string_of_node	alcotest.ml	/^let string_of_node = function$/;"	v
+string_of_path	alcotest.ml	/^let string_of_path path =$/;"	v
+terminal_columns	alcotest.ml	/^let terminal_columns =$/;"	v
+test	alcotest.ml	/^type test = string * test_case list$/;"	t
+test	alcotest.mli	/^type test = string * test_case list$/;"	t
+test_case	alcotest.ml	/^type test_case = string * speed_level * (unit -> unit)$/;"	t
+test_case	alcotest.mli	/^type test_case = string * speed_level * (unit -> unit)$/;"	t
+tests	alcotest.ml	/^let tests = ref []$/;"	v
+tl	alcotest.ml	/^      let tl, _ = List.fold_left (fun (tl, i) t ->$/;"	v
+tl	alcotest.ml	/^    let tl = List.fold_left (fun acc test ->$/;"	v
+verbose	alcotest.ml	/^let verbose = ref false$/;"	v
+with_redirect	alcotest.ml	/^let with_redirect oc file fn =$/;"	v

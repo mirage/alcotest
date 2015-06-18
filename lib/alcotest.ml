@@ -33,6 +33,7 @@ let max_doc = ref 0
 let verbose = ref false
 let speed_level = ref `Slow
 let show_errors = ref false
+let api = ref false
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
@@ -308,18 +309,65 @@ let redirect_test_output labels test_fun =
     let output_file = output_file labels in
     with_redirect stdout output_file (fun () ->
         with_redirect stderr output_file (fun () ->
-          try test_fun ()
-          with exn -> begin
-            Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
-            Printexc.print_backtrace stderr;
-            raise exn
-          end
-        )
-    )
+            try test_fun ()
+            with exn -> begin
+                Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
+                Printexc.print_backtrace stderr;
+                raise exn
+              end
+          )
+      )
 
 let select_speed labels test_fun =
   if compare_speed_level (speed_of_path labels) !speed_level >= 0 then test_fun
   else skip_fun
+
+(* Type for the json api *)
+type api_content =
+  {
+    success: int;
+    failure: int;
+    time: float
+  }
+;;
+
+(* Return the json for the api, dirty out, to avoid new dependencies *)
+let api_json api_content =
+  Printf.sprintf
+    "{\"s\":%i,\"f\":%i,\"t\":%f}"
+    api_content.success
+    api_content.failure
+    api_content.time
+
+(* Display an output for the user or the machine (api)
+   msg: a function to display messages, taking the number of error
+   time: time to run the tests
+   success :number of successful tests
+   failure: number of failures
+   failure_results: results returned when failing
+   optionnal_s: an optionnal mark of the plural *)
+let selective_display msg time ?(failure_results=[]) success =
+  let n_failure = List.length failure_results in
+  let msg = msg n_failure in
+  (* Function to display errors for each test *)
+  let display_errors () =
+    match n_failure with
+    | 0 -> ()
+    | _ -> if !verbose || !show_errors || success = 1 then
+        List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
+  in
+  match !api with
+  | true -> print_endline (api_json
+                             {
+                               time;
+                               success;
+                               failure = n_failure
+                             })
+  | false ->
+    let optionnal_s = success |> (function 1 -> "s" | _ -> "") in
+    display_errors ();
+    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
+      msg time success optionnal_s
 
 let run test =
   prepare ();
@@ -329,18 +377,16 @@ let run test =
   let results = OUnit.perform_test print_event test in
   let total_time = Sys.time () -. start_time in
   let runs = List.length (List.filter has_run results) in
-  let s = if runs = 1 then "" else "s" in
   match List.filter failure results with
   | [] ->
-    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
-      (green "Test Successful") total_time runs s
+    selective_display
+      (fun _ -> green "Test Successful") total_time runs
   | l  ->
-    if !verbose || !show_errors || runs = 1 then
-      List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
-    let s1 = if List.length l = 1 then "" else "s" in
-    let msg = Printf.sprintf "%d error%s!" (List.length l) s1 in
-    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
-      (red_s msg) total_time runs s;
+    selective_display ~failure_results:l
+      (fun n ->
+         let s1 = if n = 1 then "" else "s" in
+         red_s (Printf.sprintf "%d error%s!" n s1)
+      ) total_time runs;
     exit 1
 
 let list_tests () =
@@ -364,10 +410,11 @@ let register name (ts:test_case list) =
     ) ts in
   tests := !tests @ [ OUnit.TestLabel (name, OUnit.TestList ts) ]
 
-let run_registred_tests dir verb quick =
+let run_registred_tests dir verb quick api_flag =
   verbose := verb;
   log_dir := dir;
   speed_level := (if quick then `Quick else `Slow);
+  api := api_flag;
   run (OUnit.TestList !tests)
 
 let run_subtest dir verb err quick labels =
@@ -383,6 +430,10 @@ let run_subtest dir verb err quick labels =
     run (OUnit.TestList tests)
 
 open Cmdliner
+
+let api_flag =
+  let doc = "Display JSON for the results, to be used by a script." in
+  Arg.(value & flag & info ["a"; "api"] ~docv:"" ~doc)
 
 let test_dir =
   let doc = "Where to store the log files of the tests." in
@@ -402,7 +453,7 @@ let quicktests =
 
 let default_cmd =
   let doc = "Run all the tests." in
-  Term.(pure run_registred_tests $ test_dir $ verbose $ quicktests),
+  Term.(pure run_registred_tests $ test_dir $ verbose $ quicktests $ api_flag),
   Term.info !global_name ~version:"0.1.0" ~doc
 
 let test_cmd =

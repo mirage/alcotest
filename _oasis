@@ -20,3 +20,10 @@ Document alcotest
   Install:              true
   XOCamlbuildPath:      lib
   XOCamlbuildLibraries: alcotest
+
+Executable "simple"
+  Path: examples
+  MainIs: simple.ml
+  Install: false
+  BuildDepends: alcotest, oUnit
+
