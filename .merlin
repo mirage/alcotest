@@ -1,0 +1,8 @@
+PKG oUnit
+PKG cmdliner
+PKG re.str
+PKG bytes
+
+S lib/**
+B _build/**
+
