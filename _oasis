@@ -10,8 +10,8 @@ BuildTools:  ocamlbuild
 Library alcotest
   Path: lib
   Findlibname: alcotest
-  Modules: Alcotest
-  BuildDepends:	oUnit, re.str, cmdliner, bytes
+  Modules: Alcotest_version, Alcotest
+  BuildDepends: oUnit, re.str, cmdliner, bytes
 
 Document alcotest
   Title:                Alcotest docs
@@ -26,4 +26,4 @@ Executable "simple"
   MainIs: simple.ml
   Install: false
   BuildDepends: alcotest, oUnit
-
+  CompiledObject: best

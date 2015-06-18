@@ -26,6 +26,16 @@ type test_case = string * speed_level * (unit -> unit)
 type test = string * test_case list
 (** A test has a name and contains a list of test cases *)
 
+type result = {
+  success: int;
+  failures: int;
+  time: float
+}
+(** The type for result values. *)
+
+val result: OUnit.test -> result
+(** Run the tests, return a result. *)
+
 val run: string -> test list -> unit
 (** Run a test suite. The first argument is the name of the tested
     lib. *)
