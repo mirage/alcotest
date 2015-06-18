@@ -33,7 +33,7 @@ let max_doc = ref 0
 let verbose = ref false
 let speed_level = ref `Slow
 let show_errors = ref false
-let api = ref false
+let json = ref false
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
@@ -113,10 +113,10 @@ let right_column () =
   + 15
 
 let right s =
-  Printf.printf "%s\n%!" (indent_right s (right_column ()))
+  if not !json then Printf.printf "%s\n%!" (indent_right s (right_column ()))
 
 let left s =
-  Printf.printf "%s%!" (indent_left s (left_column ()))
+  if not !json then Printf.printf "%s%!" (indent_left s (left_column ()))
 
 let string_of_channel ic =
   let n = 32768 in
@@ -322,72 +322,49 @@ let select_speed labels test_fun =
   if compare_speed_level (speed_of_path labels) !speed_level >= 0 then test_fun
   else skip_fun
 
-(* Type for the json api *)
-type api_content =
-  {
-    success: int;
-    failure: int;
-    time: float
-  }
-;;
+type result = {
+  success: int;
+  failures: int;
+  time: float
+}
 
 (* Return the json for the api, dirty out, to avoid new dependencies *)
-let api_json api_content =
-  Printf.sprintf
-    "{\"s\":%i,\"f\":%i,\"t\":%f}"
-    api_content.success
-    api_content.failure
-    api_content.time
+let json_of_result r =
+  Printf.sprintf "{\"sucess\":%i,\"failures\":%i,\"time\":%f}"
+    r.success r.failures r.time
 
-(* Display an output for the user or the machine (api)
-   msg: a function to display messages, taking the number of error
-   time: time to run the tests
-   success :number of successful tests
-   failure: number of failures
-   failure_results: results returned when failing
-   optionnal_s: an optionnal mark of the plural *)
-let selective_display msg time ?(failure_results=[]) success =
-  let n_failure = List.length failure_results in
-  let msg = msg n_failure in
+let show_result result =
   (* Function to display errors for each test *)
-  let display_errors () =
-    match n_failure with
+  let display_errors () = match result.failures with
     | 0 -> ()
-    | _ -> if !verbose || !show_errors || success = 1 then
-        List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors);
+    | _ ->
+      if !verbose || !show_errors || result.success = 1 then
+        List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors)
   in
-  match !api with
-  | true -> print_endline (api_json
-                             {
-                               time;
-                               success;
-                               failure = n_failure
-                             })
+  match !json with
+  | true -> Printf.printf "%s\n" (json_of_result result)
   | false ->
-    let optionnal_s = success |> (function 1 -> "s" | _ -> "") in
     display_errors ();
+    let msg = match result.failures with
+      | 0 -> green "Test Successful"
+      | n ->
+        let s1 = if n = 1 then "" else "s" in
+        red_s (Printf.sprintf "%d error%s!" n s1)
+    in
+    let s = result.success |> (function 1 -> "s" | _ -> "") in
     Printf.printf "%s in %.3fs. %d test%s run.\n%!"
-      msg time success optionnal_s
+      msg result.time result.success s
 
-let run test =
+let result test =
   prepare ();
   let start_time = Sys.time () in
   let test = map_test redirect_test_output test in
   let test = map_test select_speed test in
   let results = OUnit.perform_test print_event test in
-  let total_time = Sys.time () -. start_time in
-  let runs = List.length (List.filter has_run results) in
-  match List.filter failure results with
-  | [] ->
-    selective_display
-      (fun _ -> green "Test Successful") total_time runs
-  | l  ->
-    selective_display ~failure_results:l
-      (fun n ->
-         let s1 = if n = 1 then "" else "s" in
-         red_s (Printf.sprintf "%d error%s!" n s1)
-      ) total_time runs;
-    exit 1
+  let time = Sys.time () -. start_time in
+  let success = List.length (List.filter has_run results) in
+  let failures = List.filter failure results in
+  { time; success; failures = List.length failures }
 
 let list_tests () =
   let list = Hashtbl.fold (fun k v l -> (k,v) :: l) docs [] in
@@ -410,30 +387,38 @@ let register name (ts:test_case list) =
     ) ts in
   tests := !tests @ [ OUnit.TestLabel (name, OUnit.TestList ts) ]
 
-let run_registred_tests dir verb quick api_flag =
-  verbose := verb;
-  log_dir := dir;
-  speed_level := (if quick then `Quick else `Slow);
-  api := api_flag;
-  run (OUnit.TestList !tests)
-
-let run_subtest dir verb err quick labels =
+let run_registred_tests dir verb err quick json_f =
   verbose     := verb;
-  show_errors := err;
+  log_dir     := dir;
   speed_level := (if quick then `Quick else `Slow);
-  log_dir := dir;
+  json        := json_f;
+  show_errors := err;
+  let tests = OUnit.TestList !tests in
+  let result = result tests in
+  show_result result;
+  if result.failures > 0 then exit 1
+
+let run_subtest dir verb err quick json_f labels =
+  verbose     := verb;
+  log_dir     := dir;
+  speed_level := (if quick then `Quick else `Slow);
+  json        := json_f;
+  show_errors := err;
   let is_empty = filter_tests ~subst:false labels !tests = [] in
   if is_empty then (
     Printf.printf "%s\n" (red "Invalid request!"); exit 1
   ) else
     let tests = filter_tests ~subst:true labels !tests in
-    run (OUnit.TestList tests)
+    let tests = OUnit.TestList tests in
+    let result = result tests in
+    show_result result;
+    if result.failures > 0 then exit 1
 
 open Cmdliner
 
-let api_flag =
+let json =
   let doc = "Display JSON for the results, to be used by a script." in
-  Arg.(value & flag & info ["a"; "api"] ~docv:"" ~doc)
+  Arg.(value & flag & info ["json"] ~docv:"" ~doc)
 
 let test_dir =
   let doc = "Where to store the log files of the tests." in
@@ -453,15 +438,17 @@ let quicktests =
 
 let default_cmd =
   let doc = "Run all the tests." in
-  Term.(pure run_registred_tests $ test_dir $ verbose $ quicktests $ api_flag),
-  Term.info !global_name ~version:"0.1.0" ~doc
+  Term.(pure run_registred_tests
+        $ test_dir $ verbose $ show_errors $ quicktests $ json),
+  Term.info !global_name ~version:Alcotest_version.current ~doc
 
 let test_cmd =
   let doc = "Run a given test." in
   let test =
     let doc = "The list of labels identifying a subsets of the tests to run" in
     Arg.(value & pos_all string [] & info [] ~doc ~docv:"LABEL") in
-  Term.(pure run_subtest $ test_dir $ verbose $ show_errors $ quicktests $ test),
+  Term.(pure run_subtest
+        $ test_dir $ verbose $ show_errors $ quicktests $ json $ test),
   Term.info "test" ~doc
 
 let list_cmd =
