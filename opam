@@ -1,9 +1,9 @@
 opam-version: "1.2"
 maintainer: "thomas@gazagnaire.org"
 authors:     "Thomas Gazagnaire"
-homepage:    "https://github.com/samoht/alcotest/"
-dev-repo:    "https://github.com/samoht/alcotest.git"
-bug-reports: "https://github.com/samoht/alcotest/issues/"
+homepage:    "https://github.com/mirage/alcotest/"
+dev-repo:    "https://github.com/mirage/alcotest.git"
+bug-reports: "https://github.com/mirage/alcotest/issues/"
 
 license: "ISC"
 build: [
