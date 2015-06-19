@@ -391,12 +391,18 @@ let register name (ts:test_case list) =
 
 exception Test_error
 
+let bool_of_env name =
+  try match Sys.getenv name with
+    | "" | "0" | "false" -> false
+    | _ -> true
+  with Not_found -> false
+
 let run_registred_tests dir verb err quick json_f =
   verbose     := verb;
   log_dir     := dir;
   speed_level := (if quick then `Quick else `Slow);
   json        := json_f;
-  show_errors := err;
+  show_errors := err || bool_of_env "ALCOTEST_SHOW_ERRORS";
   let tests = OUnit.TestList !tests in
   let result = result tests in
   show_result result;
@@ -407,7 +413,7 @@ let run_subtest dir verb err quick json_f labels =
   log_dir     := dir;
   speed_level := (if quick then `Quick else `Slow);
   json        := json_f;
-  show_errors := err;
+  show_errors := err || bool_of_env "ALCOTEST_SHOW_ERRORS";
   let is_empty = filter_tests ~subst:false labels !tests = [] in
   if is_empty then (
     Printf.printf "%s\n" (red "Invalid request!"); exit 1
@@ -433,7 +439,8 @@ let verbose =
   Arg.(value & flag & info ["v"; "verbose"] ~docv:"" ~doc)
 
 let show_errors =
-  let doc = "Display the test errors." in
+  let doc = "Display the test errors. Can also be set using the \
+             $(i,ALCOTEST_SHOW_ERRORS) env variable." in
   Arg.(value & flag & info ["e"; "show-errors"] ~docv:"" ~doc)
 
 let quicktests =
