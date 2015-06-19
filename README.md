@@ -55,5 +55,5 @@ test_set  1   Add entries.                                                  [OK]
 Test Successful in 0.001s. 2 tests run.
 ```
 
-See the [examples](https://github.com/samoht/alcotest/tree/master/examples)
+See the [examples](https://github.com/mirage/alcotest/tree/master/examples)
 folder for more examples.
