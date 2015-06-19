@@ -170,6 +170,9 @@ let short_string_of_path path =
   let path = List.rev (List.tl (List.rev path)) in
   OUnit.string_of_path path
 
+let eprintf fmt =
+  Printf.ksprintf (fun str -> if not !json then Printf.eprintf "%s" str) fmt
+
 let error path fmt =
   let filename = output_file path in
   let output =
@@ -187,7 +190,6 @@ let error path fmt =
           (red "-- %s Failed --" (short_string_of_path path))
           (doc_of_path path)
           filename output str in
-      Printf.eprintf "%s\n%!" str;
       errors := error :: !errors
     ) fmt
 
@@ -311,7 +313,7 @@ let redirect_test_output labels test_fun =
         with_redirect stderr output_file (fun () ->
             try test_fun ()
             with exn -> begin
-                Printf.eprintf "\nTest error: %s\n" (Printexc.to_string exn);
+                eprintf "\nTest error: %s\n" (Printexc.to_string exn);
                 Printexc.print_backtrace stderr;
                 raise exn
               end
@@ -342,7 +344,7 @@ let show_result result =
         List.iter (fun error -> Printf.printf "%s\n" error) (List.rev !errors)
   in
   match !json with
-  | true -> Printf.printf "%s\n" (json_of_result result)
+  | true  -> Printf.printf "%s\n" (json_of_result result)
   | false ->
     display_errors ();
     let msg = match result.failures with
@@ -387,6 +389,8 @@ let register name (ts:test_case list) =
     ) ts in
   tests := !tests @ [ OUnit.TestLabel (name, OUnit.TestList ts) ]
 
+exception Test_error
+
 let run_registred_tests dir verb err quick json_f =
   verbose     := verb;
   log_dir     := dir;
@@ -396,7 +400,7 @@ let run_registred_tests dir verb err quick json_f =
   let tests = OUnit.TestList !tests in
   let result = result tests in
   show_result result;
-  if result.failures > 0 then exit 1
+  if result.failures > 0 then raise Test_error
 
 let run_subtest dir verb err quick json_f labels =
   verbose     := verb;
@@ -412,7 +416,7 @@ let run_subtest dir verb err quick json_f labels =
     let tests = OUnit.TestList tests in
     let result = result tests in
     show_result result;
-    if result.failures > 0 then exit 1
+    if result.failures > 0 then raise Test_error
 
 open Cmdliner
 
@@ -456,9 +460,10 @@ let list_cmd =
   Term.(pure list_tests $ pure ()),
   Term.info "list" ~doc
 
-let run name (tl:test list) =
+let run ?(and_exit = true) name (tl:test list) =
   global_name := name;
   List.iter (fun (name, tests) -> register name tests) tl;
-  match Term.eval_choice default_cmd [list_cmd; test_cmd] with
-  | `Error _ -> exit 1
-  | _ -> exit 0
+  let err = Format.formatter_of_buffer (Buffer.create 10) in
+  match Term.eval_choice ~err default_cmd [list_cmd; test_cmd] with
+  | `Error _ -> if and_exit then exit 1 else raise Test_error
+  | _        -> if and_exit then exit 0 else ()
