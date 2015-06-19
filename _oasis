@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        alcotest
-Version:     0.3.2
+Version:     0.3.3
 Synopsis:    A lightweight and colourful test framework
 Authors:     Thomas Gazagnaire
 License:     ISC
@@ -24,6 +24,13 @@ Document alcotest
 Executable "simple"
   Path: examples
   MainIs: simple.ml
+  Install: false
+  BuildDepends: alcotest, oUnit
+  CompiledObject: best
+
+Executable "bad"
+  Path: examples
+  MainIs: bad.ml
   Install: false
   BuildDepends: alcotest, oUnit
   CompiledObject: best

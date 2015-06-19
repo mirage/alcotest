@@ -2,6 +2,8 @@ setup.data
 setup.log
 .*.swp
 _build/
-# Example file
+*~
+lib/alcotest_version.ml
 _tests
 *.byte
+*.native

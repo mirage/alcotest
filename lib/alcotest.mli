@@ -36,9 +36,16 @@ type result = {
 val result: OUnit.test -> result
 (** Run the tests, return a result. *)
 
-val run: string -> test list -> unit
-(** Run a test suite. The first argument is the name of the tested
-    lib. *)
+exception Test_error
+(** The exception return by {!run} in case of errors. *)
+
+val run: ?and_exit:bool -> string -> test list -> unit
+(** [run n t] runs the test suite [t]. [n] is is the name of the
+    tested library. The optional argument [and_exit] controls what
+    happens when the function ends. By default, [and_exit] is set,
+    which makes the function exit with [0] if everything is fine or
+    [1] if there is an issue. If [and_exit] then the function raises
+    [Test_error] on error. *)
 
 (** {2 Display} *)
 
