@@ -1,5 +1,6 @@
 ### 0.3.3 (2015-06-19)
 
+* Control `--show-errors` using the ALCOTEST_SHOW_ERRORS env variable (#9)
 * Add an `and_exit` optional argument to `Alcotest.run` to control
   the exit behavior of the main test function (#4)
 * Fix the output of `--version`
