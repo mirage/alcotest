@@ -27,3 +27,10 @@ Executable "simple"
   Install: false
   BuildDepends: alcotest, oUnit
   CompiledObject: best
+
+Executable "bad"
+  Path: examples
+  MainIs: bad.ml
+  Install: false
+  BuildDepends: alcotest, oUnit
+  CompiledObject: best
