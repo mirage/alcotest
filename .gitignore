@@ -5,3 +5,4 @@ _build/
 # Example file
 _tests
 *.byte
+lib/alcotest_version.ml
