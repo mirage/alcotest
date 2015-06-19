@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        alcotest
-Version:     0.3.2
+Version:     0.3.3
 Synopsis:    A lightweight and colourful test framework
 Authors:     Thomas Gazagnaire
 License:     ISC
