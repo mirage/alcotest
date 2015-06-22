@@ -32,18 +32,19 @@ let single_test fn = OUnit.TestCase fn
 (* global state *)
 type t = {
 
-  (* library options *)
+  (* library values. *)
   name : string;
   tests: single_test list;
 
+  (* caches computed from the library values. *)
   nodes: node list list;
   doc  : node list -> string option;
   speed: node list -> speed_level option;
 
-  (* runtime state *)
+  (* runtime state. *)
   mutable errors: string list;
 
-  (* runtime options *)
+  (* runtime options. *)
   max_label: int;
   max_doc  : int;
   speed_level: speed_level;
