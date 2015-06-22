@@ -335,6 +335,8 @@ let json_of_result r =
   Printf.sprintf "{\"sucess\":%i,\"failures\":%i,\"time\":%f}"
     r.success r.failures r.time
 
+let s = function 0 | 1 -> "" | _ -> "s"
+
 let show_result result =
   (* Function to display errors for each test *)
   let display_errors () = match result.failures with
@@ -349,13 +351,10 @@ let show_result result =
     display_errors ();
     let msg = match result.failures with
       | 0 -> green "Test Successful"
-      | n ->
-        let s1 = if n = 1 then "" else "s" in
-        red_s (Printf.sprintf "%d error%s!" n s1)
+      | n -> red_s (Printf.sprintf "%d error%s!" n (s n))
     in
-    let s = result.success |> (function 1 -> "s" | _ -> "") in
     Printf.printf "%s in %.3fs. %d test%s run.\n%!"
-      msg result.time result.success s
+      msg result.time result.success (s result.success)
 
 let result test =
   prepare ();
