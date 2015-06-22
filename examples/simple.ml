@@ -36,10 +36,10 @@ end
 
 (* The tests *)
 let capit () =
-  OUnit.assert_equal 'A' (To_test.capit 'a')
+  Alcotest.(check char) "Check A" 'A' (To_test.capit 'a')
 
 let plus () =
-  OUnit.assert_equal 7 (To_test.plus [1;1;2;3])
+  Alcotest.(check int) "Sum equals to 7" 7 (To_test.plus [1;1;2;3])
 
 let test_set = [
   "Capitalize" , `Quick, capit;

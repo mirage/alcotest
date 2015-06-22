@@ -11,7 +11,7 @@ Library alcotest
   Path: lib
   Findlibname: alcotest
   Modules: Alcotest_version, Alcotest
-  BuildDepends: oUnit, re.str, cmdliner, bytes
+  BuildDepends: re.str, cmdliner, bytes, unix
 
 Document alcotest
   Title:                Alcotest docs
@@ -25,12 +25,12 @@ Executable "simple"
   Path: examples
   MainIs: simple.ml
   Install: false
-  BuildDepends: alcotest, oUnit
+  BuildDepends: alcotest
   CompiledObject: best
 
 Executable "bad"
   Path: examples
   MainIs: bad.ml
   Install: false
-  BuildDepends: alcotest, oUnit
+  BuildDepends: alcotest
   CompiledObject: best
