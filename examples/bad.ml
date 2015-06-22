@@ -41,12 +41,25 @@ let capit () =
 let plus () =
   OUnit.assert_equal 9 (To_test.plus [1;1;2;3])
 
-let test_set = [
+let test_one = [
   "Capitalize" , `Quick, capit;
   "Add entries", `Slow , plus ;
 ]
 
+let test_two = [
+  "ok"         , `Quick, (fun () -> ());
+  "Capitalize" , `Quick, capit;
+  "ok"         , `Quick, (fun () -> ());
+]
+
 (* Run it *)
-let () =
-  try Alcotest.run ~and_exit:false "My first test" ["test_set", test_set]
+let one () =
+  try Alcotest.run ~and_exit:false "My first test" ["one", test_one]
   with Alcotest.Test_error -> Printf.printf "Continue!!\n%!"
+
+let two () =
+  Alcotest.run ~and_exit:true "Hoho" ["two", test_two]
+
+let () =
+  one ();
+  two ()
