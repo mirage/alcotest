@@ -530,7 +530,7 @@ let list (type a) elt =
         pp_v ppf v;
         pp_sep ppf ();
         pp_print_list ~pp_sep pp_v ppf vs
-    let pp = Format.pp_print_list Elt.pp
+    let pp = pp_print_list Elt.pp
     let equal = (=)
   end in
   (module M: TESTABLE with type t = M.t)
