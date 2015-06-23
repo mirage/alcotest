@@ -548,10 +548,10 @@ let check_err fmt = Format.ksprintf (fun err -> raise (Check_error err)) fmt
 let check (type a) (module T: TESTABLE with type t = a) msg x y =
   show_line msg;
   if not (T.equal x y) then (
-    let err =
-      Format.asprintf "Error %s: expecting %a, got %a." msg T.pp x T.pp y
-    in
-    failwith err
+    let buf = Buffer.create 20 in
+    let fmt = Format.formatter_of_buffer buf in
+    Format.fprintf fmt "Error %s: expecting %a, got %a." msg T.pp x T.pp y;
+    failwith (Buffer.contents buf)
   )
 
 let fail msg =
