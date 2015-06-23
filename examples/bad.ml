@@ -30,16 +30,16 @@ For more information, please refer to <http://unlicense.org/>
 
 (* A module with functions to test *)
 module To_test = struct
-  let capit letter = Char.uppercase letter
-  let plus int_list = List.fold_left (fun a b -> a + b) 0 int_list
+  let capit letter = String.uppercase letter
+  let plus int_list = List.map (fun a -> a + a) int_list
 end
 
 (* The tests *)
 let capit () =
-  OUnit.assert_equal 'A' (To_test.capit 'b')
+  Alcotest.(check string) "strings" "A" (To_test.capit "b")
 
 let plus () =
-  OUnit.assert_equal 9 (To_test.plus [1;1;2;3])
+  Alcotest.(check (list int)) "int lists" [1] (To_test.plus [1;1;2;3])
 
 let test_one = [
   "Capitalize" , `Quick, capit;

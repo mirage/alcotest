@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** A lightweight and colourful test framework, based on OUnit. *)
+(** A lightweight and colourful test framework. *)
 
 type speed_level = [`Quick | `Slow]
 (** Speed level for a test. *)
@@ -41,3 +41,34 @@ val run: ?and_exit:bool -> string -> test list -> unit
 
 val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit
 (** Draw a line on the given channel *)
+
+(** {2 Assert functions} *)
+
+module type TESTABLE = sig
+
+  type t
+  (** The type to test. *)
+
+  val pp: Format.formatter -> t -> unit
+  (** A way to pretty-print the value. *)
+
+  val equal: t -> t -> bool
+  (** Test for equality between two values. *)
+
+end
+
+type 'a testable = (module TESTABLE with type t = 'a)
+
+val int: int testable
+val char: char testable
+val string: string testable
+val list: 'a testable -> 'a list testable
+
+val check: 'a testable -> string -> 'a -> 'a -> unit
+(** Check that two values are equal. *)
+
+val fail: string -> 'a
+(** Simply fail. *)
+
+val check_raises: string -> exn -> (unit -> unit) -> unit
+(** Check that an exception is raised. *)

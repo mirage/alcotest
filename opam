@@ -14,7 +14,6 @@ install: [make "install"]
 remove: ["ocamlfind" "remove" "alcotest"]
 depends: [
   "ocamlfind"
-  "ounit" {>= "1.1.2"}
   "re"
   "cmdliner"
 ]
