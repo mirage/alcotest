@@ -1,3 +1,12 @@
+### 0.4.0 (2015-06-29)
+
+* Simplify the use of the library by removing global states -- now calling
+  the `run` function multiple times is much more consistent.
+* Remove the direct dependency to `OUnit`. Programs using `OUnit` and `Alcotest`
+  should continue to work.
+* Add a `TESTABLE` signature and a `check` function to check invariants in
+  the tested libraries.
+
 ### 0.3.3 (2015-06-19)
 
 * Control `--show-errors` using the ALCOTEST_SHOW_ERRORS env variable (#9)
