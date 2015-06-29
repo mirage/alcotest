@@ -1,17 +1,16 @@
 ## ![Alcotest logo](https://raw.githubusercontent.com/mirage/alcotest/master/alcotest-logo.png)
 
-Alcotest is a lightweight and colourful test framework, based on OUnit.
+Alcotest is a lightweight and colourful test framework.
 
-Alcotest exposes a much more restricted interface than OUnit, as you can
-only pass to `Alcotest.run` a tree of callbacks of depth 2, and the
-callbacks are `unit -> unit` functions that you can build using the
-usual `OUnit.assert_*` functions or any other means (including
-Quickcheck-like test generators).
+Alcotest exposes simple interface to perform unit tests. It exposes
+a simple `TESTABLE` module type, a `check` function to assert test
+predicates and a `run` function to perform a list of `unit -> unit`
+test callbacks.
 
-This limitation enables Alcotest to provide a quiet and colorful
-output where only faulty runs are fully displayed at the end of the
-run (with the full logs ready to inspect), with a simple (yet
-expressive) query language to select the tests to run.
+Alcotest provides a quiet and colorful output where only faulty runs
+are fully displayed at the end of the run (with the full logs ready to
+inspect), with a simple (yet expressive) query language to select the
+tests to run.
 
 ### Examples
 
@@ -28,10 +27,10 @@ end
 
 (* The tests *)
 let capit () =
-  OUnit.assert_equal 'A' (To_test.capit 'a')
+  Alcotest.(check char) "same chars"  'A' (To_test.capit 'a')
 
 let plus () =
-  OUnit.assert_equal 7 (To_test.plus [1;1;2;3])
+  Alcotest.(check int) "same ints" 7 (To_test.plus [1;1;2;3])
 
 let test_set = [
   "Capitalize" , `Quick, capit;
