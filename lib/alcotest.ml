@@ -139,33 +139,14 @@ let line oc ?color c =
     | None         -> String.make terminal_columns c in
   Printf.fprintf oc "%s\n%!" line
 
-let indent_left s nb =
+let left s nb =
   let nb = nb - String.length s in
   if nb <= 0 then
     s
   else
     s ^ String.make nb ' '
 
-let indent_right s nb =
-  let nb = nb - String.length s in
-  if nb <= 0 then
-    s
-  else
-    String.make nb ' ' ^ s
-
-let left_column t =
-  t.max_label + t.max_doc + 16
-
-let right_column t =
-  terminal_columns
-  - left_column t
-  + 15
-
-let right t s =
-  if not t.json then Printf.printf "%s\n%!" (indent_right s (right_column t))
-
-let left t s =
-  if not t.json then Printf.printf "%s%!" (indent_left s (left_column t))
+let print t s = if not t.json then Printf.printf "%s%!" s
 
 let string_of_channel ic =
   let n = 32768 in
@@ -190,7 +171,7 @@ let prepare t =
   if not (Sys.file_exists t.log_dir) then Unix.mkdir t.log_dir 0o755
 
 let string_of_path t (Path (n, i)) =
-  sp "%s%3d" (indent_left (sp "%s" (blue_s n)) (t.max_label+8)) i
+  sp "%s%3d" (left (sp "%s" (blue_s n)) (t.max_label+8)) i
 
 let doc_of_path t path =
   match t.doc path with
@@ -205,6 +186,11 @@ let speed_of_path t path =
 let eprintf t fmt =
   Printf.ksprintf (fun str -> if not t.json then Printf.eprintf "%s" str) fmt
 
+let print_info t p =
+  print t (sp "%s   %s" (string_of_path t p) (doc_of_path t p))
+
+let left_c = 20
+
 let error t path fmt =
   let filename = output_file t path in
   let output =
@@ -215,7 +201,8 @@ let error t path fmt =
       close_in file;
       output
   in
-  right t (red "[ERROR]");
+  print t (left (red "[ERROR]") left_c);
+  print_info t path;
   Printf.kprintf (fun str ->
       let error =
         sp "%s\n%s\n%s:\n%s\n%s\n"
@@ -225,17 +212,19 @@ let error t path fmt =
       t.errors <- error :: t.errors
     ) fmt
 
-let print_result t = function
-  | `Ok            -> right t (green "[OK]")
+let reset t = print t "\r"
+let newline t = print t "\n"
+
+let print_result t p = function
+  | `Ok            -> print t (left (green "[OK]") left_c); print_info t p
   | `Failure (p,s) -> error t p "[Failure] %s" s
   | `Error (p, s)  -> error t p "%s" s
-  | `Skip          -> right t (yellow "[SKIP]")
-  | `Todo _        -> right t (yellow "[TODO]")
+  | `Skip          -> print t (left (yellow "[SKIP]") left_c); print_info t p
+  | `Todo _        -> print t (left (yellow "[TODO]") left_c); print_info t p
 
 let print_event t = function
-  | `Start p  -> left t (sp "%s   %s" (string_of_path t p) (doc_of_path t p))
-  | `Result r -> print_result t r
-  | `End _    -> ()
+  | `Start p       -> print t (left "" 10); print_info t p
+  | `Result (p, r) -> reset t; print_result t p r; newline t
 
 let failure: run_result -> bool = function
   | `Ok
@@ -270,8 +259,7 @@ let protect_test path (f:run): rrun =
 let perform_test t (path, test) =
   print_event t (`Start path);
   let result = test () in
-  print_event t (`Result result);
-  print_event t (`End path);
+  print_event t (`Result (path, result));
   result
 
 let perform_tests t tests = List.map (perform_test t) tests
