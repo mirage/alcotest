@@ -251,20 +251,21 @@ let has_run: run_result -> bool = function
   | `Skip
   | `Todo _    -> false
 
+let bt () = match Printexc.get_backtrace () with "" -> "" | s  -> "\n" ^ s
+
 let protect_test path (f:run): rrun =
   fun () ->
     try f (); `Ok
     with
     | Check_error err ->
-      let err = sp "Test error: %s\n%s\n" err (Printexc.get_backtrace ())
-      in
+      let err = sp "Test error: %s%s" err (bt ()) in
       `Error (path, err)
+    | Failure f ->
+      let err = sp "%s%s" f (bt ()) in
+      `Failure (path, err)
     | exn ->
-      let err = sp "Failure: %s\n%s\n"
-          (Printexc.to_string exn)
-          (Printexc.get_backtrace ())
-      in
-      `Error (path, err)
+      let err = sp "Got exception: %s%s" (Printexc.to_string exn) (bt ()) in
+      `Failure (path, err)
 
 let perform_test t (path, test) =
   print_event t (`Start path);
