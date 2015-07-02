@@ -345,7 +345,7 @@ let show_result t result =
   let display_errors () = match result.failures with
     | 0 -> ()
     | _ ->
-      if t.verbose || t.show_errors || result.success = 1 then
+      if t.verbose || t.show_errors || result.failures = 1 then
         List.iter (fun error -> Printf.printf "%s\n" error) (List.rev t.errors)
   in
   match t.json with
@@ -535,11 +535,25 @@ let list (type a) elt =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let option (type a) elt =
+  let (module Elt: TESTABLE with type t = a) = elt in
+  let module M = struct
+    type t = a option
+    let pp fmt t = match t with
+      | None   -> Format.pp_print_string fmt "None"
+      | Some x -> Format.fprintf fmt "Some @[(%a)@]" Elt.pp x
+    let equal x y = match x, y with
+      | None  , None   -> true
+      | Some x, Some y -> Elt.equal x y
+      | _ -> false
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let show_line msg =
   if !quiet then ()
   else (
     line stderr ~color:`Yellow '-';
-    Printf.eprintf "ASSERT %s" msg;
+    Printf.eprintf "ASSERT %s\n" msg;
     line stderr ~color:`Yellow '-';
   )
 
