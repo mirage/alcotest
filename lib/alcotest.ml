@@ -345,7 +345,7 @@ let show_result t result =
   let display_errors () = match result.failures with
     | 0 -> ()
     | _ ->
-      if t.verbose || t.show_errors || result.success = 1 then
+      if t.verbose || t.show_errors || result.failures = 1 then
         List.iter (fun error -> Printf.printf "%s\n" error) (List.rev t.errors)
   in
   match t.json with
