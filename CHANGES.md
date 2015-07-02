@@ -1,3 +1,9 @@
+### 0.4.1 (2015-07-03)
+
+* Fix regression introduced in 0.4.0: display the error if there is only
+  one error
+* Add a testable combinator for options.
+
 ### 0.4.0 (2015-06-29)
 
 * Simplify the use of the library by removing global states -- now calling
