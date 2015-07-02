@@ -535,6 +535,20 @@ let list (type a) elt =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let opt (type a) elt =
+  let (module Elt: TESTABLE with type t = a) = elt in
+  let module M = struct
+    type t = a option
+    let pp fmt t = match t with
+      | None   -> Format.pp_print_string fmt "None"
+      | Some x -> Format.fprintf fmt "Some @[(%a)@]" Elt.pp x
+    let equal x y = match x, y with
+      | None  , None   -> true
+      | Some x, Some y -> Elt.equal x y
+      | _ -> false
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let show_line msg =
   if !quiet then ()
   else (
