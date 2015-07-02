@@ -27,7 +27,7 @@ type path = Path of (string * int)
 
 type run_result = [
   | `Ok
-  | `Failure of path * string
+  | `Exn of path * string * string
   | `Error of path * string
   | `Skip
   | `Todo of string
@@ -217,7 +217,7 @@ let newline t = print t "\n"
 
 let print_result t p = function
   | `Ok            -> print t (left (green "[OK]") left_c); print_info t p
-  | `Failure (p,s) -> error t p "[Failure] %s" s
+  | `Exn (p, n, s) -> error t p "[%s] %s" n s
   | `Error (p, s)  -> error t p "%s" s
   | `Skip          -> print t (left (yellow "[SKIP]") left_c); print_info t p
   | `Todo _        -> print t (left (yellow "[TODO]") left_c); print_info t p
@@ -230,17 +230,20 @@ let failure: run_result -> bool = function
   | `Ok
   | `Skip  -> false
   | `Error _
-  | `Failure _
+  | `Exn _
   | `Todo _ -> true
 
 let has_run: run_result -> bool = function
   | `Ok
   | `Error _
-  | `Failure _ -> true
+  | `Exn _ -> true
   | `Skip
   | `Todo _    -> false
 
 let bt () = match Printexc.get_backtrace () with "" -> "" | s  -> "\n" ^ s
+let exn path name err =
+  let err = sp "%s%s" err (bt ()) in
+  `Exn (path, name, err)
 
 let protect_test path (f:run): rrun =
   fun () ->
@@ -249,12 +252,9 @@ let protect_test path (f:run): rrun =
     | Check_error err ->
       let err = sp "Test error: %s%s" err (bt ()) in
       `Error (path, err)
-    | Failure f ->
-      let err = sp "%s%s" f (bt ()) in
-      `Failure (path, err)
-    | exn ->
-      let err = sp "%s%s" (Printexc.to_string exn) (bt ()) in
-      `Failure (path, err)
+    | Failure f -> exn path "failure" f
+    | Invalid_argument f -> exn path "invalid" f
+    | e -> exn path "exception" (Printexc.to_string e)
 
 let perform_test t (path, test) =
   print_event t (`Start path);
