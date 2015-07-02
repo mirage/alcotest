@@ -227,7 +227,7 @@ let error t path fmt =
 
 let print_result t = function
   | `Ok            -> right t (green "[OK]")
-  | `Failure (p,s) -> error t p "Failure: %s" s
+  | `Failure (p,s) -> error t p "[Failure] %s" s
   | `Error (p, s)  -> error t p "%s" s
   | `Skip          -> right t (yellow "[SKIP]")
   | `Todo _        -> right t (yellow "[TODO]")
@@ -264,7 +264,7 @@ let protect_test path (f:run): rrun =
       let err = sp "%s%s" f (bt ()) in
       `Failure (path, err)
     | exn ->
-      let err = sp "Got exception: %s%s" (Printexc.to_string exn) (bt ()) in
+      let err = sp "%s%s" (Printexc.to_string exn) (bt ()) in
       `Failure (path, err)
 
 let perform_test t (path, test) =
