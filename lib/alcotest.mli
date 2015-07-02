@@ -63,7 +63,7 @@ val int: int testable
 val char: char testable
 val string: string testable
 val list: 'a testable -> 'a list testable
-val opt: 'a testable -> 'a option testable
+val option: 'a testable -> 'a option testable
 
 val check: 'a testable -> string -> 'a -> 'a -> unit
 (** Check that two values are equal. *)

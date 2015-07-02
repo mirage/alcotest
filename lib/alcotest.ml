@@ -535,7 +535,7 @@ let list (type a) elt =
   end in
   (module M: TESTABLE with type t = M.t)
 
-let opt (type a) elt =
+let option (type a) elt =
   let (module Elt: TESTABLE with type t = a) = elt in
   let module M = struct
     type t = a option
