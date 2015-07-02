@@ -223,7 +223,7 @@ let print_result t p = function
   | `Todo _        -> print t (left (yellow "[TODO]") left_c); print_info t p
 
 let print_event t = function
-  | `Start p       -> print t (left "" 10); print_info t p
+  | `Start p       -> print t (left (yellow " ...") left_c); print_info t p
   | `Result (p, r) -> reset t; print_result t p r; newline t
 
 let failure: run_result -> bool = function
