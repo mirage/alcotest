@@ -553,7 +553,7 @@ let show_line msg =
   if !quiet then ()
   else (
     line stderr ~color:`Yellow '-';
-    Printf.eprintf "ASSERT %s" msg;
+    Printf.eprintf "ASSERT %s\n" msg;
     line stderr ~color:`Yellow '-';
   )
 
