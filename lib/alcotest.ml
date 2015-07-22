@@ -141,10 +141,8 @@ let line oc ?color c =
 
 let left s nb =
   let nb = nb - String.length s in
-  if nb <= 0 then
-    s
-  else
-    s ^ String.make nb ' '
+  if nb <= 0 then s
+  else s ^ String.make nb ' '
 
 let print t s = if not t.json then Printf.printf "%s%!" s
 
