@@ -363,6 +363,9 @@ let list_tests t =
       Printf.printf "%s    %s\n" (string_of_path t path) (doc_of_path t path)
     ) paths
 
+let utf8_length s =
+  Uuseg_string.fold_utf_8 `Grapheme_cluster (fun count _ -> count + 1) 0 s
+
 let register t name (ts:test_case list) =
   let paths = Hashtbl.create 16 in
   let docs = Hashtbl.create 16 in
@@ -370,8 +373,8 @@ let register t name (ts:test_case list) =
   let max_label = ref t.max_label in
   let max_doc = ref t.max_doc in
   let ts = List.mapi (fun i (doc, speed, test) ->
-      max_label := max !max_label (String.length name);
-      max_doc   := max !max_doc (String.length doc);
+      max_label := max !max_label (utf8_length name);
+      max_doc   := max !max_doc (utf8_length doc);
       let path = Path (name, i) in
       let doc =
         if doc.[String.length doc - 1] = '.' then doc
