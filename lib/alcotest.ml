@@ -554,6 +554,7 @@ let check (type a) (module T: TESTABLE with type t = a) msg x y =
     let buf = Buffer.create 20 in
     let fmt = Format.formatter_of_buffer buf in
     Format.fprintf fmt "Error %s: expecting %a, got %a." msg T.pp x T.pp y;
+    Format.pp_print_flush fmt ();
     failwith (Buffer.contents buf)
   )
 
