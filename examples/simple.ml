@@ -49,5 +49,6 @@ let test_set = [
 (* Run it *)
 let () =
   Alcotest.run "My first test" [
-    "test_set", test_set;
+    "test_sèàet", test_set;
+    "test_seaet", test_set;
   ]
