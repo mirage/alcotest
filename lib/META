@@ -1,6 +1,6 @@
 # OASIS_START
-# DO NOT EDIT (digest: 9a259ce503b39160a2f81d9d329f589c)
-version = "0.4.2"
+# DO NOT EDIT (digest: c2965e27b253b2cf79aaa224898a572e)
+version = "0.4.3"
 description = "A lightweight and colourful test framework"
 requires = "cmdliner bytes unix uuseg.string stringext"
 archive(byte) = "alcotest.cma"
