@@ -116,20 +116,20 @@ let dup oc =
   Unix.out_channel_of_descr (Unix.dup (Unix.descr_of_out_channel oc))
 
 let terminal_columns =
-  let split s c =
-    Re_str.split (Re_str.regexp (sp "[%c]" c)) s in
-  try           (* terminfo *)
-    with_process_in "tput cols"
-      (fun ic -> int_of_string (input_line ic))
-  with _ -> try (* GNU stty *)
-      with_process_in "stty size"
-        (fun ic ->
-           match split (input_line ic) ' ' with
-           | [_ ; v] -> int_of_string v
-           | _ -> failwith "stty")
-    with _ -> try (* shell envvar *)
+  try
+    (* terminfo *)
+    with_process_in "tput cols" (fun ic -> int_of_string (input_line ic))
+  with _ -> try
+      (* GNU stty *)
+      with_process_in "stty size" (fun ic ->
+          match Stringext.split (input_line ic) ~on:' ' with
+          | [_ ; v] -> int_of_string v
+          | _ -> failwith "stty")
+    with _ -> try
+        (* shell envvar *)
         int_of_string (Sys.getenv "COLUMNS")
       with _ ->
+        (* default *)
         80
 
 let line oc ?color c =
