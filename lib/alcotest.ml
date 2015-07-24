@@ -23,7 +23,7 @@ type speed_level = [`Quick | `Slow]
 
 type run = unit -> unit
 
-type path = Path of (string * int)
+type path = Path of (string * int * string)
 
 type run_result = [
   | `Ok
@@ -163,14 +163,14 @@ let string_of_channel ic =
   iter ic b s;
   Buffer.contents b
 
-let short_string_of_path (Path (n, i)) = sp "%s.%03d" n i
+let short_string_of_path (Path (n, i, _)) = sp "%s.%03d" n i
 let file_of_path path ext = sp "%s.%s" (short_string_of_path path) ext
 let output_file t path = Filename.concat t.log_dir (file_of_path path "output")
 
 let prepare t =
   if not (Sys.file_exists t.log_dir) then Unix.mkdir t.log_dir 0o755
 
-let string_of_path t (Path (n, i)) =
+let string_of_path t (Path (n, i, _)) =
   sp "%s%3d" (left (sp "%s" (blue_s n)) (t.max_label+8)) i
 
 let doc_of_path t path =
@@ -264,6 +264,16 @@ let perform_test t (path, test) =
 
 let perform_tests t tests = List.map (perform_test t) tests
 
+let create_output_alias t (Path (name, _i, doc)) target = Unix.(
+  let alias_file = sp "%s.%s.%s" name doc "output" in
+  let source = Filename.concat t.log_dir alias_file in
+  let () =
+    try unlink source
+    with Unix_error (ENOENT, "unlink", _) -> ()
+  in
+  symlink (Filename.basename target) source
+)
+
 let with_redirect oc file fn =
   flush oc;
   let fd_oc = Unix.descr_of_out_channel oc in
@@ -287,7 +297,7 @@ let skip_fun () = `Skip
 let skip_label (path, _) = path, skip_fun
 
 let filter_test ~subst labels (test: path * rrun) =
-  let Path (n, i), _ = test in
+  let Path (n, i, _), _ = test in
   match labels with
   | []    -> Some test
   | [m]   -> if n=m then Some test else None
@@ -308,6 +318,7 @@ let redirect_test_output t path (f:rrun) =
   if t.verbose then f
   else fun () ->
     let output_file = output_file t path in
+    create_output_alias t path output_file;
     with_redirect stdout output_file
       (fun () -> with_redirect stderr output_file f)
 
@@ -374,7 +385,7 @@ let register t name (ts:test_case list) =
   let ts = List.mapi (fun i (doc, speed, test) ->
       max_label := max !max_label (String.length name);
       max_doc   := max !max_doc (String.length doc);
-      let path = Path (name, i) in
+      let path = Path (name, i, doc) in
       let doc =
         if doc.[String.length doc - 1] = '.' then doc
         else doc ^ "." in
