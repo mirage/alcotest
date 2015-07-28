@@ -58,7 +58,6 @@ type t = {
 
   (* runtime options. *)
   max_label: int;
-  max_doc  : int;
   speed_level: speed_level;
   show_errors: bool;
   json       : bool;
@@ -75,14 +74,13 @@ let empty () =
   let speed _ = None in
   let tests = [] in
   let max_label = 0 in
-  let max_doc = 0 in
   let verbose = false in
   let speed_level = `Slow in
   let show_errors = false in
   let json = false in
   let log_dir = Sys.getcwd () in
   { name; errors; tests; paths; doc; speed;
-    max_label; max_doc; speed_level;
+    max_label; speed_level;
     show_errors; json; verbose; log_dir }
 
 let compare_speed_level s1 s2 =
@@ -116,20 +114,20 @@ let dup oc =
   Unix.out_channel_of_descr (Unix.dup (Unix.descr_of_out_channel oc))
 
 let terminal_columns =
-  let split s c =
-    Re_str.split (Re_str.regexp (sp "[%c]" c)) s in
-  try           (* terminfo *)
-    with_process_in "tput cols"
-      (fun ic -> int_of_string (input_line ic))
-  with _ -> try (* GNU stty *)
-      with_process_in "stty size"
-        (fun ic ->
-           match split (input_line ic) ' ' with
-           | [_ ; v] -> int_of_string v
-           | _ -> failwith "stty")
-    with _ -> try (* shell envvar *)
+  try
+    (* terminfo *)
+    with_process_in "tput cols" (fun ic -> int_of_string (input_line ic))
+  with _ -> try
+      (* GNU stty *)
+      with_process_in "stty size" (fun ic ->
+          match Stringext.split (input_line ic) ~on:' ' with
+          | [_ ; v] -> int_of_string v
+          | _ -> failwith "stty")
+    with _ -> try
+        (* shell envvar *)
         int_of_string (Sys.getenv "COLUMNS")
       with _ ->
+        (* default *)
         80
 
 let line oc ?color c =
@@ -141,10 +139,8 @@ let line oc ?color c =
 
 let left s nb =
   let nb = nb - String.length s in
-  if nb <= 0 then
-    s
-  else
-    s ^ String.make nb ' '
+  if nb <= 0 then s
+  else s ^ String.make nb ' '
 
 let print t s = if not t.json then Printf.printf "%s%!" s
 
@@ -365,32 +361,42 @@ let list_tests t =
       Printf.printf "%s    %s\n" (string_of_path t path) (doc_of_path t path)
     ) paths
 
+let is_ascii s =
+  let r = ref true in
+  for i = 0 to String.length s - 1 do r := !r && Char.code s.[i] < 128 done;
+  !r
+
+let err_ascii s =
+  let err =
+    Printf.sprintf
+      "%S is not a valid test label (it should be an ASCII string), skipping." s
+  in
+  Printf.eprintf "%s %s\n%!" (red_s "Error:") err
+
 let register t name (ts:test_case list) =
-  let paths = Hashtbl.create 16 in
-  let docs = Hashtbl.create 16 in
-  let speeds = Hashtbl.create 16 in
-  let max_label = ref t.max_label in
-  let max_doc = ref t.max_doc in
-  let ts = List.mapi (fun i (doc, speed, test) ->
-      max_label := max !max_label (String.length name);
-      max_doc   := max !max_doc (String.length doc);
-      let path = Path (name, i) in
-      let doc =
-        if doc.[String.length doc - 1] = '.' then doc
-        else doc ^ "." in
-      Hashtbl.add paths path true;
-      Hashtbl.add docs path doc;
-      Hashtbl.add speeds path speed;
-      path, protect_test path test
-    ) ts in
-  let tests = t.tests @ ts in
-  let paths = Hashtbl.fold (fun k _ acc -> k :: acc) paths [] in
-  let paths = t.paths @ paths in
-  let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
-  let speed p = try Some (Hashtbl.find speeds p) with Not_found -> t.speed p in
-  let max_label = !max_label in
-  let max_doc = !max_doc in
-  { t with paths; tests; doc; speed; max_label; max_doc }
+  if not (is_ascii name) then (err_ascii name; t)
+  else (
+    let max_label = max t.max_label (String.length name) in
+    let paths = Hashtbl.create 16 in
+    let docs = Hashtbl.create 16 in
+    let speeds = Hashtbl.create 16 in
+    let ts = List.mapi (fun i (doc, speed, test) ->
+        let path = Path (name, i) in
+        let doc =
+          if doc.[String.length doc - 1] = '.' then doc
+          else doc ^ "." in
+        Hashtbl.add paths path true;
+        Hashtbl.add docs path doc;
+        Hashtbl.add speeds path speed;
+        path, protect_test path test
+      ) ts in
+    let tests = t.tests @ ts in
+    let paths = Hashtbl.fold (fun k _ acc -> k :: acc) paths [] in
+    let paths = t.paths @ paths in
+    let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
+    let speed p = try Some (Hashtbl.find speeds p) with Not_found -> t.speed p in
+    { t with paths; tests; doc; speed; max_label; }
+  )
 
 exception Test_error
 

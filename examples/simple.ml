@@ -42,12 +42,13 @@ let plus () =
   Alcotest.(check int) "Sum equals to 7" 7 (To_test.plus [1;1;2;3])
 
 let test_set = [
-  "Capitalize" , `Quick, capit;
-  "Add entries", `Slow , plus ;
+  "\xF0\x9F\x90\xAB  Capitalize", `Quick, capit;
+  "Add entries"                 , `Slow , plus ;
 ]
 
 (* Run it *)
 let () =
   Alcotest.run "My first test" [
-    "test_set", test_set;
+    "test_1", test_set;
+    "test_2", test_set;
   ]

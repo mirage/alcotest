@@ -1,5 +1,5 @@
 # OASIS_START
-# DO NOT EDIT (digest: 65537aefedb61b4f9a674a6f0f0c3ced)
+# DO NOT EDIT (digest: ec1d418daf25eb3307b09616980214ca)
 # Ignore VCS directories, you can use the same kind of rule outside
 # OASIS_START/STOP if you want to exclude directories that contains
 # useless stuff for the build process
@@ -18,23 +18,23 @@ true: annot, bin_annot
 "lib/alcotest.cmxs": use_alcotest
 <lib/*.ml{,i,y}>: pkg_bytes
 <lib/*.ml{,i,y}>: pkg_cmdliner
-<lib/*.ml{,i,y}>: pkg_re.str
+<lib/*.ml{,i,y}>: pkg_stringext
 <lib/*.ml{,i,y}>: pkg_unix
 # Executable simple
 <examples/simple.{native,byte}>: pkg_bytes
 <examples/simple.{native,byte}>: pkg_cmdliner
-<examples/simple.{native,byte}>: pkg_re.str
+<examples/simple.{native,byte}>: pkg_stringext
 <examples/simple.{native,byte}>: pkg_unix
 <examples/simple.{native,byte}>: use_alcotest
 # Executable bad
 <examples/bad.{native,byte}>: pkg_bytes
 <examples/bad.{native,byte}>: pkg_cmdliner
-<examples/bad.{native,byte}>: pkg_re.str
+<examples/bad.{native,byte}>: pkg_stringext
 <examples/bad.{native,byte}>: pkg_unix
 <examples/bad.{native,byte}>: use_alcotest
 <examples/*.ml{,i,y}>: pkg_bytes
 <examples/*.ml{,i,y}>: pkg_cmdliner
-<examples/*.ml{,i,y}>: pkg_re.str
+<examples/*.ml{,i,y}>: pkg_stringext
 <examples/*.ml{,i,y}>: pkg_unix
 <examples/*.ml{,i,y}>: use_alcotest
 # OASIS_STOP

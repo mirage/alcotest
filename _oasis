@@ -1,6 +1,6 @@
 OASISFormat: 0.4
 Name:        alcotest
-Version:     0.4.2
+Version:     0.4.3
 Synopsis:    A lightweight and colourful test framework
 Authors:     Thomas Gazagnaire
 License:     ISC
@@ -11,7 +11,7 @@ Library alcotest
   Path: lib
   Findlibname: alcotest
   Modules: Alcotest_version, Alcotest
-  BuildDepends: re.str, cmdliner, bytes, unix
+  BuildDepends: cmdliner, bytes, unix, stringext
 
 Document alcotest
   Title:                Alcotest docs

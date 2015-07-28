@@ -48,9 +48,9 @@ The result is a self-contained binary which displays the test results. Use
 `./simple.byte --help` to see the runtime options.
 
 ```shell
-$ ./simple.byte
-test_set  0   Capitalize.                                                   [OK]
-test_set  1   Add entries.                                                  [OK]
+$ ./simple.native
+[OK]        test_set  0   Capitalize.
+[OK]        test_set  1   Add entries.
 Test Successful in 0.001s. 2 tests run.
 ```
 
