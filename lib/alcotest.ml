@@ -366,30 +366,37 @@ let is_ascii s =
   for i = 0 to String.length s - 1 do r := !r && Char.code s.[i] < 128 done;
   !r
 
+let err_ascii s =
+  let err =
+    Printf.sprintf
+      "%S is not a valid test label (it should be an ASCII string), skipping." s
+  in
+  Printf.eprintf "%s %s\n%!" (red_s "Error:") err
+
 let register t name (ts:test_case list) =
-  let paths = Hashtbl.create 16 in
-  let docs = Hashtbl.create 16 in
-  let speeds = Hashtbl.create 16 in
-  let max_label = ref t.max_label in
-  let ts = List.mapi (fun i (doc, speed, test) ->
-      if not (is_ascii name) then failwith "%s is not a valid ASCII string";
-      max_label := max !max_label (String.length name);
-      let path = Path (name, i) in
-      let doc =
-        if doc.[String.length doc - 1] = '.' then doc
-        else doc ^ "." in
-      Hashtbl.add paths path true;
-      Hashtbl.add docs path doc;
-      Hashtbl.add speeds path speed;
-      path, protect_test path test
-    ) ts in
-  let tests = t.tests @ ts in
-  let paths = Hashtbl.fold (fun k _ acc -> k :: acc) paths [] in
-  let paths = t.paths @ paths in
-  let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
-  let speed p = try Some (Hashtbl.find speeds p) with Not_found -> t.speed p in
-  let max_label = !max_label in
-  { t with paths; tests; doc; speed; max_label; }
+  if not (is_ascii name) then (err_ascii name; t)
+  else (
+    let max_label = max t.max_label (String.length name) in
+    let paths = Hashtbl.create 16 in
+    let docs = Hashtbl.create 16 in
+    let speeds = Hashtbl.create 16 in
+    let ts = List.mapi (fun i (doc, speed, test) ->
+        let path = Path (name, i) in
+        let doc =
+          if doc.[String.length doc - 1] = '.' then doc
+          else doc ^ "." in
+        Hashtbl.add paths path true;
+        Hashtbl.add docs path doc;
+        Hashtbl.add speeds path speed;
+        path, protect_test path test
+      ) ts in
+    let tests = t.tests @ ts in
+    let paths = Hashtbl.fold (fun k _ acc -> k :: acc) paths [] in
+    let paths = t.paths @ paths in
+    let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
+    let speed p = try Some (Hashtbl.find speeds p) with Not_found -> t.speed p in
+    { t with paths; tests; doc; speed; max_label; }
+  )
 
 exception Test_error
 
