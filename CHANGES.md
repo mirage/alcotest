@@ -1,7 +1,7 @@
 ### 0.4.3 (2015-07-22)
 
 * Flush formatter for `Alcotest.check` (#27, by @edwintorok)
-* Handle UTF8 for test labels and documentation (#5)
+* Handle UTF8 for test documentation strings (#5)
 
 ### 0.4.2 (2015-07-03)
 
