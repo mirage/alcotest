@@ -16,6 +16,5 @@ depends: [
   "ocamlfind"
   "stringext"
   "cmdliner"
-  "uuseg" "uutf"
 ]
 available: [ocaml-version >= "4.00.1"]

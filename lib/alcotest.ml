@@ -58,7 +58,6 @@ type t = {
 
   (* runtime options. *)
   max_label: int;
-  max_doc  : int;
   speed_level: speed_level;
   show_errors: bool;
   json       : bool;
@@ -75,14 +74,13 @@ let empty () =
   let speed _ = None in
   let tests = [] in
   let max_label = 0 in
-  let max_doc = 0 in
   let verbose = false in
   let speed_level = `Slow in
   let show_errors = false in
   let json = false in
   let log_dir = Sys.getcwd () in
   { name; errors; tests; paths; doc; speed;
-    max_label; max_doc; speed_level;
+    max_label; speed_level;
     show_errors; json; verbose; log_dir }
 
 let compare_speed_level s1 s2 =
@@ -363,18 +361,19 @@ let list_tests t =
       Printf.printf "%s    %s\n" (string_of_path t path) (doc_of_path t path)
     ) paths
 
-let utf8_length s =
-  Uuseg_string.fold_utf_8 `Grapheme_cluster (fun count _ -> count + 1) 0 s
+let is_ascii s =
+  let r = ref true in
+  for i = 0 to String.length s - 1 do r := !r && Char.code s.[i] < 128 done;
+  !r
 
 let register t name (ts:test_case list) =
   let paths = Hashtbl.create 16 in
   let docs = Hashtbl.create 16 in
   let speeds = Hashtbl.create 16 in
   let max_label = ref t.max_label in
-  let max_doc = ref t.max_doc in
   let ts = List.mapi (fun i (doc, speed, test) ->
-      max_label := max !max_label (utf8_length name);
-      max_doc   := max !max_doc (utf8_length doc);
+      if not (is_ascii name) then failwith "%s is not a valid ASCII string";
+      max_label := max !max_label (String.length name);
       let path = Path (name, i) in
       let doc =
         if doc.[String.length doc - 1] = '.' then doc
@@ -390,8 +389,7 @@ let register t name (ts:test_case list) =
   let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
   let speed p = try Some (Hashtbl.find speeds p) with Not_found -> t.speed p in
   let max_label = !max_label in
-  let max_doc = !max_doc in
-  { t with paths; tests; doc; speed; max_label; max_doc }
+  { t with paths; tests; doc; speed; max_label; }
 
 exception Test_error
 
