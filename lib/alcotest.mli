@@ -20,13 +20,11 @@ type speed_level = [`Quick | `Slow]
 (** Speed level for a test. *)
 
 type test_case = string * speed_level * (unit -> unit)
-(** A test case has a documentation string, a speed level as well as a
-    function to execute to run the test case. {b Note:} the
-    documentation string could contain UTF-8 characters. *)
+(** A test case is an UTF-8 encoded documentation string, a speed
+    level and a function to execute. *)
 
 type test = string * test_case list
-(** A test has a name and contains a list of test cases. {b Note:} the
-    name should contain only ASCII characters. *)
+(** A test is an US-ASCII encoded name and a list of test cases. *)
 
 exception Test_error
 (** The exception return by {!run} in case of errors. *)

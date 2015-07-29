@@ -362,9 +362,11 @@ let list_tests t =
     ) paths
 
 let is_ascii s =
-  let r = ref true in
-  for i = 0 to String.length s - 1 do r := !r && Char.code s.[i] < 128 done;
-  !r
+  let rec loop = function
+    | 0 -> true
+    | i -> if Char.code s.[i-1] < 128 then loop (i - 1) else false
+  in
+  loop (String.length s)
 
 let err_ascii s =
   let err =
