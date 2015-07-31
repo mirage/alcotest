@@ -54,7 +54,7 @@ let test_two = [
 
 (* Run it *)
 let one () =
-  try Alcotest.run ~and_exit:false "My first test" ["one", test_one]
+  try Alcotest.run ~and_exit:false "My first test" ["Ωèone", test_one]
   with Alcotest.Test_error -> Printf.printf "Continue!!\n%!"
 
 let two () =
