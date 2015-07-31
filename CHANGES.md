@@ -1,3 +1,9 @@
+### 0.4.4 (2015-07-31)
+
+* Fix of the format of log filenames
+* Fix a regression in 0.4.* which were hiding error messages when using wrong
+  command-line arguments
+
 ### 0.4.3 (2015-07-22)
 
 * Flush formatter for `Alcotest.check` (#27, by @edwintorok)
