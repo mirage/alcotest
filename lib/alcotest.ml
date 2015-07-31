@@ -359,7 +359,8 @@ let list_tests t =
   let paths = List.sort Pervasives.compare t.paths in
   List.iter (fun path ->
       Printf.printf "%s    %s\n" (string_of_path t path) (doc_of_path t path)
-    ) paths
+    ) paths;
+  0
 
 let is_ascii s =
   let rec loop = function
@@ -418,7 +419,7 @@ let apply fn t log_dir verbose show_errors quick json =
 let run_registred_tests t =
   let result = result t t.tests in
   show_result t result;
-  if result.failures > 0 then raise Test_error
+  result.failures
 
 let run_subtest t labels =
   let is_empty = filter_tests ~subst:false labels t.tests = [] in
@@ -428,7 +429,7 @@ let run_subtest t labels =
     let tests = filter_tests ~subst:true labels t.tests in
     let result = result t tests in
     show_result t result;
-    if result.failures > 0 then raise Test_error
+    result.failures
 
 open Cmdliner
 
@@ -479,9 +480,10 @@ let list_cmd t =
 let run ?(and_exit = true) name (tl:test list) =
   let t = empty () in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
-  let err = Format.formatter_of_buffer (Buffer.create 10) in
-  match Term.eval_choice ~err (default_cmd t) [list_cmd t; test_cmd t] with
+  match Term.eval_choice (default_cmd t) [list_cmd t; test_cmd t] with
+  | `Ok 0    -> if and_exit then exit 0 else ()
   | `Error _ -> if and_exit then exit 1 else raise Test_error
+  | `Ok i    -> if and_exit then exit i else raise Test_error
   | _        -> if and_exit then exit 0 else ()
 
 module type TESTABLE = sig
