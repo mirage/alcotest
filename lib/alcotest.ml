@@ -159,7 +159,7 @@ let string_of_channel ic =
   iter ic b s;
   Buffer.contents b
 
-let short_string_of_path (Path (n, i)) = sp "%s.%3d" n i
+let short_string_of_path (Path (n, i)) = sp "%s.%03d" n i
 let file_of_path path ext = sp "%s.%s" (short_string_of_path path) ext
 let output_file t path = Filename.concat t.log_dir (file_of_path path "output")
 
