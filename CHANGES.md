@@ -1,3 +1,7 @@
+### 0.4.5
+
+* Add boolean assert (#33, by @zjhmale)
+
 ### 0.4.4 (2015-07-31)
 
 * Fix of the format of log filenames
