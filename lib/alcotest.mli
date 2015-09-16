@@ -58,12 +58,36 @@ module type TESTABLE = sig
 end
 
 type 'a testable = (module TESTABLE with type t = 'a)
+(** The type for testable values. *)
+
+val bool: bool testable
+(** [bool] tests booleans. *)
 
 val int: int testable
+(** [int] tests integers. *)
+
 val char: char testable
+(** [char] tests characters. *)
+
 val string: string testable
+(** [string] tests OCaml strings. *)
+
 val list: 'a testable -> 'a list testable
+(** [list t] tests lists of [t]s. *)
+
+val slist: 'a testable -> ('a -> 'a -> int) -> 'a list testable
+(** [slist t comp] tests sorted lists of [t]s. The list are sorted
+    using [comp]. *)
+
 val option: 'a testable -> 'a option testable
+(** [option t] tests optional [t]s. *)
+
+val pair: 'a testable -> 'b testable -> ('a * 'b) testable
+(** [pair a b] tests pairs of [a]s and [b]s. *)
+
+val of_pp: (Format.formatter -> 'a -> unit) -> 'a testable
+(** [of_pp pp] tests values which can be printed using [pp] and
+    compared using {!Pervasives.compare} *)
 
 val check: 'a testable -> string -> 'a -> 'a -> unit
 (** Check that two values are equal. *)
