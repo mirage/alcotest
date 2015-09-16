@@ -524,7 +524,7 @@ let bool =
     let pp = Format.pp_print_bool
     let equal = (=)
   end in
-  (module M: Alcotest.TESTABLE with type t = M.t)
+  (module M: TESTABLE with type t = M.t)
 
 let list (type a) elt =
   let (module Elt: TESTABLE with type t = a) = elt in
