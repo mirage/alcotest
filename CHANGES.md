@@ -1,6 +1,10 @@
 ### 0.4.5
 
-* Add boolean assert (#33, by @zjhmale)
+* Add boolean assert: `Alcotest.bool` (#33, by @zjhmale)
+* Add sorted list assert: `Alcotest.slist` (#34, by @samoht)
+* Add pair assert: `Alcotest.pair` (#34, by @samoht)
+* Add simple assert, built using `Pervasive.compare` and a pretty-printing
+  function: `Alcotest.of_pp` (#34, by @samoht)
 
 ### 0.4.4 (2015-07-31)
 
