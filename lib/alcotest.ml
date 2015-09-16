@@ -542,6 +542,27 @@ let list (type a) elt =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let slist (type a) (a: a testable) compare: a list testable =
+  let module A = (val a) in
+  let module L = (val list a) in
+  (module struct
+    type t = A.t list
+    let equal x y = L.equal (List.sort compare x) (List.sort compare y)
+    let pp = L.pp
+  end)
+
+let of_pp (type a) pp: a testable =
+  (module struct type t = a let equal = (=) let pp = pp end)
+
+let pair (type a) (type b) (a:a testable) (b:b testable): (a * b) testable =
+  let module A = (val a) in
+  let module B = (val b) in
+  (module struct
+    type t = a * b
+    let equal (a1, b1) (a2, b2) = A.equal a1 a2 && B.equal b1 b2
+    let pp ppf (a, b) = A.pp ppf a; Format.pp_print_cut ppf (); B.pp ppf b
+  end)
+
 let option (type a) elt =
   let (module Elt: TESTABLE with type t = a) = elt in
   let module M = struct
