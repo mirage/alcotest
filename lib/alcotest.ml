@@ -518,6 +518,14 @@ let string =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let bool =
+  let module M = struct
+    type t = bool
+    let pp = Format.pp_print_bool
+    let equal = (=)
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let list (type a) elt =
   let (module Elt: TESTABLE with type t = a) = elt in
   let module M = struct
