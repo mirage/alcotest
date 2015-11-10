@@ -15,6 +15,7 @@ remove: ["ocamlfind" "remove" "alcotest"]
 depends: [
   "ocamlfind"
   "stringext"
+  "result"
   "cmdliner"
 ]
 available: [ocaml-version >= "4.00.1"]
