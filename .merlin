@@ -1,4 +1,4 @@
-PKG oUnit cmdliner stringext bytes uuseg
+PKG oUnit cmdliner stringext bytes
 
 S lib/**
 B _build/**
