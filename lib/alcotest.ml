@@ -261,19 +261,26 @@ let perform_test t (path, test) =
 
 let perform_tests t tests = List.map (perform_test t) tests
 
-let with_redirect oc file fn =
-  flush oc;
-  let fd_oc = Unix.descr_of_out_channel oc in
-  let fd_old = Unix.dup fd_oc in
+let with_redirect file fn =
+  flush stdout;
+  flush stderr;
+  let fd_stdout = Unix.descr_of_out_channel stdout in
+  let fd_stderr = Unix.descr_of_out_channel stderr in
+  let fd_old_stdout = Unix.dup fd_stdout in
+  let fd_old_stderr = Unix.dup fd_stderr in
   let fd_file = Unix.(openfile file [O_WRONLY; O_TRUNC; O_CREAT] 0o666) in
-  Unix.dup2 fd_file fd_oc;
+  Unix.dup2 fd_file fd_stdout;
+  Unix.dup2 fd_file fd_stderr;
   Unix.close fd_file;
   let r =
     try `Ok (fn ())
     with e -> `Error e in
-  flush oc;
-  Unix.dup2 fd_old fd_oc;
-  Unix.close fd_old;
+  flush stdout;
+  flush stderr;
+  Unix.dup2 fd_old_stdout fd_stdout;
+  Unix.dup2 fd_old_stderr fd_stderr;
+  Unix.close fd_old_stdout;
+  Unix.close fd_old_stderr;
   match r with
   | `Ok x -> x
   | `Error e -> raise e
@@ -305,8 +312,15 @@ let redirect_test_output t path (f:rrun) =
   if t.verbose then f
   else fun () ->
     let output_file = output_file t path in
-    with_redirect stdout output_file
-      (fun () -> with_redirect stderr output_file f)
+    with_redirect output_file (fun () ->
+      let result = f () in
+      begin match result with
+        | `Error (_path, str) -> Printf.printf "%s\n" str
+        | `Exn (_path, n, str) -> Printf.printf "[%s] %s\n" n str
+        | `Ok | `Todo _ | `Skip -> ()
+      end;
+      result
+    )
 
 let select_speed t path (f:rrun): rrun =
   if compare_speed_level (speed_of_path t path) t.speed_level >= 0 then
