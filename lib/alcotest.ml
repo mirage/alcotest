@@ -305,8 +305,17 @@ let redirect_test_output t path (f:rrun) =
   if t.verbose then f
   else fun () ->
     let output_file = output_file t path in
-    with_redirect stdout output_file
-      (fun () -> with_redirect stderr output_file f)
+    with_redirect stdout output_file (fun () ->
+      with_redirect stderr output_file (fun () ->
+        let result = f () in
+        begin match result with
+          | `Error (_path, str) -> Printf.printf "%s\n" str
+          | `Exn (_path, n, str) -> Printf.printf "[%s] %s\n" n str
+          | `Ok | `Todo _ | `Skip -> ()
+        end;
+        result
+      )
+    )
 
 let select_speed t path (f:rrun): rrun =
   if compare_speed_level (speed_of_path t path) t.speed_level >= 0 then
