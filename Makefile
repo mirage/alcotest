@@ -53,3 +53,18 @@ release:
 pr:
 	opam publish prepare $(NAME).$(VERSION) $(ARCHIVE)
 	OPAMYES=1 opam publish submit $(NAME).$(VERSION) && rm -rf $(NAME).$(VERSION)
+
+doc/html/.git:
+	cd doc/html && (\
+		git init && \
+		git remote add origin git@github.com:mirage/alcotest.git && \
+		git checkout -b gh-pages \
+	)
+
+gh-pages: doc/html/.git
+	cd doc/html && git checkout gh-pages
+	rm -f doc/html/*.html
+	cp alcotest.docdir/*.html doc/html/
+	cd doc/html && git add *.html
+	cd doc/html && git commit -a -m "Doc updates"
+	cd doc/html && git push origin gh-pages
