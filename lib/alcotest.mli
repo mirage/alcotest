@@ -82,6 +82,9 @@ val slist: 'a testable -> ('a -> 'a -> int) -> 'a list testable
 val option: 'a testable -> 'a option testable
 (** [option t] tests optional [t]s. *)
 
+val result : 'a testable -> 'e testable -> ('a, 'e) Result.result testable
+(** [result t e] tests [t]s on success and [e]s on failure. *)
+
 val pair: 'a testable -> 'b testable -> ('a * 'b) testable
 (** [pair a b] tests pairs of [a]s and [b]s. *)
 

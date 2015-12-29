@@ -592,6 +592,21 @@ let option (type a) elt =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let result (type a) (type e) a e =
+  let (module A: TESTABLE with type t = a) = a in
+  let (module E: TESTABLE with type t = e) = e in
+  let module M = struct
+    type t = (a, e) Result.result
+    let pp fmt t = match t with
+      | Result.Ok    t -> Format.fprintf fmt "Ok @[(%a)@]" A.pp t
+      | Result.Error e -> Format.fprintf fmt "Error @[(%a)@]" E.pp e
+    let equal x y = match x, y with
+      | Result.Ok    x, Result.Ok    y -> A.equal x y
+      | Result.Error x, Result.Error y -> E.equal x y
+      | _             , _              -> false
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let show_line msg =
   if !quiet then ()
   else (
