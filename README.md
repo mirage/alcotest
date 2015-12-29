@@ -12,6 +12,9 @@ are fully displayed at the end of the run (with the full logs ready to
 inspect), with a simple (yet expressive) query language to select the
 tests to run.
 
+[![Build Status](https://travis-ci.org/mirage/alcotest.svg)](https://travis-ci.org/mirage/alcotest)
+[![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/alcotest/)
+
 ### Examples
 
 A simple example:
