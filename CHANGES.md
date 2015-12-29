@@ -1,4 +1,12 @@
-### 0.4.5
+### 0.4.6 (2015-12-29)
+
+* Add missing newline to verbose output (#36, by @seliopou)
+* Result: add Result.result combinator (#37, by @seliopou)
+* When redirecting stdout/stderr, use a single fd to share the seek offset
+  (#39, by @dsheets)
+* If redirecting output, print error results as well (#39, by @dsheets)
+
+### 0.4.5 (2015-09.16)
 
 * Add boolean assert: `Alcotest.bool` (#33, by @zjhmale)
 * Add sorted list assert: `Alcotest.slist` (#34, by @samoht)
