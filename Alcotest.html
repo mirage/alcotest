@@ -1,0 +1,131 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<link rel="stylesheet" href="style.css" type="text/css">
+<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<link rel="Start" href="index.html">
+<link rel="previous" href="Alcotest_version.html">
+<link rel="Up" href="index.html">
+<link title="Index of types" rel=Appendix href="index_types.html">
+<link title="Index of exceptions" rel=Appendix href="index_exceptions.html">
+<link title="Index of values" rel=Appendix href="index_values.html">
+<link title="Index of modules" rel=Appendix href="index_modules.html">
+<link title="Index of module types" rel=Appendix href="index_module_types.html">
+<link title="Alcotest_version" rel="Chapter" href="Alcotest_version.html">
+<link title="Alcotest" rel="Chapter" href="Alcotest.html"><link title="Display" rel="Section" href="#2_Display">
+<link title="Assert functions" rel="Section" href="#2_Assertfunctions">
+<title>Alcotest</title>
+</head>
+<body>
+<div class="navbar"><a class="pre" href="Alcotest_version.html" title="Alcotest_version">Previous</a>
+&nbsp;<a class="up" href="index.html" title="Index">Up</a>
+&nbsp;</div>
+<h1>Module <a href="type_Alcotest.html">Alcotest</a></h1>
+
+<pre><span class="keyword">module</span> Alcotest: <code class="code">sig</code> <a href="Alcotest.html">..</a> <code class="code">end</code></pre><div class="info module top">
+A lightweight and colourful test framework.<br>
+</div>
+<hr width="100%">
+
+<pre><span id="TYPEspeed_level"><span class="keyword">type</span> <code class="type"></code>speed_level</span> = <code class="type">[ `Quick | `Slow ]</code> </pre>
+<div class="info ">
+Speed level for a test.<br>
+</div>
+
+
+<pre><span id="TYPEtest_case"><span class="keyword">type</span> <code class="type"></code>test_case</span> = <code class="type">string * <a href="Alcotest.html#TYPEspeed_level">speed_level</a> * (unit -> unit)</code> </pre>
+<div class="info ">
+A test case is an UTF-8 encoded documentation string, a speed
+    level and a function to execute.<br>
+</div>
+
+
+<pre><span id="TYPEtest"><span class="keyword">type</span> <code class="type"></code>test</span> = <code class="type">string * <a href="Alcotest.html#TYPEtest_case">test_case</a> list</code> </pre>
+<div class="info ">
+A test is an US-ASCII encoded name and a list of test cases.<br>
+</div>
+
+
+<pre><span id="EXCEPTIONTest_error"><span class="keyword">exception</span> Test_error</span></pre>
+<div class="info ">
+The exception return by <a href="Alcotest.html#VALrun"><code class="code">Alcotest.run</code></a> in case of errors.<br>
+</div>
+
+<pre><span id="VALrun"><span class="keyword">val</span> run</span> : <code class="type">?and_exit:bool -> string -> <a href="Alcotest.html#TYPEtest">test</a> list -> unit</code></pre><div class="info ">
+<code class="code">run n t</code> runs the test suite <code class="code">t</code>. <code class="code">n</code> is is the name of the
+    tested library. The optional argument <code class="code">and_exit</code> controls what
+    happens when the function ends. By default, <code class="code">and_exit</code> is set,
+    which makes the function exit with <code class="code">0</code> if everything is fine or
+    <code class="code">1</code> if there is an issue. If <code class="code">and_exit</code> then the function raises
+    <code class="code">Test_error</code> on error.<br>
+</div>
+<br>
+<h2 id="2_Display">Display</h2><br>
+
+<pre><span id="VALline"><span class="keyword">val</span> line</span> : <code class="type">Pervasives.out_channel -> ?color:[ `Blue | `Yellow ] -> char -> unit</code></pre><div class="info ">
+Draw a line on the given channel<br>
+</div>
+<br>
+<h2 id="2_Assertfunctions">Assert functions</h2><br>
+
+<pre><span class="keyword">module type</span> <a href="Alcotest.TESTABLE.html">TESTABLE</a> = <code class="code">sig</code> <a href="Alcotest.TESTABLE.html">..</a> <code class="code">end</code></pre>
+<pre><span id="TYPEtestable"><span class="keyword">type</span> <code class="type">'a</code> testable</span> = <code class="type">(module Alcotest.TESTABLE with type t = 'a)</code> </pre>
+<div class="info ">
+The type for testable values.<br>
+</div>
+
+
+<pre><span id="VALbool"><span class="keyword">val</span> bool</span> : <code class="type">bool <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">bool</code> tests booleans.<br>
+</div>
+
+<pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type">int <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">int</code> tests integers.<br>
+</div>
+
+<pre><span id="VALchar"><span class="keyword">val</span> char</span> : <code class="type">char <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">char</code> tests characters.<br>
+</div>
+
+<pre><span id="VALstring"><span class="keyword">val</span> string</span> : <code class="type">string <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">string</code> tests OCaml strings.<br>
+</div>
+
+<pre><span id="VALlist"><span class="keyword">val</span> list</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'a list <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">list t</code> tests lists of <code class="code">t</code>s.<br>
+</div>
+
+<pre><span id="VALslist"><span class="keyword">val</span> slist</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> ('a -> 'a -> int) -> 'a list <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">slist t comp</code> tests sorted lists of <code class="code">t</code>s. The list are sorted
+    using <code class="code">comp</code>.<br>
+</div>
+
+<pre><span id="VALoption"><span class="keyword">val</span> option</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'a option <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">option t</code> tests optional <code class="code">t</code>s.<br>
+</div>
+
+<pre><span id="VALresult"><span class="keyword">val</span> result</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -><br>       'e <a href="Alcotest.html#TYPEtestable">testable</a> -> ('a, 'e) Result.result <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">result t e</code> tests <code class="code">t</code>s on success and <code class="code">e</code>s on failure.<br>
+</div>
+
+<pre><span id="VALpair"><span class="keyword">val</span> pair</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'b <a href="Alcotest.html#TYPEtestable">testable</a> -> ('a * 'b) <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">pair a b</code> tests pairs of <code class="code">a</code>s and <code class="code">b</code>s.<br>
+</div>
+
+<pre><span id="VALof_pp"><span class="keyword">val</span> of_pp</span> : <code class="type">(Format.formatter -> 'a -> unit) -> 'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">of_pp pp</code> tests values which can be printed using <code class="code">pp</code> and
+    compared using <code class="code">Pervasives.compare</code><br>
+</div>
+
+<pre><span id="VALcheck"><span class="keyword">val</span> check</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> string -> 'a -> 'a -> unit</code></pre><div class="info ">
+Check that two values are equal.<br>
+</div>
+
+<pre><span id="VALfail"><span class="keyword">val</span> fail</span> : <code class="type">string -> 'a</code></pre><div class="info ">
+Simply fail.<br>
+</div>
+
+<pre><span id="VALcheck_raises"><span class="keyword">val</span> check_raises</span> : <code class="type">string -> exn -> (unit -> unit) -> unit</code></pre><div class="info ">
+Check that an exception is raised.<br>
+</div>
+</body></html>
