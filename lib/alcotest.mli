@@ -34,8 +34,8 @@ val run: ?and_exit:bool -> string -> test list -> unit
     tested library. The optional argument [and_exit] controls what
     happens when the function ends. By default, [and_exit] is set,
     which makes the function exit with [0] if everything is fine or
-    [1] if there is an issue. If [and_exit] then the function raises
-    [Test_error] on error. *)
+    [1] if there is an issue. If [and_exit] is [false], then the
+    function raises [Test_error] on error. *)
 
 (** {2 Display} *)
 
