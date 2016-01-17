@@ -7,3 +7,4 @@ lib/alcotest_version.ml
 _tests
 *.byte
 *.native
+*.docdir
