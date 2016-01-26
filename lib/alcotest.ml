@@ -120,9 +120,9 @@ let terminal_columns =
   with _ -> try
       (* GNU stty *)
       with_process_in "stty size" (fun ic ->
-          match Stringext.split (input_line ic) ~on:' ' with
-          | [_ ; v] -> int_of_string v
-          | _ -> failwith "stty")
+          match Astring.String.cut (input_line ic) ~sep:" " with
+          | Some (_, v) -> int_of_string v
+          | None -> failwith "stty")
     with _ -> try
         (* shell envvar *)
         int_of_string (Sys.getenv "COLUMNS")
