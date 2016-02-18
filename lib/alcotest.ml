@@ -454,7 +454,7 @@ let json =
 
 let test_dir =
   let doc = "Where to store the log files of the tests." in
-  Arg.(value & opt string "./_tests/"  & info ["o"] ~docv:"DIR" ~doc)
+  Arg.(value & opt string "_tests"  & info ["o"] ~docv:"DIR" ~doc)
 
 let verbose =
   let doc = "Display the test outputs." in
