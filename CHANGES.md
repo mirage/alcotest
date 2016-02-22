@@ -1,3 +1,7 @@
+### 0.4.7 (2016-02-22)
+
+* Minimal fix to ensure windows support (#46, by @samoht)
+
 ### 0.4.6 (2015-12-29)
 
 * Add missing newline to verbose output (#36, by @seliopou)
