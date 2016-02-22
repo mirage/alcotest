@@ -454,7 +454,7 @@ let json =
 
 let test_dir =
   let doc = "Where to store the log files of the tests." in
-  Arg.(value & opt string "./_tests/"  & info ["o"] ~docv:"DIR" ~doc)
+  Arg.(value & opt string "_tests"  & info ["o"] ~docv:"DIR" ~doc)
 
 let verbose =
   let doc = "Display the test outputs." in
@@ -553,7 +553,7 @@ let list (type a) elt =
         pp_sep ppf ();
         pp_print_list ~pp_sep pp_v ppf vs
     let pp = pp_print_list Elt.pp
-    let equal l1 l2 = 
+    let equal l1 l2 =
       List.length l1 = List.length l2 && List.for_all2 (Elt.equal) l1 l2
   end in
   (module M: TESTABLE with type t = M.t)
