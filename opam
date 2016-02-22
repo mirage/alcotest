@@ -13,7 +13,7 @@ build: [
 install: [make "install"]
 remove: ["ocamlfind" "remove" "alcotest"]
 depends: [
-  "ocamlfind"
+  "ocamlfind" {build}
   "stringext"
   "result"
   "cmdliner"
