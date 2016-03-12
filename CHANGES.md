@@ -1,3 +1,7 @@
+### 0.4.8 (2016-03-12)
+
+* Fix `check_raises` (#48, by @yallop)
+
 ### 0.4.7 (2016-02-22)
 
 * Minimal fix to ensure windows support (#46, by @samoht)
