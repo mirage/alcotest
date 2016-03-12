@@ -1,4 +1,4 @@
-PKG oUnit cmdliner stringext bytes
+PKG oUnit cmdliner astring bytes result
 
 S lib/**
 B _build/**

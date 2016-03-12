@@ -1,18 +1,29 @@
+VERSION = $(shell git describe --match 'v[0-9]*' --dirty='.m' --always)
 VFILE   = lib/alcotest_version.ml
+PREFIX ?= $(shell opam config var prefix)
 
 SETUP = ocaml setup.ml
 
 build: setup.data $(VFILE)
 	$(SETUP) -build $(BUILDFLAGS)
 
+all: setup.data
+	$(SETUP) -all $(ALLFLAGS)
+
+setup.ml: _oasis
+	rm -f _tags myocamlbuild.ml
+	oasis setup
+	echo 'true: debug, bin_annot' >> _tags
+	echo 'true: warn_error(+1..49), warn(A-4-41-44)' >> _tags
+#	echo 'Ocamlbuild_plugin.mark_tag_used "tests"' >> myocamlbuild.ml
+
 doc: setup.data build
 	$(SETUP) -doc $(DOCFLAGS)
 
-test: setup.data build
+test:
+	$(SETUP) -configure --enable-tests --prefix $(PREFIX)
+	$(MAKE) build
 	$(SETUP) -test $(TESTFLAGS)
-
-all:  $(VFILE)
-	$(SETUP) -all $(ALLFLAGS)
 
 install: setup.data
 	$(SETUP) -install $(INSTALLFLAGS)
@@ -24,35 +35,18 @@ reinstall: setup.data
 	$(SETUP) -reinstall $(REINSTALLFLAGS)
 
 clean:
-	$(SETUP) -clean $(CLEANFLAGS)
+	if [ -f setup.ml ]; then $(SETUP) -clean $(CLEANFLAGS); fi
+	rm -f setup.data setup.ml myocamlbuild.ml _tags configure
+	rm -f lib/*.odocl lib/META setup.log lib/*.mldylib lib/*.mllib
+	rm -rf examples/*.byte examples/_tests
 	rm -f $(VFILE)
+	rm -rf $(APP) _tests
 
-distclean:
-	$(SETUP) -distclean $(DISTCLEANFLAGS)
+setup.data: setup.ml
+	$(SETUP) -configure --prefix $(PREFIX)
 
-setup.data:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
-
-configure:
-	$(SETUP) -configure $(CONFIGUREFLAGS)
-
-.PHONY: build doc test all install uninstall reinstall clean distclean configure
-
-$(VFILE): _oasis
-	echo "let current = \"$(VERSION)\"" > $@
-
-VERSION = $(shell grep 'Version:' _oasis | sed 's/Version: *//')
-NAME    = $(shell grep 'Name:' _oasis    | sed 's/Name: *//')
-ARCHIVE = https://github.com/mirage/alcotest/archive/$(VERSION).tar.gz
-
-release:
-	git tag -a $(VERSION) -m "Version $(VERSION)."
-	git push upstream $(VERSION)
-	$(MAKE) pr
-
-pr:
-	opam publish prepare $(NAME).$(VERSION) $(ARCHIVE)
-	OPAMYES=1 opam publish submit $(NAME).$(VERSION) && rm -rf $(NAME).$(VERSION)
+$(VFILE):
+	echo "let v = \"$(VERSION)\"" > $(VFILE)
 
 doc/html/.git:
 	cd doc/html && (\
@@ -61,10 +55,12 @@ doc/html/.git:
 		git checkout -b gh-pages \
 	)
 
-gh-pages: doc/html/.git
+gh-pages: doc/html/.git doc
 	cd doc/html && git checkout gh-pages
 	rm -f doc/html/*.html
 	cp alcotest.docdir/*.html doc/html/
 	cd doc/html && git add *.html
 	cd doc/html && git commit -a -m "Doc updates"
 	cd doc/html && git push origin gh-pages
+
+.PHONY: build doc test all install uninstall reinstall clean distclean

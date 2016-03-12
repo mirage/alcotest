@@ -6,16 +6,16 @@ dev-repo:    "https://github.com/mirage/alcotest.git"
 bug-reports: "https://github.com/mirage/alcotest/issues/"
 
 license: "ISC"
-build: [
-  ["./configure" "--prefix" prefix]
-  [make]
-]
+build: [make "PREFIX=%{prefix}%"]
+build-test: [make "test"]
 install: [make "install"]
 remove: ["ocamlfind" "remove" "alcotest"]
 depends: [
-  "ocamlfind" {build}
-  "stringext"
+  "ocamlfind"  {build}
+  "ocamlbuild" {build}
+  "oasis"      {build}
+  "astring"
   "result"
   "cmdliner"
 ]
-available: [ocaml-version >= "4.00.1"]
+available: [ocaml-version >= "4.01.0"]
