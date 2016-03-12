@@ -98,7 +98,6 @@ let yellow fmt = sp ("\027[33m"^^fmt^^"\027[m")
 let blue   fmt = sp ("\027[36m"^^fmt^^"\027[m")
 
 let red_s    = red "%s"
-let green_s  = green "%s"
 let yellow_s = yellow "%s"
 let blue_s   = blue "%s"
 
@@ -109,9 +108,6 @@ let with_process_in cmd f =
     ignore (Unix.close_process_in ic) ; r
   with exn ->
     ignore (Unix.close_process_in ic) ; raise exn
-
-let dup oc =
-  Unix.out_channel_of_descr (Unix.dup (Unix.descr_of_out_channel oc))
 
 let terminal_columns =
   try
@@ -178,9 +174,6 @@ let speed_of_path t path =
   match t.speed path with
   | None   -> `Slow
   | Some s -> s
-
-let eprintf t fmt =
-  Printf.ksprintf (fun str -> if not t.json then Printf.eprintf "%s" str) fmt
 
 let print_info t p =
   print t (sp "%s   %s" (string_of_path t p) (doc_of_path t p))
@@ -285,12 +278,11 @@ let with_redirect file fn =
   | `Ok x -> x
   | `Error e -> raise e
 
-let same_label x y = (String.lowercase x) = (String.lowercase y)
 let skip_fun () = `Skip
 
 let skip_label (path, _) = path, skip_fun
 
-let filter_test ~subst labels (test: path * rrun) =
+let filter_test labels (test: path * rrun) =
   let Path (n, i), _ = test in
   match labels with
   | []    -> Some test
@@ -302,7 +294,7 @@ let map_test f l = List.map (fun (path, test) -> path, f path test) l
 
 let filter_tests ~subst path tests =
   let tests = List.fold_left (fun acc test ->
-      match filter_test ~subst path test with
+      match filter_test path test with
       | None   -> if subst then skip_label test :: acc else acc
       | Some r -> r :: acc
     ) [] tests in
@@ -476,7 +468,7 @@ let of_env t =
 let default_cmd t =
   let doc = "Run all the tests." in
   Term.(pure run_registred_tests $ of_env t),
-  Term.info t.name ~version:Alcotest_version.current ~doc
+  Term.info t.name ~version:Alcotest_version.v ~doc
 
 let test_cmd t =
   let doc = "Run a given test." in
@@ -493,6 +485,7 @@ let list_cmd t =
   Term.info "list" ~doc
 
 let run ?(and_exit = true) name (tl:test list) =
+  Printf.printf "Testing %s" name;
   let t = empty () in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
   match Term.eval_choice (default_cmd t) [list_cmd t; test_cmd t] with
@@ -638,7 +631,7 @@ let collect_exception f =
 let check_raises msg exn f =
   show_line msg;
   match collect_exception f with
-    None -> 
+    None ->
     check_err "Fail %s: expecting %s, got nothing." msg (Printexc.to_string exn)
   | Some e ->
     if e <> exn then
