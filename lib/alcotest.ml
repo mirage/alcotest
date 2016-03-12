@@ -632,10 +632,15 @@ let fail msg =
   show_line msg;
   check_err "Error %s." msg
 
+let collect_exception f =
+  try f (); None with e -> Some e
+
 let check_raises msg exn f =
   show_line msg;
-  try
-    f ();
+  match collect_exception f with
+    None -> 
     check_err "Fail %s: expecting %s, got nothing." msg (Printexc.to_string exn)
-  with e ->
-    ()
+  | Some e ->
+    if e <> exn then
+      check_err "Fail %s: expecting %s, got %s."
+        msg (Printexc.to_string exn) (Printexc.to_string e)
