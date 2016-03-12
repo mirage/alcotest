@@ -64,3 +64,18 @@ gh-pages: doc/html/.git doc
 	cd doc/html && git push origin gh-pages
 
 .PHONY: build doc test all install uninstall reinstall clean distclean
+
+
+RVERSION = $(shell grep 'Version:' _oasis | sed 's/Version: *//')
+RNAME    = $(shell grep 'Name:' _oasis    | sed 's/Name: *//')
+RARCHIVE = https://github.com/mirage/$(RNAME)/archive/$(RVERSION).tar.gz
+
+release:
+	git tag -a $(RVERSION) -m "Version $(RVERSION)."
+	git push upstream $(RVERSION)
+	$(MAKE) pr
+
+pr:
+	opam publish prepare $(RNAME).$(RVERSION) $(RARCHIVE)
+	OPAMYES=1 opam publish submit $(RNAME).$(RVERSION) && \
+	  rm -rf $(RNAME).$(RVERSION)
