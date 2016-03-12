@@ -641,4 +641,6 @@ let check_raises msg exn f =
     None -> 
     check_err "Fail %s: expecting %s, got nothing." msg (Printexc.to_string exn)
   | Some e ->
-    ()
+    if e <> exn then
+      check_err "Fail %s: expecting %s, got %s."
+        msg (Printexc.to_string exn) (Printexc.to_string e)
