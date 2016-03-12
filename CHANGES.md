@@ -1,6 +1,8 @@
 ### 0.4.8 (2016-03-12)
 
 * Fix `check_raises` (#48, by @yallop)
+* Use Astring (this drops support for 4.00) (@samoht)
+* Simplify the build system (@samoht)
 
 ### 0.4.7 (2016-02-22)
 
