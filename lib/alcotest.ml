@@ -14,6 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+open Astring
+
 exception Check_error of string
 
 let sp = Printf.sprintf
@@ -116,7 +118,7 @@ let terminal_columns =
   with _ -> try
       (* GNU stty *)
       with_process_in "stty size" (fun ic ->
-          match Stringext.split (input_line ic) ~on:' ' with
+          match String.cuts (input_line ic) ~sep:" " with
           | [_ ; v] -> int_of_string v
           | _ -> failwith "stty")
     with _ -> try
@@ -128,15 +130,15 @@ let terminal_columns =
 
 let line oc ?color c =
   let line = match color with
-    | Some `Blue   -> blue_s (String.make terminal_columns c)
-    | Some `Yellow -> yellow_s (String.make terminal_columns c)
-    | None         -> String.make terminal_columns c in
+    | Some `Blue   -> blue_s (String.v ~len:terminal_columns (fun _ -> c))
+    | Some `Yellow -> yellow_s (String.v ~len:terminal_columns (fun _ -> c))
+    | None         -> String.v ~len:terminal_columns (fun _ -> c) in
   Printf.fprintf oc "%s\n%!" line
 
 let left s nb =
   let nb = nb - String.length s in
   if nb <= 0 then s
-  else s ^ String.make nb ' '
+  else s ^ String.v ~len:nb (fun _ -> ' ')
 
 let print t s = if not t.json then Printf.printf "%s%!" s
 
@@ -369,12 +371,7 @@ let list_tests t =
     ) paths;
   0
 
-let is_ascii s =
-  let rec loop = function
-    | 0 -> true
-    | i -> if Char.code s.[i-1] < 128 then loop (i - 1) else false
-  in
-  loop (String.length s)
+let is_ascii s = String.for_all Char.Ascii.is_valid s
 
 let err_ascii s =
   let err =
