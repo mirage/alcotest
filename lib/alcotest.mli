@@ -92,6 +92,9 @@ val of_pp: (Format.formatter -> 'a -> unit) -> 'a testable
 (** [of_pp pp] tests values which can be printed using [pp] and
     compared using {!Pervasives.compare} *)
 
+val pass: 'a testable
+(** [pass] tests values of any type and always succeeds. *)
+
 val check: 'a testable -> string -> 'a -> 'a -> unit
 (** Check that two values are equal. *)
 

@@ -598,6 +598,14 @@ let result (type a) (type e) a e =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let pass (type a) =
+  let module M = struct
+    type t = a
+    let pp fmt _ = Format.pp_print_string fmt "Alcotest.pass"
+    let equal _ _ = true
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let show_line msg =
   if !quiet then ()
   else (
