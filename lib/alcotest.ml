@@ -390,7 +390,7 @@ let register t name (ts:test_case list) =
     let ts = List.mapi (fun i (doc, speed, test) ->
         let path = Path (name, i) in
         let doc =
-          if doc.[String.length doc - 1] = '.' then doc
+          if doc = "" || doc.[String.length doc - 1] = '.' then doc
           else doc ^ "." in
         Hashtbl.add paths path true;
         Hashtbl.add docs path doc;
