@@ -64,7 +64,7 @@ type t = {
   show_errors: bool;
   json       : bool;
   verbose    : bool;
-  log_dir    : string;
+  test_dir   : string;
 
 }
 
@@ -80,10 +80,10 @@ let empty () =
   let speed_level = `Slow in
   let show_errors = false in
   let json = false in
-  let log_dir = Sys.getcwd () in
+  let test_dir = Sys.getcwd () in
   { name; errors; tests; paths; doc; speed;
     max_label; speed_level;
-    show_errors; json; verbose; log_dir }
+    show_errors; json; verbose; test_dir }
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
@@ -159,10 +159,10 @@ let string_of_channel ic =
 
 let short_string_of_path (Path (n, i)) = sp "%s.%03d" n i
 let file_of_path path ext = sp "%s.%s" (short_string_of_path path) ext
-let output_file t path = Filename.concat t.log_dir (file_of_path path "output")
+let output_file t path = Filename.concat t.test_dir (file_of_path path "output")
 
 let prepare t =
-  if not (Sys.file_exists t.log_dir) then Unix.mkdir t.log_dir 0o755
+  if not (Sys.file_exists t.test_dir) then Unix.mkdir t.test_dir 0o755
 
 let string_of_path t (Path (n, i)) =
   sp "%s%3d" (left (sp "%s" (blue_s n)) (t.max_label+8)) i
@@ -350,8 +350,9 @@ let show_result t result =
       | 0 -> green "Test Successful"
       | n -> red_s (sp "%d error%s!" n (s n))
     in
-    Printf.printf "%s in %.3fs. %d test%s run.\n%!"
-      msg result.time result.success (s result.success)
+    Printf.printf "The full test results are available in `%s`.\n\
+                   %s in %.3fs. %d test%s run.\n%!"
+      t.test_dir msg result.time result.success (s result.success)
 
 let result t test =
   prepare t;
@@ -413,11 +414,11 @@ let bool_of_env name =
     | _ -> true
   with Not_found -> false
 
-let apply fn t log_dir verbose show_errors quick json =
+let apply fn t test_dir verbose show_errors quick json =
   let show_errors = show_errors || bool_of_env "ALCOTEST_SHOW_ERRORS" in
   let speed_level = if quick then `Quick else `Slow in
   if json then quiet := false;
-  let t = { t with verbose; log_dir; json; show_errors; speed_level } in
+  let t = { t with verbose; test_dir; json; show_errors; speed_level } in
   fn t
 
 let run_registred_tests t =
