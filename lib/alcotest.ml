@@ -98,10 +98,12 @@ let red    fmt = sp ("\027[31m"^^fmt^^"\027[m")
 let green  fmt = sp ("\027[32m"^^fmt^^"\027[m")
 let yellow fmt = sp ("\027[33m"^^fmt^^"\027[m")
 let blue   fmt = sp ("\027[36m"^^fmt^^"\027[m")
+let bold   fmt = sp ("\027[1m"^^fmt^^"\027[m")
 
 let red_s    = red "%s"
 let yellow_s = yellow "%s"
 let blue_s   = blue "%s"
+let bold_s   = bold "%s"
 
 let with_process_in cmd f =
   let ic = Unix.open_process_in cmd in
@@ -483,7 +485,7 @@ let list_cmd t =
   Term.info "list" ~doc
 
 let run ?(and_exit = true) name (tl:test list) =
-  Printf.printf "Testing %s" name;
+  Printf.printf "Testing %s.\n" (bold_s name);
   let t = empty () in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
   match Term.eval_choice (default_cmd t) [list_cmd t; test_cmd t] with
