@@ -1,3 +1,12 @@
+### 0.4.9 (2014-02-25)
+
+* Add `Alcotest.pass` a testable combinator which always pass (#50, @seliopou)
+* Fix `index out of bounds` for empty test doc string (#51, @dariusf)
+* Display the log directory (@samoht)
+* Add missing newline in dispay header (#53, #54, @samoht)
+* Add a `--color` flag to tweak color usage on the command-line and use `Fmt`
+  (#52, #55, @samoht)
+
 ### 0.4.8 (2016-03-12)
 
 * Fix `check_raises` (#48, by @yallop)
