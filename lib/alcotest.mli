@@ -37,11 +37,6 @@ val run: ?and_exit:bool -> string -> test list -> unit
     [1] if there is an issue. If [and_exit] is [false], then the
     function raises [Test_error] on error. *)
 
-(** {2 Display} *)
-
-val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit
-(** Draw a line on the given channel *)
-
 (** {2 Assert functions} *)
 
 module type TESTABLE = sig

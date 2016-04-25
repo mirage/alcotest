@@ -1,4 +1,4 @@
-PKG oUnit cmdliner astring bytes result
+PKG oUnit cmdliner astring bytes result fmt
 
 S lib/**
 B _build/**

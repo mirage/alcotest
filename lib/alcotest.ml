@@ -18,8 +18,6 @@ open Astring
 
 exception Check_error of string
 
-let sp = Printf.sprintf
-
 (* Types *)
 type speed_level = [`Quick | `Slow]
 
@@ -92,19 +90,6 @@ let compare_speed_level s1 s2 =
   | `Quick, _      -> 1
   | _     , `Quick -> -1
 
-(* Printers *)
-
-let red    fmt = sp ("\027[31m"^^fmt^^"\027[m")
-let green  fmt = sp ("\027[32m"^^fmt^^"\027[m")
-let yellow fmt = sp ("\027[33m"^^fmt^^"\027[m")
-let blue   fmt = sp ("\027[36m"^^fmt^^"\027[m")
-let bold   fmt = sp ("\027[1m"^^fmt^^"\027[m")
-
-let red_s    = red "%s"
-let yellow_s = yellow "%s"
-let blue_s   = blue "%s"
-let bold_s   = bold "%s"
-
 let with_process_in cmd f =
   let ic = Unix.open_process_in cmd in
   try
@@ -130,19 +115,22 @@ let terminal_columns =
         (* default *)
         80
 
-let line oc ?color c =
-  let line = match color with
-    | Some `Blue   -> blue_s (String.v ~len:terminal_columns (fun _ -> c))
-    | Some `Yellow -> yellow_s (String.v ~len:terminal_columns (fun _ -> c))
-    | None         -> String.v ~len:terminal_columns (fun _ -> c) in
-  Printf.fprintf oc "%s\n%!" line
+let line ppf ?color c =
+  let line = String.v ~len:terminal_columns (fun _ -> c) in
+  match color with
+  | Some c -> Fmt.pf ppf "%a\n%!" Fmt.(styled c string)  line
+  | None   -> Fmt.pf ppf "%s\n%!"line
 
-let left s nb =
+let left nb pp ppf a =
+  let s = Fmt.to_to_string pp a in
   let nb = nb - String.length s in
-  if nb <= 0 then s
-  else s ^ String.v ~len:nb (fun _ -> ' ')
+  if nb <= 0 then pp ppf a
+  else (
+    pp ppf a;
+    Fmt.string ppf (String.v ~len:nb (fun _ -> ' '))
+  )
 
-let print t s = if not t.json then Printf.printf "%s%!" s
+let print t k = if not t.json then k Fmt.stdout
 
 let string_of_channel ic =
   let n = 32768 in
@@ -159,15 +147,26 @@ let string_of_channel ic =
   iter ic b s;
   Buffer.contents b
 
-let short_string_of_path (Path (n, i)) = sp "%s.%03d" n i
-let file_of_path path ext = sp "%s.%s" (short_string_of_path path) ext
+let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
+
+let file_of_path path ext =
+  Printf.sprintf "%s.%s" (short_string_of_path path) ext
+
 let output_file t path = Filename.concat t.test_dir (file_of_path path "output")
 
 let prepare t =
   if not (Sys.file_exists t.test_dir) then Unix.mkdir t.test_dir 0o755
 
-let string_of_path t (Path (n, i)) =
-  sp "%s%3d" (left (sp "%s" (blue_s n)) (t.max_label+8)) i
+let color c ppf fmt = Fmt.(styled c string) ppf fmt
+let red_s fmt = color `Red fmt
+let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
+let green_s fmt = color `Green fmt
+let yellow_s fmt = color `Yellow fmt
+let bold_s fmt = color `Bold fmt
+let cyan_s fmt = color `Cyan fmt
+
+let pp_path t ppf (Path (n, i)) =
+  Fmt.pf ppf "%a%3d" (left (t.max_label+8) cyan_s) n i
 
 let doc_of_path t path =
   match t.doc path with
@@ -180,7 +179,9 @@ let speed_of_path t path =
   | Some s -> s
 
 let print_info t p =
-  print t (sp "%s   %s" (string_of_path t p) (doc_of_path t p))
+  print t (fun ppf ->
+      Fmt.pf ppf "%a   %s" (pp_path t) p (doc_of_path t p)
+    )
 
 let left_c = 20
 
@@ -194,31 +195,42 @@ let error t path fmt =
       close_in file;
       output
   in
-  print t (left (red "[ERROR]") left_c);
+  print t (fun ppf -> red_s ppf "[ERROR]");
   print_info t path;
   Printf.kprintf (fun str ->
       let error =
-        sp "%s\n%s\n%s:\n%s\n%s\n"
-          (red "-- %s Failed --" (short_string_of_path path))
+        Fmt.strf "%s\n%s\n%s:\n%s\n%s\n"
+          (Fmt.(strf_like stdout) "-- %s Failed --" (short_string_of_path path))
           (doc_of_path t path)
           filename output str in
       t.errors <- error :: t.errors
     ) fmt
 
-let reset t = print t "\r"
-let newline t = print t "\n"
+let reset t = print t (fun ppf -> Fmt.string ppf "\r")
+let newline t = print t (fun ppf -> Fmt.string ppf "\n")
 
 let print_result t p = function
-  | `Ok            -> print t (left (green "[OK]") left_c); print_info t p
+  | `Ok            ->
+    print t (fun ppf -> left left_c green_s ppf "[OK]");
+    print_info t p
   | `Exn (p, n, s) -> error t p "[%s] %s" n s
   | `Error (p, s)  -> error t p "%s" s
-  | `Skip          -> print t (left (yellow "[SKIP]") left_c); print_info t p
-  | `Todo _        -> print t (left (yellow "[TODO]") left_c); print_info t p
+  | `Skip          ->
+    print t (fun ppf -> left left_c yellow_s ppf "[SKIP]");
+    print_info t p
+  | `Todo _        ->
+    print t (fun ppf -> left left_c yellow_s ppf "[TODO]");
+    print_info t p
 
 let print_event t = function
-  | `Start p       -> print t (left (yellow " ...") left_c); print_info t p;
-                      if t.verbose then newline t
-  | `Result (p, r) -> reset t; print_result t p r; newline t
+  | `Start p       ->
+    print t (fun ppf -> left left_c yellow_s ppf " ...");
+    print_info t p;
+    if t.verbose then newline t
+  | `Result (p, r) ->
+    reset t;
+    print_result t p r;
+    newline t
 
 let failure: run_result -> bool = function
   | `Ok
@@ -236,7 +248,7 @@ let has_run: run_result -> bool = function
 
 let bt () = match Printexc.get_backtrace () with "" -> "" | s  -> "\n" ^ s
 let exn path name err =
-  let err = sp "%s%s" err (bt ()) in
+  let err = Printf.sprintf "%s%s" err (bt ()) in
   `Exn (path, name, err)
 
 let protect_test path (f:run): rrun =
@@ -244,7 +256,7 @@ let protect_test path (f:run): rrun =
     try f (); `Ok
     with
     | Check_error err ->
-      let err = sp "Test error: %s%s" err (bt ()) in
+      let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
       `Error (path, err)
     | Failure f -> exn path "failure" f
     | Invalid_argument f -> exn path "invalid" f
@@ -332,7 +344,8 @@ type result = {
 
 (* Return the json for the api, dirty out, to avoid new dependencies *)
 let json_of_result r =
-  sp "{\"sucess\":%i,\"failures\":%i,\"time\":%f}" r.success r.failures r.time
+  Printf.sprintf "{\"sucess\":%i,\"failures\":%i,\"time\":%f}"
+    r.success r.failures r.time
 
 let s = function 0 | 1 -> "" | _ -> "s"
 
@@ -348,13 +361,13 @@ let show_result t result =
   | true  -> Printf.printf "%s\n" (json_of_result result)
   | false ->
     display_errors ();
-    let msg = match result.failures with
-      | 0 -> green "Test Successful"
-      | n -> red_s (sp "%d error%s!" n (s n))
+    let msg ppf () = match result.failures with
+      | 0 -> green_s ppf "Test Successful"
+      | n -> red     ppf "%d error%s!" n (s n)
     in
-    Printf.printf "The full test results are available in `%s`.\n\
-                   %s in %.3fs. %d test%s run.\n%!"
-      t.test_dir msg result.time result.success (s result.success)
+    Fmt.(pf stdout) "The full test results are available in `%s`.\n\
+                     %a in %.3fs. %d test%s run.\n%!"
+      t.test_dir msg () result.time result.success (s result.success)
 
 let result t test =
   prepare t;
@@ -367,10 +380,10 @@ let result t test =
   let failures = List.filter failure results in
   { time; success; failures = List.length failures }
 
-let list_tests t =
+let list_tests t () =
   let paths = List.sort Pervasives.compare t.paths in
   List.iter (fun path ->
-      Printf.printf "%s    %s\n" (string_of_path t path) (doc_of_path t path)
+      Fmt.(pf stdout) "%a    %s\n" (pp_path t) path (doc_of_path t path)
     ) paths;
   0
 
@@ -381,7 +394,7 @@ let err_ascii s =
     Printf.sprintf
       "%S is not a valid test label (it should be an ASCII string), skipping." s
   in
-  Printf.eprintf "%s %s\n%!" (red_s "Error:") err
+  Fmt.(pf stderr) "%a %s\n%!" red "Error:" err
 
 let register t name (ts:test_case list) =
   if not (is_ascii name) then (err_ascii name; t)
@@ -423,15 +436,16 @@ let apply fn t test_dir verbose show_errors quick json =
   let t = { t with verbose; test_dir; json; show_errors; speed_level } in
   fn t
 
-let run_registred_tests t =
+let run_registred_tests t () =
   let result = result t t.tests in
   show_result t result;
   result.failures
 
-let run_subtest t labels =
+let run_subtest t labels () =
   let is_empty = filter_tests ~subst:false labels t.tests = [] in
   if is_empty then (
-    Printf.printf "%s\n" (red "Invalid request!"); exit 1
+    Fmt.(pf stderr) "%a\n" red "Invalid request!";
+    exit 1
   ) else
     let tests = filter_tests ~subst:true labels t.tests in
     let result = result t tests in
@@ -465,9 +479,14 @@ let of_env t =
   Term.(pure (apply (fun t -> t) t)
         $ test_dir $ verbose $ show_errors $ quicktests $ json)
 
+let set_color style_renderer =
+  Fmt_tty.setup_std_outputs ?style_renderer ()
+
+let set_color = Term.(const set_color $ Fmt_cli.style_renderer ())
+
 let default_cmd t =
   let doc = "Run all the tests." in
-  Term.(pure run_registred_tests $ of_env t),
+  Term.(pure run_registred_tests $ of_env t $ set_color),
   Term.info t.name ~version:Alcotest_version.v ~doc
 
 let test_cmd t =
@@ -476,16 +495,16 @@ let test_cmd t =
     let doc = "The list of labels identifying a subsets of the tests to run" in
     Arg.(value & pos_all string [] & info [] ~doc ~docv:"LABEL")
   in
-  Term.(pure run_subtest $ of_env t $ label),
+  Term.(pure run_subtest $ of_env t $ label $ set_color),
   Term.info "test" ~doc
 
 let list_cmd t =
   let doc = "List all available tests." in
-  Term.(pure list_tests $ of_env t),
+  Term.(pure list_tests $ of_env t $ set_color),
   Term.info "list" ~doc
 
 let run ?(and_exit = true) name (tl:test list) =
-  Printf.printf "Testing %s.\n" (bold_s name);
+  Fmt.(pf stdout) "Testing %a.\n" bold_s name;
   let t = empty () in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
   match Term.eval_choice (default_cmd t) [list_cmd t; test_cmd t] with
@@ -612,9 +631,9 @@ let pass (type a) =
 let show_line msg =
   if !quiet then ()
   else (
-    line stderr ~color:`Yellow '-';
+    line Fmt.stderr ~color:`Yellow '-';
     Printf.eprintf "ASSERT %s\n" msg;
-    line stderr ~color:`Yellow '-';
+    line Fmt.stderr ~color:`Yellow '-';
   )
 
 let check_err fmt = Format.ksprintf (fun err -> raise (Check_error err)) fmt
