@@ -3,7 +3,7 @@
 * Add `Alcotest.pass` a testable combinator which always pass (#50, @seliopou)
 * Fix `index out of bounds` for empty test doc string (#51, @dariusf)
 * Display the log directory (@samoht)
-* Add missing newline in dispay header (#53, #54, @samoht)
+* Add missing newline in display header (#53, #54, @samoht)
 * Add a `--color` flag to tweak color usage on the command-line and use `Fmt`
   (#52, #55, @samoht)
 
