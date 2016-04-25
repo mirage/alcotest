@@ -98,3 +98,8 @@ val fail: string -> 'a
 
 val check_raises: string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
+
+(** {2 Display} *)
+
+val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit
+(** @@deprecated you should write your own line function. *)
