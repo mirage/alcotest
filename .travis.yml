@@ -4,3 +4,4 @@ script: bash -ex .travis-opam.sh
 env:
   - PACKAGE="alcotest" OCAML_VERSION=4.01
   - PACKAGE="alcotest" OCAML_VERSION=4.02
+  - PACKAGE="alcotest" OCAML_VERSION=4.03
