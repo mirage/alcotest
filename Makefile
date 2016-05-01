@@ -1,6 +1,7 @@
 VERSION = $(shell git describe --match 'v[0-9]*' --dirty='.m' --always)
 VFILE   = lib/alcotest_version.ml
 PREFIX ?= $(shell opam config var prefix)
+OCAMLV  = $(shell ocamlc -version | cut -d '.' -f 1-2)
 
 SETUP = ocaml setup.ml
 
@@ -15,6 +16,13 @@ setup.ml: _oasis
 	oasis setup
 	echo 'true: debug, bin_annot' >> _tags
 	echo 'true: warn_error(+1..49), warn(A-4-41-44)' >> _tags
+	if [ $(OCAMLV) = '4.03' ]; then \
+		cd examples ; \
+		cat simple.ml | sed -e 's/Char.uppercase /Char.uppercase_ascii /g' > simple.ml.tmp ; \
+		mv simple.ml.tmp simple.ml ; \
+		cat bad.ml | sed -e 's/String.uppercase /String.uppercase_ascii /g' > bad.ml.tmp ; \
+		mv bad.ml.tmp bad.ml ; \
+	fi
 #	echo 'Ocamlbuild_plugin.mark_tag_used "tests"' >> myocamlbuild.ml
 
 doc: setup.data build
