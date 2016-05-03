@@ -14,7 +14,7 @@ setup.ml: _oasis
 	rm -f _tags myocamlbuild.ml
 	oasis setup
 	echo 'true: debug, bin_annot' >> _tags
-	echo 'true: warn_error(+1..49), warn(A-4-41-44)' >> _tags
+	echo 'true: warn_error(+1-2-4..49), warn(A-4-41-44)' >> _tags
 #	echo 'Ocamlbuild_plugin.mark_tag_used "tests"' >> myocamlbuild.ml
 
 doc: setup.data build
