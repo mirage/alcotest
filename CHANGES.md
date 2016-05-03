@@ -1,4 +1,8 @@
-### 0.4.9 (2014-02-25)
+### 0.4.10 (2016-05-03)
+
+* Fix support for 4.03 (#58, by @hannesm)
+
+### 0.4.9 (2016-02-25)
 
 * Add `Alcotest.pass` a testable combinator which always pass (#50, @seliopou)
 * Fix `index out of bounds` for empty test doc string (#51, @dariusf)
