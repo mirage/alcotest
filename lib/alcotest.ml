@@ -195,7 +195,7 @@ let error t path fmt =
       close_in file;
       output
   in
-  print t (fun ppf -> red_s ppf "[ERROR]");
+  print t (fun ppf -> left left_c red_s ppf "[ERROR]");
   print_info t path;
   Printf.kprintf (fun str ->
       let error =
