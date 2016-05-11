@@ -1,3 +1,7 @@
+### 0.4.11 (2016-05-11)
+
+* Fix regression introduced in 0.4.8 about alignment of [ERROR] (#60, @samoht)
+
 ### 0.4.10 (2016-05-03)
 
 * Fix support for 4.03 (#58, by @hannesm)
