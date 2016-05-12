@@ -30,7 +30,7 @@ For more information, please refer to <http://unlicense.org/>
 
 (* A module with functions to test *)
 module To_test = struct
-  let capit letter = Char.uppercase letter
+  let capit letter = Astring.Char.Ascii.uppercase letter
   let plus int_list = List.fold_left (fun a b -> a + b) 0 int_list
 end
 
