@@ -35,7 +35,9 @@ val run: ?and_exit:bool -> ?argv:string array -> string -> test list -> unit
     happens when the function ends. By default, [and_exit] is set,
     which makes the function exit with [0] if everything is fine or
     [1] if there is an issue. If [and_exit] is [false], then the
-    function raises [Test_error] on error. *)
+    function raises [Test_error] on error. The optional argument
+    [argv] specify the argument send to alcotest like ["--json"],
+    ["--verbose"], etc. (require at least one argument).*)
 
 (** {2 Assert functions} *)
 
