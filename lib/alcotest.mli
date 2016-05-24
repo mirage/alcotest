@@ -29,7 +29,7 @@ type test = string * test_case list
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
 
-val run: ?and_exit:bool -> string -> test list -> unit
+val run: ?and_exit:bool -> ?argv:string array -> string -> test list -> unit
 (** [run n t] runs the test suite [t]. [n] is is the name of the
     tested library. The optional argument [and_exit] controls what
     happens when the function ends. By default, [and_exit] is set,
