@@ -628,6 +628,14 @@ let pass (type a) =
   end in
   (module M: TESTABLE with type t = M.t)
 
+let reject (type a) =
+  let module M = struct
+    type t = a
+    let pp fmt _ = Format.pp_print_string fmt "Alcotest.reject"
+    let equal _ _ = false
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let show_line msg =
   if !quiet then ()
   else (
