@@ -26,7 +26,7 @@ For more information, please refer to <http://unlicense.org/>
 *)
 
 (* Build with
- * ocamlbuild -pkg alcotest to_test.byte *)
+ * ocamlbuild -pkg alcotest simple.byte *)
 
 (* A module with functions to test *)
 module To_test = struct
