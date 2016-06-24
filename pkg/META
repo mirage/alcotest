@@ -1,0 +1,7 @@
+description = "A lightweight and colourful test framework"
+version = "%%VERSION%%"
+requires = "cmdliner bytes unix result astring fmt fmt.cli fmt.tty"
+archive(byte) = "alcotest.cma"
+archive(native) = "alcotest.cmxa"
+plugin(byte) = "alcotest.cma"
+plugin(native) = "alcotest.cmxs"
