@@ -503,11 +503,11 @@ let list_cmd t =
   Term.(pure list_tests $ of_env t $ set_color),
   Term.info "list" ~doc
 
-let run ?(and_exit = true) name (tl:test list) =
+let run ?(and_exit = true) ?argv name (tl:test list) =
   Fmt.(pf stdout) "Testing %a.\n" bold_s name;
   let t = empty () in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
-  match Term.eval_choice (default_cmd t) [list_cmd t; test_cmd t] with
+  match Term.eval_choice ?argv (default_cmd t) [list_cmd t; test_cmd t] with
   | `Ok 0    -> if and_exit then exit 0 else ()
   | `Error _ -> if and_exit then exit 1 else raise Test_error
   | `Ok i    -> if and_exit then exit i else raise Test_error

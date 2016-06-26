@@ -29,13 +29,15 @@ type test = string * test_case list
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
 
-val run: ?and_exit:bool -> string -> test list -> unit
+val run: ?and_exit:bool -> ?argv:string array -> string -> test list -> unit
 (** [run n t] runs the test suite [t]. [n] is is the name of the
     tested library. The optional argument [and_exit] controls what
     happens when the function ends. By default, [and_exit] is set,
     which makes the function exit with [0] if everything is fine or
     [1] if there is an issue. If [and_exit] is [false], then the
-    function raises [Test_error] on error. *)
+    function raises [Test_error] on error. The optional argument
+    [argv] specify the argument send to alcotest like ["--json"],
+    ["--verbose"], etc. (require at least one argument).*)
 
 (** {2 Assert functions} *)
 
