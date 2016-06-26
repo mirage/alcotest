@@ -90,6 +90,9 @@ val of_pp: (Format.formatter -> 'a -> unit) -> 'a testable
 val pass: 'a testable
 (** [pass] tests values of any type and always succeeds. *)
 
+val reject: 'a testable
+(** [reject] tests values of any type and always fails. *)
+
 val check: 'a testable -> string -> 'a -> 'a -> unit
 (** Check that two values are equal. *)
 
