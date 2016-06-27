@@ -1,3 +1,8 @@
+### 0.4.12 (2016-06-13)
+
+* Fix typo in JSON output (#fxfactorial, #67)
+* Use Astring for the unit tests (#hannesm, #62)
+
 ### 0.4.11 (2016-05-11)
 
 * Fix regression introduced in 0.4.8 about alignment of [ERROR] (#60, @samoht)

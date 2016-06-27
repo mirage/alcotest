@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2013 Thomas Gazagnaire <thomas@gazagnaire.org>
+ * Copyright (c) 2013-2016 Thomas Gazagnaire <thomas@gazagnaire.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -141,7 +141,7 @@ let string_of_channel ic =
       try input ic s 0 n
       with End_of_file -> 0 in
     if nread > 0 then (
-      Buffer.add_substring b s 0 nread;
+      Buffer.add_substring b (Bytes.unsafe_to_string s) 0 nread;
       iter ic b s
     ) in
   iter ic b s;
@@ -487,7 +487,7 @@ let set_color = Term.(const set_color $ Fmt_cli.style_renderer ())
 let default_cmd t =
   let doc = "Run all the tests." in
   Term.(pure run_registred_tests $ of_env t $ set_color),
-  Term.info t.name ~version:Alcotest_version.v ~doc
+  Term.info t.name ~version:"%%VERSION%%" ~doc
 
 let test_cmd t =
   let doc = "Run a given test." in

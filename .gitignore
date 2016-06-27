@@ -1,10 +1,8 @@
-setup.data
-setup.log
-.*.swp
-_build/
+_build
 *~
-lib/alcotest_version.ml
-_tests
-*.byte
+\.\#*
+\#*#
 *.native
-*.docdir
+*.byte
+*.install
+_tests/

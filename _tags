@@ -1,0 +1,8 @@
+true : bin_annot, safe_string, package(bytes)
+true: warn_error(+1..49), warn(A-4-41-44)
+
+<src> : include
+<examples>: include
+
+true: package(fmt), package(astring), package(result), package(cmdliner)
+true: package(fmt.cli), package(fmt.tty)
