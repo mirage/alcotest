@@ -1,4 +1,4 @@
-### 0.4.12 (2016-06-27)
+### 0.5.0 (2016-06-27)
 
 * Use `topkg` (#68, @samoht)
 * Add `Alcotest.reject` to always fail tests (#64, @talex5)
