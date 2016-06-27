@@ -14,7 +14,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** A lightweight and colourful test framework. *)
+(** A lightweight and colourful test framework.
+
+    {e Release %%VERSION%%} *)
 
 type speed_level = [`Quick | `Slow]
 (** Speed level for a test. *)
