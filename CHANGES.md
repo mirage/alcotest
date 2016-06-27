@@ -4,7 +4,7 @@
 * Add `Alcotest.reject` to always fail tests (#64, @talex5)
 * Fix pretty-printing of `Alcotest.list` (#53, #65, @talex5)
 * Add an `argv` optional argument to `run` to use custom command-line arguments
-  (#63, @dinasaure)
+  (#63, @dinosaure)
 * Fix typo in JSON output (#67, @fxfactorial)
 * Use `Astring` for the unit tests (#62, @hannesm)
 
