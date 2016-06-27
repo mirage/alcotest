@@ -16,7 +16,18 @@
 
 (** A lightweight and colourful test framework.
 
-    {e Release %%VERSION%%} *)
+    [Alcotest] provides a simple interface to perform unit tests. It
+    exposes a simple {{!TESTABLE}TESTABLE} module type, a
+    {{!check}check function} to assert test predicates and a
+    {{!run}run} function to perform a list of [unit -> unit] test
+    callbacks.
+
+    From these descriptions, [Alcotest] builds a quiet and colorful
+    output where only faulty runs are fully displayed at the end of
+    the run (with the full logs ready to inspect), with a simple (yet
+    expressive) query language to select the tests to run.
+
+    {e Release %%VERSION%% } *)
 
 type speed_level = [`Quick | `Slow]
 (** Speed level for a test. *)
@@ -41,8 +52,10 @@ val run: ?and_exit:bool -> ?argv:string array -> string -> test list -> unit
     [argv] specifies the argument sent to alcotest like ["--json"],
     ["--verbose"], etc. (at least one argument is required).*)
 
-(** {2 Assert functions} *)
+(** {1 Assert functions} *)
 
+(** [TESTABLE] provides an abstract description for testable
+    values. *)
 module type TESTABLE = sig
 
   type t
@@ -106,7 +119,16 @@ val fail: string -> 'a
 val check_raises: string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
 
-(** {2 Display} *)
+(** {1 Deprecated} *)
 
 val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit
-(** @@deprecated you should write your own line function. *)
+(** @deprecated
+    You should write your own line function. For instance:
+{[
+let line ppf ?color c =
+  let line = String.v ~len:terminal_columns (fun _ -> c) in
+  match color with
+  | Some c -> Fmt.pf ppf "%a\n%!" Fmt.(styled c string)  line
+  | None   -> Fmt.pf ppf "%s\n%!"line
+]}
+*)
