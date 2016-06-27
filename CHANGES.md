@@ -1,7 +1,12 @@
 ### 0.4.12 (2016-06-13)
 
-* Fix typo in JSON output (#fxfactorial, #67)
-* Use Astring for the unit tests (#hannesm, #62)
+* Use `topkg` (#68, @samoht)
+* Add `Alcotest.reject` to always fail tests (#64, @talex5)
+* Fix pretty-printing of `Alcotest.list` (#53, #65, @talex5)
+* Add an `argv` optional argument to `run` to use custom command-line arguments
+  (#63, @dinasaure)
+* Fix typo in JSON output (#67, @fxfactorial)
+* Use `Astring` for the unit tests (#62, @hannesm)
 
 ### 0.4.11 (2016-05-11)
 
