@@ -2,7 +2,7 @@
 <html>
 <head>
 <link rel="stylesheet" href="style.css" type="text/css">
-<meta content="text/html; charset=iso-8859-1" http-equiv="Content-Type">
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type">
 <link rel="Start" href="index.html">
 <link rel="Up" href="index.html">
 <link title="Index of types" rel=Appendix href="index_types.html">
@@ -10,8 +10,8 @@
 <link title="Index of values" rel=Appendix href="index_values.html">
 <link title="Index of modules" rel=Appendix href="index_modules.html">
 <link title="Index of module types" rel=Appendix href="index_module_types.html">
-<link title="Alcotest" rel="Chapter" href="Alcotest.html"><link title="Display" rel="Section" href="#2_Display">
-<link title="Assert functions" rel="Section" href="#2_Assertfunctions">
+<link title="Alcotest" rel="Chapter" href="Alcotest.html"><link title="Assert functions" rel="Section" href="#2_Assertfunctions">
+<link title="Display" rel="Section" href="#2_Display">
 <title>Alcotest</title>
 </head>
 <body>
@@ -19,7 +19,7 @@
 &nbsp;</div>
 <h1>Module <a href="type_Alcotest.html">Alcotest</a></h1>
 
-<pre><span class="keyword">module</span> Alcotest: <code class="code">sig</code> <a href="Alcotest.html">..</a> <code class="code">end</code></pre><div class="info module top">
+<pre><span class="keyword">module</span> Alcotest: <code class="code"><span class="keyword">sig</span></code> <a href="Alcotest.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
 A lightweight and colourful test framework.<br>
 </div>
 <hr width="100%">
@@ -45,27 +45,23 @@ A test is an US-ASCII encoded name and a list of test cases.<br>
 
 <pre><span id="EXCEPTIONTest_error"><span class="keyword">exception</span> Test_error</span></pre>
 <div class="info ">
-The exception return by <a href="Alcotest.html#VALrun"><code class="code">Alcotest.run</code></a> in case of errors.<br>
+The exception return by <a href="Alcotest.html#VALrun"><code class="code"><span class="constructor">Alcotest</span>.run</code></a> in case of errors.<br>
 </div>
 
-<pre><span id="VALrun"><span class="keyword">val</span> run</span> : <code class="type">?and_exit:bool -> string -> <a href="Alcotest.html#TYPEtest">test</a> list -> unit</code></pre><div class="info ">
+<pre><span id="VALrun"><span class="keyword">val</span> run</span> : <code class="type">?and_exit:bool -> ?argv:string array -> string -> <a href="Alcotest.html#TYPEtest">test</a> list -> unit</code></pre><div class="info ">
 <code class="code">run n t</code> runs the test suite <code class="code">t</code>. <code class="code">n</code> is is the name of the
     tested library. The optional argument <code class="code">and_exit</code> controls what
     happens when the function ends. By default, <code class="code">and_exit</code> is set,
     which makes the function exit with <code class="code">0</code> if everything is fine or
-    <code class="code">1</code> if there is an issue. If <code class="code">and_exit</code> is <code class="code">false</code>, then the
-    function raises <code class="code">Test_error</code> on error.<br>
-</div>
-<br>
-<h2 id="2_Display">Display</h2><br>
-
-<pre><span id="VALline"><span class="keyword">val</span> line</span> : <code class="type">Pervasives.out_channel -> ?color:[ `Blue | `Yellow ] -> char -> unit</code></pre><div class="info ">
-Draw a line on the given channel<br>
+    <code class="code">1</code> if there is an issue. If <code class="code">and_exit</code> is <code class="code"><span class="keyword">false</span></code>, then the
+    function raises <code class="code"><span class="constructor">Test_error</span></code> on error. The optional argument
+    <code class="code">argv</code> specifies the argument sent to alcotest like <code class="code"><span class="string">"--json"</span></code>,
+    <code class="code"><span class="string">"--verbose"</span></code>, etc. (at least one argument is required).<br>
 </div>
 <br>
 <h2 id="2_Assertfunctions">Assert functions</h2><br>
 
-<pre><span class="keyword">module type</span> <a href="Alcotest.TESTABLE.html">TESTABLE</a> = <code class="code">sig</code> <a href="Alcotest.TESTABLE.html">..</a> <code class="code">end</code></pre>
+<pre><span class="keyword">module type</span> <a href="Alcotest.TESTABLE.html">TESTABLE</a> = <code class="code"><span class="keyword">sig</span></code> <a href="Alcotest.TESTABLE.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
 <pre><span id="TYPEtestable"><span class="keyword">type</span> <code class="type">'a</code> testable</span> = <code class="type">(module Alcotest.TESTABLE with type t = 'a)</code> </pre>
 <div class="info ">
 The type for testable values.<br>
@@ -111,7 +107,15 @@ The type for testable values.<br>
 
 <pre><span id="VALof_pp"><span class="keyword">val</span> of_pp</span> : <code class="type">(Format.formatter -> 'a -> unit) -> 'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
 <code class="code">of_pp pp</code> tests values which can be printed using <code class="code">pp</code> and
-    compared using <code class="code">Pervasives.compare</code><br>
+    compared using <code class="code"><span class="constructor">Pervasives</span>.compare</code><br>
+</div>
+
+<pre><span id="VALpass"><span class="keyword">val</span> pass</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">pass</code> tests values of any type and always succeeds.<br>
+</div>
+
+<pre><span id="VALreject"><span class="keyword">val</span> reject</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">reject</code> tests values of any type and always fails.<br>
 </div>
 
 <pre><span id="VALcheck"><span class="keyword">val</span> check</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> string -> 'a -> 'a -> unit</code></pre><div class="info ">
@@ -124,5 +128,12 @@ Simply fail.<br>
 
 <pre><span id="VALcheck_raises"><span class="keyword">val</span> check_raises</span> : <code class="type">string -> exn -> (unit -> unit) -> unit</code></pre><div class="info ">
 Check that an exception is raised.<br>
+</div>
+<br>
+<h2 id="2_Display">Display</h2><br>
+
+<pre><span id="VALline"><span class="keyword">val</span> line</span> : <code class="type">Pervasives.out_channel -> ?color:[ `Blue | `Yellow ] -> char -> unit</code></pre><div class="info ">
+<span class="warning">Deprecated.</span>you should write your own line function.<br>
+@<br>
 </div>
 </body></html>
