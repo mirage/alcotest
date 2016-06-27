@@ -5,7 +5,7 @@ homepage:    "https://github.com/mirage/alcotest/"
 dev-repo:    "https://github.com/mirage/alcotest.git"
 bug-reports: "https://github.com/mirage/alcotest/issues/"
 license:     "ISC"
-doc:         "https://samoht.github.io/alcotest"
+doc:         "https://mirage.github.io/alcotest/"
 
 build: ["ocaml" "pkg/pkg.ml" "build" "--pinned" pinned]
 build-test: [
