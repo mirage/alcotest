@@ -10,8 +10,8 @@
 <link title="Index of values" rel=Appendix href="index_values.html">
 <link title="Index of modules" rel=Appendix href="index_modules.html">
 <link title="Index of module types" rel=Appendix href="index_module_types.html">
-<link title="Alcotest" rel="Chapter" href="Alcotest.html"><link title="Assert functions" rel="Section" href="#2_Assertfunctions">
-<link title="Display" rel="Section" href="#2_Display">
+<link title="Alcotest" rel="Chapter" href="Alcotest.html"><link title="Assert functions" rel="Section" href="#1_Assertfunctions">
+<link title="Deprecated" rel="Section" href="#1_Deprecated">
 <title>Alcotest</title>
 </head>
 <body>
@@ -20,7 +20,23 @@
 <h1>Module <a href="type_Alcotest.html">Alcotest</a></h1>
 
 <pre><span class="keyword">module</span> Alcotest: <code class="code"><span class="keyword">sig</span></code> <a href="Alcotest.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info module top">
-A lightweight and colourful test framework.<br>
+A lightweight and colourful test framework.
+<p>
+
+    <code class="code"><span class="constructor">Alcotest</span></code> provides a simple interface to perform unit tests. It
+    exposes a simple <a href="Alcotest.TESTABLE.html">TESTABLE</a> module type, a
+    <a href="Alcotest.html#VALcheck">check function</a> to assert test predicates and a
+    <a href="Alcotest.html#VALrun">run</a> function to perform a list of <code class="code">unit <span class="keywordsign">-&gt;</span> unit</code> test
+    callbacks.
+<p>
+
+    From these descriptions, <code class="code"><span class="constructor">Alcotest</span></code> builds a quiet and colorful
+    output where only faulty runs are fully displayed at the end of
+    the run (with the full logs ready to inspect), with a simple (yet
+    expressive) query language to select the tests to run.
+<p>
+
+    <em>Release 0.6.0 </em><br>
 </div>
 <hr width="100%">
 
@@ -59,9 +75,13 @@ The exception return by <a href="Alcotest.html#VALrun"><code class="code"><span 
     <code class="code"><span class="string">"--verbose"</span></code>, etc. (at least one argument is required).<br>
 </div>
 <br>
-<h2 id="2_Assertfunctions">Assert functions</h2><br>
+<h1 id="1_Assertfunctions">Assert functions</h1><br>
 
-<pre><span class="keyword">module type</span> <a href="Alcotest.TESTABLE.html">TESTABLE</a> = <code class="code"><span class="keyword">sig</span></code> <a href="Alcotest.TESTABLE.html">..</a> <code class="code"><span class="keyword">end</span></code></pre>
+<pre><span class="keyword">module type</span> <a href="Alcotest.TESTABLE.html">TESTABLE</a> = <code class="code"><span class="keyword">sig</span></code> <a href="Alcotest.TESTABLE.html">..</a> <code class="code"><span class="keyword">end</span></code></pre><div class="info">
+<code class="code"><span class="constructor">TESTABLE</span></code> provides an abstract description for testable
+    values.
+</div>
+
 <pre><span id="TYPEtestable"><span class="keyword">type</span> <code class="type">'a</code> testable</span> = <code class="type">(module Alcotest.TESTABLE with type t = 'a)</code> </pre>
 <div class="info ">
 The type for testable values.<br>
@@ -74,6 +94,18 @@ The type for testable values.<br>
 
 <pre><span id="VALint"><span class="keyword">val</span> int</span> : <code class="type">int <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
 <code class="code">int</code> tests integers.<br>
+</div>
+
+<pre><span id="VALint32"><span class="keyword">val</span> int32</span> : <code class="type">int32 <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">int32</code> tests 32-bit integers.<br>
+</div>
+
+<pre><span id="VALint64"><span class="keyword">val</span> int64</span> : <code class="type">int64 <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">int64</code> tests 64-bit integers.<br>
+</div>
+
+<pre><span id="VALfloat"><span class="keyword">val</span> float</span> : <code class="type">float <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">float</code> tests floats.<br>
 </div>
 
 <pre><span id="VALchar"><span class="keyword">val</span> char</span> : <code class="type">char <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
@@ -130,10 +162,15 @@ Simply fail.<br>
 Check that an exception is raised.<br>
 </div>
 <br>
-<h2 id="2_Display">Display</h2><br>
+<h1 id="1_Deprecated">Deprecated</h1><br>
 
 <pre><span id="VALline"><span class="keyword">val</span> line</span> : <code class="type">Pervasives.out_channel -> ?color:[ `Blue | `Yellow ] -> char -> unit</code></pre><div class="info ">
-<span class="warning">Deprecated.</span>you should write your own line function.<br>
-@<br>
+<span class="warning">Deprecated.</span>You should write your own line function. For instance:
+<pre class="codepre"><code class="code"><span class="keyword">let</span>&nbsp;line&nbsp;ppf&nbsp;?color&nbsp;c&nbsp;=
+&nbsp;&nbsp;<span class="keyword">let</span>&nbsp;line&nbsp;=&nbsp;<span class="constructor">String</span>.v&nbsp;~len:terminal_columns&nbsp;(<span class="keyword">fun</span>&nbsp;_&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;c)&nbsp;<span class="keyword">in</span>
+&nbsp;&nbsp;<span class="keyword">match</span>&nbsp;color&nbsp;<span class="keyword">with</span>
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">Some</span>&nbsp;c&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Fmt</span>.pf&nbsp;ppf&nbsp;<span class="string">"%a\n%!"</span>&nbsp;<span class="constructor">Fmt</span>.(styled&nbsp;c&nbsp;string)&nbsp;&nbsp;line
+&nbsp;&nbsp;<span class="keywordsign">|</span>&nbsp;<span class="constructor">None</span>&nbsp;&nbsp;&nbsp;<span class="keywordsign">-&gt;</span>&nbsp;<span class="constructor">Fmt</span>.pf&nbsp;ppf&nbsp;<span class="string">"%s\n%!"</span>line
+</code></pre><br>
 </div>
 </body></html>
