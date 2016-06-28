@@ -1,3 +1,7 @@
+### 0.6.0 (2016-06-28)
+
+- Add int32,int64,float testables (#71, @hcarty)
+
 ### 0.5.0 (2016-06-27)
 
 * Use `topkg` (#68, @samoht)
