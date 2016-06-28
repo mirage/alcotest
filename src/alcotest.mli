@@ -78,6 +78,15 @@ val bool: bool testable
 val int: int testable
 (** [int] tests integers. *)
 
+val int32: int32 testable
+(** [int32] tests 32-bit integers. *)
+
+val int64: int64 testable
+(** [int64] tests 64-bit integers. *)
+
+val float: float testable
+(** [float] tests floats. *)
+
 val char: char testable
 (** [char] tests characters. *)
 
