@@ -515,7 +515,7 @@ let run ?(and_exit = true) ?argv name (tl:test list) =
 
 module type TESTABLE = sig
   type t
-  val pp: Format.formatter -> t -> unit
+  val pp: t Fmt.t
   val equal: t -> t -> bool
 end
 
@@ -529,23 +529,19 @@ let testable (type a) (pp: a Fmt.t) (equal: a -> a -> bool) : a testable =
   let module M = struct type t = a let pp = pp let equal = equal end
   in (module M)
 
-let int32 =
-  let pp fmt i = Format.pp_print_string fmt (Int32.to_string i) in
-  testable pp (=)
+let int32 = testable Fmt.int32 (=)
 
-let int64 =
-  let pp fmt x = Format.pp_print_string fmt (Int64.to_string x) in
-  testable pp (=)
+let int64 = testable Fmt.int64 (=)
 
-let int = testable Format.pp_print_int (=)
+let int = testable Fmt.int (=)
 
-let float = testable Format.pp_print_float (=)
+let float = testable Fmt.float (=)
 
-let char = testable Format.pp_print_char (=)
+let char = testable Fmt.char (=)
 
-let string = testable Format.pp_print_string (=)
+let string = testable Fmt.string (=)
 
-let bool = testable Format.pp_print_bool (=)
+let bool = testable Fmt.bool (=)
 
 let list e =
   let rec eq l1 l2 = match (l1, l2) with
@@ -590,7 +586,7 @@ let of_pp pp = testable pp (=)
 let pass (type a) =
   let module M = struct
     type t = a
-    let pp fmt _ = Format.pp_print_string fmt "Alcotest.pass"
+    let pp fmt _ = Fmt.string fmt "Alcotest.pass"
     let equal _ _ = true
   end in
   (module M: TESTABLE with type t = M.t)
@@ -598,7 +594,7 @@ let pass (type a) =
 let reject (type a) =
   let module M = struct
     type t = a
-    let pp fmt _ = Format.pp_print_string fmt "Alcotest.reject"
+    let pp fmt _ = Fmt.string fmt "Alcotest.reject"
     let equal _ _ = false
   end in
   (module M: TESTABLE with type t = M.t)
@@ -613,15 +609,11 @@ let show_line msg =
 
 let check_err fmt = Format.ksprintf (fun err -> raise (Check_error err)) fmt
 
-let check (type a) (module T: TESTABLE with type t = a) msg x y =
+let check t msg x y =
   show_line msg;
-  if not (T.equal x y) then (
-    let buf = Buffer.create 20 in
-    let fmt = Format.formatter_of_buffer buf in
-    Format.fprintf fmt "Error %s: expecting %a, got %a." msg T.pp x T.pp y;
-    Format.pp_print_flush fmt ();
-    failwith (Buffer.contents buf)
-  )
+  if not (equal t x y) then
+    Fmt.strf "Error %s: expecting %a, got %a." msg (pp t) x (pp t) y
+    |> failwith
 
 let fail msg =
   show_line msg;
