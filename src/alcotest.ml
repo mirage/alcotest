@@ -521,133 +521,71 @@ end
 
 type 'a testable = (module TESTABLE with type t = 'a)
 
-let int =
-  let module M = struct
-    type t = int
-    let pp = Format.pp_print_int
-    let equal = (=)
-  end in
-  (module M: TESTABLE with type t = M.t)
+let pp (type a) (t: a testable) = let (module T) = t in T.pp
+
+let equal (type a) (t: a testable) = let (module T) = t in T.equal
+
+let testable (type a) (pp: a Fmt.t) (equal: a -> a -> bool) : a testable =
+  let module M = struct type t = a let pp = pp let equal = equal end
+  in (module M)
 
 let int32 =
-  let module M = struct
-    type t = int32
-    let pp fmt i = Format.pp_print_string fmt (Int32.to_string i)
-    let equal = ( = )
-  end in
-  (module M: TESTABLE with type t = M.t)
+  let pp fmt i = Format.pp_print_string fmt (Int32.to_string i) in
+  testable pp (=)
 
 let int64 =
-  let module M = struct
-    type t = int64
-    let pp fmt x = Format.pp_print_string fmt (Int64.to_string x)
-    let equal = ( = )
-  end in
-  (module M: TESTABLE with type t = M.t)
+  let pp fmt x = Format.pp_print_string fmt (Int64.to_string x) in
+  testable pp (=)
 
-let float =
-  let module M = struct
-    type t = float
-    let pp = Format.pp_print_float
-    let equal = ( = )
-  end in
-  (module M: TESTABLE with type t = M.t)
+let int = testable Format.pp_print_int (=)
 
-let char =
-  let module M = struct
-    type t = char
-    let pp = Format.pp_print_char
-    let equal = (=)
-  end in
-  (module M: TESTABLE with type t = M.t)
+let float = testable Format.pp_print_float (=)
 
-let string =
-  let module M = struct
-    type t = string
-    let pp = Format.pp_print_string
-    let equal = (=)
-  end in
-  (module M: TESTABLE with type t = M.t)
+let char = testable Format.pp_print_char (=)
 
-let bool =
-  let module M = struct
-    type t = bool
-    let pp = Format.pp_print_bool
-    let equal = (=)
-  end in
-  (module M: TESTABLE with type t = M.t)
+let string = testable Format.pp_print_string (=)
 
-let list (type a) elt =
-  let (module Elt: TESTABLE with type t = a) = elt in
-  let module M = struct
-    type t = a list
-    let pp = Fmt.Dump.list Elt.pp
-    let equal l1 l2 =
-      List.length l1 = List.length l2 && List.for_all2 (Elt.equal) l1 l2
-  end in
-  (module M: TESTABLE with type t = M.t)
+let bool = testable Format.pp_print_bool (=)
 
-let slist (type a) (a: a testable) compare: a list testable =
-  let module A = (val a) in
-  let module L = (val list a) in
-  (module struct
-    type t = A.t list
-    let equal x y = L.equal (List.sort compare x) (List.sort compare y)
-    let pp = L.pp
-  end)
+let list e =
+  let rec eq l1 l2 = match (l1, l2) with
+    | (x::xs, y::ys) -> equal e x y && eq xs ys
+    | ([], []) -> true
+    | _ -> false in
+  testable (Fmt.Dump.list (pp e)) eq
 
-let array (type a) elt =
-  let (module Elt: TESTABLE with type t = a) = elt in
-  let module M = struct
-    type t = a array
-    let pp = Fmt.Dump.array Elt.pp
-    let equal a1 a2 =
-      let (m, n) = Array.(length a1, length a2) in
-      let rec go i = i = m || (Elt.equal a1.(i) a2.(i) && go (i + 1)) in
-      m = n && go 0
-  end in
-  (module M: TESTABLE with type t = M.t)
+let slist (type a) (a : a testable) compare =
+  let l = list a in
+  let eq l1 l2 = equal l (List.sort compare l1) (List.sort compare l2) in
+  testable (pp l) eq
 
-let of_pp (type a) pp: a testable =
-  (module struct type t = a let equal = (=) let pp = pp end)
+let array e =
+  let eq a1 a2 =
+    let (m, n) = Array.(length a1, length a2) in
+    let rec go i = i = m || (equal e a1.(i) a2.(i) && go (i + 1)) in
+    m = n && go 0 in
+  testable (Fmt.Dump.array (pp e)) eq
 
-let pair (type a) (type b) (a:a testable) (b:b testable): (a * b) testable =
-  let module A = (val a) in
-  let module B = (val b) in
-  (module struct
-    type t = a * b
-    let equal (a1, b1) (a2, b2) = A.equal a1 a2 && B.equal b1 b2
-    let pp ppf (a, b) = A.pp ppf a; Format.pp_print_cut ppf (); B.pp ppf b
-  end)
+let pair a b =
+  let eq (a1, b1) (a2, b2) = equal a a1 a2 && equal b b1 b2 in
+  testable (Fmt.Dump.pair (pp a) (pp b)) eq
 
-let option (type a) elt =
-  let (module Elt: TESTABLE with type t = a) = elt in
-  let module M = struct
-    type t = a option
-    let pp fmt t = match t with
-      | None   -> Format.pp_print_string fmt "None"
-      | Some x -> Format.fprintf fmt "Some @[(%a)@]" Elt.pp x
-    let equal x y = match x, y with
-      | None  , None   -> true
-      | Some x, Some y -> Elt.equal x y
-      | _ -> false
-  end in
-  (module M: TESTABLE with type t = M.t)
+let option e =
+  let eq x y = match (x, y) with
+    | (Some a, Some b) -> equal e a b
+    | (None, None) -> true
+    | _ -> false in
+  testable (Fmt.Dump.option (pp e)) eq
 
-let result (type a) (type e) a e =
-  let (module A: TESTABLE with type t = a) = a in
-  let (module E: TESTABLE with type t = e) = e in
-  let module M = struct
-    type t = (a, e) Result.result
-    let pp fmt t = match t with
-      | Result.Ok    t -> Format.fprintf fmt "Ok @[(%a)@]" A.pp t
-      | Result.Error e -> Format.fprintf fmt "Error @[(%a)@]" E.pp e
-    let equal x y = match x, y with
-      | Result.Ok    x, Result.Ok    y -> A.equal x y
-      | Result.Error x, Result.Error y -> E.equal x y
-      | _             , _              -> false
-  end in
-  (module M: TESTABLE with type t = M.t)
+let result a e =
+  let eq x y = let open Result in
+    match (x, y) with
+    | (Ok x, Ok y) -> equal a x y
+    | (Error x, Error y) -> equal e x y
+    | _ -> false in
+  testable (Fmt.Dump.result ~ok:(pp a) ~error:(pp e)) eq
+
+let of_pp pp = testable pp (=)
 
 let pass (type a) =
   let module M = struct

@@ -72,6 +72,16 @@ end
 type 'a testable = (module TESTABLE with type t = 'a)
 (** The type for testable values. *)
 
+val testable : (Format.formatter -> 'a -> unit) -> ('a -> 'a -> bool) -> 'a testable
+(** [testable pp eq] is a new {!testable} with the pretty-printer [pp] and
+    equality [eq]. *)
+
+val pp : 'a testable -> Format.formatter -> 'a -> unit
+(** [pp t] is [t]'s pretty-printer. *)
+
+val equal : 'a testable -> 'a -> 'a -> bool
+(* [equal t] is [t]'s equality. *)
+
 val bool: bool testable
 (** [bool] tests booleans. *)
 
