@@ -596,6 +596,18 @@ let slist (type a) (a: a testable) compare: a list testable =
     let pp = L.pp
   end)
 
+let array (type a) elt =
+  let (module Elt: TESTABLE with type t = a) = elt in
+  let module M = struct
+    type t = a array
+    let pp = Fmt.Dump.array Elt.pp
+    let equal a1 a2 =
+      let (m, n) = Array.(length a1, length a2) in
+      let rec go i = i = m || (Elt.equal a1.(i) a2.(i) && go (i + 1)) in
+      m = n && go 0
+  end in
+  (module M: TESTABLE with type t = M.t)
+
 let of_pp (type a) pp: a testable =
   (module struct type t = a let equal = (=) let pp = pp end)
 
