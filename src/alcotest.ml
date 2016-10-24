@@ -154,8 +154,20 @@ let file_of_path path ext =
 
 let output_file t path = Filename.concat t.test_dir (file_of_path path "output")
 
+let mkdir_p path mode =
+  let rec mk parent = function
+  | [] -> ()
+  | name::names ->
+      let path = parent ^ "/" ^ name in
+      begin try if not (Sys.is_directory path) then
+        Fmt.strf "mkdir: %s: is a file" path |> failwith
+      with Sys_error _ -> Unix.mkdir path mode end;
+      mk path names in
+  match String.cuts ~empty:true ~sep:"/" path with
+  | ""::xs -> mk "/" xs | xs -> mk "." xs
+
 let prepare t =
-  if not (Sys.file_exists t.test_dir) then Unix.mkdir t.test_dir 0o755
+  if not (Sys.file_exists t.test_dir) then mkdir_p t.test_dir 0o755
 
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
 let red_s fmt = color `Red fmt
@@ -460,7 +472,7 @@ let json =
 
 let test_dir =
   let doc = "Where to store the log files of the tests." in
-  Arg.(value & opt string "_tests"  & info ["o"] ~docv:"DIR" ~doc)
+  Arg.(value & opt dir "_build/_tests"  & info ["o"] ~docv:"DIR" ~doc)
 
 let verbose =
   let doc = "Display the test outputs." in
