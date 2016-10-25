@@ -36,7 +36,7 @@ A lightweight and colourful test framework.
     expressive) query language to select the tests to run.
 <p>
 
-    <em>Release 0.6.0 </em><br>
+    <em>Release 0.7.0 </em><br>
 </div>
 <hr width="100%">
 
@@ -88,6 +88,16 @@ The type for testable values.<br>
 </div>
 
 
+<pre><span id="VALtestable"><span class="keyword">val</span> testable</span> : <code class="type">'a Fmt.t -> ('a -> 'a -> bool) -> 'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">testable pp eq</code> is a new <a href="Alcotest.html#VALtestable"><code class="code"><span class="constructor">Alcotest</span>.testable</code></a> with the pretty-printer <code class="code">pp</code> and
+    equality <code class="code">eq</code>.<br>
+</div>
+
+<pre><span id="VALpp"><span class="keyword">val</span> pp</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'a Fmt.t</code></pre><div class="info ">
+<code class="code">pp t</code> is <code class="code">t</code>'s pretty-printer.<br>
+</div>
+
+<pre><span id="VALequal"><span class="keyword">val</span> equal</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'a -> 'a -> bool</code></pre>
 <pre><span id="VALbool"><span class="keyword">val</span> bool</span> : <code class="type">bool <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
 <code class="code">bool</code> tests booleans.<br>
 </div>
@@ -125,6 +135,10 @@ The type for testable values.<br>
     using <code class="code">comp</code>.<br>
 </div>
 
+<pre><span id="VALarray"><span class="keyword">val</span> array</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'a array <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<code class="code">array t</code> tests arrays of <code class="code">t</code>s.<br>
+</div>
+
 <pre><span id="VALoption"><span class="keyword">val</span> option</span> : <code class="type">'a <a href="Alcotest.html#TYPEtestable">testable</a> -> 'a option <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
 <code class="code">option t</code> tests optional <code class="code">t</code>s.<br>
 </div>
@@ -137,7 +151,7 @@ The type for testable values.<br>
 <code class="code">pair a b</code> tests pairs of <code class="code">a</code>s and <code class="code">b</code>s.<br>
 </div>
 
-<pre><span id="VALof_pp"><span class="keyword">val</span> of_pp</span> : <code class="type">(Format.formatter -> 'a -> unit) -> 'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
+<pre><span id="VALof_pp"><span class="keyword">val</span> of_pp</span> : <code class="type">'a Fmt.t -> 'a <a href="Alcotest.html#TYPEtestable">testable</a></code></pre><div class="info ">
 <code class="code">of_pp pp</code> tests values which can be printed using <code class="code">pp</code> and
     compared using <code class="code"><span class="constructor">Pervasives</span>.compare</code><br>
 </div>
