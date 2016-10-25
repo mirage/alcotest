@@ -543,6 +543,8 @@ let string = testable Fmt.string (=)
 
 let bool = testable Fmt.bool (=)
 
+let unit = testable (Fmt.unit "()") (=)
+
 let list e =
   let rec eq l1 l2 = match (l1, l2) with
     | (x::xs, y::ys) -> equal e x y && eq xs ys
