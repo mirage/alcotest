@@ -543,6 +543,8 @@ let string = testable Fmt.string (=)
 
 let bool = testable Fmt.bool (=)
 
+let unit = testable (Fmt.unit "()") (=)
+
 let rresult_msg = testable Rresult.R.pp_msg (=)
 
 let list e =

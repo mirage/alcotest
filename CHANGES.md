@@ -1,3 +1,5 @@
+- Add a `unit` testable (useful for functions with side-effects)
+
 ### 0.7.0 (2016-10-25)
 
 - Add a `testable` combinator to easily build `'a testable` values (#75, @pqwy)
