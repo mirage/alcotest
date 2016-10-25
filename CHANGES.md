@@ -1,3 +1,10 @@
+### 0.7.0 (2016-10-25)
+
+- Add a `testable` combinator to easily build `'a testable` values (#75, @pqwy)
+- Add `pp` and `equal` to extract the pretty-printer and equality functions
+  from an `'a testable` (#75, @pqwy)
+- Add an `array` testable (#75, @pqwy)
+
 ### 0.6.0 (2016-06-28)
 
 - Add int32,int64,float testables (#71, @hcarty)
