@@ -529,17 +529,17 @@ let testable (type a) (pp: a Fmt.t) (equal: a -> a -> bool) : a testable =
   let module M = struct type t = a let pp = pp let equal = equal end
   in (module M)
 
-let int32 = testable Fmt.int32 (=)
+let int32 = testable Fmt.int32 Int32.equal
 
-let int64 = testable Fmt.int64 (=)
+let int64 = testable Fmt.int64 Int64.equal
 
 let int = testable Fmt.int (=)
 
 let float = testable Fmt.float (=)
 
-let char = testable Fmt.char (=)
+let char = testable Fmt.char Char.equal
 
-let string = testable Fmt.string (=)
+let string = testable Fmt.string String.equal
 
 let bool = testable Fmt.bool (=)
 
