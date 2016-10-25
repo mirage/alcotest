@@ -1,7 +1,6 @@
-- Add a `unit` testable (useful for functions with side-effects)
-
 ### 0.7.0 (2016-10-25)
 
+- Add a `unit` testable (useful for functions with side-effects) (#79, @avsm)
 - Add a `testable` combinator to easily build `'a testable` values (#75, @pqwy)
 - Add `pp` and `equal` to extract the pretty-printer and equality functions
   from an `'a testable` (#75, @pqwy)
