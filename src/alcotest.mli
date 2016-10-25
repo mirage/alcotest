@@ -103,6 +103,9 @@ val char: char testable
 val string: string testable
 (** [string] tests OCaml strings. *)
 
+val unit: unit testable
+(** [unit] tests unit values (useful for functions with side-effects). *)
+
 val list: 'a testable -> 'a list testable
 (** [list t] tests lists of [t]s. *)
 
