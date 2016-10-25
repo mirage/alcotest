@@ -61,7 +61,7 @@ module type TESTABLE = sig
   type t
   (** The type to test. *)
 
-  val pp: Format.formatter -> t -> unit
+  val pp: t Fmt.t
   (** A way to pretty-print the value. *)
 
   val equal: t -> t -> bool
@@ -71,6 +71,16 @@ end
 
 type 'a testable = (module TESTABLE with type t = 'a)
 (** The type for testable values. *)
+
+val testable : 'a Fmt.t -> ('a -> 'a -> bool) -> 'a testable
+(** [testable pp eq] is a new {!testable} with the pretty-printer [pp] and
+    equality [eq]. *)
+
+val pp : 'a testable -> 'a Fmt.t
+(** [pp t] is [t]'s pretty-printer. *)
+
+val equal : 'a testable -> 'a -> 'a -> bool
+(* [equal t] is [t]'s equality. *)
 
 val bool: bool testable
 (** [bool] tests booleans. *)
@@ -100,6 +110,9 @@ val slist: 'a testable -> ('a -> 'a -> int) -> 'a list testable
 (** [slist t comp] tests sorted lists of [t]s. The list are sorted
     using [comp]. *)
 
+val array : 'a testable -> 'a array testable
+(** [array t] tests arrays of [t]s. *)
+
 val option: 'a testable -> 'a option testable
 (** [option t] tests optional [t]s. *)
 
@@ -109,7 +122,7 @@ val result : 'a testable -> 'e testable -> ('a, 'e) Result.result testable
 val pair: 'a testable -> 'b testable -> ('a * 'b) testable
 (** [pair a b] tests pairs of [a]s and [b]s. *)
 
-val of_pp: (Format.formatter -> 'a -> unit) -> 'a testable
+val of_pp: 'a Fmt.t -> 'a testable
 (** [of_pp pp] tests values which can be printed using [pp] and
     compared using {!Pervasives.compare} *)
 
