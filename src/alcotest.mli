@@ -122,6 +122,11 @@ val option: 'a testable -> 'a option testable
 val result : 'a testable -> 'e testable -> ('a, 'e) Result.result testable
 (** [result t e] tests [t]s on success and [e]s on failure. *)
 
+val rresult_msg : Rresult.R.msg testable
+(** [rresult_msg] tests the error message case of the [Rresult] library.
+    This can be used (for example) as [result int rresult_msg] to test
+    for an integer success result with an {!Rresult.R.msg} error case. *)
+
 val pair: 'a testable -> 'b testable -> ('a * 'b) testable
 (** [pair a b] tests pairs of [a]s and [b]s. *)
 
