@@ -1,3 +1,7 @@
+### 0.7.1 (2016-11-03)
+
+- Store tests output to `_build/_tests` by default (#77, @pqwy)
+
 ### 0.7.0 (2016-10-25)
 
 - Add a `unit` testable (useful for functions with side-effects) (#79, @avsm)
