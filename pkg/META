@@ -1,5 +1,5 @@
 description = "A lightweight and colourful test framework"
-version = "%%VERSION%%"
+version = "%%VERSION_NUM%%"
 requires = "cmdliner bytes unix result astring fmt fmt.cli fmt.tty"
 archive(byte) = "alcotest.cma"
 archive(native) = "alcotest.cmxa"
