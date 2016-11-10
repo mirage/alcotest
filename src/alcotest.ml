@@ -435,14 +435,8 @@ let register t name (ts:test_case list) =
 
 exception Test_error
 
-let bool_of_env name =
-  try match Sys.getenv name with
-    | "" | "0" | "false" -> false
-    | _ -> true
-  with Not_found -> false
-
 let apply fn t test_dir verbose show_errors quick json =
-  let show_errors = show_errors || bool_of_env "ALCOTEST_SHOW_ERRORS" in
+  let show_errors = show_errors in
   let speed_level = if quick then `Quick else `Slow in
   if json then quiet := false;
   let t = { t with verbose; test_dir; json; show_errors; speed_level } in
@@ -475,17 +469,19 @@ let test_dir =
   Arg.(value & opt dir "_build/_tests"  & info ["o"] ~docv:"DIR" ~doc)
 
 let verbose =
+  let env = Arg.env_var "ALCOTEST_VERBOSE" in
   let doc = "Display the test outputs." in
-  Arg.(value & flag & info ["v"; "verbose"] ~docv:"" ~doc)
+  Arg.(value & flag & info ~env ["v"; "verbose"] ~docv:"" ~doc)
 
 let show_errors =
-  let doc = "Display the test errors. Can also be set using the \
-             $(i,ALCOTEST_SHOW_ERRORS) env variable." in
-  Arg.(value & flag & info ["e"; "show-errors"] ~docv:"" ~doc)
+  let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
+  let doc = "Display the test errors." in
+  Arg.(value & flag & info ~env ["e"; "show-errors"] ~docv:"" ~doc)
 
 let quicktests =
+  let env = Arg.env_var "ALCOTEST_QUICK_TESTS" in
   let doc = "Run only the quick tests." in
-  Arg.(value & flag & info ["q"; "quick-tests"] ~docv:"" ~doc)
+  Arg.(value & flag & info ~env ["q"; "quick-tests"] ~docv:"" ~doc)
 
 let of_env t =
   Term.(pure (apply (fun t -> t) t)
