@@ -1,3 +1,7 @@
+### 0.7.2 (2016-11-10)
+
+- Clean up handling of env variables (#83, @samoht)
+
 ### 0.7.1 (2016-11-03)
 
 - Store tests output to `_build/_tests` by default (#77, @pqwy)
