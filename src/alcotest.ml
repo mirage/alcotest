@@ -622,7 +622,7 @@ let check_err fmt = Format.ksprintf (fun err -> raise (Check_error err)) fmt
 let check t msg x y =
   show_line msg;
   if not (equal t x y) then
-    Fmt.strf "Error %s: expecting %a, got %a." msg (pp t) x (pp t) y
+    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) x (pp t) y
     |> failwith
 
 let fail msg =
