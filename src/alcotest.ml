@@ -543,7 +543,7 @@ let int64 = testable Fmt.int64 (=)
 
 let int = testable Fmt.int (=)
 
-let float = testable Fmt.float (=)
+let float eps = testable Fmt.float (fun x y -> abs_float (x -. y) < eps)
 
 let char = testable Fmt.char (=)
 
