@@ -94,8 +94,8 @@ val int32: int32 testable
 val int64: int64 testable
 (** [int64] tests 64-bit integers. *)
 
-val float: float testable
-(** [float] tests floats. *)
+val float: float -> float testable
+(** [float] tests floats with specified absolute error. *)
 
 val char: char testable
 (** [char] tests characters. *)
