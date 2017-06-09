@@ -1,0 +1,9 @@
+(jbuild_version 1)
+
+(executables
+ ((names (bad simple))
+  (libraries (alcotest))))
+
+(alias
+ ((name DEFAULT)
+  (deps (bad.exe simple.exe))))
