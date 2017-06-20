@@ -43,9 +43,6 @@ val test_case: string -> speed_level -> (unit -> unit) -> test_case
 type test = string * test_case list
 (** A test is an US-ASCII encoded name and a list of test cases. *)
 
-val test: string -> test_case list -> test
-(** [test n ts] is the test [n] with test cases [ts]. *)
-
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
 
