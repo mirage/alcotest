@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+  ((name alcotest_lwt)
+   (public_name alcotest-lwt)
+   (wrapped false)
+   (libraries (logs lwt.unix alcotest))))
