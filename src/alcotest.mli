@@ -80,7 +80,7 @@ val pp : 'a testable -> 'a Fmt.t
 (** [pp t] is [t]'s pretty-printer. *)
 
 val equal : 'a testable -> 'a -> 'a -> bool
-(* [equal t] is [t]'s equality. *)
+(** [equal t] is [t]'s equality. *)
 
 val bool: bool testable
 (** [bool] tests booleans. *)
