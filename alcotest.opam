@@ -20,4 +20,4 @@ depends: [
   "result"
   "cmdliner"
 ]
-available: [ocaml-version >= "4.01.0"]
+available: [ocaml-version >= "4.02.3"]
