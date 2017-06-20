@@ -141,6 +141,10 @@ val check: 'a testable -> string -> 'a -> 'a -> unit
 val fail: string -> 'a
 (** Simply fail. *)
 
+val neg: 'a testable -> 'a testable
+(** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it
+    is [false] when [t] is [true]. *)
+
 val check_raises: string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
 
