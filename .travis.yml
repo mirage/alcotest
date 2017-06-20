@@ -6,15 +6,15 @@ services:
 sudo: false
 env:
  global:
-   - PACKAGE="alcotest"
+   - PINS="alcotest:. alcotest-lwt:."
    - PRE_INSTALL_HOOK="cd /home/opam/opam-repository && git pull origin master && opam update -u -y"
  matrix:
-   - DISTRO=debian-stable OCAML_VERSION=4.04.1
-   - DISTRO=debian-testing OCAML_VERSION=4.02.3
-   - DISTRO=debian-unstable OCAML_VERSION=4.03.0
-   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.04.1
-   - DISTRO=ubuntu-16.04 OCAML_VERSION=4.03.0
-   - DISTRO=centos-6 OCAML_VERSION=4.02.3
-   - DISTRO=centos-7 OCAML_VERSION=4.03.0
-   - DISTRO=fedora-24 OCAML_VERSION=4.02.3
-   - DISTRO=alpine OCAML_VERSION=4.03.0
+   - DISTRO=debian-stable OCAML_VERSION=4.04.1 PACKAGE="alcotest-lwt"
+   - DISTRO=debian-testing OCAML_VERSION=4.02.3 PACKAGE="alcotest"
+   - DISTRO=debian-unstable OCAML_VERSION=4.03.0 PACKAGE="alcotest"
+   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.04.1 PACKAGE="alcotest-lwt"
+   - DISTRO=ubuntu-16.04 OCAML_VERSION=4.03.0 PACKAGE="alcotest"
+   - DISTRO=centos-6 OCAML_VERSION=4.02.3 PACKAGE="alcotest"
+   - DISTRO=centos-7 OCAML_VERSION=4.03.0 PACKAGE="alcotest"
+   - DISTRO=fedora-24 OCAML_VERSION=4.02.3 PACKAGE="alcotest-lwt"
+   - DISTRO=alpine OCAML_VERSION=4.03.0 PACKAGE="alcotest-lwt"

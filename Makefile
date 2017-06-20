@@ -1,5 +1,5 @@
 all:
-	jbuilder build @install @DEFAULT
+	jbuilder build @install @DEFAULT --dev
 
 clean:
 	jbuilder clean

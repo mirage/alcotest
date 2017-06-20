@@ -37,7 +37,11 @@ type rrun = unit -> run_result
 
 type test_case = string * speed_level * run
 
+let test_case n s f = (n, s, f)
+
 type test = string * test_case list
+
+let test n ts = (n, ts)
 
 let quiet = ref false
 
