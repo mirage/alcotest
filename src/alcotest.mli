@@ -36,8 +36,15 @@ type test_case = string * speed_level * (unit -> unit)
 (** A test case is an UTF-8 encoded documentation string, a speed
     level and a function to execute. *)
 
+val test_case: string -> speed_level -> (unit -> unit) -> test_case
+(** [test_case n s f] is the test case [n] running at speed [s] using
+    the function [f]. *)
+
 type test = string * test_case list
 (** A test is an US-ASCII encoded name and a list of test cases. *)
+
+val test: string -> test_case list -> test
+(** [test n ts] is the test [n] with test cases [ts]. *)
 
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
