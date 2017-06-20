@@ -32,29 +32,41 @@
 type speed_level = [`Quick | `Slow]
 (** Speed level for a test. *)
 
-type test_case = string * speed_level * (unit -> unit)
+type 'a test_case = string * speed_level * ('a -> unit)
 (** A test case is an UTF-8 encoded documentation string, a speed
     level and a function to execute. *)
 
-val test_case: string -> speed_level -> (unit -> unit) -> test_case
+val test_case: string -> speed_level -> ('a -> unit) -> 'a test_case
 (** [test_case n s f] is the test case [n] running at speed [s] using
     the function [f]. *)
 
-type test = string * test_case list
+type 'a test = string * 'a test_case list
 (** A test is an US-ASCII encoded name and a list of test cases. *)
 
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
 
-val run: ?and_exit:bool -> ?argv:string array -> string -> test list -> unit
+val run: ?and_exit:bool -> ?argv:string array ->
+  string -> unit test list -> unit
 (** [run n t] runs the test suite [t]. [n] is the name of the
-    tested library. The optional argument [and_exit] controls what
-    happens when the function ends. By default, [and_exit] is set,
-    which makes the function exit with [0] if everything is fine or
-    [1] if there is an issue. If [and_exit] is [false], then the
-    function raises [Test_error] on error. The optional argument
-    [argv] specifies the argument sent to alcotest like ["--json"],
-    ["--verbose"], etc. (at least one argument is required).*)
+    tested library.
+
+    The optional argument [and_exit] controls what happens when the
+    function ends. By default, [and_exit] is set, which makes the
+    function exit with [0] if everything is fine or [1] if there is an
+    issue. If [and_exit] is [false], then the function raises
+    [Test_error] on error.
+
+    The optional argument [argv] specifies the argument sent to
+    alcotest like ["--json"], ["--verbose"], etc. (at least one
+    argument is required).*)
+
+val run_with_args: ?and_exit:bool -> ?argv:string array ->
+  string -> 'a Cmdliner.Term.t -> 'a test list -> unit
+(** [run_with_args n a t] Similar to [run a t] but take an extra
+    argument [a]. Every test function will receive as arguement the
+    evaluation of the [Cdmliner] term [a]: this is useful to configure
+    the test behaviors using the CLI. *)
 
 (** {1 Assert functions} *)
 

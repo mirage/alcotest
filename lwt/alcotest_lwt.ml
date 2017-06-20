@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-let run fn () =
+let run fn args =
   let async_ex, async_waker = Lwt.wait () in
   let handle_exn ex =
     Logs.debug (fun f -> f "Uncaught async exception: %a" Fmt.exn ex);
@@ -22,7 +22,8 @@ let run fn () =
       Lwt.wakeup_exn async_waker ex
   in
   Lwt.async_exception_hook := handle_exn;
-  Lwt_main.run (Lwt_switch.with_switch (fun sw -> Lwt.pick [fn sw; async_ex]))
+  Lwt_main.run @@
+  Lwt_switch.with_switch (fun sw -> Lwt.pick [fn sw args; async_ex])
 
 let test_case n s f =
   Alcotest.test_case n s (run f)
