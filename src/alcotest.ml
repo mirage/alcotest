@@ -21,7 +21,7 @@ exception Check_error of string
 (* Types *)
 type speed_level = [`Quick | `Slow]
 
-type run = unit -> unit
+type 'a run = 'a -> unit
 
 type path = Path of (string * int)
 
@@ -33,22 +33,22 @@ type run_result = [
   | `Todo of string
 ]
 
-type rrun = unit -> run_result
+type 'a rrun = 'a -> run_result
 
-type test_case = string * speed_level * run
+type 'a test_case = string * speed_level * 'a run
 
 let test_case n s f = (n, s, f)
 
-type test = string * test_case list
+type 'a test = string * 'a test_case list
 
 let quiet = ref false
 
 (* global state *)
-type t = {
+type 'a t = {
 
   (* library values. *)
   name : string;
-  tests: (path * rrun) list;
+  tests: (path * 'a rrun) list;
 
   (* caches computed from the library values. *)
   paths: path list;
@@ -265,9 +265,9 @@ let exn path name err =
   let err = Printf.sprintf "%s%s" err (bt ()) in
   `Exn (path, name, err)
 
-let protect_test path (f:run): rrun =
-  fun () ->
-    try f (); `Ok
+let protect_test path (f:'a run): 'a rrun =
+  fun args ->
+    try f args; `Ok
     with
     | Check_error err ->
       let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
@@ -276,13 +276,13 @@ let protect_test path (f:run): rrun =
     | Invalid_argument f -> exn path "invalid" f
     | e -> exn path "exception" (Printexc.to_string e)
 
-let perform_test t (path, test) =
+let perform_test t args (path, test) =
   print_event t (`Start path);
-  let result = test () in
+  let result = test args in
   print_event t (`Result (path, result));
   result
 
-let perform_tests t tests = List.map (perform_test t) tests
+let perform_tests t tests args = List.map (perform_test t args) tests
 
 let with_redirect file fn =
   flush stdout;
@@ -308,11 +308,11 @@ let with_redirect file fn =
   | `Ok x -> x
   | `Error e -> raise e
 
-let skip_fun () = `Skip
+let skip_fun _ = `Skip
 
 let skip_label (path, _) = path, skip_fun
 
-let filter_test labels (test: path * rrun) =
+let filter_test labels (test: path * 'a rrun) =
   let Path (n, i), _ = test in
   match labels with
   | []    -> Some test
@@ -330,12 +330,12 @@ let filter_tests ~subst path tests =
     ) [] tests in
   List.rev tests
 
-let redirect_test_output t path (f:rrun) =
+let redirect_test_output t path (f: 'a rrun) =
   if t.verbose then f
-  else fun () ->
+  else fun args ->
     let output_file = output_file t path in
     with_redirect output_file (fun () ->
-      let result = f () in
+      let result = f args in
       begin match result with
         | `Error (_path, str) -> Printf.printf "%s\n" str
         | `Exn (_path, n, str) -> Printf.printf "[%s] %s\n" n str
@@ -344,7 +344,7 @@ let redirect_test_output t path (f:rrun) =
       result
     )
 
-let select_speed t path (f:rrun): rrun =
+let select_speed t path (f: 'a rrun): 'a rrun =
   if compare_speed_level (speed_of_path t path) t.speed_level >= 0 then
     f
   else
@@ -383,12 +383,12 @@ let show_result t result =
                      %a in %.3fs. %d test%s run.\n%!"
       t.test_dir msg () result.time result.success (s result.success)
 
-let result t test =
+let result t test args =
   prepare t;
   let start_time = Sys.time () in
   let test = map_test (redirect_test_output t) test in
   let test = map_test (select_speed t) test in
-  let results = perform_tests t test in
+  let results = perform_tests t test args in
   let time = Sys.time () -. start_time in
   let success = List.length (List.filter has_run results) in
   let failures = List.filter failure results in
@@ -410,7 +410,7 @@ let err_ascii s =
   in
   Fmt.(pf stderr) "%a %s\n%!" red "Error:" err
 
-let register t name (ts:test_case list) =
+let register t name (ts: 'a test_case list) =
   if not (is_ascii name) then (err_ascii name; t)
   else (
     let max_label = max t.max_label (String.length name) in
@@ -444,19 +444,19 @@ let apply fn t test_dir verbose show_errors quick json =
   let t = { t with verbose; test_dir; json; show_errors; speed_level } in
   fn t
 
-let run_registred_tests t () =
-  let result = result t t.tests in
+let run_registred_tests t () args =
+  let result = result t t.tests args in
   show_result t result;
   result.failures
 
-let run_subtest t labels () =
+let run_subtest t labels () args =
   let is_empty = filter_tests ~subst:false labels t.tests = [] in
   if is_empty then (
     Fmt.(pf stderr) "%a\n" red "Invalid request!";
     exit 1
   ) else
     let tests = filter_tests ~subst:true labels t.tests in
-    let result = result t tests in
+    let result = result t tests args in
     show_result t result;
     result.failures
 
@@ -494,18 +494,18 @@ let set_color style_renderer =
 
 let set_color = Term.(const set_color $ Fmt_cli.style_renderer ())
 
-let default_cmd t =
+let default_cmd t args =
   let doc = "Run all the tests." in
-  Term.(pure run_registred_tests $ of_env t $ set_color),
+  Term.(pure run_registred_tests $ of_env t $ set_color $ args),
   Term.info t.name ~version:"%%VERSION%%" ~doc
 
-let test_cmd t =
+let test_cmd t args =
   let doc = "Run a given test." in
   let label =
     let doc = "The list of labels identifying a subsets of the tests to run" in
     Arg.(value & pos_all string [] & info [] ~doc ~docv:"LABEL")
   in
-  Term.(pure run_subtest $ of_env t $ label $ set_color),
+  Term.(pure run_subtest $ of_env t $ label $ set_color $ args),
   Term.info "test" ~doc
 
 let list_cmd t =
@@ -513,15 +513,22 @@ let list_cmd t =
   Term.(pure list_tests $ of_env t $ set_color),
   Term.info "list" ~doc
 
-let run ?(and_exit = true) ?argv name (tl:test list) =
+let run_with_args ?(and_exit = true) ?argv name args (tl: 'a test list) =
   Fmt.(pf stdout) "Testing %a.\n" bold_s name;
   let t = empty () in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
-  match Term.eval_choice ?argv (default_cmd t) [list_cmd t; test_cmd t] with
+  let choices = [
+    list_cmd t;
+    test_cmd t args;
+  ] in
+  match Term.eval_choice ?argv (default_cmd t args) choices with
   | `Ok 0    -> if and_exit then exit 0 else ()
   | `Error _ -> if and_exit then exit 1 else raise Test_error
   | `Ok i    -> if and_exit then exit i else raise Test_error
   | _        -> if and_exit then exit 0 else ()
+
+let run ?and_exit ?argv name tl =
+  run_with_args ?and_exit ?argv name (Term.pure ()) tl
 
 module type TESTABLE = sig
   type t
