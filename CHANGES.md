@@ -1,3 +1,19 @@
+### 0.8.0 (2016-06-22)
+
+- Format "got" and "expected" values in the same way (#86, @talex5)
+- Change the `float` combinator to take a mandatory 'epsilon' parameter
+  (#89, @superbobry)
+- Switch to jbuilder (#92, @rgrinberg)
+- Add a `test_case` function (#94, @samoht)
+- Add an `alcotest-lwt` package, containing an `Alcotet_lwt` module with
+  an `Alcotest_lwt.test_case` function to better deal with lwt tests
+  (#94, @talex5, @samoht)
+- Add `Alcotest.neg` to negate test results (#95, @samoht)
+- Change the `test_case` type from `unit -> unit` to `'a -> unit`. The `'a`
+  parameter can be built using as a `Cmdliner` term using the new
+  `run_with_args` function. This is useful to configure the tests using the CLI
+  (#96, @samoht)
+
 ### 0.7.2 (2016-11-10)
 
 - Clean up handling of env variables (#83, @samoht)
