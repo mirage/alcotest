@@ -638,6 +638,9 @@ let fail msg =
   show_line msg;
   check_err "Error %s." msg
 
+let failf fmt =
+  Fmt.kstrf fail fmt
+
 let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
 let collect_exception f =
