@@ -200,23 +200,23 @@ let print_info t p =
 let left_c = 20
 
 let error t path fmt =
-  let filename = output_file t path in
-  let output =
-    if not (Sys.file_exists filename) then "--"
-    else
-      let file = open_in filename in
-      let output = string_of_channel file in
-      close_in file;
-      output
-  in
-  print t (fun ppf -> left left_c red_s ppf "[ERROR]");
-  print_info t path;
-  Printf.kprintf (fun str ->
+  Fmt.kstrf (fun error ->
+      let logs =
+        let filename = output_file t path in
+        if t.verbose || not (Sys.file_exists filename)
+        then Fmt.strf "%s\n" error
+        else
+          let file = open_in filename in
+          let output = string_of_channel file in
+          close_in file;
+          Fmt.strf "in %s:\n%s" filename output
+      in
+      print t (fun ppf -> left left_c red_s ppf "[ERROR]");
+      print_info t path;
       let error =
-        Fmt.strf "%s\n%s\n%s:\n%s\n%s\n"
-          (Fmt.(strf_like stdout) "-- %s Failed --" (short_string_of_path path))
-          (doc_of_path t path)
-          filename output str in
+        Fmt.strf "-- %s [%s] Failed --\n%s"
+          (short_string_of_path path) (doc_of_path t path) logs
+      in
       t.errors <- error :: t.errors
     ) fmt
 
@@ -240,7 +240,6 @@ let print_event t = function
   | `Start p       ->
     print t (fun ppf -> left left_c yellow_s ppf " ...");
     print_info t p;
-    if t.verbose then newline t
   | `Result (p, r) ->
     reset t;
     print_result t p r;
@@ -375,16 +374,16 @@ let show_result t result =
   | true  -> Printf.printf "%s\n" (json_of_result result)
   | false ->
     display_errors ();
-    let test_results ppf () = match result.failures with
+    let test_results ppf = match result.failures with
       | 0 -> green_s ppf "Test Successful"
       | n -> red     ppf "%d error%s!" n (s n)
     in
-    let full_logs =
-      if t.verbose then ""
-      else Fmt.strf "The full test results are available in `%s`.\n" t.test_dir
+    let full_logs ppf =
+      if t.verbose then Fmt.string ppf ""
+      else Fmt.pf ppf "The full test results are available in `%s`.\n" t.test_dir
     in
-    Fmt.(pf stdout) "%s%a in %.3fs. %d test%s run.\n%!"
-      full_logs test_results () result.time result.success (s result.success)
+    Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!"
+      full_logs test_results result.time result.success (s result.success)
 
 let result t test args =
   prepare t;
