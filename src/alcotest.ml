@@ -375,13 +375,16 @@ let show_result t result =
   | true  -> Printf.printf "%s\n" (json_of_result result)
   | false ->
     display_errors ();
-    let msg ppf () = match result.failures with
+    let test_results ppf () = match result.failures with
       | 0 -> green_s ppf "Test Successful"
       | n -> red     ppf "%d error%s!" n (s n)
     in
-    Fmt.(pf stdout) "The full test results are available in `%s`.\n\
-                     %a in %.3fs. %d test%s run.\n%!"
-      t.test_dir msg () result.time result.success (s result.success)
+    let full_logs =
+      if t.verbose then ""
+      else Fmt.strf "The full test results are available in `%s`.\n" t.test_dir
+    in
+    Fmt.(pf stdout) "%s%a in %.3fs. %d test%s run.\n%!"
+      full_logs test_results () result.time result.success (s result.success)
 
 let result t test args =
   prepare t;
@@ -472,7 +475,10 @@ let test_dir =
 
 let verbose =
   let env = Arg.env_var "ALCOTEST_VERBOSE" in
-  let doc = "Display the test outputs." in
+  let doc =
+    "Display the test outputs. $(b,WARNING:) when using this option \
+     the output logs will not be available for further inspection."
+ in
   Arg.(value & flag & info ~env ["v"; "verbose"] ~docv:"" ~doc)
 
 let show_errors =
