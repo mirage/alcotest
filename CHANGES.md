@@ -1,4 +1,15 @@
-### 0.8.0 (2016-06-22)
+### 0.8.1 (2017-08-03)
+
+- Add `failf` (#105, @hcarty)
+- Relax the `float` combinator to compare its epsilon using `<=` instead
+  of `<`. This allows to use `float 0.` for "exact" float comparison
+  (#107, @samoht, @talex5)
+- Fix outdated displayed information when using `--verbose`.
+  Be clearer that no new output logs are actually created and
+  do not try to display outdated information (#108, @samoht)
+
+
+### 0.8.0 (2017-06-22)
 
 - Format "got" and "expected" values in the same way (#86, @talex5)
 - Change the `float` combinator to take a mandatory 'epsilon' parameter
