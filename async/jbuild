@@ -1,0 +1,7 @@
+(jbuild_version 1)
+
+(library
+ ((name alcotest_async)
+  (public_name alcotest-async)
+  (wrapped false)
+  (libraries (alcotest core_kernel async_unix))))
