@@ -1,3 +1,8 @@
+### 0.8.2 (2017-08-21)
+
+- add `Async` support: there is a new `alcotest-async` package containing
+  an `Alcotest_async` module (#104, @rgrinberg)
+
 ### 0.8.1 (2017-08-03)
 
 - Add `failf` (#105, @hcarty)
