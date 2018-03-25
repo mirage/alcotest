@@ -1,3 +1,7 @@
+### 0.8.3 (2018-03-25)
+
+- Show one failure when multiple tests fail (#117, @aantron)
+
 ### 0.8.2 (2017-08-21)
 
 - add `Async` support: there is a new `alcotest-async` package containing
