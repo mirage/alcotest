@@ -60,6 +60,19 @@ Test Successful in 0.001s. 2 tests run.
 See the [examples](https://github.com/mirage/alcotest/tree/master/examples)
 folder for more examples.
 
+### Quick and Slow tests
+
+In general you should be using `` `Quick`` tests; `` `Slow`` tests
+tests are useful when you are defined stress tests, that do not need
+to run on every `make test` but that you will typically run before
+a release. This mechanism is a way to mark some tests as optional; they
+will be not triggered when you pass -q on the command line, e.g.:
+
+```
+$ ./test.exe -q # run only the quick tests
+$ ./test.exe    # run quick and slow tests
+```
+
 ### Passing custom options to the tests
 
 In most cases, the base tests are `unit -> unit` functions. However,
