@@ -62,11 +62,11 @@ folder for more examples.
 
 ### Quick and Slow tests
 
-In general you should be using `` `Quick`` tests; `` `Slow`` tests
-tests are useful when you are defined stress tests, that do not need
-to run on every `make test` but that you will typically run before
-a release. This mechanism is a way to mark some tests as optional; they
-will be not triggered when you pass -q on the command line, e.g.:
+In general you should use `` `Quick`` tests: tests that are ran on any
+invocations of the test suite. You should only use `` `Slow`` tests for stress
+tests that are ran only on occasion (typically before a release or after a major
+change). These slow tests can be suppressed by passing the `-q` flag on the
+command line, e.g.:
 
 ```
 $ ./test.exe -q # run only the quick tests

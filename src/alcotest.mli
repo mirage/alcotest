@@ -30,11 +30,13 @@
     {e Release %%VERSION%% } *)
 
 type speed_level = [`Quick | `Slow]
-(** Speed level for a test. *)
+(** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
+   as [`Slow] are skipped when the `-q` flag is passed. *)
 
 type 'a test_case = string * speed_level * ('a -> unit)
 (** A test case is an UTF-8 encoded documentation string, a speed
-    level and a function to execute. *)
+    level and a function to execute. Typically, the testing function calls the
+    helper functions provided below (such as [check] and [fail]). *)
 
 val test_case: string -> speed_level -> ('a -> unit) -> 'a test_case
 (** [test_case n s f] is the test case [n] running at speed [s] using
