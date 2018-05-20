@@ -458,7 +458,7 @@ let run_registred_tests t () args =
 let run_subtest t labels () args =
   let is_empty = filter_tests ~subst:false labels t.tests = [] in
   if is_empty then (
-    Fmt.(pf stderr) "%a\n" red "Invalid request!";
+    Fmt.(pf stderr) "%a\n" red "Invalid request (no tests to run, filter skipped everything)!";
     exit 1
   ) else
     let tests = filter_tests ~subst:true labels t.tests in
