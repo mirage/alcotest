@@ -673,3 +673,5 @@ let line (oc:out_channel) ?color c =
   in
   let str: string = Fmt.(to_to_string @@ fun ppf -> line ppf ?color) c in
   Printf.fprintf oc "%s" str
+
+let () = at_exit (Format.pp_print_flush Format.err_formatter)
