@@ -43,7 +43,8 @@ val test_case: string -> speed_level -> ('a -> unit) -> 'a test_case
     the function [f]. *)
 
 type 'a test = string * 'a test_case list
-(** A test is an US-ASCII encoded name and a list of test cases. *)
+(** A test is an US-ASCII encoded name and a list of test cases.
+ * The name can be used for filtering which tests to run on the CLI *)
 
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
