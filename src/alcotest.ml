@@ -314,10 +314,9 @@ let skip_label (path, _) = path, skip_fun
 let filter_test labels (test: path * 'a rrun) =
   let Path (n, i), _ = test in
   match labels with
-  | []    -> Some test
-  | [m]   -> if n=m then Some test else None
-  | [m;j] -> if n=m && int_of_string j = i then Some test else None
-  | _     -> failwith "filter_test"
+  | None, _ -> Some test
+  | Some m, None   -> if n=m then Some test else None
+  | Some m, Some j -> if n=m && j = i then Some test else None
 
 let map_test f l = List.map (fun (path, test) -> path, f path test) l
 
@@ -458,7 +457,7 @@ let run_registred_tests t () args =
 let run_subtest t labels () args =
   let is_empty = filter_tests ~subst:false labels t.tests = [] in
   if is_empty then (
-    Fmt.(pf stderr) "%a\n" red "Invalid request!";
+    Fmt.(pf stderr) "%a\n" red "Invalid request (no tests to run, filter skipped everything)!";
     exit 1
   ) else
     let tests = filter_tests ~subst:true labels t.tests in
@@ -510,10 +509,15 @@ let default_cmd t args =
 
 let test_cmd t args =
   let doc = "Run a given test." in
-  let label =
-    let doc = "The list of labels identifying a subsets of the tests to run" in
-    Arg.(value & pos_all string [] & info [] ~doc ~docv:"LABEL")
+  let testname =
+    let doc = "The label (name) of the test identifying a subset of the tests to run" in
+    Arg.(value & pos 0 (some string) None & info [] ~doc ~docv:"NAME")
   in
+  let testcase =
+    let doc = "The test case number identifying a single test to run" in
+    Arg.(value & pos 1 (some int) None & info [] ~doc ~docv:"TESTCASE")
+  in
+  let label = Term.(pure (fun n t -> n, t) $ testname $ testcase) in
   Term.(pure run_subtest $ of_env t $ label $ set_color $ args),
   Term.info "test" ~doc
 
@@ -673,3 +677,5 @@ let line (oc:out_channel) ?color c =
   in
   let str: string = Fmt.(to_to_string @@ fun ppf -> line ppf ?color) c in
   Printf.fprintf oc "%s" str
+
+let () = at_exit (Format.pp_print_flush Format.err_formatter)

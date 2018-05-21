@@ -57,6 +57,27 @@ $ ./simple.native
 Test Successful in 0.001s. 2 tests run.
 ```
 
+You can filter which tests to run by supplying either the exact test name
+(which would run all testcases with that name), or the exact test name
+and test case number (which would run just that single test):
+```shell
+$ ./simple.native test test_set
+Testing My first test.
+[OK]              test_set          0   Capitalize.
+[OK]              test_set          1   Add entries.
+The full test results are available in `_build/_tests`.
+Test Successful in 0.000s. 2 test run.
+$ ./simple.native test test_set 1
+Testing My first test.
+[SKIP]              test_set          0   Capitalize.
+[OK]                test_set          1   Add entries.
+The full test results are available in `_build/_tests`.
+Test Successful in 0.000s. 1 test run.
+```
+
+Note that you cannot filter by test case name (i.e. `Capitalize` or `Add entries`), you have to use
+the test case number instead.
+
 See the [examples](https://github.com/mirage/alcotest/tree/master/examples)
 folder for more examples.
 
