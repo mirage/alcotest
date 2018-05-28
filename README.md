@@ -177,3 +177,34 @@ in _build/_tests/all.000.output:
 freeing all resources
 [failure] All is broken
 ```
+
+### Comparison with other testing frameworks
+
+The README is pretty clear about that:
+
+> Alcotest is a lightweight and colourful test framework.
+
+Alcotest is the only testing framework using colors!
+
+More seriously, Alcotest is similar to [ounit](http://ounit.forge.ocamlcore.org/)
+but it fixes a few of the problems found in that library:
+
+- Alcotest has a nicer output, it is easier to see what failed and what
+  succeeded and to read the log outputs of the failed tests;
+
+- Alcotest uses combinators to define pretty-printers and
+  comparators between the things to test.
+
+Other nice tools doing different kind of testing also exist:
+
+- [qcheck](https://github.com/c-cube/qcheck) qcheck does random
+  generation and property testing (e.g. Quick Check)
+
+- [crowbar](https://github.com/stedolan/crowbar)
+  and [bun](https://github.com/yomimono/ocaml-bun)
+  are similar to qcheck, but use compiler-directed randomness,
+  e.g. it takes advantage of the AFL support  the OCaml compiler.
+
+- [`ppx_inline_tests`](https://github.com/janestreet/ppx_inline_test)
+  allows to write tests in the same file as your source-code; they
+  will be run only in a special mode of compilation.
