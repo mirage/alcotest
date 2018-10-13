@@ -156,9 +156,11 @@ let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
 let file_of_path path ext =
   Printf.sprintf "%s.%s" (short_string_of_path path) ext
 
+let output_dir t =
+  Filename.concat t.test_dir t.run_id
+
 let output_file t path =
-  let output_dir = Filename.concat t.test_dir t.run_id in
-  Filename.concat output_dir (file_of_path path "output")
+  Filename.concat (output_dir t) (file_of_path path "output")
 
 let mkdir_p path mode =
   let rec mk parent = function
@@ -173,7 +175,8 @@ let mkdir_p path mode =
   | ""::xs -> mk "/" xs | xs -> mk "." xs
 
 let prepare t =
-  if not (Sys.file_exists t.test_dir) then mkdir_p t.test_dir 0o755
+  let output_dir = output_dir t in
+  if not (Sys.file_exists output_dir) then mkdir_p output_dir 0o755
 
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
 let red_s fmt = color `Red fmt
@@ -539,7 +542,7 @@ let run_with_args ?(and_exit = true) ?argv name args (tl: 'a test list) =
     Uuidm.v4_gen random_state ()
     |> Uuidm.to_string ~upper:true in
   Fmt.(pf stdout) "Testing %a.\n" bold_s name;
-  Fmt.(pf stdout) "This run has ID `%s`." run_id;
+  Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
   let t = { (empty ()) with run_id=run_id} in
   let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
   let choices = [
