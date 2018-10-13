@@ -19,5 +19,6 @@ depends: [
   "astring"
   "result"
   "cmdliner"
+  "uuidm"
 ]
 available: [ocaml-version >= "4.02.3"]
