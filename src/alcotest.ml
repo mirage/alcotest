@@ -65,6 +65,7 @@ type 'a t = {
   json       : bool;
   verbose    : bool;
   test_dir   : string;
+  run_id     : Uuidm.t;
 
 }
 
@@ -81,9 +82,10 @@ let empty () =
   let show_errors = false in
   let json = false in
   let test_dir = Sys.getcwd () in
+  let run_id = Uuidm.nil in
   { name; errors; tests; paths; doc; speed;
     max_label; speed_level;
-    show_errors; json; verbose; test_dir }
+    show_errors; json; verbose; test_dir; run_id }
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
