@@ -175,8 +175,8 @@ let mkdir_p path mode =
   | ""::xs -> mk "/" xs | xs -> mk "." xs
 
 let prepare t =
-  let output_dir = output_dir t in
-  if not (Sys.file_exists output_dir) then mkdir_p output_dir 0o755
+  let test_dir = output_dir t in
+  if not (Sys.file_exists test_dir) then mkdir_p test_dir 0o755
 
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
 let red_s fmt = color `Red fmt
@@ -392,7 +392,7 @@ let show_result t result =
       if t.verbose then Fmt.string ppf ""
       else
         Fmt.pf ppf "The full test results are available in `%s`.\n"
-          (Filename.concat t.test_dir t.run_id)
+          (output_dir t)
     in
     Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!"
       full_logs test_results result.time result.success (s result.success)
