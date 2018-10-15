@@ -481,8 +481,9 @@ let json =
   Arg.(value & flag & info ["json"] ~docv:"" ~doc)
 
 let test_dir =
+  let default_dir = Filename.concat (Sys.getcwd ()) "_build/_tests" in
   let doc = "Where to store the log files of the tests." in
-  Arg.(value & opt dir "_build/_tests"  & info ["o"] ~docv:"DIR" ~doc)
+  Arg.(value & opt dir default_dir & info ["o"] ~docv:"DIR" ~doc)
 
 let verbose =
   let env = Arg.env_var "ALCOTEST_VERBOSE" in
