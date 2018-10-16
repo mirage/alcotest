@@ -1,5 +1,5 @@
 language: c
-install: wget https://raw.githubusercontent.com/ocaml/ocaml-travisci-skeleton/master/.travis-docker.sh
+install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.travis-docker.sh
 script: bash -ex .travis-docker.sh
 services:
   - docker
@@ -7,17 +7,8 @@ sudo: false
 env:
  global:
    - PINS="alcotest:. alcotest-lwt:. alcotest-async:."
-   - PRE_INSTALL_HOOK="cd /home/opam/opam-repository && git pull origin master && opam update -u -y"
  matrix:
-   - DISTRO=debian-stable OCAML_VERSION=4.04.1 PACKAGE="alcotest-lwt"
-   - DISTRO=debian-stable OCAML_VERSION=4.04.1 PACKAGE="alcotest-async"
-   - DISTRO=debian-testing OCAML_VERSION=4.02.3 PACKAGE="alcotest"
-   - DISTRO=debian-unstable OCAML_VERSION=4.03.0 PACKAGE="alcotest"
-   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.04.1 PACKAGE="alcotest-lwt"
-   - DISTRO=ubuntu-12.04 OCAML_VERSION=4.04.1 PACKAGE="alcotest-async"
-   - DISTRO=ubuntu-16.04 OCAML_VERSION=4.03.0 PACKAGE="alcotest"
-   - DISTRO=centos-6 OCAML_VERSION=4.02.3 PACKAGE="alcotest"
-   - DISTRO=centos-7 OCAML_VERSION=4.03.0 PACKAGE="alcotest"
-   - DISTRO=fedora-24 OCAML_VERSION=4.02.3 PACKAGE="alcotest-lwt"
-   - DISTRO=alpine OCAML_VERSION=4.03.0 PACKAGE="alcotest-lwt"
-   - DISTRO=alpine OCAML_VERSION=4.03.0 PACKAGE="alcotest-async"
+   - DISTRO=alpine          OCAML_VERSION=4.04 PACKAGE="alcotest-lwt"
+   - DISTRO=debian-stable   OCAML_VERSION=4.05 PACKAGE="alcotest-async"
+   - DISTRO=debian-testing  OCAML_VERSION=4.06 PACKAGE="alcotest"
+   - DISTRO=debian-unstable OCAML_VERSION=4.07 PACKAGE="alcotest"
