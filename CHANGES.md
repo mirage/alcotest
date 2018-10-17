@@ -1,3 +1,11 @@
+### 0.8.4 (2018-10-17)
+
+- Improve documentation for speed and tests (#129, @raphael-proust)
+- Improve documentation on test case filtering and flush error formatter on exit
+  (#133, @edwintorok)
+- Create a fresh log sub-dir for every run (#125, @m-harrison)
+- Fix wrong location hint for test files when using dune (#135, @m-harrison)
+
 ### 0.8.3 (2018-03-25)
 
 - Show one failure when multiple tests fail (#117, @aantron)
