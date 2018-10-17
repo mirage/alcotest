@@ -1,7 +1,12 @@
+.PHONY: all test clean
+
 all:
-	jbuilder build @install @DEFAULT --dev
+	dune build
+
+test:
+	dune runtest
 
 clean:
-	jbuilder clean
+	dune clean
 
 .PHONY: all clean

@@ -1,0 +1,3 @@
+(library
+ (public_name alcotest)
+ (libraries   fmt astring result cmdliner fmt.cli fmt.tty uuidm))

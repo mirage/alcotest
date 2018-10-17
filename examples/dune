@@ -1,0 +1,7 @@
+(executables
+  (names     bad simple)
+  (libraries alcotest))
+
+(alias
+  (name runtest)
+  (deps bad.exe simple.exe))
