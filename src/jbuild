@@ -1,8 +1,0 @@
-(jbuild_version 1)
-
-(library
- ((name alcotest)
-  (public_name alcotest)
-  (wrapped false)
-  (libraries
-   (fmt astring result cmdliner fmt.cli fmt.tty uuidm))))
