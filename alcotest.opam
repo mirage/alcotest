@@ -20,5 +20,6 @@ depends: [
   "result"
   "cmdliner"
   "uuidm"
+  "fpath"
 ]
 available: [ocaml-version >= "4.02.3"]

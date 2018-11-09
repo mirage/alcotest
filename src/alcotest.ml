@@ -172,11 +172,10 @@ let mkdir_p path mode =
         Fmt.strf "mkdir: %s: is a file" path |> failwith
       with Sys_error _ -> Unix.mkdir path mode end;
       mk path names in
-  match String.cuts ~empty:true ~sep:sep path with
-  | ""::xs -> mk sep xs
-  (* check for Windows drive letter *)
-  | dl::xs when Str.string_match (Str.regexp "[A-Z]:") dl 0 -> mk dl xs
-  | xs -> mk "." xs
+  let fp = Fpath.v path in
+  match Fpath.split_volume fp with
+  | "",  p -> if Fpath.is_abs p then mk sep (Fpath.segs p) else mk "." (Fpath.segs p)
+  | v, p   -> mk v (Fpath.segs p)
 
 let prepare t =
   let test_dir = output_dir t in
