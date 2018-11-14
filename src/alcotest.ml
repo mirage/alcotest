@@ -163,16 +163,25 @@ let output_file t path =
   Filename.concat (output_dir t) (file_of_path path "output")
 
 let mkdir_p path mode =
+  let is_win_drive_letter x =
+    String.length x = 2
+    && x.[1] = ':'
+    && Char.Ascii.is_letter x.[0]
+  in
+  let sep = Filename.dir_sep in
   let rec mk parent = function
   | [] -> ()
   | name::names ->
-      let path = parent ^ "/" ^ name in
+      let path = parent ^ sep ^ name in
       begin try if not (Sys.is_directory path) then
         Fmt.strf "mkdir: %s: is a file" path |> failwith
       with Sys_error _ -> Unix.mkdir path mode end;
       mk path names in
-  match String.cuts ~empty:true ~sep:"/" path with
-  | ""::xs -> mk "/" xs | xs -> mk "." xs
+  match String.cuts ~empty:true ~sep:sep path with
+  | ""::xs -> mk sep xs
+  (* check for Windows drive letter *)
+  | dl::xs when is_win_drive_letter dl -> mk dl xs
+  | xs -> mk "." xs
 
 let prepare t =
   let test_dir = output_dir t in
@@ -481,7 +490,8 @@ let json =
   Arg.(value & flag & info ["json"] ~docv:"" ~doc)
 
 let test_dir =
-  let default_dir = Filename.concat (Sys.getcwd ()) "_build/_tests" in
+  let fname_concat l = List.fold_left Filename.concat "" l in
+  let default_dir = fname_concat [Sys.getcwd (); "_build"; "_tests"] in
   let doc = "Where to store the log files of the tests." in
   Arg.(value & opt dir default_dir & info ["o"] ~docv:"DIR" ~doc)
 
