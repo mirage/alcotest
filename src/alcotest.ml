@@ -163,6 +163,11 @@ let output_file t path =
   Filename.concat (output_dir t) (file_of_path path "output")
 
 let mkdir_p path mode =
+  let is_win_drive_letter x =
+    String.length x = 2
+    && x.[1] = ':'
+    && Char.Ascii.is_letter x.[0]
+  in
   let sep = Filename.dir_sep in
   let rec mk parent = function
   | [] -> ()
@@ -175,7 +180,7 @@ let mkdir_p path mode =
   match String.cuts ~empty:true ~sep:sep path with
   | ""::xs -> mk sep xs
   (* check for Windows drive letter *)
-  | dl::xs when Str.string_match (Str.regexp "[A-Z]:") dl 0 -> mk dl xs
+  | dl::xs when is_win_drive_letter dl -> mk dl xs
   | xs -> mk "." xs
 
 let prepare t =
