@@ -1,8 +1,8 @@
-opam-version: "1.2"
-maintainer: "thomas@gazagnaire.org"
+opam-version: "2.0"
+maintainer:  "thomas@gazagnaire.org"
 authors:     "Thomas Gazagnaire"
 homepage:    "https://github.com/mirage/alcotest/"
-dev-repo:    "https://github.com/mirage/alcotest.git"
+dev-repo:    "git+https://github.com/mirage/alcotest.git"
 bug-reports: "https://github.com/mirage/alcotest/issues/"
 license:     "ISC"
 doc:         "https://mirage.github.io/alcotest/"
@@ -10,13 +10,15 @@ doc:         "https://mirage.github.io/alcotest/"
 build: [
   ["dune" "subst"] {pinned}
   ["dune" "build" "-p" name "-j" jobs]
+  ["dune" "runtest" "-p" name "-j" jobs] {with-test}
 ]
-build-test: ["dune" "runtest" "-p" name "-j" jobs]
 
 depends: [
   "dune"  {build}
+  "ocaml" {>= "4.03.0"}
   "alcotest"
   "async_unix" {>= "v0.9.0"}
   "core_kernel" {>= "v0.9.0"}
 ]
-available: [ocaml-version >= "4.03.0"]
+
+synopsis: "Async-based helpers for Alcotest"
