@@ -178,6 +178,15 @@ freeing all resources
 [failure] All is broken
 ```
 
+### Screenshots
+
+The following screenshots demonstrate the HTML testing output from the [odoc](https://github.com/ocaml/odoc) project.
+
+| All tests passed                   | Some tests failed                    | Failed test with custom diffing          |
+|------------------------------------|--------------------------------------|------------------------------------------|
+| ![ok](screenshots/ok.png?raw=true) | ![err](screenshots/err.png?raw=true) | ![diff](screenshots/diff.png?raw=true)   |
+
+
 ### Comparison with other testing frameworks
 
 The README is pretty clear about that:
