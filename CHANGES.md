@@ -1,3 +1,11 @@
+### 0.8.5 (2018-12-11)
+- Port build to Dune from jbuilder (#139 @samoht)
+- Fix output path on Windows/Cygwin (#141 @kkirstein)
+- Switch opam metadata to 2.0 format (#144 @samoht)
+- Add nice screenshots to the README (#143 @rizo)
+- Fix ocamldoc headings to work with odoc (#145 @avsm)
+- Do not test on Debian-unstable, add Fedora (#145 @avsm)
+
 ### 0.8.4 (2018-10-17)
 
 - Improve documentation for speed and tests (#129, @raphael-proust)

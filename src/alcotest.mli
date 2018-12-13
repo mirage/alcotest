@@ -71,7 +71,7 @@ val run_with_args: ?and_exit:bool -> ?argv:string array ->
     evaluation of the [Cdmliner] term [a]: this is useful to configure
     the test behaviors using the CLI. *)
 
-(** {1 Assert functions} *)
+(** {2 Assert functions} *)
 
 (** [TESTABLE] provides an abstract description for testable
     values. *)
@@ -170,7 +170,7 @@ val neg: 'a testable -> 'a testable
 val check_raises: string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
 
-(** {1 Deprecated} *)
+(** {2 Deprecated} *)
 
 val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit
 (** @deprecated
