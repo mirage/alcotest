@@ -62,6 +62,7 @@ type 'a t = {
   show_errors: bool;
   json       : bool;
   verbose    : bool;
+  silent     : bool;
   test_dir   : string;
   run_id     : string;
 
@@ -76,6 +77,7 @@ let empty () =
   let tests = [] in
   let max_label = 0 in
   let verbose = false in
+  let silent = false in
   let speed_level = `Slow in
   let show_errors = false in
   let json = false in
@@ -83,7 +85,7 @@ let empty () =
   let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
   { name; errors; tests; paths; doc; speed;
     max_label; speed_level;
-    show_errors; json; verbose; test_dir; run_id }
+    show_errors; json; verbose; silent; test_dir; run_id }
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
@@ -236,6 +238,7 @@ let error t path fmt =
 
 let reset t = print t (fun ppf -> Fmt.string ppf "\r")
 let newline t = print t (fun ppf -> Fmt.string ppf "\n")
+let dot t = print t (fun ppf -> Fmt.string ppf ".")
 
 let print_result t p = function
   | `Ok            ->
@@ -251,10 +254,14 @@ let print_result t p = function
     print_info t p
 
 let print_event t = function
+  | `Start _       when t.silent -> ()
   | `Start p       ->
     print t (fun ppf -> left left_c yellow_s ppf " ...");
     print_info t p;
+  | `Result (_, (`Ok | `Skip)) when t.silent ->
+    dot t
   | `Result (p, r) ->
+    if t.silent then newline t;
     reset t;
     print_result t p r;
     newline t
@@ -390,6 +397,7 @@ let show_result t result =
   match t.json with
   | true  -> Printf.printf "%s\n" (json_of_result result)
   | false ->
+    if t.silent then newline t;
     display_errors ();
     let test_results ppf = match result.failures with
       | 0 -> green_s ppf "Test Successful"
@@ -401,8 +409,9 @@ let show_result t result =
         Fmt.pf ppf "The full test results are available in `%s`.\n"
           (output_dir t)
     in
-    Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!"
-      full_logs test_results result.time result.success (s result.success)
+    if (not t.silent || result.failures > 0) then
+      Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!"
+        full_logs test_results result.time result.success (s result.success)
 
 let result t test args =
   prepare t;
@@ -458,10 +467,10 @@ let register t name (ts: 'a test_case list) =
 
 exception Test_error
 
-let apply fn t test_dir verbose show_errors quick json =
+let apply fn t test_dir verbose silent show_errors quick json =
   let show_errors = show_errors in
   let speed_level = if quick then `Quick else `Slow in
-  let t = { t with verbose; test_dir; json; show_errors; speed_level } in
+  let t = { t with verbose; silent; test_dir; json; show_errors; speed_level } in
   fn t
 
 let run_registred_tests t () args =
@@ -500,6 +509,13 @@ let verbose =
  in
   Arg.(value & flag & info ~env ["v"; "verbose"] ~docv:"" ~doc)
 
+let silent =
+  let env = Arg.env_var "ALCOTEST_SILENT" in
+  let doc =
+    "Silence all Successful and Skipped tests."
+ in
+  Arg.(value & flag & info ~env ["s"; "silent"] ~docv:"" ~doc)
+
 let show_errors =
   let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
   let doc = "Display the test errors." in
@@ -512,7 +528,7 @@ let quicktests =
 
 let of_env t =
   Term.(pure (apply (fun t -> t) t)
-        $ test_dir $ verbose $ show_errors $ quicktests $ json)
+        $ test_dir $ verbose $ silent $ show_errors $ quicktests $ json)
 
 let set_color style_renderer =
   Fmt_tty.setup_std_outputs ?style_renderer ()
