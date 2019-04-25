@@ -41,8 +41,6 @@ let test_case n s f = (n, s, f)
 
 type 'a test = string * 'a test_case list
 
-let quiet = ref false
-
 (* global state *)
 type 'a t = {
 
@@ -463,7 +461,6 @@ exception Test_error
 let apply fn t test_dir verbose show_errors quick json =
   let show_errors = show_errors in
   let speed_level = if quick then `Quick else `Slow in
-  if json then quiet := false;
   let t = { t with verbose; test_dir; json; show_errors; speed_level } in
   fn t
 
@@ -658,12 +655,9 @@ let reject (type a) =
   (module M: TESTABLE with type t = M.t)
 
 let show_line msg =
-  if !quiet then ()
-  else (
-    line Fmt.stderr ~color:`Yellow '-';
-    Printf.eprintf "ASSERT %s\n" msg;
-    line Fmt.stderr ~color:`Yellow '-';
-  )
+  line Fmt.stderr ~color:`Yellow '-';
+  Printf.eprintf "ASSERT %s\n" msg;
+  line Fmt.stderr ~color:`Yellow '-'
 
 let check_err fmt = Format.ksprintf (fun err -> raise (Check_error err)) fmt
 
