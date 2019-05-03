@@ -173,9 +173,14 @@ let mkdir_p path mode =
   | [] -> ()
   | name::names ->
       let path = parent ^ sep ^ name in
-      begin try if not (Sys.is_directory path) then
-        Fmt.strf "mkdir: %s: is a file" path |> failwith
-      with Sys_error _ -> Unix.mkdir path mode end;
+      begin
+        try Unix.mkdir path mode
+        with Unix.Unix_error(Unix.EEXIST, _, _) ->
+          if Sys.is_directory path then
+            () (* the directory exists *)
+          else
+            Fmt.strf "mkdir: %s: is a file" path |> failwith
+      end;
       mk path names in
   match String.cuts ~empty:true ~sep:sep path with
   | ""::xs -> mk sep xs
