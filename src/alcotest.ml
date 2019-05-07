@@ -259,10 +259,11 @@ let print_event t = function
     print_info t p;
   | `Result (_, r) when t.silent -> begin
       let c = match r with
-        | `Ok -> "."
-        | `Error _ | `Exn _ -> "E"
-        | `Skip -> "S"
-        | `Todo _ -> "T"
+        | `Exn _   -> "F"
+        | `Error _ -> "E"
+        | `Skip    -> "S"
+        | `Todo _  -> "T"
+        | `Ok      -> "."
       in
       print t (fun ppf -> Fmt.string ppf c)
     end
