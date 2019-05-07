@@ -238,7 +238,6 @@ let error t path fmt =
 
 let reset t = print t (fun ppf -> Fmt.string ppf "\r")
 let newline t = print t (fun ppf -> Fmt.string ppf "\n")
-let dot t = print t (fun ppf -> Fmt.string ppf ".")
 
 let print_result t p = function
   | `Ok            ->
@@ -258,10 +257,16 @@ let print_event t = function
   | `Start p       ->
     print t (fun ppf -> left left_c yellow_s ppf " ...");
     print_info t p;
-  | `Result (_, (`Ok | `Skip)) when t.silent ->
-    dot t
+  | `Result (_, r) when t.silent -> begin
+      let c = match r with
+        | `Ok -> "."
+        | `Error _ | `Exn _ -> "E"
+        | `Skip -> "S"
+        | `Todo _ -> "T"
+      in
+      print t (fun ppf -> Fmt.string ppf c)
+    end
   | `Result (p, r) ->
-    if t.silent then newline t;
     reset t;
     print_result t p r;
     newline t
