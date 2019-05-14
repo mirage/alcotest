@@ -41,8 +41,6 @@ let test_case n s f = (n, s, f)
 
 type 'a test = string * 'a test_case list
 
-let quiet = ref false
-
 (* global state *)
 type 'a t = {
 
@@ -64,9 +62,9 @@ type 'a t = {
   show_errors: bool;
   json       : bool;
   verbose    : bool;
+  compact    : bool;
   test_dir   : string;
   run_id     : string;
-
 }
 
 let empty () =
@@ -78,6 +76,7 @@ let empty () =
   let tests = [] in
   let max_label = 0 in
   let verbose = false in
+  let compact = false in
   let speed_level = `Slow in
   let show_errors = false in
   let json = false in
@@ -85,7 +84,7 @@ let empty () =
   let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
   { name; errors; tests; paths; doc; speed;
     max_label; speed_level;
-    show_errors; json; verbose; test_dir; run_id }
+    show_errors; json; verbose; compact; test_dir; run_id }
 
 let compare_speed_level s1 s2 =
   match s1, s2 with
@@ -227,24 +226,27 @@ let error t path fmt =
           close_in file;
           Fmt.strf "in %s:\n%s" filename output
       in
-      print t (fun ppf -> left left_c red_s ppf "[ERROR]");
-      print_info t path;
       let error =
         Fmt.strf "-- %s [%s] Failed --\n%s"
           (short_string_of_path path) (doc_of_path t path) logs
       in
-      t.errors <- error :: t.errors
+      t.errors <- error :: t.errors;
     ) fmt
 
 let reset t = print t (fun ppf -> Fmt.string ppf "\r")
 let newline t = print t (fun ppf -> Fmt.string ppf "\n")
+let print_ch t ch = print t (fun ppf -> Fmt.string ppf ch)
 
-let print_result t p = function
+let print_full_result t p = function
   | `Ok            ->
     print t (fun ppf -> left left_c green_s ppf "[OK]");
     print_info t p
-  | `Exn (p, n, s) -> error t p "[%s] %s" n s
-  | `Error (p, s)  -> error t p "%s" s
+  | `Exn _ ->
+    print t (fun ppf -> left left_c red_s ppf "[FAIL]");
+    print_info t p;
+  | `Error _  ->
+    print t (fun ppf -> left left_c red_s ppf "[ERROR]");
+    print_info t p;
   | `Skip          ->
     print t (fun ppf -> left left_c yellow_s ppf "[SKIP]");
     print_info t p
@@ -252,13 +254,23 @@ let print_result t p = function
     print t (fun ppf -> left left_c yellow_s ppf "[TODO]");
     print_info t p
 
+let print_compact_result t = function
+  | `Exn _   -> print_ch t "F"
+  | `Error _ -> print_ch t "E"
+  | `Skip    -> print_ch t "S"
+  | `Todo _  -> print_ch t "T"
+  | `Ok      -> print_ch t "."
+
 let print_event t = function
-  | `Start p       ->
+  | `Start _ when t.compact -> ()
+  | `Start p ->
     print t (fun ppf -> left left_c yellow_s ppf " ...");
     print_info t p;
+  | `Result (_, r) when t.compact ->
+    print_compact_result t r
   | `Result (p, r) ->
     reset t;
-    print_result t p r;
+    print_full_result t p r;
     newline t
 
 let failure: run_result -> bool = function
@@ -294,6 +306,12 @@ let protect_test path (f:'a run): 'a rrun =
 let perform_test t args (path, test) =
   print_event t (`Start path);
   let result = test args in
+  (* Store errors *)
+  let () = match result with
+    | `Exn (p, n, s) -> error t p "[%s] %s" n s
+    | `Error (p, s)  -> error t p "%s" s
+    | _ -> ()
+  in
   print_event t (`Result (path, result));
   result
 
@@ -392,6 +410,7 @@ let show_result t result =
   match t.json with
   | true  -> Printf.printf "%s\n" (json_of_result result)
   | false ->
+    if t.compact then newline t;
     display_errors ();
     let test_results ppf = match result.failures with
       | 0 -> green_s ppf "Test Successful"
@@ -403,8 +422,9 @@ let show_result t result =
         Fmt.pf ppf "The full test results are available in `%s`.\n"
           (output_dir t)
     in
-    Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!"
-      full_logs test_results result.time result.success (s result.success)
+    if (not t.compact || result.failures > 0) then
+      Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!"
+        full_logs test_results result.time result.success (s result.success)
 
 let result t test args =
   prepare t;
@@ -460,11 +480,10 @@ let register t name (ts: 'a test_case list) =
 
 exception Test_error
 
-let apply fn t test_dir verbose show_errors quick json =
+let apply fn t test_dir verbose compact show_errors quick json =
   let show_errors = show_errors in
   let speed_level = if quick then `Quick else `Slow in
-  if json then quiet := false;
-  let t = { t with verbose; test_dir; json; show_errors; speed_level } in
+  let t = { t with verbose; compact; test_dir; json; show_errors; speed_level } in
   fn t
 
 let run_registred_tests t () args =
@@ -503,6 +522,13 @@ let verbose =
  in
   Arg.(value & flag & info ~env ["v"; "verbose"] ~docv:"" ~doc)
 
+let compact =
+  let env = Arg.env_var "ALCOTEST_COMPACT" in
+  let doc =
+    "Compact the output of the tests"
+ in
+  Arg.(value & flag & info ~env ["c"; "compact"] ~docv:"" ~doc)
+
 let show_errors =
   let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
   let doc = "Display the test errors." in
@@ -515,7 +541,7 @@ let quicktests =
 
 let of_env t =
   Term.(pure (apply (fun t -> t) t)
-        $ test_dir $ verbose $ show_errors $ quicktests $ json)
+        $ test_dir $ verbose $ compact $ show_errors $ quicktests $ json)
 
 let set_color style_renderer =
   Fmt_tty.setup_std_outputs ?style_renderer ()
@@ -658,12 +684,9 @@ let reject (type a) =
   (module M: TESTABLE with type t = M.t)
 
 let show_line msg =
-  if !quiet then ()
-  else (
-    line Fmt.stderr ~color:`Yellow '-';
-    Printf.eprintf "ASSERT %s\n" msg;
-    line Fmt.stderr ~color:`Yellow '-';
-  )
+  line Fmt.stderr ~color:`Yellow '-';
+  Printf.eprintf "ASSERT %s\n" msg;
+  line Fmt.stderr ~color:`Yellow '-'
 
 let check_err fmt = Format.ksprintf (fun err -> raise (Check_error err)) fmt
 
