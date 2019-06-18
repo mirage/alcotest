@@ -1,0 +1,9 @@
+(executable
+ (name bad)
+ (libraries alcotest))
+
+; This fails at runtime, so just build the executable
+
+(alias
+ (name runtest)
+ (deps bad.exe))
