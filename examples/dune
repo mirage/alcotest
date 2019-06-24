@@ -1,3 +1,3 @@
 (tests
- (names simple)
+ (names simple floats)
  (libraries alcotest))

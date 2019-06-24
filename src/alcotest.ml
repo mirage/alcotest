@@ -612,6 +612,8 @@ let pp (type a) (t: a testable) = let (module T) = t in T.pp
 
 let equal (type a) (t: a testable) = let (module T) = t in T.equal
 
+let isnan f = FP_nan = classify_float f
+
 let testable (type a) (pp: a Fmt.t) (equal: a -> a -> bool) : a testable =
   let module M = struct type t = a let pp = pp let equal = equal end
   in (module M)
@@ -622,7 +624,13 @@ let int64 = testable Fmt.int64 (=)
 
 let int = testable Fmt.int (=)
 
-let float eps = testable Fmt.float (fun x y -> abs_float (x -. y) <= eps)
+let float eps =
+  let same x y = (isnan x && isnan y) ||
+                 (* compare infinities *)
+                  x = y ||
+                  abs_float (x -. y) <= eps
+  in
+  testable Fmt.float same
 
 let char = testable Fmt.char (=)
 
