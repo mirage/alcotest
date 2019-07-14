@@ -189,7 +189,19 @@ let mkdir_p path mode =
 
 let prepare t =
   let test_dir = output_dir t in
-  if not (Sys.file_exists test_dir) then mkdir_p test_dir 0o770
+  if not (Sys.file_exists test_dir) then begin
+    mkdir_p test_dir 0o770 ;
+    if Sys.unix || Sys.cygwin then begin
+      let this_exe = Filename.concat t.test_dir t.name
+      and latest = Filename.concat t.test_dir "latest" in
+      if Sys.file_exists this_exe then Sys.remove this_exe ;
+      if Sys.file_exists latest then Sys.remove latest ;
+      Unix.symlink ~to_dir:true test_dir this_exe ;
+      Unix.symlink ~to_dir:true test_dir latest ;
+    end
+  end else if not (Sys.is_directory test_dir) then
+    failwith (Fmt.strf "exists but is not a directory: %S" test_dir)
+
 
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
 let red_s fmt = color `Red fmt
