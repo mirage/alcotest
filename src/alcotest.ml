@@ -189,7 +189,7 @@ let mkdir_p path mode =
 
 let prepare t =
   let test_dir = output_dir t in
-  if not (Sys.file_exists test_dir) then mkdir_p test_dir 0o755
+  if not (Sys.file_exists test_dir) then mkdir_p test_dir 0o770
 
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
 let red_s fmt = color `Red fmt
@@ -329,7 +329,7 @@ let with_redirect file fn =
   let fd_stderr = Unix.descr_of_out_channel stderr in
   let fd_old_stdout = Unix.dup fd_stdout in
   let fd_old_stderr = Unix.dup fd_stderr in
-  let fd_file = Unix.(openfile file [O_WRONLY; O_TRUNC; O_CREAT] 0o666) in
+  let fd_file = Unix.(openfile file [O_WRONLY; O_TRUNC; O_CREAT] 0o660) in
   Unix.dup2 fd_file fd_stdout;
   Unix.dup2 fd_file fd_stderr;
   Unix.close fd_file;
