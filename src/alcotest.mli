@@ -138,7 +138,7 @@ val array : 'a testable -> 'a array testable
 val option: 'a testable -> 'a option testable
 (** [option t] tests optional [t]s. *)
 
-val result : 'a testable -> 'e testable -> ('a, 'e) Result.result testable
+val result : 'a testable -> 'e testable -> ('a, 'e) result testable
 (** [result t e] tests [t]s on success and [e]s on failure. *)
 
 val pair: 'a testable -> 'b testable -> ('a * 'b) testable
