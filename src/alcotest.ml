@@ -474,12 +474,12 @@ let list_tests t () =
     ) paths;
   0
 
-let is_ascii s = String.for_all Char.Ascii.is_valid s
-
 let validate_name name =
-  let errmsg reason = Fmt.strf "%a %S is not a valid test label (%s)." red "Error:" name reason in
-  if not (is_ascii name) then
-    Error (errmsg "it should be an ASCII string")
+  let pattern = "^[a-zA-Z0-9_- ]+$" in
+  let re = Re.(compile @@ Pcre.re pattern) in
+  if not (Re.execp re name) then
+    let msg = Fmt.strf "%a %S is not a valid test label (must match %s)." red "Error:" name pattern in
+    Error msg
   else
     Ok ()
 

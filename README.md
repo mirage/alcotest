@@ -94,8 +94,9 @@ The full test results are available in `_build/_tests`.
 Test Successful in 0.000s. 1 test run.
 ```
 
-Note that you cannot filter by test case name (i.e. `Lower case` or `Capitalization`), you
-must filter by test name & number instead.
+Note that you cannot filter by test case name (i.e. `Lower case` or `Capitalization`), you must
+filter by test name & number instead. Test names may contain only alphanumeric characters, spaces,
+hyphens and underscores.
 
 See the [examples](https://github.com/mirage/alcotest/tree/master/examples)
 folder for more examples.
