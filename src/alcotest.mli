@@ -60,9 +60,13 @@ val run: ?and_exit:bool -> ?argv:string array ->
     issue. If [and_exit] is [false], then the function raises
     [Test_error] on error.
 
-    The optional argument [argv] specifies the argument sent to
-    alcotest like ["--json"], ["--verbose"], etc. (at least one
-    argument is required).*)
+    The optional argument [argv] specifies command line arguments sent to
+    alcotest like ["--json"], ["--verbose"], etc. Note that this array will be
+    treated like a regular [Sys.argv], so the array must have at least one
+    element, and the first element will be treated as if it was the command name
+    and thus ignored for the purposes of option processing. So [~argv:[||]] is
+    an error, [~argv:[| "--verbose" |]] will have no effect, and [~argv:[|
+    "ignored"; "--verbose" |]] will successfully pass the verbose option. *)
 
 val run_with_args: ?and_exit:bool -> ?argv:string array ->
   string -> 'a Cmdliner.Term.t -> 'a test list -> unit
