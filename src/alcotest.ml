@@ -601,7 +601,7 @@ let int_range_list =
     let acc i = (set := IntSet.add i (!set)) in
     let ranges = String.cuts ~sep:"," s in
     let process_range s =
-      let bounds = String.cuts ~sep:"-" s |> List.map (String.to_int) in
+      let bounds = String.cuts ~sep:".." s |> List.map (String.to_int) in
       match bounds with
       | [Some i] -> acc i
       | [Some lower; Some upper] when lower <= upper ->
