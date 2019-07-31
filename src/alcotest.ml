@@ -445,11 +445,11 @@ let show_result t result =
 
 let result t test args =
   prepare t;
-  let start_time = Sys.time () in
+  let start_time = Unix.time () in
   let test = map_test (redirect_test_output t) test in
   let test = map_test (select_speed t) test in
   let results = perform_tests t test args in
-  let time = Sys.time () -. start_time in
+  let time = Unix.time () -. start_time in
   let success = List.length (List.filter has_run results) in
   let failures = List.filter failure results in
   { time; success; failures = List.length failures }
