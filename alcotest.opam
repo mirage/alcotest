@@ -20,6 +20,7 @@ depends: [
   "astring"
   "cmdliner"
   "uuidm"
+  "re"
 ]
 
 synopsis: "Alcotest is a lightweight and colourful test framework"

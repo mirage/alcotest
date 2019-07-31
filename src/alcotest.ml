@@ -16,6 +16,11 @@
 
 open Astring
 
+module IntSet = Set.Make ( struct
+    let compare = Pervasives.compare
+    type t = int
+  end )
+
 exception Check_error of string
 
 (* Types *)
@@ -362,20 +367,28 @@ let skip_fun _ = `Skip
 
 let skip_label (path, _) = path, skip_fun
 
-let filter_test labels (test: path * 'a rrun) =
+let filter_test (regexp, cases) (test : path * 'a rrun) =
   let Path (n, i), _ = test in
-  match labels with
-  | None, _ -> Some test
-  | Some m, None   -> if n=m then Some test else None
-  | Some m, Some j -> if n=m && j = i then Some test else None
+  let regexp_match = function
+    | None -> true
+    | Some r -> Re.execp r n
+  in
+  let case_match = function
+    | None -> true
+    | Some set -> IntSet.mem i set
+  in
+  (regexp_match regexp) && (case_match cases)
 
 let map_test f l = List.map (fun (path, test) -> path, f path test) l
 
 let filter_tests ~subst path tests =
   let tests = List.fold_left (fun acc test ->
-      match filter_test path test with
-      | None   -> if subst then skip_label test :: acc else acc
-      | Some r -> r :: acc
+      if filter_test path test then
+        test :: acc
+      else if subst then
+        skip_label test :: acc
+      else
+        acc
     ) [] tests in
   List.rev tests
 
@@ -570,15 +583,47 @@ let default_cmd t args =
   Term.(pure run_registred_tests $ of_env t $ set_color $ args),
   Term.info t.name ~version:"%%VERSION%%" ~doc
 
+let regex =
+  let parse s = try Ok (Re.(compile @@ Pcre.re s)) with
+    | Re.Perl.Parse_error -> Error (`Msg "Perl-compatible regexp parse error")
+    | Re.Perl.Not_supported -> Error (`Msg "unsupported regexp feature")
+  in
+  let print = Re.pp_re in
+  Arg.conv (parse, print)
+
+exception Invalid_format
+
+let int_range_list =
+  let parse s =
+    let set = ref IntSet.empty in
+    let acc i = (set := IntSet.add i (!set)) in
+    let ranges = String.cuts ~sep:"," s in
+    let process_range s =
+      let bounds = String.cuts ~sep:"-" s |> List.map (String.to_int) in
+      match bounds with
+      | [Some i] -> acc i
+      | [Some lower; Some upper] when lower <= upper ->
+        for i = lower to upper do
+          acc i
+        done
+      | _ -> raise Invalid_format
+    in
+    match List.iter process_range ranges with
+    | () -> Ok (!set)
+    | exception Invalid_format -> Error (`Msg "must be a comma-separated list of integers / integer ranges")
+  in
+  let print ppf set = Fmt.pf ppf "%a" Fmt.(braces @@ list ~sep:comma int) (IntSet.elements set) in
+  Arg.conv (parse, print)
+
 let test_cmd t args =
-  let doc = "Run a given test." in
+  let doc = "Run a subset of the tests." in
   let testname =
-    let doc = "The label (name) of the test identifying a subset of the tests to run" in
-    Arg.(value & pos 0 (some string) None & info [] ~doc ~docv:"NAME")
+    let doc = "A regular expression matching the names of tests to run" in
+    Arg.(value & pos 0 (some regex) None & info [] ~doc ~docv:"NAME_REGEX")
   in
   let testcase =
-    let doc = "The test case number identifying a single test to run" in
-    Arg.(value & pos 1 (some int) None & info [] ~doc ~docv:"TESTCASE")
+    let doc = "A comma-separated list of test case numbers (and ranges of numbers) to run, e.g: '4,6-10,19'" in
+    Arg.(value & pos 1 (some int_range_list) None & info [] ~doc ~docv:"TESTCASES")
   in
   let label = Term.(pure (fun n t -> n, t) $ testname $ testcase) in
   Term.(pure run_subtest $ of_env t $ label $ set_color $ args),

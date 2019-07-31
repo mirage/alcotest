@@ -24,27 +24,36 @@ A simple example:
 
 (* A module with functions to test *)
 module To_test = struct
-  let capit letter = Char.uppercase letter
-  let plus int_list = List.fold_left (fun a b -> a + b) 0 int_list
+  let lowercase = String.lowercase_ascii
+  let capitalize = String.capitalize_ascii
+  let str_concat = String.concat ""
+  let list_concat = List.append
 end
 
 (* The tests *)
-let capit () =
-  Alcotest.(check char) "same chars"  'A' (To_test.capit 'a')
+let test_lowercase () =
+  Alcotest.(check string) "same string" "hello!" (To_test.lowercase "hELLO!")
 
-let plus () =
-  Alcotest.(check int) "same ints" 7 (To_test.plus [1;1;2;3])
+let test_capitalize () =
+  Alcotest.(check string) "same string" "World." (To_test.capitalize "world.")
 
-let test_set = [
-  "Capitalize" , `Quick, capit;
-  "Add entries", `Slow , plus ;
-]
+let test_str_concat () =
+  Alcotest.(check string) "same string" "foobar" (To_test.str_concat ["foo"; "bar"])
+
+let test_list_concat () =
+  Alcotest.(check (list int)) "same lists" [1; 2; 3] (To_test.list_concat [1] [2; 3])
 
 (* Run it *)
 let () =
-  Alcotest.run "My first test" [
-    "test_set", test_set;
-  ]
+  let open Alcotest in
+  run "Utils" [
+      "string-case", [
+          test_case "Lower case"     `Quick test_lowercase;
+          test_case "Capitalization" `Quick test_capitalize;
+        ];
+      "string-concat", [ test_case "String mashing" `Quick test_str_concat  ];
+      "list-concat",   [ test_case "List mashing"   `Slow  test_list_concat ];
+    ]
 ```
 
 The result is a self-contained binary which displays the test results. Use
@@ -52,31 +61,41 @@ The result is a self-contained binary which displays the test results. Use
 
 ```shell
 $ ./simple.native
-[OK]        test_set  0   Capitalize.
-[OK]        test_set  1   Add entries.
-Test Successful in 0.001s. 2 tests run.
+Testing Utils.
+[OK]       string-case            0   Lower case.
+[OK]       string-case            1   Capitalization.
+[OK]       string-concat          0   String mashing.
+[OK]       list-concat            0   List mashing.
+Test Successful in 0.001s. 4 tests run.
 ```
 
-You can filter which tests to run by supplying either the exact test name
-(which would run all testcases with that name), or the exact test name
-and test case number (which would run just that single test):
+### Selecting tests to execute
+
+You can filter which tests to run by supplying a regular expression matching the names
+of the tests to execute, or by passing a regular expression _and_ a comma-separated list
+of test numbers (or ranges of test numbers, e.g. `2,4..9`):
 ```shell
-$ ./simple.native test test_set
-Testing My first test.
-[OK]              test_set          0   Capitalize.
-[OK]              test_set          1   Add entries.
+$ ./simple.native test '.*concat*'
+Testing Utils.
+[SKIP]     string-case            0   Lower case.
+[SKIP]     string-case            1   Capitalization.
+[OK]       string-concat          0   String mashing.
+[OK]       list-concat            0   List mashing.
 The full test results are available in `_build/_tests`.
-Test Successful in 0.000s. 2 test run.
-$ ./simple.native test test_set 1
-Testing My first test.
-[SKIP]              test_set          0   Capitalize.
-[OK]                test_set          1   Add entries.
+Test Successful in 0.000s. 2 tests run.
+
+$ ./simple.native test 'string-case' '1..3'
+Testing Utils.
+[SKIP]     string-case            0   Lower case.
+[OK]       string-case            1   Capitalization.
+[SKIP]     string-concat          0   String mashing.
+[SKIP]     list-concat            0   List mashing.
 The full test results are available in `_build/_tests`.
 Test Successful in 0.000s. 1 test run.
 ```
 
-Note that you cannot filter by test case name (i.e. `Capitalize` or `Add entries`), you have to use
-the test case number instead.
+Note that you cannot filter by test case name (i.e. `Lower case` or `Capitalization`), you
+must filter by test name & number instead.
 
 See the [examples](https://github.com/mirage/alcotest/tree/master/examples)
 folder for more examples.
