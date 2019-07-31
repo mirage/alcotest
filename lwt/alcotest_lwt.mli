@@ -18,5 +18,8 @@
     promise. {!run} will run these promises and will catch asynchrous
     exceptions. *)
 
-val test_case: string -> Alcotest.speed_level ->
-  (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a Alcotest.test_case
+val test_case :
+  string ->
+  Alcotest.speed_level ->
+  (Lwt_switch.t -> 'a -> unit Lwt.t) ->
+  'a Alcotest.test_case
