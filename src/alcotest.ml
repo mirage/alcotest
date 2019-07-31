@@ -683,7 +683,7 @@ let option e =
   testable (Fmt.Dump.option (pp e)) eq
 
 let result a e =
-  let eq x y = let open Result in
+  let eq x y =
     match (x, y) with
     | (Ok x, Ok y) -> equal a x y
     | (Error x, Error y) -> equal e x y
