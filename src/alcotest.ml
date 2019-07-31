@@ -474,18 +474,21 @@ let list_tests t () =
     ) paths;
   0
 
-let is_ascii s = String.for_all Char.Ascii.is_valid s
-
-let err_ascii s =
-  let err =
-    Printf.sprintf
-      "%S is not a valid test label (it should be an ASCII string), skipping." s
-  in
-  Fmt.(pf stderr) "%a %s\n%!" red "Error:" err
+let validate_name name =
+  let pattern = "^[a-zA-Z0-9_- ]+$" in
+  let re = Re.(compile @@ Pcre.re pattern) in
+  if not (Re.execp re name) then
+    let msg = Fmt.strf "%a %S is not a valid test label (must match %s)." red "Error:" name pattern in
+    Error msg
+  else
+    Ok ()
 
 let register t name (ts: 'a test_case list) =
-  if not (is_ascii name) then (err_ascii name; t)
-  else (
+  match (t, validate_name name) with
+  | Error error_acc, Error e -> Error (e::error_acc)
+  | Error error_acc, Ok ()   -> Error error_acc
+  | Ok _, Error e            -> Error [e]
+  | Ok t, Ok () ->
     let max_label = max t.max_label (String.length name) in
     let paths = Hashtbl.create 16 in
     let docs = Hashtbl.create 16 in
@@ -505,8 +508,7 @@ let register t name (ts: 'a test_case list) =
     let paths = t.paths @ paths in
     let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
     let speed p = try Some (Hashtbl.find speeds p) with Not_found -> t.speed p in
-    { t with paths; tests; doc; speed; max_label; }
-  )
+    Ok { t with paths; tests; doc; speed; max_label; }
 
 exception Test_error
 
@@ -599,7 +601,7 @@ let int_range_list =
     let acc i = (set := IntSet.add i (!set)) in
     let ranges = String.cuts ~sep:"," s in
     let process_range s =
-      let bounds = String.cuts ~sep:"-" s |> List.map (String.to_int) in
+      let bounds = String.cuts ~sep:".." s |> List.map (String.to_int) in
       match bounds with
       | [Some i] -> acc i
       | [Some lower; Some upper] when lower <= upper ->
@@ -640,19 +642,24 @@ let run_with_args ?(and_exit = true) ?argv name args (tl: 'a test list) =
   let run_id =
     Uuidm.v4_gen random_state ()
     |> Uuidm.to_string ~upper:true in
-  Fmt.(pf stdout) "Testing %a.\n" bold_s name;
-  Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
   let t = { (empty ()) with run_id=run_id} in
-  let t = List.fold_left (fun t (name, tests) -> register t name tests) t tl in
-  let choices = [
-    list_cmd t;
-    test_cmd t args;
-  ] in
-  match Term.eval_choice ?argv (default_cmd t args) choices with
-  | `Ok 0    -> if and_exit then exit 0 else ()
-  | `Error _ -> if and_exit then exit 1 else raise Test_error
-  | `Ok i    -> if and_exit then exit i else raise Test_error
-  | _        -> if and_exit then exit 0 else ()
+  let t = List.fold_left (fun t (name, tests) -> register t name tests) (Ok t) tl in
+  match t with
+  | Error error_acc ->
+    Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
+    exit 1
+  | Ok t ->
+    Fmt.(pf stdout) "Testing %a.\n" bold_s name;
+    Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
+    let choices = [
+      list_cmd t;
+      test_cmd t args;
+    ] in
+    match Term.eval_choice ?argv (default_cmd t args) choices with
+    | `Ok 0    -> if and_exit then exit 0 else ()
+    | `Error _ -> if and_exit then exit 1 else raise Test_error
+    | `Ok i    -> if and_exit then exit i else raise Test_error
+    | _        -> if and_exit then exit 0 else ()
 
 let run ?and_exit ?argv name tl =
   run_with_args ?and_exit ?argv name (Term.pure ()) tl
