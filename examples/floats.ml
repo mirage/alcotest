@@ -46,17 +46,10 @@ let others () =
   Alcotest.(check @@ neg @@ float e) "1 is not 0" 1. 0.;
   Alcotest.(check @@ float e) ".3 is .3" (0.1 +. 0.2) 0.3
 
-let edge_set = [
-  "NaN", `Quick, nan     ;
-  "∞",   `Quick, infinity;
-]
+let edge_set = [ ("NaN", `Quick, nan); ("∞", `Quick, infinity) ]
 
-let others_set = [
-  "others", `Quick, others;
-]
+let others_set = [ ("others", `Quick, others) ]
 
 let () =
-  Alcotest.run "Float tests" [
-    "Edge cases",   edge_set  ;
-    "Other floats", others_set;
-  ]
+  Alcotest.run "Float tests"
+    [ ("Edge cases", edge_set); ("Other floats", others_set) ]

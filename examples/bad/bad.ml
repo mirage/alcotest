@@ -31,34 +31,30 @@ For more information, please refer to <http://unlicense.org/>
 (* A module with functions to test *)
 module To_test = struct
   let capit letter = Astring.String.Ascii.uppercase letter
+
   let plus int_list = List.map (fun a -> a + a) int_list
 end
 
 (* The tests *)
-let capit () =
-  Alcotest.(check string) "strings" "A" (To_test.capit "b")
+let capit () = Alcotest.(check string) "strings" "A" (To_test.capit "b")
 
 let plus () =
-  Alcotest.(check (list int)) "int lists" [1] (To_test.plus [1;1;2;3])
+  Alcotest.(check (list int)) "int lists" [ 1 ] (To_test.plus [ 1; 1; 2; 3 ])
 
-let test_one = [
-  "Capitalize" , `Quick, capit;
-  "Add entries", `Slow , plus ;
-]
+let test_one = [ ("Capitalize", `Quick, capit); ("Add entries", `Slow, plus) ]
 
-let test_two = [
-  "ok"         , `Quick, (fun () -> ());
-  "Capitalize" , `Quick, capit;
-  "ok"         , `Quick, (fun () -> ());
-]
+let test_two =
+  [ ("ok", `Quick, fun () -> ());
+    ("Capitalize", `Quick, capit);
+    ("ok", `Quick, fun () -> ())
+  ]
 
 (* Run it *)
 let one () =
-  try Alcotest.run ~and_exit:false "My first test" ["Ωèone", test_one]
+  try Alcotest.run ~and_exit:false "My first test" [ ("Ωèone", test_one) ]
   with Alcotest.Test_error -> Printf.printf "Continue!!\n%!"
 
-let two () =
-  Alcotest.run ~and_exit:true "Hoho" ["two", test_two]
+let two () = Alcotest.run ~and_exit:true "Hoho" [ ("two", test_two) ]
 
 let () =
   one ();

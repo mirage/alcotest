@@ -29,7 +29,7 @@
 
     {e Release %%VERSION%% } *)
 
-type speed_level = [`Quick | `Slow]
+type speed_level = [ `Quick | `Slow ]
 (** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
    as [`Slow] are skipped when the `-q` flag is passed. *)
 
@@ -38,7 +38,7 @@ type 'a test_case = string * speed_level * ('a -> unit)
     level and a function to execute. Typically, the testing function calls the
     helper functions provided below (such as [check] and [fail]). *)
 
-val test_case: string -> speed_level -> ('a -> unit) -> 'a test_case
+val test_case : string -> speed_level -> ('a -> unit) -> 'a test_case
 (** [test_case n s f] is the test case [n] running at speed [s] using
     the function [f]. *)
 
@@ -49,8 +49,8 @@ type 'a test = string * 'a test_case list
 exception Test_error
 (** The exception return by {!run} in case of errors. *)
 
-val run: ?and_exit:bool -> ?argv:string array ->
-  string -> unit test list -> unit
+val run :
+  ?and_exit:bool -> ?argv:string array -> string -> unit test list -> unit
 (** [run n t] runs the test suite [t]. [n] is the name of the
     tested library.
 
@@ -68,8 +68,13 @@ val run: ?and_exit:bool -> ?argv:string array ->
     an error, [~argv:[| "--verbose" |]] will have no effect, and [~argv:[|
     "ignored"; "--verbose" |]] will successfully pass the verbose option. *)
 
-val run_with_args: ?and_exit:bool -> ?argv:string array ->
-  string -> 'a Cmdliner.Term.t -> 'a test list -> unit
+val run_with_args :
+  ?and_exit:bool ->
+  ?argv:string array ->
+  string ->
+  'a Cmdliner.Term.t ->
+  'a test list ->
+  unit
 (** [run_with_args n a t] Similar to [run a t] but take an extra
     argument [a]. Every test function will receive as arguement the
     evaluation of the [Cdmliner] term [a]: this is useful to configure
@@ -80,16 +85,14 @@ val run_with_args: ?and_exit:bool -> ?argv:string array ->
 (** [TESTABLE] provides an abstract description for testable
     values. *)
 module type TESTABLE = sig
-
   type t
   (** The type to test. *)
 
-  val pp: t Fmt.t
+  val pp : t Fmt.t
   (** A way to pretty-print the value. *)
 
-  val equal: t -> t -> bool
+  val equal : t -> t -> bool
   (** Test for equality between two values. *)
-
 end
 
 type 'a testable = (module TESTABLE with type t = 'a)
@@ -105,78 +108,78 @@ val pp : 'a testable -> 'a Fmt.t
 val equal : 'a testable -> 'a -> 'a -> bool
 (** [equal t] is [t]'s equality. *)
 
-val bool: bool testable
+val bool : bool testable
 (** [bool] tests booleans. *)
 
-val int: int testable
+val int : int testable
 (** [int] tests integers. *)
 
-val int32: int32 testable
+val int32 : int32 testable
 (** [int32] tests 32-bit integers. *)
 
-val int64: int64 testable
+val int64 : int64 testable
 (** [int64] tests 64-bit integers. *)
 
-val float: float -> float testable
+val float : float -> float testable
 (** [float] tests floats with specified absolute error. *)
 
-val char: char testable
+val char : char testable
 (** [char] tests characters. *)
 
-val string: string testable
+val string : string testable
 (** [string] tests OCaml strings. *)
 
-val unit: unit testable
+val unit : unit testable
 (** [unit] tests unit values (useful for functions with side-effects). *)
 
-val list: 'a testable -> 'a list testable
+val list : 'a testable -> 'a list testable
 (** [list t] tests lists of [t]s. *)
 
-val slist: 'a testable -> ('a -> 'a -> int) -> 'a list testable
+val slist : 'a testable -> ('a -> 'a -> int) -> 'a list testable
 (** [slist t comp] tests sorted lists of [t]s. The list are sorted
     using [comp]. *)
 
 val array : 'a testable -> 'a array testable
 (** [array t] tests arrays of [t]s. *)
 
-val option: 'a testable -> 'a option testable
+val option : 'a testable -> 'a option testable
 (** [option t] tests optional [t]s. *)
 
 val result : 'a testable -> 'e testable -> ('a, 'e) result testable
 (** [result t e] tests [t]s on success and [e]s on failure. *)
 
-val pair: 'a testable -> 'b testable -> ('a * 'b) testable
+val pair : 'a testable -> 'b testable -> ('a * 'b) testable
 (** [pair a b] tests pairs of [a]s and [b]s. *)
 
-val of_pp: 'a Fmt.t -> 'a testable
+val of_pp : 'a Fmt.t -> 'a testable
 (** [of_pp pp] tests values which can be printed using [pp] and
     compared using {!Pervasives.compare} *)
 
-val pass: 'a testable
+val pass : 'a testable
 (** [pass] tests values of any type and always succeeds. *)
 
-val reject: 'a testable
+val reject : 'a testable
 (** [reject] tests values of any type and always fails. *)
 
-val check: 'a testable -> string -> 'a -> 'a -> unit
+val check : 'a testable -> string -> 'a -> 'a -> unit
 (** Check that two values are equal. *)
 
-val fail: string -> 'a
+val fail : string -> 'a
 (** Simply fail. *)
 
-val failf: ('a, Format.formatter, unit, 'b) format4 -> 'a
+val failf : ('a, Format.formatter, unit, 'b) format4 -> 'a
 (** Simply fail with a formatted message. *)
 
-val neg: 'a testable -> 'a testable
+val neg : 'a testable -> 'a testable
 (** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it
     is [false] when [t] is [true]. *)
 
-val check_raises: string -> exn -> (unit -> unit) -> unit
+val check_raises : string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
 
 (** {2 Deprecated} *)
 
-val line: out_channel -> ?color:[`Blue|`Yellow] -> char -> unit
+val line : out_channel -> ?color:[ `Blue | `Yellow ] -> char -> unit
 (** @deprecated
     You should write your own line function. For instance:
 {[
