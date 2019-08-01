@@ -14,12 +14,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** [Alcotest_async] allows to defines tests which returns an Async deferred.
-    {!run} will schedule these deferreds and return their results. *)
+(** [Alcotest_async] enables testing functions which return an Async deferred.
+    {!run} returns a deferred which will run the tests when scheduled. *)
+
+include Alcotest.TESTER with type return = unit Async_kernel.Deferred.t
 
 val test_case :
   ?timeout:Core_kernel.Time.Span.t ->
   string ->
   Alcotest.speed_level ->
   ('a -> unit Async_kernel.Deferred.t) ->
-  'a Alcotest.test_case
+  'a test_case
+
+val test_case' : string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case

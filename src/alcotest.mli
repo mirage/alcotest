@@ -29,16 +29,22 @@
 
     {e Release %%VERSION%% } *)
 
+exception Test_error
+(** The exception return by {!run} in case of errors. *)
+
 type speed_level = [ `Quick | `Slow ]
 (** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
-   as [`Slow] are skipped when the `-q` flag is passed. *)
+    as [`Slow] are skipped when the `-q` flag is passed. *)
 
-type 'a test_case = string * speed_level * ('a -> unit)
+module type TESTER = sig
+  type return
+
+type 'a test_case = string * speed_level * ('a -> return)
 (** A test case is an UTF-8 encoded documentation string, a speed
     level and a function to execute. Typically, the testing function calls the
     helper functions provided below (such as [check] and [fail]). *)
 
-val test_case : string -> speed_level -> ('a -> unit) -> 'a test_case
+val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
 (** [test_case n s f] is the test case [n] running at speed [s] using
     the function [f]. *)
 
@@ -46,11 +52,8 @@ type 'a test = string * 'a test_case list
 (** A test is an US-ASCII encoded name and a list of test cases.
  * The name can be used for filtering which tests to run on the CLI *)
 
-exception Test_error
-(** The exception return by {!run} in case of errors. *)
-
 val run :
-  ?and_exit:bool -> ?argv:string array -> string -> unit test list -> unit
+  ?and_exit:bool -> ?argv:string array -> string -> unit test list -> return
 (** [run n t] runs the test suite [t]. [n] is the name of the
     tested library.
 
@@ -74,11 +77,28 @@ val run_with_args :
   string ->
   'a Cmdliner.Term.t ->
   'a test list ->
-  unit
+  return
 (** [run_with_args n a t] Similar to [run a t] but take an extra
     argument [a]. Every test function will receive as arguement the
     evaluation of the [Cdmliner] term [a]: this is useful to configure
     the test behaviors using the CLI. *)
+end
+
+include TESTER with type return = unit
+
+module type MONAD = sig
+  type 'a t
+
+  val return : 'a -> 'a t
+
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+end
+
+module MonadicTester (M : MONAD) : TESTER with type return = unit M.t
+(** Functor for building a tester that sequences tests of type [('a -> unit M.t)]
+    within a given concurrency monad [M.t]. The [run] and [run_with_args] functions
+    must be scheduled in a global event loop. Intended for use by the {!Alcotest_lwt}
+    and {!Alcotest_async} backends. *)
 
 (** {2 Assert functions} *)
 

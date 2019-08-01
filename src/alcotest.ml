@@ -22,12 +22,74 @@ module IntSet = Set.Make (struct
   type t = int
 end)
 
+module type MONAD = sig
+  type 'a t
+
+  val return : 'a -> 'a t
+
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+end
+
+module ExtendMonad (M : MONAD) = struct
+  include M
+
+  module Infix = struct
+    let ( >>= ) = M.bind
+
+    let ( >|= ) x f =
+      x >>= fun y ->
+      M.return (f y)
+  end
+
+  open Infix
+
+  module List = struct
+    let map_s f l =
+      let rec inner acc = function
+        | [] -> return (List.rev acc)
+        | hd :: tl ->
+            f hd >>= fun r ->
+            (inner [@ocaml.tailcall]) (r :: acc) tl
+      in
+      inner [] l
+  end
+end
+
 exception Check_error of string
 
-(* Types *)
+exception Test_error
+
 type speed_level = [ `Quick | `Slow ]
 
-type 'a run = 'a -> unit
+module type TESTER = sig
+  type return
+
+  type 'a test_case = string * speed_level * ('a -> return)
+
+  val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
+
+  type 'a test = string * 'a test_case list
+
+  val run :
+    ?and_exit:bool -> ?argv:string array -> string -> unit test list -> return
+
+  val run_with_args :
+    ?and_exit:bool ->
+    ?argv:string array ->
+    string ->
+    'a Cmdliner.Term.t ->
+    'a test list ->
+    return
+end
+
+module MonadicTester (M : MONAD) = struct
+module M = ExtendMonad (M)
+include M.Infix
+
+(* Types *)
+type return = unit M.t
+
+type 'a run = 'a -> unit M.t
 
 type path = Path of (string * int)
 
@@ -38,7 +100,7 @@ type run_result =
   | `Skip
   | `Todo of string ]
 
-type 'a rrun = 'a -> run_result
+type 'a rrun = 'a -> run_result M.t
 
 type 'a test_case = string * speed_level * 'a run
 
@@ -130,7 +192,7 @@ let terminal_columns =
     with _ -> (
       try (* shell envvar *)
           int_of_string (Sys.getenv "COLUMNS") with _ -> (* default *)
-                                                         80 ) )
+                                                          80 ) )
 
 let line ppf ?color c =
   let line = String.v ~len:terminal_columns (fun _ -> c) in
@@ -310,21 +372,21 @@ let exn path name err =
   `Exn (path, name, err)
 
 let protect_test path (f : 'a run) : 'a rrun =
- fun args ->
+  fun args ->
   try
-    f args;
+    f args >|= fun () ->
     `Ok
   with
   | Check_error err ->
       let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
-      `Error (path, err)
-  | Failure f -> exn path "failure" f
-  | Invalid_argument f -> exn path "invalid" f
-  | e -> exn path "exception" (Printexc.to_string e)
+      M.return @@ `Error (path, err)
+  | Failure f -> M.return @@ exn path "failure" f
+  | Invalid_argument f -> M.return @@ exn path "invalid" f
+  | e -> M.return @@ exn path "exception" (Printexc.to_string e)
 
 let perform_test t args (path, test) =
   print_event t (`Start path);
-  let result = test args in
+  test args >|= fun result ->
   (* Store errors *)
   let () =
     match result with
@@ -335,7 +397,7 @@ let perform_test t args (path, test) =
   print_event t (`Result (path, result));
   result
 
-let perform_tests t tests args = List.map (perform_test t args) tests
+let perform_tests t tests args = M.List.map_s (perform_test t args) tests
 
 let with_redirect file fn =
   flush stdout;
@@ -348,7 +410,11 @@ let with_redirect file fn =
   Unix.dup2 fd_file fd_stdout;
   Unix.dup2 fd_file fd_stderr;
   Unix.close fd_file;
-  let r = try `Ok (fn ()) with e -> `Error e in
+  ( try
+      fn () >|= fun o ->
+      `Ok o
+    with e -> M.return @@ `Error e )
+  >|= fun r ->
   flush stdout;
   flush stderr;
   Unix.dup2 fd_old_stdout fd_stdout;
@@ -357,7 +423,7 @@ let with_redirect file fn =
   Unix.close fd_old_stderr;
   match r with `Ok x -> x | `Error e -> raise e
 
-let skip_fun _ = `Skip
+let skip_fun _ = M.return `Skip
 
 let skip_label (path, _) = (path, skip_fun)
 
@@ -385,7 +451,7 @@ let redirect_test_output t path (f : 'a rrun) =
   else fun args ->
     let output_file = output_file t path in
     with_redirect output_file (fun () ->
-        let result = f args in
+        f args >|= fun result ->
         ( match result with
         | `Error (_path, str) -> Printf.printf "%s\n" str
         | `Exn (_path, n, str) -> Printf.printf "[%s] %s\n" n str
@@ -442,7 +508,7 @@ let result t test args =
   let start_time = Unix.time () in
   let test = map_test (redirect_test_output t) test in
   let test = map_test (select_speed t) test in
-  let results = perform_tests t test args in
+  perform_tests t test args >|= fun results ->
   let time = Unix.time () -. start_time in
   let success = List.length (List.filter has_run results) in
   let failures = List.filter failure results in
@@ -454,7 +520,7 @@ let list_tests t () =
     (fun path ->
       Fmt.(pf stdout) "%a    %s\n" (pp_path t) path (doc_of_path t path))
     paths;
-  0
+  M.return 0
 
 let validate_name name =
   let pattern = "^[a-zA-Z0-9_- ]+$" in
@@ -494,13 +560,13 @@ let register t name (ts : 'a test_case list) =
       let tests = t.tests @ ts in
       let paths = Hashtbl.fold (fun k _ acc -> k :: acc) paths [] in
       let paths = t.paths @ paths in
-      let doc p = try Some (Hashtbl.find docs p) with Not_found -> t.doc p in
+      let doc p =
+        try Some (Hashtbl.find docs p) with Not_found -> t.doc p
+      in
       let speed p =
         try Some (Hashtbl.find speeds p) with Not_found -> t.speed p
       in
       Ok { t with paths; tests; doc; speed; max_label }
-
-exception Test_error
 
 let apply fn t test_dir verbose compact show_errors quick json =
   let show_errors = show_errors in
@@ -510,8 +576,8 @@ let apply fn t test_dir verbose compact show_errors quick json =
   in
   fn t
 
-let run_registred_tests t () args =
-  let result = result t t.tests args in
+let run_registered_tests t () args =
+  result t t.tests args >|= fun result ->
   show_result t result;
   result.failures
 
@@ -524,7 +590,7 @@ let run_subtest t labels () args =
     exit 1 )
   else
     let tests = filter_tests ~subst:true labels t.tests in
-    let result = result t tests args in
+    result t tests args >|= fun result ->
     show_result t result;
     result.failures
 
@@ -574,7 +640,7 @@ let set_color = Term.(const set_color $ Fmt_cli.style_renderer ())
 
 let default_cmd t args =
   let doc = "Run all the tests." in
-  ( Term.(pure run_registred_tests $ of_env t $ set_color $ args),
+  ( Term.(pure run_registered_tests $ of_env t $ set_color $ args),
     Term.info t.name ~version:"%%VERSION%%" ~doc )
 
 let regex =
@@ -653,13 +719,27 @@ let run_with_args ?(and_exit = true) ?argv name args (tl : 'a test list) =
       Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
       let choices = [ list_cmd t; test_cmd t args ] in
       match Term.eval_choice ?argv (default_cmd t args) choices with
-      | `Ok 0 -> if and_exit then exit 0 else ()
+      | `Ok im -> (
+          im >|= function
+          | 0 -> if and_exit then exit 0 else ()
+          | i -> if and_exit then exit i else raise Test_error )
       | `Error _ -> if and_exit then exit 1 else raise Test_error
-      | `Ok i -> if and_exit then exit i else raise Test_error
-      | _ -> if and_exit then exit 0 else () )
+      | _ -> if and_exit then exit 0 else M.return () )
 
 let run ?and_exit ?argv name tl =
   run_with_args ?and_exit ?argv name (Term.pure ()) tl
+end
+
+module IdentityMonad = struct
+  type 'a t = 'a
+
+  let return x = x
+
+  let bind x f = f x
+end
+
+module T = MonadicTester (IdentityMonad)
+include T
 
 module type TESTABLE = sig
   type t
