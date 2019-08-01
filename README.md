@@ -17,7 +17,7 @@ tests to run.
 
 ### Examples
 
-A simple example:
+A simple example (taken from `examples/simple.ml`):
 
 ```ocaml
 (* Build with `ocamlbuild -pkg alcotest simple.byte` *)
