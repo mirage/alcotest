@@ -25,27 +25,43 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 *)
 
-(* Build with
- * ocamlbuild -pkg alcotest simple.byte *)
-
 (* A module with functions to test *)
 module To_test = struct
-  let capit letter = Astring.Char.Ascii.uppercase letter
+  let lowercase = String.lowercase_ascii
 
-  let plus int_list = List.fold_left (fun a b -> a + b) 0 int_list
+  let capitalize = String.capitalize_ascii
+
+  let str_concat = String.concat ""
+
+  let list_concat = List.append
 end
 
 (* The tests *)
-let capit () = Alcotest.(check char) "Check A" 'A' (To_test.capit 'a')
+let test_lowercase () =
+  Alcotest.(check string) "same string" "hello!" (To_test.lowercase "hELLO!")
 
-let plus () =
-  Alcotest.(check int) "Sum equals to 7" 7 (To_test.plus [ 1; 1; 2; 3 ])
+let test_capitalize () =
+  Alcotest.(check string) "same string" "World." (To_test.capitalize "world.")
 
-let test_set =
-  [ ("\xF0\x9F\x90\xAB  Capitalize", `Quick, capit);
-    ("Add entries", `Slow, plus)
-  ]
+let test_str_concat () =
+  Alcotest.(check string)
+    "same string" "foobar"
+    (To_test.str_concat [ "foo"; "bar" ])
+
+let test_list_concat () =
+  Alcotest.(check (list int))
+    "same lists" [ 1; 2; 3 ]
+    (To_test.list_concat [ 1 ] [ 2; 3 ])
 
 (* Run it *)
 let () =
-  Alcotest.run "My first test" [ ("test_1", test_set); ("test_2", test_set) ]
+  Alcotest.run "Utils"
+    [ ( "string-case",
+        [ Alcotest.test_case "Lower case" `Quick test_lowercase;
+          Alcotest.test_case "Capitalization" `Quick test_capitalize
+        ] );
+      ( "string-concat",
+        [ Alcotest.test_case "String mashing" `Quick test_str_concat ] );
+      ( "list-concat",
+        [ Alcotest.test_case "List mashing" `Slow test_list_concat ] )
+    ]
