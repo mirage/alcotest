@@ -36,7 +36,7 @@ type speed_level = [ `Quick | `Slow ]
 (** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
     as [`Slow] are skipped when the `-q` flag is passed. *)
 
-module type TESTER = sig
+module type S = sig
   type return
 
 type 'a test_case = string * speed_level * ('a -> return)
@@ -84,7 +84,7 @@ val run_with_args :
     the test behaviors using the CLI. *)
 end
 
-include TESTER with type return = unit
+include S with type return = unit
 
 module type MONAD = sig
   type 'a t
@@ -94,7 +94,7 @@ module type MONAD = sig
   val bind : 'a t -> ('a -> 'b t) -> 'b t
 end
 
-module MonadicTester (M : MONAD) : TESTER with type return = unit M.t
+module Make (M : MONAD) : S with type return = unit M.t
 (** Functor for building a tester that sequences tests of type [('a -> unit M.t)]
     within a given concurrency monad [M.t]. The [run] and [run_with_args] functions
     must be scheduled in a global event loop. Intended for use by the {!Alcotest_lwt}

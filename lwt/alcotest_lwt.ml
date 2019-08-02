@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-module Tester = Alcotest.MonadicTester (Lwt)
+module Tester = Alcotest.Make (Lwt)
 include Tester
 
 let test_case' n s f = test_case n s (fun x -> Lwt.return (f x))

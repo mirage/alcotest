@@ -61,7 +61,7 @@ exception Test_error
 
 type speed_level = [ `Quick | `Slow ]
 
-module type TESTER = sig
+module type S = sig
   type return
 
   type 'a test_case = string * speed_level * ('a -> return)
@@ -82,7 +82,7 @@ module type TESTER = sig
     return
 end
 
-module MonadicTester (M : MONAD) = struct
+module Make (M : MONAD) = struct
 module M = ExtendMonad (M)
 include M.Infix
 
@@ -738,7 +738,7 @@ module IdentityMonad = struct
   let bind x f = f x
 end
 
-module T = MonadicTester (IdentityMonad)
+module T = Make (IdentityMonad)
 include T
 
 module type TESTABLE = sig
