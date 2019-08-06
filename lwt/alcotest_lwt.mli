@@ -14,12 +14,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** [Alcotest_lwt] allows to defines tests which returns an Lwt
-    promise. {!run} will run these promises and will catch asynchrous
-    exceptions. *)
+(** [Alcotest_lwt] enables testing functions which return an Lwt promise.
+    {!run} returns a promise that runs the tests when scheduled, catching
+    any asynchronous exceptions thrown by the tests. *)
+
+include Alcotest.S with type return = unit Lwt.t
 
 val test_case :
   string ->
   Alcotest.speed_level ->
   (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-  'a Alcotest.test_case
+  'a test_case
+
+val test_case' : string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case

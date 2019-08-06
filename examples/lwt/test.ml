@@ -85,19 +85,20 @@ let test_switch_dealloc _ () =
 
 (* Run it *)
 let () =
-  Alcotest.run "LwtUtils"
-    [ ( "basic",
-        [ Alcotest.test_case "Plain" `Quick test_lowercase;
-          Alcotest_lwt.test_case "Lwt" `Quick test_lowercase_lwt
-        ] );
-      ( "exceptions",
-        [ Alcotest.test_case "Plain" `Quick test_exn;
-          Alcotest_lwt.test_case "Lwt toplevel" `Quick test_exn_lwt_toplevel;
-          Alcotest_lwt.test_case "Lwt internal" `Quick test_exn_lwt_internal
-        ] );
-      ( "switches",
-        [ Alcotest_lwt.test_case "Allocate resource" `Quick test_switch_alloc;
-          Alcotest_lwt.test_case "Check resource is deallocated" `Quick
-            test_switch_dealloc
-        ] )
-    ]
+  let open Alcotest_lwt in
+  Lwt_main.run
+  @@ run "LwtUtils"
+       [ ( "basic",
+           [ test_case' "Plain" `Quick test_lowercase;
+             test_case "Lwt" `Quick test_lowercase_lwt
+           ] );
+         ( "exceptions",
+           [ test_case' "Plain" `Quick test_exn;
+             test_case "Lwt toplevel" `Quick test_exn_lwt_toplevel;
+             test_case "Lwt internal" `Quick test_exn_lwt_internal
+           ] );
+         ( "switches",
+           [ test_case "Allocate resource" `Quick test_switch_alloc;
+             test_case "Check resource deallocated" `Quick test_switch_dealloc
+           ] )
+       ]

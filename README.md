@@ -179,7 +179,7 @@ let test_lwt switch () =
   Lwt_unix.sleep 10.
 
 let () =
-  Alcotest.run "foo" [
+  Lwt_main.run @@ Alcotest_lwt.run "foo" [
     "all", [
       Alcotest_lwt.test_case "one" `Quick test_lwt
     ]
