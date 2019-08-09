@@ -16,10 +16,12 @@
 
 open Astring
 
-module IntSet = Set.Make (struct
-  let compare = Pervasives.compare
+let compare_int : int -> int -> int = compare
 
+module IntSet = Set.Make (struct
   type t = int
+
+  let compare = compare_int
 end)
 
 module type MONAD = sig
@@ -92,6 +94,9 @@ module Make (M : MONAD) = struct
   type 'a run = 'a -> unit M.t
 
   type path = Path of (string * int)
+
+  let compare_path (Path (s, i)) (Path (s', i')) =
+    match String.compare s s' with 0 -> compare_int i i' | n -> n
 
   type run_result =
     [ `Ok
@@ -515,7 +520,7 @@ module Make (M : MONAD) = struct
     { time; success; failures = List.length failures }
 
   let list_tests t () =
-    let paths = List.sort Pervasives.compare t.paths in
+    let paths = List.sort compare_path t.paths in
     List.iter
       (fun path ->
         Fmt.(pf stdout) "%a    %s\n" (pp_path t) path (doc_of_path t path))
