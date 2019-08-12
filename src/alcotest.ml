@@ -570,26 +570,29 @@ module Make (M : MONAD) = struct
       Error msg
     else Ok ()
 
-  let register t_acc name (ts : 'a test_case list) =
+  let register t name (ts : 'a test_case list) =
+    let max_label = max t.max_label (String.length name) in
+    let test_details =
+      List.mapi
+        (fun i (doc, speed, test) ->
+          let path = Path (name, i) in
+          let doc =
+            if doc = "" || doc.[String.length doc - 1] = '.' then doc
+            else doc ^ "."
+          in
+          (path, doc, speed, protect_test path test))
+        ts
+    in
+    let suite = List.fold_left Suite.add t.suite test_details in
+    { t with suite; max_label }
+
+  (* Accumulate name validation errors rather than failing fast *)
+  let register_acc t_acc name (ts : 'a test_case list) =
     match (t_acc, validate_name name) with
     | Error error_acc, Error e -> Error (e :: error_acc)
     | Error error_acc, Ok () -> Error error_acc
     | Ok _, Error e -> Error [ e ]
-    | Ok t, Ok () ->
-        let max_label = max t.max_label (String.length name) in
-        let test_details =
-          List.mapi
-            (fun i (doc, speed, test) ->
-              let path = Path (name, i) in
-              let doc =
-                if doc = "" || doc.[String.length doc - 1] = '.' then doc
-                else doc ^ "."
-              in
-              (path, doc, speed, protect_test path test))
-            ts
-        in
-        let suite = List.fold_left Suite.add t.suite test_details in
-        Ok { t with suite; max_label }
+    | Ok t, Ok () -> Ok (register t name ts)
 
   let apply fn t test_dir verbose compact show_errors quick json =
     let show_errors = show_errors in
@@ -737,7 +740,9 @@ module Make (M : MONAD) = struct
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
     let t = { (empty ()) with run_id } in
     let t =
-      List.fold_left (fun t (name, tests) -> register t name tests) (Ok t) tl
+      List.fold_left
+        (fun t (name, tests) -> register_acc t name tests)
+        (Ok t) tl
     in
     match t with
     | Error error_acc ->
