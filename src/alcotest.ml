@@ -61,6 +61,8 @@ exception Check_error of string
 
 exception Test_error
 
+exception Registration_error of string
+
 type speed_level = [ `Quick | `Slow ]
 
 module type S = sig
@@ -98,6 +100,12 @@ module Make (M : MONAD) = struct
   let compare_path (Path (s, i)) (Path (s', i')) =
     match String.compare s s' with 0 -> compare_int i i' | n -> n
 
+  let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
+
+  let file_of_path (Path (n, i)) =
+    let path = Path (String.Ascii.lowercase n, i) in
+    Printf.sprintf "%s.output" (short_string_of_path path)
+
   type run_result =
     [ `Ok
     | `Exn of path * string * string
@@ -126,24 +134,37 @@ module Make (M : MONAD) = struct
 
     val speed_of_path : 'a t -> path -> speed_level
   end = struct
+    module String_set = Set.Make (String)
+
     type 'a t = {
       tests : (path * 'a rrun) list;
       (* caches computed from the library values. *)
+      filepaths : String_set.t;
       doc : (path, string) Hashtbl.t;
       speed : (path, speed_level) Hashtbl.t;
     }
 
     let empty () =
       let tests = [] in
+      let filepaths = String_set.empty in
       let doc = Hashtbl.create 0 in
       let speed = Hashtbl.create 0 in
-      { tests; doc; speed }
+      { tests; filepaths; doc; speed }
+
+    let check_path_is_unique t path =
+      let exn_of_path (Path (name, _)) =
+        Registration_error (Fmt.strf "Duplicate test name: %s" name)
+      in
+      if String_set.mem (file_of_path path) t.filepaths then
+        raise (exn_of_path path)
 
     let add t (path, doc, speed, testfn) =
+      check_path_is_unique t path;
       let tests = (path, testfn) :: t.tests in
+      let filepaths = String_set.add (file_of_path path) t.filepaths in
       Hashtbl.add t.doc path doc;
       Hashtbl.add t.speed path speed;
-      { t with tests }
+      { t with tests; filepaths }
 
     let tests t = List.rev t.tests
 
@@ -258,15 +279,9 @@ module Make (M : MONAD) = struct
     iter ic b s;
     Buffer.contents b
 
-  let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
-
-  let file_of_path path ext =
-    Printf.sprintf "%s.%s" (short_string_of_path path) ext
-
   let output_dir t = Filename.concat t.test_dir t.run_id
 
-  let output_file t path =
-    Filename.concat (output_dir t) (file_of_path path "output")
+  let output_file t path = Filename.concat (output_dir t) (file_of_path path)
 
   let mkdir_p path mode =
     let is_win_drive_letter x =
