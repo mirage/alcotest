@@ -1,0 +1,8 @@
+Testing suite-name.
+This run has ID `<uuid>`.
+ ...                test-a          0   First test case.[OK]                test-a          0   First test case.
+ ...                test-a          1   Second test case.[OK]                test-a          1   Second test case.
+ ...                test-b          0   Third test case.[OK]                test-b          0   Third test case.
+ ...                test-c          0   Fourth test case.[OK]                test-c          0   Fourth test case.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 4 tests run.
