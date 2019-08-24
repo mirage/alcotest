@@ -86,15 +86,7 @@ end
 
 include S with type return = unit
 
-module type MONAD = sig
-  type 'a t
-
-  val return : 'a -> 'a t
-
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-end
-
-module Make (M : MONAD) : S with type return = unit M.t
+module Make (M : Monad.S) : S with type return = unit M.t
 (** Functor for building a tester that sequences tests of type [('a -> unit M.t)]
     within a given concurrency monad [M.t]. The [run] and [run_with_args] functions
     must be scheduled in a global event loop. Intended for use by the {!Alcotest_lwt}

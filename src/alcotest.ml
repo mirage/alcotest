@@ -24,39 +24,6 @@ module IntSet = Set.Make (struct
   let compare = compare_int
 end)
 
-module type MONAD = sig
-  type 'a t
-
-  val return : 'a -> 'a t
-
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-end
-
-module ExtendMonad (M : MONAD) = struct
-  include M
-
-  module Infix = struct
-    let ( >>= ) = M.bind
-
-    let ( >|= ) x f =
-      x >>= fun y ->
-      M.return (f y)
-  end
-
-  open Infix
-
-  module List = struct
-    let map_s f l =
-      let rec inner acc = function
-        | [] -> return (List.rev acc)
-        | hd :: tl ->
-            f hd >>= fun r ->
-            (inner [@ocaml.tailcall]) (r :: acc) tl
-      in
-      inner [] l
-  end
-end
-
 exception Check_error of string
 
 exception Test_error
@@ -86,8 +53,8 @@ module type S = sig
     return
 end
 
-module Make (M : MONAD) = struct
-  module M = ExtendMonad (M)
+module Make (M : Monad.S) = struct
+  module M = Monad.Extend (M)
   include M.Infix
 
   (* Types *)
