@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2017 Thomas Gazagnaire <thomas@gazagnaire.org>
+ * Copyright (c) 2013-2016 Thomas Gazagnaire <thomas@gazagnaire.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,17 +14,31 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** [Alcotest_lwt] enables testing functions which return an Lwt promise.
-    {!run} returns a promise that runs the tests when scheduled, catching
-    any asynchronous exceptions thrown by the tests. *)
+exception Check_error of string
 
-include Alcotest.Core.S with type return = unit Lwt.t
+type speed_level = [ `Quick | `Slow ]
 
-val test_case :
-  string ->
-  Alcotest.Core.speed_level ->
-  (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-  'a test_case
+module type S = sig
+  type return
 
-val test_case' :
-  string -> Alcotest.Core.speed_level -> ('a -> unit) -> 'a test_case
+  type 'a test_case = string * speed_level * ('a -> return)
+
+  exception Test_error
+
+  val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
+
+  type 'a test = string * 'a test_case list
+
+  val run :
+    ?and_exit:bool -> ?argv:string array -> string -> unit test list -> return
+
+  val run_with_args :
+    ?and_exit:bool ->
+    ?argv:string array ->
+    string ->
+    'a Cmdliner.Term.t ->
+    'a test list ->
+    return
+end
+
+module Make (M : Monad.S) : S with type return = unit M.t

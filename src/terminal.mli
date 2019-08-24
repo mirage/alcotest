@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2017 Thomas Gazagnaire <thomas@gazagnaire.org>
+ * Copyright (c) 2013-2016 Thomas Gazagnaire <thomas@gazagnaire.org>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,17 +14,4 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** [Alcotest_lwt] enables testing functions which return an Lwt promise.
-    {!run} returns a promise that runs the tests when scheduled, catching
-    any asynchronous exceptions thrown by the tests. *)
-
-include Alcotest.Core.S with type return = unit Lwt.t
-
-val test_case :
-  string ->
-  Alcotest.Core.speed_level ->
-  (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-  'a test_case
-
-val test_case' :
-  string -> Alcotest.Core.speed_level -> ('a -> unit) -> 'a test_case
+val line : Format.formatter -> ?color:Fmt.style -> char -> unit
