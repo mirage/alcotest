@@ -1,0 +1,8 @@
+Testing suite-name.
+This run has ID `<uuid>`.
+ ...                test-a          0   Quick & passes filter.[OK]                test-a          0   Quick & passes filter.
+ ...                test-a          1   Slow & passes filter.[SKIP]              test-a          1   Slow & passes filter.
+ ...                test-b          0   Slow & fails filter.[SKIP]              test-b          0   Slow & fails filter.
+ ...                test-b          1   Quick & fails filter.[SKIP]              test-b          1   Quick & fails filter.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 1 test run.
