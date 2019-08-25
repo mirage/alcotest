@@ -352,7 +352,7 @@ module Make (M : MONAD) = struct
             let file = open_in filename in
             let output = string_of_channel file in
             close_in file;
-            Fmt.strf "in %s:\n%s" filename output
+            Fmt.strf "in `%s`:\n%s" filename output
         in
         let error =
           Fmt.strf "-- %s [%s] Failed --\n%s"
