@@ -51,10 +51,10 @@ let test_two =
 
 (* Run it *)
 let one () =
-  try Alcotest.run ~and_exit:false "My first test" [ ("Ωèone", test_one) ]
+  try Alcotest.Cli.run ~and_exit:false "My first test" [ ("Ωèone", test_one) ]
   with Alcotest.Test_error -> Printf.printf "Continue!!\n%!"
 
-let two () = Alcotest.run ~and_exit:true "Hoho" [ ("two", test_two) ]
+let two () = Alcotest.Cli.run ~and_exit:true "Hoho" [ ("two", test_two) ]
 
 let () =
   one ();

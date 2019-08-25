@@ -17,28 +17,63 @@
 exception Check_error of string
 
 type speed_level = [ `Quick | `Slow ]
+(** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
+    as [`Slow] are skipped when the `-q` flag is passed. *)
+
+module IntSet : Set.S with type elt = int
 
 module type S = sig
   type return
 
   type 'a test_case = string * speed_level * ('a -> return)
+  (** A test case is an UTF-8 encoded documentation string, a speed
+      level and a function to execute. Typically, the testing function calls the
+      helper functions provided below (such as [check] and [fail]). *)
 
   exception Test_error
+  (** The exception return by {!run} in case of errors. *)
 
   val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
+  (** [test_case n s f] is the test case [n] running at speed [s] using
+      the function [f]. *)
 
   type 'a test = string * 'a test_case list
+  (** A test is an US-ASCII encoded name and a list of test cases.
+      The name can be used for filtering which tests to run on the CLI *)
 
-  val run :
-    ?and_exit:bool -> ?argv:string array -> string -> unit test list -> return
+  val list_tests : 'a test list -> return
+  (** Print all of the test cases in a human-readable form *)
 
-  val run_with_args :
+  type 'a with_options =
     ?and_exit:bool ->
-    ?argv:string array ->
-    string ->
-    'a Cmdliner.Term.t ->
-    'a test list ->
-    return
+    ?verbose:bool ->
+    ?compact:bool ->
+    ?quick_only:bool ->
+    ?show_errors:bool ->
+    ?json:bool ->
+    ?filter:Re.re option * IntSet.t option ->
+    ?output_dir:string ->
+    'a
+  (** The various options taken by the tests runners {!run} and
+      {!run_with_args}:
+
+      - [and_exit] (default [true]). Once the tests have completed, exit with
+        return code [0] if all tests passed, otherwise [1].
+      - [verbose] (default [false]). Display the test std.out and std.err (rather
+        than redirecting to a log file).
+      - [compact] (default [false]). Compact the output of the tests.
+      - [quick_only] (default [false]). Don't run tests with the
+        {{!Core.speed_level} [`Slow] speed level}.
+      - [show_errors] (default [false]). Display the test errors.
+      - [json] (default [false]). Print test results in a JSON-compatible format. *)
+
+  val run : (string -> unit test list -> return) with_options
+
+  val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
 module Make (M : Monad.S) : S with type return = unit M.t
+(** Functor for building a tester that sequences tests of type [('a -> unit M.t)]
+    within a given concurrency monad [M.t]. The [run] and [run_with_args] functions
+    must be scheduled in a global event loop. Intended for use by the {!Alcotest_lwt}
+    and {!Alcotest_async} backends. *)

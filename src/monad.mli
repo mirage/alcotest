@@ -22,6 +22,8 @@ module type S = sig
   val bind : 'a t -> ('a -> 'b t) -> 'b t
 end
 
+module Identity : S with type 'a t = 'a
+
 module type EXTENDED = sig
   include S
 

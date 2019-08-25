@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  run ~argv:[| ""; "--json" |] "suite-name"
+  Cli.run ~argv:[| ""; "--json" |] "suite-name"
     [ ( "test-a",
         [ test_case "First test case" `Quick id;
           test_case "Second test case" `Quick id
