@@ -61,6 +61,8 @@ exception Check_error of string
 
 exception Test_error
 
+exception Registration_error of string
+
 type speed_level = [ `Quick | `Slow ]
 
 module type S = sig
@@ -98,6 +100,12 @@ module Make (M : MONAD) = struct
   let compare_path (Path (s, i)) (Path (s', i')) =
     match String.compare s s' with 0 -> compare_int i i' | n -> n
 
+  let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
+
+  let file_of_path (Path (n, i)) =
+    let path = Path (String.Ascii.lowercase n, i) in
+    Printf.sprintf "%s.output" (short_string_of_path path)
+
   type run_result =
     [ `Ok
     | `Exn of path * string * string
@@ -113,15 +121,64 @@ module Make (M : MONAD) = struct
 
   type 'a test = string * 'a test_case list
 
+  module Suite : sig
+    type 'a t
+
+    val empty : unit -> 'a t
+
+    val add : 'a t -> path * string * speed_level * 'a rrun -> 'a t
+
+    val tests : 'a t -> (path * 'a rrun) list
+
+    val doc_of_path : 'a t -> path -> string
+
+    val speed_of_path : 'a t -> path -> speed_level
+  end = struct
+    module String_set = Set.Make (String)
+
+    type 'a t = {
+      tests : (path * 'a rrun) list;
+      (* caches computed from the library values. *)
+      filepaths : String_set.t;
+      doc : (path, string) Hashtbl.t;
+      speed : (path, speed_level) Hashtbl.t;
+    }
+
+    let empty () =
+      let tests = [] in
+      let filepaths = String_set.empty in
+      let doc = Hashtbl.create 0 in
+      let speed = Hashtbl.create 0 in
+      { tests; filepaths; doc; speed }
+
+    let check_path_is_unique t path =
+      let exn_of_path (Path (name, _)) =
+        Registration_error (Fmt.strf "Duplicate test name: %s" name)
+      in
+      if String_set.mem (file_of_path path) t.filepaths then
+        raise (exn_of_path path)
+
+    let add t (path, doc, speed, testfn) =
+      check_path_is_unique t path;
+      let tests = (path, testfn) :: t.tests in
+      let filepaths = String_set.add (file_of_path path) t.filepaths in
+      Hashtbl.add t.doc path doc;
+      Hashtbl.add t.speed path speed;
+      { t with tests; filepaths }
+
+    let tests t = List.rev t.tests
+
+    let doc_of_path t path = try Hashtbl.find t.doc path with Not_found -> ""
+
+    let speed_of_path t path =
+      try Hashtbl.find t.speed path with Not_found -> `Slow
+  end
+
   (* global state *)
   type 'a t = {
     (* library values. *)
     name : string;
-    tests : (path * 'a rrun) list;
-    (* caches computed from the library values. *)
-    paths : path list;
-    doc : path -> string option;
-    speed : path -> speed_level option;
+    suite : 'a Suite.t;
     (* runtime state. *)
     mutable errors : string list;
     (* runtime options. *)
@@ -138,10 +195,7 @@ module Make (M : MONAD) = struct
   let empty () =
     let name = Filename.basename Sys.argv.(0) in
     let errors = [] in
-    let paths = [] in
-    let doc _ = None in
-    let speed _ = None in
-    let tests = [] in
+    let suite = Suite.empty () in
     let max_label = 0 in
     let verbose = false in
     let compact = false in
@@ -153,10 +207,7 @@ module Make (M : MONAD) = struct
     {
       name;
       errors;
-      tests;
-      paths;
-      doc;
-      speed;
+      suite;
       max_label;
       speed_level;
       show_errors;
@@ -228,15 +279,9 @@ module Make (M : MONAD) = struct
     iter ic b s;
     Buffer.contents b
 
-  let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
-
-  let file_of_path path ext =
-    Printf.sprintf "%s.%s" (short_string_of_path path) ext
-
   let output_dir t = Filename.concat t.test_dir t.run_id
 
-  let output_file t path =
-    Filename.concat (output_dir t) (file_of_path path "output")
+  let output_file t path = Filename.concat (output_dir t) (file_of_path path)
 
   let mkdir_p path mode =
     let is_win_drive_letter x =
@@ -290,13 +335,9 @@ module Make (M : MONAD) = struct
   let pp_path t ppf (Path (n, i)) =
     Fmt.pf ppf "%a%3d" (left (t.max_label + 8) cyan_s) n i
 
-  let doc_of_path t path = match t.doc path with None -> "" | Some d -> d
-
-  let speed_of_path t path =
-    match t.speed path with None -> `Slow | Some s -> s
-
   let print_info t p =
-    print t (fun ppf -> Fmt.pf ppf "%a   %s" (pp_path t) p (doc_of_path t p))
+    print t (fun ppf ->
+        Fmt.pf ppf "%a   %s" (pp_path t) p (Suite.doc_of_path t.suite p))
 
   let left_c = 20
 
@@ -316,7 +357,8 @@ module Make (M : MONAD) = struct
         let error =
           Fmt.strf "-- %s [%s] Failed --\n%s"
             (short_string_of_path path)
-            (doc_of_path t path) logs
+            (Suite.doc_of_path t.suite path)
+            logs
         in
         t.errors <- error :: t.errors)
       fmt
@@ -464,7 +506,9 @@ module Make (M : MONAD) = struct
           result)
 
   let select_speed t path (f : 'a rrun) : 'a rrun =
-    if compare_speed_level (speed_of_path t path) t.speed_level >= 0 then f
+    if
+      compare_speed_level (Suite.speed_of_path t.suite path) t.speed_level >= 0
+    then f
     else skip_fun
 
   type result = { success : int; failures : int; time : float }
@@ -520,10 +564,13 @@ module Make (M : MONAD) = struct
     { time; success; failures = List.length failures }
 
   let list_tests t () =
-    let paths = List.sort compare_path t.paths in
+    let paths = List.map fst (Suite.tests t.suite) in
+    let paths = List.sort compare_path paths in
     List.iter
       (fun path ->
-        Fmt.(pf stdout) "%a    %s\n" (pp_path t) path (doc_of_path t path))
+        Fmt.(pf stdout)
+          "%a    %s\n" (pp_path t) path
+          (Suite.doc_of_path t.suite path))
       paths;
     M.return 0
 
@@ -539,39 +586,28 @@ module Make (M : MONAD) = struct
     else Ok ()
 
   let register t name (ts : 'a test_case list) =
-    match (t, validate_name name) with
+    let max_label = max t.max_label (String.length name) in
+    let test_details =
+      List.mapi
+        (fun i (doc, speed, test) ->
+          let path = Path (name, i) in
+          let doc =
+            if doc = "" || doc.[String.length doc - 1] = '.' then doc
+            else doc ^ "."
+          in
+          (path, doc, speed, protect_test path test))
+        ts
+    in
+    let suite = List.fold_left Suite.add t.suite test_details in
+    { t with suite; max_label }
+
+  (* Accumulate name validation errors rather than failing fast *)
+  let register_acc t_acc name (ts : 'a test_case list) =
+    match (t_acc, validate_name name) with
     | Error error_acc, Error e -> Error (e :: error_acc)
     | Error error_acc, Ok () -> Error error_acc
     | Ok _, Error e -> Error [ e ]
-    | Ok t, Ok () ->
-        let max_label = max t.max_label (String.length name) in
-        let paths = Hashtbl.create 16 in
-        let docs = Hashtbl.create 16 in
-        let speeds = Hashtbl.create 16 in
-        let ts =
-          List.mapi
-            (fun i (doc, speed, test) ->
-              let path = Path (name, i) in
-              let doc =
-                if doc = "" || doc.[String.length doc - 1] = '.' then doc
-                else doc ^ "."
-              in
-              Hashtbl.add paths path true;
-              Hashtbl.add docs path doc;
-              Hashtbl.add speeds path speed;
-              (path, protect_test path test))
-            ts
-        in
-        let tests = t.tests @ ts in
-        let paths = Hashtbl.fold (fun k _ acc -> k :: acc) paths [] in
-        let paths = t.paths @ paths in
-        let doc p =
-          try Some (Hashtbl.find docs p) with Not_found -> t.doc p
-        in
-        let speed p =
-          try Some (Hashtbl.find speeds p) with Not_found -> t.speed p
-        in
-        Ok { t with paths; tests; doc; speed; max_label }
+    | Ok t, Ok () -> Ok (register t name ts)
 
   let apply fn t test_dir verbose compact show_errors quick json =
     let show_errors = show_errors in
@@ -582,19 +618,21 @@ module Make (M : MONAD) = struct
     fn t
 
   let run_registered_tests t () args =
-    result t t.tests args >|= fun result ->
+    result t (Suite.tests t.suite) args >|= fun result ->
     show_result t result;
     result.failures
 
   let run_subtest t labels () args =
-    let is_empty = filter_tests ~subst:false labels t.tests = [] in
+    let is_empty =
+      filter_tests ~subst:false labels (Suite.tests t.suite) = []
+    in
     if is_empty then (
       Fmt.(pf stderr)
         "%a\n" red
         "Invalid request (no tests to run, filter skipped everything)!";
       exit 1 )
     else
-      let tests = filter_tests ~subst:true labels t.tests in
+      let tests = filter_tests ~subst:true labels (Suite.tests t.suite) in
       result t tests args >|= fun result ->
       show_result t result;
       result.failures
@@ -717,7 +755,9 @@ module Make (M : MONAD) = struct
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
     let t = { (empty ()) with run_id } in
     let t =
-      List.fold_left (fun t (name, tests) -> register t name tests) (Ok t) tl
+      List.fold_left
+        (fun t (name, tests) -> register_acc t name tests)
+        (Ok t) tl
     in
     match t with
     | Error error_acc ->
