@@ -1,0 +1,8 @@
+Testing suite-name.
+This run has ID `<uuid>`.
+ ...                test-a          0   Quick.[OK]                test-a          0   Quick.
+ ...                test-a          1   Slow.[SKIP]              test-a          1   Slow.
+ ...                test-b          0   Slow.[SKIP]              test-b          0   Slow.
+ ...                test-b          1   Quick.[OK]                test-b          1   Quick.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 2 tests run.

@@ -1,0 +1,7 @@
+Testing suite-name.
+This run has ID `<uuid>`.
+ ...                test-a          0   First test case.[OK]                test-a          0   First test case.
+ ...                test-a          1   Second test case.[OK]                test-a          1   Second test case.
+ ...                test-b          0   Skipped failing test.[SKIP]              test-b          0   Skipped failing test.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 2 tests run.

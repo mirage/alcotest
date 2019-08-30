@@ -1,0 +1,25 @@
+Testing passing testables.
+This run has ID `<uuid>`.
+ ...                reflexive basic              0   unit.[OK]                reflexive basic              0   unit.
+ ...                reflexive basic              1   bool.[OK]                reflexive basic              1   bool.
+ ...                reflexive basic              2   int.[OK]                reflexive basic              2   int.
+ ...                reflexive basic              3   int32.[OK]                reflexive basic              3   int32.
+ ...                reflexive basic              4   int64.[OK]                reflexive basic              4   int64.
+ ...                reflexive basic              5   float.[OK]                reflexive basic              5   float.
+ ...                reflexive basic              6   char.[OK]                reflexive basic              6   char.
+ ...                reflexive basic              7   string.[OK]                reflexive basic              7   string.
+ ...                reflexive composite          0   empty list.[OK]                reflexive composite          0   empty list.
+ ...                reflexive composite          1   non-empty list.[OK]                reflexive composite          1   non-empty list.
+ ...                reflexive composite          2   empty array.[OK]                reflexive composite          2   empty array.
+ ...                reflexive composite          3   non-empty array.[OK]                reflexive composite          3   non-empty array.
+ ...                reflexive composite          4   option some.[OK]                reflexive composite          4   option some.
+ ...                reflexive composite          5   option none.[OK]                reflexive composite          5   option none.
+ ...                reflexive composite          6   result ok.[OK]                reflexive composite          6   result ok.
+ ...                reflexive composite          7   result error.[OK]                reflexive composite          7   result error.
+ ...                reflexive composite          8   pair.[OK]                reflexive composite          8   pair.
+ ...                negation                     0   checked exceptions.[OK]                negation                     0   checked exceptions.
+ ...                negation                     1   negated testables.[OK]                negation                     1   negated testables.
+ ...                fuzzy equality               0   float thresholds.[OK]                fuzzy equality               0   float thresholds.
+ ...                fuzzy equality               1   sorted list.[OK]                fuzzy equality               1   sorted list.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 21 tests run.

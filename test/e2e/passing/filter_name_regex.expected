@@ -1,0 +1,9 @@
+Testing suite-name.
+This run has ID `<uuid>`.
+ ...                basic-run-a            0   Executed.[OK]                basic-run-a            0   Executed.
+ ...                basic-run-a            1   Also executed.[OK]                basic-run-a            1   Also executed.
+ ...                basic-run-b            0   Skipped.[SKIP]              basic-run-b            0   Skipped.
+ ...                basic-run-c            0   Executed.[OK]                basic-run-c            0   Executed.
+ ...                complex-run-a          0   Skipped.[SKIP]              complex-run-a          0   Skipped.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 3 tests run.
