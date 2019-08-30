@@ -1,5 +1,5 @@
 (*
- * Copyright (c) 2017 Thomas Gazagnaire <thomas@gazagnaire.org>
+ * Copyright (c) 2019 Craig Ferguson <craig@tarides.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,17 +14,26 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** [Alcotest_lwt] enables testing functions which return an Lwt promise.
-    {!run} returns a promise that runs the tests when scheduled, catching
-    any asynchronous exceptions thrown by the tests. *)
+module type S = sig
+  type 'a t
 
-include Alcotest.Core.S with type return = unit Lwt.t
+  val return : 'a -> 'a t
 
-val test_case :
-  string ->
-  Alcotest.Core.speed_level ->
-  (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-  'a test_case
+  val bind : 'a t -> ('a -> 'b t) -> 'b t
+end
 
-val test_case' :
-  string -> Alcotest.Core.speed_level -> ('a -> unit) -> 'a test_case
+module type EXTENDED = sig
+  include S
+
+  module Infix : sig
+    val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
+
+    val ( >|= ) : 'a t -> ('a -> 'b) -> 'b t
+  end
+
+  module List : sig
+    val map_s : ('a -> 'b t) -> 'a list -> 'b list t
+  end
+end
+
+module Extend (M : S) : EXTENDED with type 'a t = 'a M.t
