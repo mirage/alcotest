@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  Cli.run
+  Alcotest_cli.run
     ~argv:[| ""; "test"; "--quick"; ".*-a" |]
     "suite-name"
     [ ( "test-a",

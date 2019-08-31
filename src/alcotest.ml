@@ -15,7 +15,6 @@
  *)
 
 module Core = Core
-module Cli = Cli
 module Monad = Monad
 module T = Core.Make (Monad.Identity)
 include T

@@ -6,7 +6,7 @@ let global_stanza filenames =
  (names
    %a
  )
- (libraries alcotest)
+ (libraries alcotest alcotest.cli)
  (modules
    %a
  )

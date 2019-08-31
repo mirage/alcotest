@@ -1,0 +1,6 @@
+(library
+ (public_name alcotest.cli)
+ (name alcotest_cli)
+ (libraries alcotest cmdliner fmt.cli)
+
+)

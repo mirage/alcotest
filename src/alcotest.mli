@@ -30,7 +30,6 @@
 
 module Core : module type of Core
 
-module Cli : module type of Cli
 module Monad : module type of Monad
 
 include Core.S with type return = unit
