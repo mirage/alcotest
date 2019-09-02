@@ -3,6 +3,7 @@
    and_exit_false
    and_exit_true
    basic
+   basic_cli
    check_basic
    filter_name
    filter_name_regex
@@ -16,6 +17,7 @@
    and_exit_false
    and_exit_true
    basic
+   basic_cli
    check_basic
    filter_name
    filter_name_regex
@@ -101,6 +103,32 @@
  (name runtest)
  (action
    (diff basic.expected basic.processed)
+ )
+)
+
+(rule
+ (target basic_cli.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:basic_cli.exe})
+  )
+ )
+)
+
+(rule
+ (target basic_cli.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:basic_cli.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff basic_cli.expected basic_cli.processed)
  )
 )
 
