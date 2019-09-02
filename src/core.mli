@@ -52,7 +52,7 @@ module type S = sig
     ?show_errors:bool ->
     ?json:bool ->
     ?filter:Re.re option * IntSet.t option ->
-    ?output_dir:string ->
+    ?log_dir:string ->
     'a
   (** The various options taken by the tests runners {!run} and
       {!run_with_args}:
@@ -65,7 +65,9 @@ module type S = sig
       - [quick_only] (default [false]). Don't run tests with the
         {{!Core.speed_level} [`Slow] speed level}.
       - [show_errors] (default [false]). Display the test errors.
-      - [json] (default [false]). Print test results in a JSON-compatible format. *)
+      - [json] (default [false]). Print test results in a JSON-compatible format.
+      - [log_dir] (default "$PWD/_build/_tests/"). The directory in which to log
+        the output of the tests (if [verbose] is not set). *)
 
   val run : (string -> unit test list -> return) with_options
 

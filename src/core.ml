@@ -51,7 +51,7 @@ module type S = sig
     ?show_errors:bool ->
     ?json:bool ->
     ?filter:Re.re option * IntSet.t option ->
-    ?output_dir:string ->
+    ?log_dir:string ->
     'a
 
   val run : (string -> unit test list -> return) with_options
@@ -163,7 +163,7 @@ module Make (M : Monad.S) = struct
     json : bool;
     verbose : bool;
     compact : bool;
-    test_dir : string;
+    log_dir : string;
     run_id : string;
   }
 
@@ -177,7 +177,7 @@ module Make (M : Monad.S) = struct
     let speed_level = `Slow in
     let show_errors = false in
     let json = false in
-    let test_dir = Sys.getcwd () in
+    let log_dir = Sys.getcwd () in
     let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
     {
       name;
@@ -189,7 +189,7 @@ module Make (M : Monad.S) = struct
       json;
       verbose;
       compact;
-      test_dir;
+      log_dir;
       run_id;
     }
 
@@ -222,9 +222,9 @@ module Make (M : Monad.S) = struct
     iter ic b s;
     Buffer.contents b
 
-  let output_dir t = Filename.concat t.test_dir t.run_id
+  let log_dir t = Filename.concat t.log_dir t.run_id
 
-  let output_file t path = Filename.concat (output_dir t) (file_of_path path)
+  let output_file t path = Filename.concat (log_dir t) (file_of_path path)
 
   let mkdir_p path mode =
     let is_win_drive_letter x =
@@ -248,18 +248,18 @@ module Make (M : Monad.S) = struct
     | xs -> mk "." xs
 
   let prepare t =
-    let test_dir = output_dir t in
-    if not (Sys.file_exists test_dir) then (
-      mkdir_p test_dir 0o770;
+    let log_dir = log_dir t in
+    if not (Sys.file_exists log_dir) then (
+      mkdir_p log_dir 0o770;
       if Sys.unix || Sys.cygwin then (
-        let this_exe = Filename.concat t.test_dir t.name
-        and latest = Filename.concat t.test_dir "latest" in
+        let this_exe = Filename.concat t.log_dir t.name
+        and latest = Filename.concat t.log_dir "latest" in
         if Sys.file_exists this_exe then Sys.remove this_exe;
         if Sys.file_exists latest then Sys.remove latest;
-        Unix.symlink ~to_dir:true test_dir this_exe;
-        Unix.symlink ~to_dir:true test_dir latest ) )
-    else if not (Sys.is_directory test_dir) then
-      failwith (Fmt.strf "exists but is not a directory: %S" test_dir)
+        Unix.symlink ~to_dir:true log_dir this_exe;
+        Unix.symlink ~to_dir:true log_dir latest ) )
+    else if not (Sys.is_directory log_dir) then
+      failwith (Fmt.strf "exists but is not a directory: %S" log_dir)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
@@ -489,7 +489,7 @@ module Make (M : Monad.S) = struct
           if t.verbose then Fmt.string ppf ""
           else
             Fmt.pf ppf "The full test results are available in `%s`.\n"
-              (output_dir t)
+              (log_dir t)
         in
         if (not t.compact) || result.failures > 0 then
           Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!" full_logs test_results
@@ -580,7 +580,7 @@ module Make (M : Monad.S) = struct
         exit 1
     | Ok t -> list_registered_tests t ()
 
-  let default_output_dir () =
+  let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
     fname_concat [ Sys.getcwd (); "_build"; "_tests" ]
 
@@ -592,12 +592,12 @@ module Make (M : Monad.S) = struct
     ?show_errors:bool ->
     ?json:bool ->
     ?filter:Re.re option * IntSet.t option ->
-    ?output_dir:string ->
+    ?log_dir:string ->
     'a
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
       ?(quick_only = false) ?(show_errors = false) ?(json = false) ?filter
-      ?(output_dir = default_output_dir ()) name args (tl : 'a test list) =
+      ?(log_dir = default_log_dir ()) name args (tl : 'a test list) =
     let speed_level = if quick_only then `Quick else `Slow in
     let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
@@ -611,7 +611,7 @@ module Make (M : Monad.S) = struct
         speed_level;
         json;
         show_errors;
-        test_dir = output_dir;
+        log_dir;
       }
     in
     match register_all t tl with
@@ -630,7 +630,7 @@ module Make (M : Monad.S) = struct
         | _, false -> raise Test_error )
 
   let run ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json ?filter
-      ?output_dir name (tl : unit test list) =
+      ?log_dir name (tl : unit test list) =
     run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
-      ?filter ?output_dir name () tl
+      ?filter ?log_dir name () tl
 end

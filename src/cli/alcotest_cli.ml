@@ -43,8 +43,8 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
 
   let set_color = Term.(const set_color $ Fmt_cli.style_renderer ())
 
-  (* arg_* types are used as a poor-man's "named argument" feature to prevent
-     flags from being re-ordered when passing to Core.run. *)
+  (* arg_* types used as an ad-hoc "named argument" feature to prevent flags
+     from being re-ordered when passing to Core.run. *)
   type arg_verbose = Verbose of bool
 
   type arg_compact = Compact of bool
@@ -55,43 +55,47 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
 
   type arg_json = Json of bool
 
-  type arg_test_dir = Test_dir of string
+  type arg_log_dir = Log_dir of string
 
   type arg_test_filter =
     | Test_filter of (Re.re option * IntSet.t option) option
 
-  type runtime_flags = {
+  type runtime_options = {
     verbose : bool;
     compact : bool;
     show_errors : bool;
     quick_only : bool;
     json : bool;
+    log_dir : string option;
   }
 
   let v_runtime_flags ~defaults (Verbose verbose) (Compact compact)
-      (Show_errors show_errors) (Quick_only quick_only) (Json json) =
+      (Show_errors show_errors) (Quick_only quick_only) (Json json)
+      (Log_dir log_dir) =
     let verbose = verbose || defaults.verbose in
     let compact = compact || defaults.compact in
     let show_errors = show_errors || defaults.show_errors in
     let quick_only = quick_only || defaults.quick_only in
     let json = json || defaults.json in
-    { verbose; compact; show_errors; quick_only; json }
+    let log_dir = Some log_dir in
+    { verbose; compact; show_errors; quick_only; json; log_dir }
 
-  let run_test ~and_exit { verbose; compact; show_errors; quick_only; json }
-      (Test_dir test_dir) (Test_filter filter) () tests name args =
+  let run_test ~and_exit
+      { verbose; compact; show_errors; quick_only; json; log_dir }
+      (Test_filter filter) () tests name args =
     run_with_args ~and_exit ~verbose ~compact ~quick_only ~show_errors ~json
-      ?filter ~output_dir:test_dir name tests args
+      ?filter ?log_dir name tests args
 
   let json =
     let doc = "Display JSON for the results, to be used by a script." in
     Term.(app (const (fun x -> Json x)))
       Arg.(value & flag & info [ "json" ] ~docv:"" ~doc)
 
-  let test_dir =
+  let log_dir =
     let fname_concat l = List.fold_left Filename.concat "" l in
     let default_dir = fname_concat [ Sys.getcwd (); "_build"; "_tests" ] in
     let doc = "Where to store the log files of the tests." in
-    Term.(app (const (fun x -> Test_dir x)))
+    Term.(app (const (fun x -> Log_dir x)))
       Arg.(value & opt dir default_dir & info [ "o" ] ~docv:"DIR" ~doc)
 
   let verbose =
@@ -124,7 +128,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   let flags_with_defaults defaults =
     Term.(
       pure (v_runtime_flags ~defaults)
-      $ verbose $ compact $ show_errors $ quick_only $ json)
+      $ verbose $ compact $ show_errors $ quick_only $ json $ log_dir)
 
   let regex =
     let parse s =
@@ -189,7 +193,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     let flags = flags_with_defaults runtime_flags in
     ( Term.(
         pure (run_test ~and_exit)
-        $ flags $ test_dir $ pure (Test_filter None) $ set_color $ args
+        $ flags $ pure (Test_filter None) $ set_color $ args
         $ pure library_name $ pure tests),
       Term.info exec_name ~version:"%%VERSION%%" ~doc )
 
@@ -203,8 +207,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     in
     ( Term.(
         pure (run_test ~and_exit)
-        $ flags $ test_dir $ filter $ set_color $ args $ pure library_name
-        $ pure tests),
+        $ flags $ filter $ set_color $ args $ pure library_name $ pure tests),
       Term.info "test" ~doc )
 
   let list_cmd tests =
@@ -214,8 +217,10 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
       ?(quick_only = false) ?(show_errors = false) ?(json = false) ?filter
-      ?output_dir:_ ?argv name (args : 'a Term.t) (tl : 'a test list) =
-    let runtime_flags = { verbose; compact; show_errors; quick_only; json } in
+      ?log_dir ?argv name (args : 'a Term.t) (tl : 'a test list) =
+    let runtime_flags =
+      { verbose; compact; show_errors; quick_only; json; log_dir }
+    in
     let choices =
       [ list_cmd tl;
         test_cmd ~and_exit runtime_flags ~filter:(Test_filter filter) args name
@@ -232,9 +237,9 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     | _ -> if and_exit then exit 0 else M.return ()
 
   let run ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json ?filter
-      ?output_dir ?argv name tl =
+      ?log_dir ?argv name tl =
     run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
-      ?filter ?output_dir ?argv name (Term.pure ()) tl
+      ?filter ?log_dir ?argv name (Term.pure ()) tl
 end
 
 module T = Make (Monad.Identity)
