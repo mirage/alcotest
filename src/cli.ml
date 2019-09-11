@@ -17,7 +17,6 @@
 
 open Cmdliner
 open Astring
-open Alcotest
 module IntSet = Core.IntSet
 
 module type S = sig
@@ -225,6 +224,3 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
       ?filter ?log_dir ?argv name (Term.pure ()) tl
 end
-
-module T = Make (Monad.Identity)
-include T

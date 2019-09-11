@@ -30,9 +30,11 @@
 
 module Core : module type of Core
 
+module Cli : module type of Cli
+
 module Monad : module type of Monad
 
-include Core.S with type return = unit
+include Cli.S with type return = unit
 
 (** {2 Assert functions} *)
 

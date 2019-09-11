@@ -3,7 +3,7 @@
    exception_in_test
    unicode_testname
  )
- (libraries alcotest alcotest.cli)
+ (libraries alcotest)
  (modules
    exception_in_test
    unicode_testname

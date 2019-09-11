@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  Alcotest_cli.run ~argv:[| ""; "test"; "test-a" |] "suite-name"
+  run ~argv:[| ""; "test"; "test-a" |] "suite-name"
     [ ( "test-a",
         [ test_case "First test case" `Quick id;
           test_case "Second test case" `Quick id

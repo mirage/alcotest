@@ -15,8 +15,9 @@
  *)
 
 module Core = Core
+module Cli = Cli
 module Monad = Monad
-module T = Core.Make (Monad.Identity)
+module T = Cli.Make (Monad.Identity)
 include T
 
 module type TESTABLE = sig
