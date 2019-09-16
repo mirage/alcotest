@@ -16,31 +16,13 @@
 
 open Astring
 
-let with_process_in cmd f =
-  let ic = Unix.open_process_in cmd in
-  try
-    let r = f ic in
-    ignore (Unix.close_process_in ic);
-    r
-  with exn ->
-    ignore (Unix.close_process_in ic);
-    raise exn
-
 let terminal_columns =
-  try
-    (* terminfo *)
-    with_process_in "tput cols" (fun ic -> int_of_string (input_line ic))
-  with _ -> (
-    try
-      (* GNU stty *)
-      with_process_in "stty size" (fun ic ->
-          match String.cuts (input_line ic) ~sep:" " with
-          | [ _; v ] -> int_of_string v
-          | _ -> failwith "stty")
-    with _ -> (
+  match Terminal_size.get_columns () with
+  | Some c -> c
+  | None -> (
       try (* shell envvar *)
           int_of_string (Sys.getenv "COLUMNS") with _ -> (* default *)
-                                                         80 ) )
+                                                         80 )
 
 let line ppf ?color c =
   let line = String.v ~len:terminal_columns (fun _ -> c) in
