@@ -41,16 +41,22 @@ module type S = sig
 
   type 'a test = string * 'a test_case list
 
-  val run :
-    ?and_exit:bool -> ?argv:string array -> string -> unit test list -> return
+  val list_tests : 'a test list -> return
 
-  val run_with_args :
+  type 'a with_options =
     ?and_exit:bool ->
-    ?argv:string array ->
-    string ->
-    'a Cmdliner.Term.t ->
-    'a test list ->
-    return
+    ?verbose:bool ->
+    ?compact:bool ->
+    ?quick_only:bool ->
+    ?show_errors:bool ->
+    ?json:bool ->
+    ?filter:Re.re option * IntSet.t option ->
+    ?log_dir:string ->
+    'a
+
+  val run : (string -> unit test list -> return) with_options
+
+  val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
 module Make (M : Monad.S) = struct
@@ -157,7 +163,7 @@ module Make (M : Monad.S) = struct
     json : bool;
     verbose : bool;
     compact : bool;
-    test_dir : string;
+    log_dir : string;
     run_id : string;
   }
 
@@ -171,7 +177,7 @@ module Make (M : Monad.S) = struct
     let speed_level = `Slow in
     let show_errors = false in
     let json = false in
-    let test_dir = Sys.getcwd () in
+    let log_dir = Sys.getcwd () in
     let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
     {
       name;
@@ -183,7 +189,7 @@ module Make (M : Monad.S) = struct
       json;
       verbose;
       compact;
-      test_dir;
+      log_dir;
       run_id;
     }
 
@@ -216,9 +222,9 @@ module Make (M : Monad.S) = struct
     iter ic b s;
     Buffer.contents b
 
-  let output_dir t = Filename.concat t.test_dir t.run_id
+  let log_dir t = Filename.concat t.log_dir t.run_id
 
-  let output_file t path = Filename.concat (output_dir t) (file_of_path path)
+  let output_file t path = Filename.concat (log_dir t) (file_of_path path)
 
   let mkdir_p path mode =
     let is_win_drive_letter x =
@@ -242,18 +248,18 @@ module Make (M : Monad.S) = struct
     | xs -> mk "." xs
 
   let prepare t =
-    let test_dir = output_dir t in
-    if not (Sys.file_exists test_dir) then (
-      mkdir_p test_dir 0o770;
+    let log_dir = log_dir t in
+    if not (Sys.file_exists log_dir) then (
+      mkdir_p log_dir 0o770;
       if Sys.unix || Sys.cygwin then (
-        let this_exe = Filename.concat t.test_dir t.name
-        and latest = Filename.concat t.test_dir "latest" in
+        let this_exe = Filename.concat t.log_dir t.name
+        and latest = Filename.concat t.log_dir "latest" in
         if Sys.file_exists this_exe then Sys.remove this_exe;
         if Sys.file_exists latest then Sys.remove latest;
-        Unix.symlink ~to_dir:true test_dir this_exe;
-        Unix.symlink ~to_dir:true test_dir latest ) )
-    else if not (Sys.is_directory test_dir) then
-      failwith (Fmt.strf "exists but is not a directory: %S" test_dir)
+        Unix.symlink ~to_dir:true log_dir this_exe;
+        Unix.symlink ~to_dir:true log_dir latest ) )
+    else if not (Sys.is_directory log_dir) then
+      failwith (Fmt.strf "exists but is not a directory: %S" log_dir)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
@@ -483,7 +489,7 @@ module Make (M : Monad.S) = struct
           if t.verbose then Fmt.string ppf ""
           else
             Fmt.pf ppf "The full test results are available in `%s`.\n"
-              (output_dir t)
+              (log_dir t)
         in
         if (not t.compact) || result.failures > 0 then
           Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!" full_logs test_results
@@ -500,7 +506,7 @@ module Make (M : Monad.S) = struct
     let failures = List.filter failure results in
     { time; success; failures = List.length failures }
 
-  let list_tests t () =
+  let list_registered_tests t () =
     let paths = List.map fst (Suite.tests t.suite) in
     let paths = List.sort compare_path paths in
     List.iter
@@ -509,7 +515,7 @@ module Make (M : Monad.S) = struct
           "%a    %s\n" (pp_path t) path
           (Suite.doc_of_path t.suite path))
       paths;
-    M.return 0
+    M.return ()
 
   let validate_name name =
     let pattern = "^[a-zA-Z0-9_- ]+$" in
@@ -546,172 +552,85 @@ module Make (M : Monad.S) = struct
     | Ok _, Error e -> Error [ e ]
     | Ok t, Ok () -> Ok (register t name ts)
 
-  let apply fn t test_dir verbose compact show_errors quick json =
-    let show_errors = show_errors in
-    let speed_level = if quick then `Quick else `Slow in
-    let t =
-      { t with verbose; compact; test_dir; json; show_errors; speed_level }
-    in
-    fn t
+  let register_all t tl =
+    List.fold_left (fun t (name, tests) -> register_acc t name tests) (Ok t) tl
 
-  let run_registered_tests t () args =
-    result t (Suite.tests t.suite) args >|= fun result ->
+  let run_tests ?filter t () args =
+    let suite = Suite.tests t.suite in
+    ( match filter with
+    | None -> result t suite args
+    | Some labels ->
+        let is_empty = filter_tests ~subst:false labels suite = [] in
+        if is_empty then (
+          Fmt.(pf stderr)
+            "%a\n" red
+            "Invalid request (no tests to run, filter skipped everything)!";
+          exit 1 )
+        else
+          let tests = filter_tests ~subst:true labels suite in
+          result t tests args )
+    >|= fun result ->
     show_result t result;
     result.failures
 
-  let run_subtest t labels () args =
-    let is_empty =
-      filter_tests ~subst:false labels (Suite.tests t.suite) = []
-    in
-    if is_empty then (
-      Fmt.(pf stderr)
-        "%a\n" red
-        "Invalid request (no tests to run, filter skipped everything)!";
-      exit 1 )
-    else
-      let tests = filter_tests ~subst:true labels (Suite.tests t.suite) in
-      result t tests args >|= fun result ->
-      show_result t result;
-      result.failures
+  let list_tests (tl : 'a test list) =
+    match register_all (empty ()) tl with
+    | Error error_acc ->
+        Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
+        exit 1
+    | Ok t -> list_registered_tests t ()
 
-  open Cmdliner
-
-  let json =
-    let doc = "Display JSON for the results, to be used by a script." in
-    Arg.(value & flag & info [ "json" ] ~docv:"" ~doc)
-
-  let test_dir =
+  let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
-    let default_dir = fname_concat [ Sys.getcwd (); "_build"; "_tests" ] in
-    let doc = "Where to store the log files of the tests." in
-    Arg.(value & opt dir default_dir & info [ "o" ] ~docv:"DIR" ~doc)
+    fname_concat [ Sys.getcwd (); "_build"; "_tests" ]
 
-  let verbose =
-    let env = Arg.env_var "ALCOTEST_VERBOSE" in
-    let doc =
-      "Display the test outputs. $(b,WARNING:) when using this option the \
-       output logs will not be available for further inspection."
-    in
-    Arg.(value & flag & info ~env [ "v"; "verbose" ] ~docv:"" ~doc)
+  type 'a with_options =
+    ?and_exit:bool ->
+    ?verbose:bool ->
+    ?compact:bool ->
+    ?quick_only:bool ->
+    ?show_errors:bool ->
+    ?json:bool ->
+    ?filter:Re.re option * IntSet.t option ->
+    ?log_dir:string ->
+    'a
 
-  let compact =
-    let env = Arg.env_var "ALCOTEST_COMPACT" in
-    let doc = "Compact the output of the tests" in
-    Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
-
-  let show_errors =
-    let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
-    let doc = "Display the test errors." in
-    Arg.(value & flag & info ~env [ "e"; "show-errors" ] ~docv:"" ~doc)
-
-  let quicktests =
-    let env = Arg.env_var "ALCOTEST_QUICK_TESTS" in
-    let doc = "Run only the quick tests." in
-    Arg.(value & flag & info ~env [ "q"; "quick-tests" ] ~docv:"" ~doc)
-
-  let of_env t =
-    Term.(
-      pure (apply (fun t -> t) t)
-      $ test_dir $ verbose $ compact $ show_errors $ quicktests $ json)
-
-  let set_color style_renderer = Fmt_tty.setup_std_outputs ?style_renderer ()
-
-  let set_color = Term.(const set_color $ Fmt_cli.style_renderer ())
-
-  let default_cmd t args =
-    let doc = "Run all the tests." in
-    ( Term.(pure run_registered_tests $ of_env t $ set_color $ args),
-      Term.info t.name ~version:"%%VERSION%%" ~doc )
-
-  let regex =
-    let parse s =
-      try Ok Re.(compile @@ Pcre.re s) with
-      | Re.Perl.Parse_error ->
-          Error (`Msg "Perl-compatible regexp parse error")
-      | Re.Perl.Not_supported -> Error (`Msg "unsupported regexp feature")
-    in
-    let print = Re.pp_re in
-    Arg.conv (parse, print)
-
-  exception Invalid_format
-
-  let int_range_list =
-    let parse s =
-      let set = ref IntSet.empty in
-      let acc i = set := IntSet.add i !set in
-      let ranges = String.cuts ~sep:"," s in
-      let process_range s =
-        let bounds = String.cuts ~sep:".." s |> List.map String.to_int in
-        match bounds with
-        | [ Some i ] -> acc i
-        | [ Some lower; Some upper ] when lower <= upper ->
-            for i = lower to upper do
-              acc i
-            done
-        | _ -> raise Invalid_format
-      in
-      match List.iter process_range ranges with
-      | () -> Ok !set
-      | exception Invalid_format ->
-          Error
-            (`Msg
-              "must be a comma-separated list of integers / integer ranges")
-    in
-    let print ppf set =
-      Fmt.pf ppf "%a" Fmt.(braces @@ list ~sep:comma int) (IntSet.elements set)
-    in
-    Arg.conv (parse, print)
-
-  let test_cmd t args =
-    let doc = "Run a subset of the tests." in
-    let testname =
-      let doc = "A regular expression matching the names of tests to run" in
-      Arg.(value & pos 0 (some regex) None & info [] ~doc ~docv:"NAME_REGEX")
-    in
-    let testcase =
-      let doc =
-        "A comma-separated list of test case numbers (and ranges of numbers) \
-         to run, e.g: '4,6-10,19'"
-      in
-      Arg.(
-        value
-        & pos 1 (some int_range_list) None
-        & info [] ~doc ~docv:"TESTCASES")
-    in
-    let label = Term.(pure (fun n t -> (n, t)) $ testname $ testcase) in
-    ( Term.(pure run_subtest $ of_env t $ label $ set_color $ args),
-      Term.info "test" ~doc )
-
-  let list_cmd t =
-    let doc = "List all available tests." in
-    (Term.(pure list_tests $ of_env t $ set_color), Term.info "list" ~doc)
-
-  let random_state = Random.State.make_self_init ()
-
-  let run_with_args ?(and_exit = true) ?argv name args (tl : 'a test list) =
+  let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
+      ?(quick_only = false) ?(show_errors = false) ?(json = false) ?filter
+      ?(log_dir = default_log_dir ()) name args (tl : 'a test list) =
+    let speed_level = if quick_only then `Quick else `Slow in
+    let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
-    let t = { (empty ()) with run_id } in
     let t =
-      List.fold_left
-        (fun t (name, tests) -> register_acc t name tests)
-        (Ok t) tl
+      {
+        (empty ()) with
+        run_id;
+        name;
+        verbose;
+        compact;
+        speed_level;
+        json;
+        show_errors;
+        log_dir;
+      }
     in
-    match t with
+    match register_all t tl with
     | Error error_acc ->
         Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
         exit 1
     | Ok t -> (
-        Fmt.(pf stdout) "Testing %a.\n" bold_s name;
-        Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
-        let choices = [ list_cmd t; test_cmd t args ] in
-        match Term.eval_choice ?argv (default_cmd t args) choices with
-        | `Ok im -> (
-            im >|= function
-            | 0 -> if and_exit then exit 0 else ()
-            | i -> if and_exit then exit i else raise Test_error )
-        | `Error _ -> if and_exit then exit 1 else raise Test_error
-        | _ -> if and_exit then exit 0 else M.return () )
+        ( Fmt.(pf stdout) "Testing %a.\n" bold_s name;
+          Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
+          run_tests ?filter t () args )
+        >|= fun test_failures ->
+        match (test_failures, and_exit) with
+        | 0, true -> exit 0
+        | 0, false -> ()
+        | _, true -> exit 1
+        | _, false -> raise Test_error )
 
-  let run ?and_exit ?argv name tl =
-    run_with_args ?and_exit ?argv name (Term.pure ()) tl
+  let run ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json ?filter
+      ?log_dir name (tl : unit test list) =
+    run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
+      ?filter ?log_dir name () tl
 end

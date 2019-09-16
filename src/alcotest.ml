@@ -15,16 +15,9 @@
  *)
 
 module Core = Core
-
-module IdentityMonad = struct
-  type 'a t = 'a
-
-  let return x = x
-
-  let bind x f = f x
-end
-
-module T = Core.Make (IdentityMonad)
+module Cli = Cli
+module Monad = Monad
+module T = Cli.Make (Monad.Identity)
 include T
 
 module type TESTABLE = sig
