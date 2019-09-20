@@ -16,6 +16,8 @@ matrix:
       env: OCAML_VERSION=4.07 PACKAGE="alcotest"
     - os: linux
       env: OCAML_VERSION=4.08 PACKAGE="alcotest"
+    - os: linux
+      env: OCAML_VERSION=4.09 PACKAGE="alcotest"
     - os: osx
       env: OCAML_VERSION=4.08 PACKAGE="alcotest"
 
