@@ -24,14 +24,14 @@ module IntSet = Set.Make (struct
   let compare : int -> int -> int = compare
 end)
 
-type speed_level = [ `Quick | `Slow ]
-
 exception Registration_error of string
 
 exception Check_error of string
 
 module type S = sig
   type return
+
+  type speed_level = [ `Quick | `Slow ]
 
   type 'a test_case = string * speed_level * ('a -> return)
 
@@ -69,6 +69,8 @@ module Make (M : Monad.S) = struct
   type 'a run = 'a -> unit M.t
 
   type path = Path of (string * int)
+
+  type speed_level = [ `Quick | `Slow ]
 
   exception Test_error
 
