@@ -178,7 +178,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
         $ flags
         $ pure (`Test_filter None)
         $ set_color $ args $ pure library_name $ pure tests),
-      Term.info exec_name ~version:"%%VERSION%%" ~doc )
+      Term.info exec_name ~doc )
 
   let test_cmd ~and_exit runtime_flags ~filter args library_name tests =
     let doc = "Run a subset of the tests." in
