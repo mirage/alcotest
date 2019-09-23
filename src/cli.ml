@@ -205,9 +205,10 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       { verbose; compact; show_errors; quick_only; json; log_dir }
     in
     let choices =
-      [ list_cmd tl;
+      [
+        list_cmd tl;
         test_cmd ~and_exit runtime_flags ~filter:(`Test_filter filter) args
-          name tl
+          name tl;
       ]
     in
     match

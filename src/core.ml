@@ -365,10 +365,7 @@ module Make (M : Monad.S) = struct
 
   let protect_test path (f : 'a run) : 'a rrun =
    fun args ->
-    try
-      f args >|= fun () ->
-      `Ok
-    with
+    try f args >|= fun () -> `Ok with
     | Check_error err ->
         let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
         M.return @@ `Error (path, err)
@@ -402,10 +399,7 @@ module Make (M : Monad.S) = struct
     Unix.dup2 fd_file fd_stdout;
     Unix.dup2 fd_file fd_stderr;
     Unix.close fd_file;
-    ( try
-        fn () >|= fun o ->
-        `Ok o
-      with e -> M.return @@ `Error e )
+    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e)
     >|= fun r ->
     flush stdout;
     flush stderr;

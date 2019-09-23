@@ -56,12 +56,14 @@ let test_list_concat () =
 (* Run it *)
 let () =
   Alcotest.run "Utils"
-    [ ( "string-case",
-        [ Alcotest.test_case "Lower case" `Quick test_lowercase;
-          Alcotest.test_case "Capitalization" `Quick test_capitalize
+    [
+      ( "string-case",
+        [
+          Alcotest.test_case "Lower case" `Quick test_lowercase;
+          Alcotest.test_case "Capitalization" `Quick test_capitalize;
         ] );
       ( "string-concat",
         [ Alcotest.test_case "String mashing" `Quick test_str_concat ] );
       ( "list-concat",
-        [ Alcotest.test_case "List mashing" `Slow test_list_concat ] )
+        [ Alcotest.test_case "List mashing" `Slow test_list_concat ] );
     ]

@@ -26,5 +26,4 @@ val test_case :
   (Lwt_switch.t -> 'a -> unit Lwt.t) ->
   'a test_case
 
-val test_case' :
-  string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
+val test_case' : string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case

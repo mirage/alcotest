@@ -50,9 +50,7 @@ module Extend (M : S) = struct
   module Infix = struct
     let ( >>= ) = M.bind
 
-    let ( >|= ) x f =
-      x >>= fun y ->
-      M.return (f y)
+    let ( >|= ) x f = x >>= fun y -> M.return (f y)
   end
 
   open Infix
@@ -61,9 +59,7 @@ module Extend (M : S) = struct
     let map_s f l =
       let rec inner acc = function
         | [] -> return (List.rev acc)
-        | hd :: tl ->
-            f hd >>= fun r ->
-            (inner [@ocaml.tailcall]) (r :: acc) tl
+        | hd :: tl -> f hd >>= fun r -> (inner [@ocaml.tailcall]) (r :: acc) tl
       in
       inner [] l
   end

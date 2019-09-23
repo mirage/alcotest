@@ -26,5 +26,4 @@ val test_case :
   ('a -> unit Async_kernel.Deferred.t) ->
   'a test_case
 
-val test_case' :
-  string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
+val test_case' : string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
