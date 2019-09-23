@@ -22,9 +22,9 @@ include Alcotest.Core.S with type return = unit Lwt.t
 
 val test_case :
   string ->
-  Alcotest.Core.speed_level ->
+  Alcotest.speed_level ->
   (Lwt_switch.t -> 'a -> unit Lwt.t) ->
   'a test_case
 
 val test_case' :
-  string -> Alcotest.Core.speed_level -> ('a -> unit) -> 'a test_case
+  string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case

@@ -16,14 +16,14 @@
 
 exception Check_error of string
 
-type speed_level = [ `Quick | `Slow ]
-(** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
-    as [`Slow] are skipped when the `-q` flag is passed. *)
-
 module IntSet : Set.S with type elt = int
 
 module type S = sig
   type return
+
+  type speed_level = [ `Quick | `Slow ]
+  (** Speed level of a test. Tests marked as [`Quick] are always run. Tests marked
+      as [`Slow] are skipped when the `-q` flag is passed. *)
 
   type 'a test_case = string * speed_level * ('a -> return)
   (** A test case is an UTF-8 encoded documentation string, a speed
