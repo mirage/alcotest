@@ -132,17 +132,3 @@ val neg : 'a testable -> 'a testable
 
 val check_raises : string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
-
-(** {2 Deprecated} *)
-
-val line : out_channel -> ?color:[ `Blue | `Yellow ] -> char -> unit
-(** @deprecated
-    You should write your own line function. For instance:
-{[
-let line ppf ?color c =
-  let line = String.v ~len:terminal_columns (fun _ -> c) in
-  match color with
-  | Some c -> Fmt.pf ppf "%a\n%!" Fmt.(styled c string)  line
-  | None   -> Fmt.pf ppf "%s\n%!"line
-]}
-*)

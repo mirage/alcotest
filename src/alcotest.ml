@@ -139,22 +139,20 @@ let reject (type a) =
   end in
   (module M : TESTABLE with type t = M.t)
 
-let show_line msg =
-  Terminal.line Fmt.stderr ~color:`Yellow '-';
-  Printf.eprintf "ASSERT %s\n" msg;
-  Terminal.line Fmt.stderr ~color:`Yellow '-'
+let show_assert msg =
+  Format.eprintf "%a %s\n" Fmt.(styled `Yellow string) "ASSERT" msg
 
 let check_err fmt =
   Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
 
 let check t msg x y =
-  show_line msg;
+  show_assert msg;
   if not (equal t x y) then
     Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) x (pp t) y
     |> failwith
 
 let fail msg =
-  show_line msg;
+  show_assert msg;
   check_err "Error %s." msg
 
 let failf fmt = Fmt.kstrf fail fmt
@@ -168,7 +166,7 @@ let collect_exception f =
   with e -> Some e
 
 let check_raises msg exn f =
-  show_line msg;
+  show_assert msg;
   match collect_exception f with
   | None ->
       check_err "Fail %s: expecting %s, got nothing." msg
@@ -177,20 +175,5 @@ let check_raises msg exn f =
       if e <> exn then
         check_err "Fail %s: expecting %s, got %s." msg (Printexc.to_string exn)
           (Printexc.to_string e)
-
-let line (oc : out_channel) ?color c =
-  let color =
-    match color with
-    | None -> None
-    | Some `Blue -> Some `Cyan
-    | Some `Yellow -> Some `Yellow
-  in
-  let str : string =
-    Fmt.(
-      to_to_string @@ fun ppf ->
-      Terminal.line ppf ?color)
-      c
-  in
-  Printf.fprintf oc "%s" str
 
 let () = at_exit (Format.pp_print_flush Format.err_formatter)
