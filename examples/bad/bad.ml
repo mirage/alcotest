@@ -44,9 +44,10 @@ let plus () =
 let test_one = [ ("Capitalize", `Quick, capit); ("Add entries", `Slow, plus) ]
 
 let test_two =
-  [ ("ok", `Quick, fun () -> ());
+  [
+    ("ok", `Quick, fun () -> ());
     ("Capitalize", `Quick, capit);
-    ("ok", `Quick, fun () -> ())
+    ("ok", `Quick, fun () -> ());
   ]
 
 (* Run it *)

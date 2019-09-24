@@ -54,9 +54,7 @@ let test_exn () =
 
 let lwt_check_raises f =
   Lwt.catch
-    (fun () ->
-      f () >|= fun () ->
-      `Ok)
+    (fun () -> f () >|= fun () -> `Ok)
     (function e -> Lwt.return @@ `Error e)
   >|= function
   | `Ok -> Alcotest.fail "No exception was thrown"
@@ -88,17 +86,21 @@ let () =
   let open Alcotest_lwt in
   Lwt_main.run
   @@ run "LwtUtils"
-       [ ( "basic",
-           [ test_case' "Plain" `Quick test_lowercase;
-             test_case "Lwt" `Quick test_lowercase_lwt
+       [
+         ( "basic",
+           [
+             test_case' "Plain" `Quick test_lowercase;
+             test_case "Lwt" `Quick test_lowercase_lwt;
            ] );
          ( "exceptions",
-           [ test_case' "Plain" `Quick test_exn;
+           [
+             test_case' "Plain" `Quick test_exn;
              test_case "Lwt toplevel" `Quick test_exn_lwt_toplevel;
-             test_case "Lwt internal" `Quick test_exn_lwt_internal
+             test_case "Lwt internal" `Quick test_exn_lwt_internal;
            ] );
          ( "switches",
-           [ test_case "Allocate resource" `Quick test_switch_alloc;
-             test_case "Check resource deallocated" `Quick test_switch_dealloc
-           ] )
+           [
+             test_case "Allocate resource" `Quick test_switch_alloc;
+             test_case "Check resource deallocated" `Quick test_switch_dealloc;
+           ] );
        ]

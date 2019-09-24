@@ -25,11 +25,12 @@ let time_replace =
   let open Re in
   let t =
     seq
-      [ str "Test Successful in ";
+      [
+        str "Test Successful in ";
         rep1 Re.digit;
         char '.';
         rep1 Re.digit;
-        char 's'
+        char 's';
       ]
   in
   let re = compile t in

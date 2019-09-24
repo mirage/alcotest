@@ -37,18 +37,21 @@ let sorted_list () =
 let () =
   let open Alcotest in
   run "passing testables"
-    [ ( "reflexive basic",
-        [ id_case unit "unit" ();
+    [
+      ( "reflexive basic",
+        [
+          id_case unit "unit" ();
           id_case bool "bool" true;
           id_case int "int" 1;
           id_case int32 "int32" Int32.max_int;
           id_case int64 "int64" Int64.max_int;
           id_case (float 0.0) "float" 1.0;
           id_case char "char" 'a';
-          id_case string "string" "Lorem ipsum dolor sit amet."
+          id_case string "string" "Lorem ipsum dolor sit amet.";
         ] );
       ( "reflexive composite",
-        [ id_case (list int) "empty list" [];
+        [
+          id_case (list int) "empty list" [];
           id_case (list char) "non-empty list" [ 'a'; 'b'; 'c' ];
           id_case (array unit) "empty array" [||];
           id_case (array int64) "non-empty array" Int64.[| zero; max_int |];
@@ -56,14 +59,16 @@ let () =
           id_case (option int) "option none" None;
           id_case (result int unit) "result ok" (Ok 1);
           id_case (result int unit) "result error" (Error ());
-          id_case (pair int char) "pair" (1, 'a')
+          id_case (pair int char) "pair" (1, 'a');
         ] );
       ( "negation",
-        [ test_case "checked exceptions" `Quick checked_exceptions;
-          test_case "negated testables" `Quick negated_testables
+        [
+          test_case "checked exceptions" `Quick checked_exceptions;
+          test_case "negated testables" `Quick negated_testables;
         ] );
       ( "fuzzy equality",
-        [ test_case "float thresholds" `Quick float_threshold;
-          test_case "sorted list" `Quick sorted_list
-        ] )
+        [
+          test_case "float thresholds" `Quick float_threshold;
+          test_case "sorted list" `Quick sorted_list;
+        ] );
     ]
