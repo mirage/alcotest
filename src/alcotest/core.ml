@@ -454,7 +454,11 @@ module Make (M : Monad.S) = struct
 
   (* Return the json for the api, dirty out, to avoid new dependencies *)
   let json_of_result r =
-    Printf.sprintf "{\"success\":%i,\"failures\":%i,\"time\":%f}" r.success
+    Fmt.strf {|{
+  "success": %i,
+  "failures": %i,
+  "time": %f
+}|} r.success
       r.failures r.time
 
   let s = function 0 | 1 -> "" | _ -> "s"
