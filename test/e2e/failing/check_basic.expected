@@ -1,0 +1,22 @@
+Testing failing testables.
+This run has ID `<uuid>`.
+ ...                different basic              0   bool.[FAIL]              different basic              0   bool.
+ ...                different basic              1   int.[FAIL]              different basic              1   int.
+ ...                different basic              2   int32.[FAIL]              different basic              2   int32.
+ ...                different basic              3   int64.[FAIL]              different basic              3   int64.
+ ...                different basic              4   float.[FAIL]              different basic              4   float.
+ ...                different basic              5   char.[FAIL]              different basic              5   char.
+ ...                different basic              6   string.[FAIL]              different basic              6   string.
+ ...                different composite          0   list.[FAIL]              different composite          0   list.
+ ...                different composite          1   array.[FAIL]              different composite          1   array.
+ ...                different composite          2   option some.[FAIL]              different composite          2   option some.
+ ...                different composite          3   result.[FAIL]              different composite          3   result.
+ ...                different composite          4   pair.[FAIL]              different composite          4   pair.
+-- different basic.000 [bool.] Failed --
+in `<build-context>/_build/_tests/<uuid>/different basic.000.output`:
+[failure] Error bool: expecting
+true, got
+false.
+
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+12 errors! in <test-duration>s. 12 tests run.

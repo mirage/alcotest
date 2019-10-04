@@ -1,5 +1,3 @@
-exception Foo of string
-
 let () =
   let open Alcotest in
   run "suite-with-failures"
@@ -7,7 +5,7 @@ let () =
       ( "test-a",
         [
           test_case "Passing" `Quick (fun () -> ());
-          test_case "Failing" `Quick (fun () -> raise (Foo "message"));
+          test_case "Failing" `Quick (fun () -> invalid_arg "Failing test");
         ] );
       ("test-b", [ test_case "Another pass" `Quick (fun () -> ()) ]);
     ]

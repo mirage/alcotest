@@ -1,12 +1,42 @@
 (executables
  (names
+   check_basic
    exception_in_test
+   invalid_arg_in_test
    unicode_testname
  )
  (libraries alcotest)
  (modules
+   check_basic
    exception_in_test
+   invalid_arg_in_test
    unicode_testname
+ )
+)
+
+(rule
+ (target check_basic.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../expect_failure.exe %{dep:check_basic.exe})
+  )
+ )
+)
+
+(rule
+ (target check_basic.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:check_basic.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff check_basic.expected check_basic.processed)
  )
 )
 
@@ -33,6 +63,32 @@
  (name runtest)
  (action
    (diff exception_in_test.expected exception_in_test.processed)
+ )
+)
+
+(rule
+ (target invalid_arg_in_test.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../expect_failure.exe %{dep:invalid_arg_in_test.exe})
+  )
+ )
+)
+
+(rule
+ (target invalid_arg_in_test.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:invalid_arg_in_test.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)
  )
 )
 
