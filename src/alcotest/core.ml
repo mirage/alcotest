@@ -68,29 +68,20 @@ module Make (M : Monad.S) = struct
 
   type 'a run = 'a -> unit M.t
 
-  type path = Path of (string * int)
-
   type speed_level = [ `Quick | `Slow ]
 
   exception Test_error
 
-  let compare_path (Path (s, i)) (Path (s', i')) =
+  let compare_path (`Path (s, i)) (`Path (s', i')) =
     match String.compare s s' with 0 -> compare_int i i' | n -> n
 
-  let short_string_of_path (Path (n, i)) = Printf.sprintf "%s.%03d" n i
+  let short_string_of_path (`Path (n, i)) = Printf.sprintf "%s.%03d" n i
 
-  let file_of_path (Path (n, i)) =
-    let path = Path (String.Ascii.lowercase n, i) in
+  let file_of_path (`Path (n, i)) =
+    let path = `Path (String.Ascii.lowercase n, i) in
     Printf.sprintf "%s.output" (short_string_of_path path)
 
-  type run_result =
-    [ `Ok
-    | `Exn of path * string * string
-    | `Error of path * string
-    | `Skip
-    | `Todo of string ]
-
-  type 'a rrun = 'a -> run_result M.t
+  type 'a rrun = 'a -> Output.run_result M.t
 
   type 'a test_case = string * speed_level * 'a run
 
@@ -101,54 +92,58 @@ module Make (M : Monad.S) = struct
   module Suite : sig
     type 'a t
 
+    type 'a test_case = {
+      path : Output.path;
+      speed_level : speed_level;
+      fn : 'a rrun;
+    }
+
     val empty : unit -> 'a t
 
-    val add : 'a t -> path * string * speed_level * 'a rrun -> 'a t
+    val add : 'a t -> Output.path * string * speed_level * 'a rrun -> 'a t
 
-    val tests : 'a t -> (path * 'a rrun) list
+    val tests : 'a t -> 'a test_case list
 
-    val doc_of_path : 'a t -> path -> string
-
-    val speed_of_path : 'a t -> path -> speed_level
+    val doc_of_path : 'a t -> Output.path -> string
   end = struct
     module String_set = Set.Make (String)
 
+    type 'a test_case = {
+      path : Output.path;
+      speed_level : speed_level;
+      fn : 'a rrun;
+    }
+
     type 'a t = {
-      tests : (path * 'a rrun) list;
+      tests : 'a test_case list;
       (* caches computed from the library values. *)
       filepaths : String_set.t;
-      doc : (path, string) Hashtbl.t;
-      speed : (path, speed_level) Hashtbl.t;
+      doc : (Output.path, string) Hashtbl.t;
     }
 
     let empty () =
       let tests = [] in
       let filepaths = String_set.empty in
       let doc = Hashtbl.create 0 in
-      let speed = Hashtbl.create 0 in
-      { tests; filepaths; doc; speed }
+      { tests; filepaths; doc }
 
     let check_path_is_unique t path =
-      let exn_of_path (Path (name, _)) =
+      let exn_of_path (`Path (name, _)) =
         Registration_error (Fmt.strf "Duplicate test name: %s" name)
       in
       if String_set.mem (file_of_path path) t.filepaths then
         raise (exn_of_path path)
 
-    let add t (path, doc, speed, testfn) =
+    let add t (path, doc, speed_level, fn) =
       check_path_is_unique t path;
-      let tests = (path, testfn) :: t.tests in
+      let tests = { path; speed_level; fn } :: t.tests in
       let filepaths = String_set.add (file_of_path path) t.filepaths in
       Hashtbl.add t.doc path doc;
-      Hashtbl.add t.speed path speed;
       { t with tests; filepaths }
 
     let tests t = List.rev t.tests
 
     let doc_of_path t path = try Hashtbl.find t.doc path with Not_found -> ""
-
-    let speed_of_path t path =
-      try Hashtbl.find t.speed path with Not_found -> `Slow
   end
 
   (* global state *)
@@ -200,16 +195,6 @@ module Make (M : Monad.S) = struct
     | `Quick, `Quick | `Slow, `Slow -> 0
     | `Quick, _ -> 1
     | _, `Quick -> -1
-
-  let left nb pp ppf a =
-    let s = Fmt.to_to_string pp a in
-    let nb = nb - String.length s in
-    if nb <= 0 then pp ppf a
-    else (
-      pp ppf a;
-      Fmt.string ppf (String.v ~len:nb (fun _ -> ' ')) )
-
-  let print t k = if not t.json then k Fmt.stdout
 
   let string_of_channel ic =
     let n = 32768 in
@@ -269,91 +254,27 @@ module Make (M : Monad.S) = struct
 
   let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
 
-  let green_s fmt = color `Green fmt
-
-  let yellow_s fmt = color `Yellow fmt
-
   let bold_s fmt = color `Bold fmt
 
-  let cyan_s fmt = color `Cyan fmt
+  let pp_error ~verbose ~doc_of_path ~output_file ppf (path, error) =
+    let logs =
+      let filename = output_file path in
+      if verbose || not (Sys.file_exists filename) then Fmt.strf "%s\n" error
+      else
+        let file = open_in filename in
+        let output = string_of_channel file in
+        close_in file;
+        Fmt.strf "in `%s`:\n%s" filename output
+    in
+    Fmt.pf ppf "-- %s [%s] Failed --\n%s"
+      (short_string_of_path path)
+      (doc_of_path path) logs
 
-  let pp_path t ppf (Path (n, i)) =
-    Fmt.pf ppf "%a%3d" (left (t.max_label + 8) cyan_s) n i
-
-  let print_info t p =
-    print t (fun ppf ->
-        Fmt.pf ppf "%a   %s" (pp_path t) p (Suite.doc_of_path t.suite p))
-
-  let left_c = 20
-
-  let error t path fmt =
-    Fmt.kstrf
-      (fun error ->
-        let logs =
-          let filename = output_file t path in
-          if t.verbose || not (Sys.file_exists filename) then
-            Fmt.strf "%s\n" error
-          else
-            let file = open_in filename in
-            let output = string_of_channel file in
-            close_in file;
-            Fmt.strf "in `%s`:\n%s" filename output
-        in
-        let error =
-          Fmt.strf "-- %s [%s] Failed --\n%s"
-            (short_string_of_path path)
-            (Suite.doc_of_path t.suite path)
-            logs
-        in
-        t.errors <- error :: t.errors)
-      fmt
-
-  let reset t = print t (fun ppf -> Fmt.string ppf "\r")
-
-  let newline t = print t (fun ppf -> Fmt.string ppf "\n")
-
-  let print_ch t ch = print t (fun ppf -> Fmt.string ppf ch)
-
-  let print_full_result t p = function
-    | `Ok ->
-        print t (fun ppf -> left left_c green_s ppf "[OK]");
-        print_info t p
-    | `Exn _ ->
-        print t (fun ppf -> left left_c red_s ppf "[FAIL]");
-        print_info t p
-    | `Error _ ->
-        print t (fun ppf -> left left_c red_s ppf "[ERROR]");
-        print_info t p
-    | `Skip ->
-        print t (fun ppf -> left left_c yellow_s ppf "[SKIP]");
-        print_info t p
-    | `Todo _ ->
-        print t (fun ppf -> left left_c yellow_s ppf "[TODO]");
-        print_info t p
-
-  let print_compact_result t = function
-    | `Exn _ -> print_ch t "F"
-    | `Error _ -> print_ch t "E"
-    | `Skip -> print_ch t "S"
-    | `Todo _ -> print_ch t "T"
-    | `Ok -> print_ch t "."
-
-  let print_event t = function
-    | `Start _ when t.compact -> ()
-    | `Start p ->
-        print t (fun ppf -> left left_c yellow_s ppf " ...");
-        print_info t p
-    | `Result (_, r) when t.compact -> print_compact_result t r
-    | `Result (p, r) ->
-        reset t;
-        print_full_result t p r;
-        newline t
-
-  let failure : run_result -> bool = function
+  let failure : Output.run_result -> bool = function
     | `Ok | `Skip -> false
     | `Error _ | `Exn _ | `Todo _ -> true
 
-  let has_run : run_result -> bool = function
+  let has_run : Output.run_result -> bool = function
     | `Ok | `Error _ | `Exn _ -> true
     | `Skip | `Todo _ -> false
 
@@ -373,17 +294,32 @@ module Make (M : Monad.S) = struct
     | Invalid_argument f -> M.return @@ exn path "invalid" f
     | e -> M.return @@ exn path "exception" (Printexc.to_string e)
 
-  let perform_test t args (path, test) =
-    print_event t (`Start path);
+  let perform_test t args Suite.{ path; fn; _ } =
+    let test = fn in
+    let pp_event =
+      if not t.json then
+        Output.pp_event ~compact:t.compact ~max_label:t.max_label
+          ~doc_of_path:(Suite.doc_of_path t.suite)
+      else fun _ _ -> ()
+    in
+    pp_event Fmt.stdout (`Start path);
     test args >|= fun result ->
     (* Store errors *)
     let () =
-      match result with
-      | `Exn (p, n, s) -> error t p "[%s] %s" n s
-      | `Error (p, s) -> error t p "%s" s
-      | _ -> ()
+      let pp_error =
+        pp_error ~verbose:t.verbose
+          ~doc_of_path:(Suite.doc_of_path t.suite)
+          ~output_file:(output_file t)
+      in
+      let error =
+        match result with
+        | `Exn (p, n, _) -> [ Fmt.strf "%a" pp_error (p, n) ]
+        | `Error e -> [ Fmt.strf "%a" pp_error e ]
+        | _ -> []
+      in
+      t.errors <- error @ t.errors
     in
-    print_event t (`Result (path, result));
+    pp_event Fmt.stdout (`Result (path, result));
     result
 
   let perform_tests t tests args = M.List.map_s (perform_test t args) tests
@@ -411,110 +347,65 @@ module Make (M : Monad.S) = struct
 
   let skip_fun _ = M.return `Skip
 
-  let skip_label (path, _) = (path, skip_fun)
+  let skip_label test_case = Suite.{ test_case with fn = skip_fun }
 
-  let filter_test (regexp, cases) (test : path * 'a rrun) =
-    let Path (n, i), _ = test in
+  let filter_test_case (regexp, cases) test_case =
+    let (`Path (n, i)) = test_case.Suite.path in
     let regexp_match = function None -> true | Some r -> Re.execp r n in
     let case_match = function None -> true | Some set -> IntSet.mem i set in
     regexp_match regexp && case_match cases
 
-  let map_test f l = List.map (fun (path, test) -> (path, f path test)) l
-
-  let filter_tests ~subst path tests =
+  let filter_test_cases ~subst path tests =
     let tests =
       List.fold_left
-        (fun acc test ->
-          if filter_test path test then test :: acc
-          else if subst then skip_label test :: acc
+        (fun acc test_case ->
+          if filter_test_case path test_case then test_case :: acc
+          else if subst then skip_label test_case :: acc
           else acc)
         [] tests
     in
     List.rev tests
 
-  let redirect_test_output t path (f : 'a rrun) =
-    if t.verbose then f
-    else fun args ->
-      let output_file = output_file t path in
+  let redirect_test_output t test_case =
+    let output_file = output_file t test_case.Suite.path in
+    let fn args =
       with_redirect output_file (fun () ->
-          f args >|= fun result ->
+          test_case.fn args >|= fun result ->
           ( match result with
           | `Error (_path, str) -> Printf.printf "%s\n" str
           | `Exn (_path, n, str) -> Printf.printf "[%s] %s\n" n str
           | `Ok | `Todo _ | `Skip -> () );
           result)
-
-  let select_speed t path (f : 'a rrun) : 'a rrun =
-    if
-      compare_speed_level (Suite.speed_of_path t.suite path) t.speed_level >= 0
-    then f
-    else skip_fun
-
-  type result = { success : int; failures : int; time : float }
-
-  (* Return the json for the api, dirty out, to avoid new dependencies *)
-  let json_of_result r =
-    Fmt.strf {|{
-  "success": %i,
-  "failures": %i,
-  "time": %f
-}|} r.success
-      r.failures r.time
-
-  let s = function 0 | 1 -> "" | _ -> "s"
-
-  let show_result t result =
-    (* Function to display errors for each test *)
-    let display_errors () =
-      match result.failures with
-      | 0 -> ()
-      | _ ->
-          if result.failures > 0 then
-            let print_error error = Printf.printf "%s\n" error in
-            if t.verbose || t.show_errors then
-              List.iter print_error (List.rev t.errors)
-            else print_error (List.hd (List.rev t.errors))
     in
-    match t.json with
-    | true -> Printf.printf "%s\n" (json_of_result result)
-    | false ->
-        if t.compact then newline t;
-        display_errors ();
-        let test_results ppf =
-          match result.failures with
-          | 0 -> green_s ppf "Test Successful"
-          | n -> red ppf "%d error%s!" n (s n)
-        in
-        let full_logs ppf =
-          if t.verbose then Fmt.string ppf ""
-          else
-            Fmt.pf ppf "The full test results are available in `%s`.\n"
-              (log_dir t)
-        in
-        if (not t.compact) || result.failures > 0 then
-          Fmt.pr "%t%t in %.3fs. %d test%s run.\n%!" full_logs test_results
-            result.time result.success (s result.success)
+    { test_case with fn }
+
+  let select_speed speed_level (test_case : 'a Suite.test_case) :
+      'a Suite.test_case =
+    if compare_speed_level test_case.speed_level speed_level >= 0 then
+      test_case
+    else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
     prepare t;
     let start_time = Unix.time () in
-    let test = map_test (redirect_test_output t) test in
-    let test = map_test (select_speed t) test in
+    let test =
+      if t.verbose then test else List.map (redirect_test_output t) test
+    in
+    let test = List.map (select_speed t.speed_level) test in
     perform_tests t test args >|= fun results ->
     let time = Unix.time () -. start_time in
     let success = List.length (List.filter has_run results) in
-    let failures = List.filter failure results in
-    { time; success; failures = List.length failures }
+    let failures = List.length (List.filter failure results) in
+    Output.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
-    let paths = List.map fst (Suite.tests t.suite) in
+    let paths = List.map (fun t -> t.Suite.path) (Suite.tests t.suite) in
     let paths = List.sort compare_path paths in
-    List.iter
-      (fun path ->
-        Fmt.(pf stdout)
-          "%a    %s\n" (pp_path t) path
-          (Suite.doc_of_path t.suite path))
-      paths;
+    let pp_info =
+      Output.pp_info ~max_label:t.max_label
+        ~doc_of_path:(Suite.doc_of_path t.suite)
+    in
+    Fmt.(list ~sep:(const string "\n") pp_info stdout paths);
     M.return ()
 
   let validate_name name =
@@ -533,7 +424,7 @@ module Make (M : Monad.S) = struct
     let test_details =
       List.mapi
         (fun i (doc, speed, test) ->
-          let path = Path (name, i) in
+          let path = `Path (name, i) in
           let doc =
             if doc = "" || doc.[String.length doc - 1] = '.' then doc
             else doc ^ "."
@@ -560,17 +451,21 @@ module Make (M : Monad.S) = struct
     ( match filter with
     | None -> result t suite args
     | Some labels ->
-        let is_empty = filter_tests ~subst:false labels suite = [] in
+        let is_empty = filter_test_cases ~subst:false labels suite = [] in
         if is_empty then (
           Fmt.(pf stderr)
             "%a\n" red
             "Invalid request (no tests to run, filter skipped everything)!";
           exit 1 )
         else
-          let tests = filter_tests ~subst:true labels suite in
+          let tests = filter_test_cases ~subst:true labels suite in
           result t tests args )
     >|= fun result ->
-    show_result t result;
+    Fmt.(pf stdout)
+      "%a"
+      (Output.pp_suite_results ~verbose:t.verbose ~show_errors:t.show_errors
+         ~json:t.json ~compact:t.compact ~log_dir:(log_dir t))
+      result;
     result.failures
 
   let list_tests (tl : 'a test list) =
