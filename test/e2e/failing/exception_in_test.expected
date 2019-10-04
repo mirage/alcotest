@@ -8,4 +8,4 @@ in `<build-context>/_build/_tests/<uuid>/test-a.001.output`:
 [invalid] Failing test
 
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
-1 error! in 0.000s. 3 tests run.
+1 error! in <test-duration>s. 3 tests run.

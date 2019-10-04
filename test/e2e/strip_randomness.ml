@@ -26,15 +26,21 @@ let time_replace =
   let t =
     seq
       [
-        str "Test Successful in ";
-        rep1 Re.digit;
+        group
+          (alt
+             [
+               str "Test Successful in ";
+               seq [ rep1 digit; str " error! in " ];
+               seq [ rep1 digit; str " errors! in " ];
+             ]);
+        rep1 digit;
         char '.';
-        rep1 Re.digit;
+        rep1 digit;
         char 's';
       ]
   in
   let re = compile t in
-  replace_string ~all:true re ~by:"Test Successful in <test-duration>s"
+  replace ~all:true re ~f:(fun g -> Group.get g 1 ^ "<test-duration>s")
 
 (* Remove all non-deterministic output in a given Alcotest log and write
    the result to std.out *)
