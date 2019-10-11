@@ -14,7 +14,7 @@ build: [
 ]
 
 depends: [
-  "dune"  {build}
+  "dune"
   "ocaml" {>= "4.03.0"}
   "alcotest" {= version}
   "lwt" "logs"
