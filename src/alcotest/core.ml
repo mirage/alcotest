@@ -15,6 +15,7 @@
  *)
 
 open Astring
+open Utils
 
 let compare_int : int -> int -> int = compare
 
@@ -355,16 +356,12 @@ module Make (M : Monad.S) = struct
     let case_match = function None -> true | Some set -> IntSet.mem i set in
     regexp_match regexp && case_match cases
 
-  let filter_test_cases ~subst path tests =
-    let tests =
-      List.fold_left
-        (fun acc test_case ->
-          if filter_test_case path test_case then test_case :: acc
-          else if subst then skip_label test_case :: acc
-          else acc)
-        [] tests
-    in
-    List.rev tests
+  let filter_test_cases ~subst path test_cases =
+    test_cases
+    |> List.filter_map (fun tc ->
+           if filter_test_case path tc then Some tc
+           else if subst then Some (skip_label tc)
+           else None)
 
   let redirect_test_output t test_case =
     let output_file = output_file t test_case.Suite.path in
@@ -419,7 +416,7 @@ module Make (M : Monad.S) = struct
       Error msg
     else Ok ()
 
-  let register t name (ts : 'a test_case list) =
+  let register t (name, (ts : 'a test_case list)) =
     let max_label = max t.max_label (String.length name) in
     let test_details =
       List.mapi
@@ -435,16 +432,11 @@ module Make (M : Monad.S) = struct
     let suite = List.fold_left Suite.add t.suite test_details in
     { t with suite; max_label }
 
-  (* Accumulate name validation errors rather than failing fast *)
-  let register_acc t_acc name (ts : 'a test_case list) =
-    match (t_acc, validate_name name) with
-    | Error error_acc, Error e -> Error (e :: error_acc)
-    | Error error_acc, Ok () -> Error error_acc
-    | Ok _, Error e -> Error [ e ]
-    | Ok t, Ok () -> Ok (register t name ts)
-
   let register_all t tl =
-    List.fold_left (fun t (name, tests) -> register_acc t name tests) (Ok t) tl
+    let validate (n, ts) = validate_name n |> Result.map (fun _ -> (n, ts)) in
+    List.map validate tl
+    |> List.lift_result
+    |> Result.map (List.fold_left register t)
 
   let run_tests ?filter t () args =
     let suite = Suite.tests t.suite in
@@ -471,9 +463,11 @@ module Make (M : Monad.S) = struct
   let list_tests (tl : 'a test list) =
     match register_all (empty ()) tl with
     | Error error_acc ->
-        Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
+        Fmt.(pf stderr) "%a\n" Fmt.(list string) error_acc;
         exit 1
-    | Ok t -> list_registered_tests t ()
+    | Ok t ->
+        list_registered_tests t ();
+        M.return ()
 
   let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
