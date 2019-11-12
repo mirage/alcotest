@@ -17,9 +17,7 @@
 
 type path = [ `Path of string * int ]
 
-val pp_path : max_label:int -> path Fmt.t
-
-val pp_info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
+val info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
 
 type run_result =
   [ `Ok
@@ -37,10 +35,12 @@ type result = {
   errors : string list;
 }
 
-val pp_event :
+val rresult_error : run_result Fmt.t
+
+val event :
   compact:bool -> max_label:int -> doc_of_path:(path -> string) -> event Fmt.t
 
-val pp_suite_results :
+val suite_results :
   verbose:bool ->
   show_errors:bool ->
   json:bool ->

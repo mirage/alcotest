@@ -28,6 +28,11 @@ type run_result =
 
 type event = [ `Result of path * run_result | `Start of path ]
 
+let rresult_error ppf = function
+  | `Error (_, s) -> Fmt.pf ppf "%s\n" s
+  | `Exn (_, n, s) -> Fmt.pf ppf "[%s] %s\n" n s
+  | `Ok | `Todo _ | `Skip -> ()
+
 (* Colours *)
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
@@ -54,7 +59,7 @@ let left nb pp ppf a =
 let pp_path ~max_label ppf (`Path (n, i)) =
   Fmt.pf ppf "%a%3d" (left (max_label + 8) cyan_s) n i
 
-let pp_info ~max_label ~doc_of_path ppf p =
+let info ~max_label ~doc_of_path ppf p =
   Fmt.pf ppf "%a   %s" (pp_path ~max_label) p (doc_of_path p)
 
 let pp_result ppf = function
@@ -76,13 +81,13 @@ let pp_result_compact ppf result =
   Fmt.char ppf char
 
 let pp_result_full ~max_label ~doc_of_path ppf (path, result) =
-  Fmt.pf ppf "%a%a" pp_result result (pp_info ~max_label ~doc_of_path) path
+  Fmt.pf ppf "%a%a" pp_result result (info ~max_label ~doc_of_path) path
 
-let pp_event ~compact ~max_label ~doc_of_path ppf = function
+let event ~compact ~max_label ~doc_of_path ppf = function
   | `Start _ when compact -> ()
   | `Start p ->
       left left_c yellow_s ppf " ...";
-      Fmt.pf ppf "%a" (pp_info ~max_label ~doc_of_path) p
+      Fmt.pf ppf "%a" (info ~max_label ~doc_of_path) p
   | `Result (_, r) when compact -> Fmt.pr "%a" pp_result_compact r
   | `Result (p, r) ->
       Fmt.pf ppf "\r%a\n" (pp_result_full ~max_label ~doc_of_path) (p, r)
@@ -113,7 +118,7 @@ let pp_summary ppf r =
   Fmt.pf ppf "%a in %.3fs. %d test%a run.\n" pp_failures r.failures r.time
     r.success pp_plural r.success
 
-let pp_suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
+let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
   let print_summary = (not compact) || r.failures > 0 in
   match json with
   | true ->

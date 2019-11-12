@@ -82,7 +82,7 @@ module Make (M : Monad.S) = struct
     let path = `Path (String.Ascii.lowercase n, i) in
     Printf.sprintf "%s.output" (short_string_of_path path)
 
-  type 'a rrun = 'a -> Output.run_result M.t
+  type 'a rrun = 'a -> Pp.run_result M.t
 
   type 'a test_case = string * speed_level * 'a run
 
@@ -94,23 +94,23 @@ module Make (M : Monad.S) = struct
     type 'a t
 
     type 'a test_case = {
-      path : Output.path;
+      path : Pp.path;
       speed_level : speed_level;
       fn : 'a rrun;
     }
 
     val empty : unit -> 'a t
 
-    val add : 'a t -> Output.path * string * speed_level * 'a rrun -> 'a t
+    val add : 'a t -> Pp.path * string * speed_level * 'a rrun -> 'a t
 
     val tests : 'a t -> 'a test_case list
 
-    val doc_of_path : 'a t -> Output.path -> string
+    val doc_of_path : 'a t -> Pp.path -> string
   end = struct
     module String_set = Set.Make (String)
 
     type 'a test_case = {
-      path : Output.path;
+      path : Pp.path;
       speed_level : speed_level;
       fn : 'a rrun;
     }
@@ -119,7 +119,7 @@ module Make (M : Monad.S) = struct
       tests : 'a test_case list;
       (* caches computed from the library values. *)
       filepaths : String_set.t;
-      doc : (Output.path, string) Hashtbl.t;
+      doc : (Pp.path, string) Hashtbl.t;
     }
 
     let empty () =
@@ -271,11 +271,11 @@ module Make (M : Monad.S) = struct
       (short_string_of_path path)
       (doc_of_path path) logs
 
-  let failure : Output.run_result -> bool = function
+  let failure : Pp.run_result -> bool = function
     | `Ok | `Skip -> false
     | `Error _ | `Exn _ | `Todo _ -> true
 
-  let has_run : Output.run_result -> bool = function
+  let has_run : Pp.run_result -> bool = function
     | `Ok | `Error _ | `Exn _ -> true
     | `Skip | `Todo _ -> false
 
@@ -299,7 +299,7 @@ module Make (M : Monad.S) = struct
     let test = fn in
     let pp_event =
       if not t.json then
-        Output.pp_event ~compact:t.compact ~max_label:t.max_label
+        Pprint.pp_event ~compact:t.compact ~max_label:t.max_label
           ~doc_of_path:(Suite.doc_of_path t.suite)
       else fun _ _ -> ()
     in
@@ -368,10 +368,7 @@ module Make (M : Monad.S) = struct
     let fn args =
       with_redirect output_file (fun () ->
           test_case.fn args >|= fun result ->
-          ( match result with
-          | `Error (_path, str) -> Printf.printf "%s\n" str
-          | `Exn (_path, n, str) -> Printf.printf "[%s] %s\n" n str
-          | `Ok | `Todo _ | `Skip -> () );
+          Pp.rresult_error Fmt.stdout result;
           result)
     in
     { test_case with fn }
@@ -393,13 +390,13 @@ module Make (M : Monad.S) = struct
     let time = Unix.time () -. start_time in
     let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter failure results) in
-    Output.{ time; success; failures; errors = List.rev t.errors }
+    Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
     let paths = List.map (fun t -> t.Suite.path) (Suite.tests t.suite) in
     let paths = List.sort compare_path paths in
     let pp_info =
-      Output.pp_info ~max_label:t.max_label
+      Pprint.pp_info ~max_label:t.max_label
         ~doc_of_path:(Suite.doc_of_path t.suite)
     in
     Fmt.(list ~sep:(const string "\n") pp_info stdout paths);
@@ -455,7 +452,7 @@ module Make (M : Monad.S) = struct
     >|= fun result ->
     Fmt.(pf stdout)
       "%a"
-      (Output.pp_suite_results ~verbose:t.verbose ~show_errors:t.show_errors
+      (Pprint.pp_suite_results ~verbose:t.verbose ~show_errors:t.show_errors
          ~json:t.json ~compact:t.compact ~log_dir:(log_dir t))
       result;
     result.failures
