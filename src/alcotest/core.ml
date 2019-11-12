@@ -212,6 +212,19 @@ module Make (M : Monad.S) = struct
 
   let log_dir t = Filename.concat t.log_dir t.run_id
 
+  let pp_suite_results t =
+    Pp.suite_results ~verbose:t.verbose ~show_errors:t.show_errors ~json:t.json
+      ~compact:t.compact ~log_dir:(log_dir t)
+
+  let pp_event t =
+    if not t.json then
+      Pp.event ~compact:t.compact ~max_label:t.max_label
+        ~doc_of_path:(Suite.doc_of_path t.suite)
+    else Fmt.nop
+
+  let pp_info t =
+    Pp.info ~max_label:t.max_label ~doc_of_path:(Suite.doc_of_path t.suite)
+
   let output_file t path = Filename.concat (log_dir t) (file_of_path path)
 
   let mkdir_p path mode =
@@ -297,12 +310,7 @@ module Make (M : Monad.S) = struct
 
   let perform_test t args Suite.{ path; fn; _ } =
     let test = fn in
-    let pp_event =
-      if not t.json then
-        Pprint.pp_event ~compact:t.compact ~max_label:t.max_label
-          ~doc_of_path:(Suite.doc_of_path t.suite)
-      else fun _ _ -> ()
-    in
+    let pp_event = pp_event t in
     pp_event Fmt.stdout (`Start path);
     test args >|= fun result ->
     (* Store errors *)
@@ -393,14 +401,10 @@ module Make (M : Monad.S) = struct
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
-    let paths = List.map (fun t -> t.Suite.path) (Suite.tests t.suite) in
-    let paths = List.sort compare_path paths in
-    let pp_info =
-      Pprint.pp_info ~max_label:t.max_label
-        ~doc_of_path:(Suite.doc_of_path t.suite)
-    in
-    Fmt.(list ~sep:(const string "\n") pp_info stdout paths);
-    M.return ()
+    Suite.tests t.suite
+    |> List.map (fun t -> t.Suite.path)
+    |> List.sort compare_path
+    |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
 
   let validate_name name =
     let pattern = "^[a-zA-Z0-9_- ]+$" in
@@ -450,11 +454,7 @@ module Make (M : Monad.S) = struct
           let tests = filter_test_cases ~subst:true labels suite in
           result t tests args )
     >|= fun result ->
-    Fmt.(pf stdout)
-      "%a"
-      (Pprint.pp_suite_results ~verbose:t.verbose ~show_errors:t.show_errors
-         ~json:t.json ~compact:t.compact ~log_dir:(log_dir t))
-      result;
+    Fmt.(pf stdout) "%a" (pp_suite_results t) result;
     result.failures
 
   let list_tests (tl : 'a test list) =
