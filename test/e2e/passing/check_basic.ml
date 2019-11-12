@@ -9,13 +9,16 @@ let make_checks () =
   check int "int " 0 0;
   check int32
 
+exception Zero
+
+exception One of int
+
+exception Two of int * char
+
 let checked_exceptions () =
   let check_refl name exn =
     Alcotest.check_raises name exn (fun () -> raise exn)
   in
-  let exception Zero in
-  let exception One of int in
-  let exception Two of int * char in
   check_refl "0-tuple" Zero;
   check_refl "1-tuple" (One 1);
   check_refl "2-tuple" (Two (1, 'a'))
