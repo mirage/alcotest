@@ -1,6 +1,8 @@
 module List = struct
   include List
 
+  type 'a t = 'a list
+
   let filter_map f l =
     let rec inner acc = function
       | [] -> rev acc
@@ -20,4 +22,8 @@ module List = struct
         | Error e, Error acc -> Error (e :: acc)
         | Error e, Ok _ -> Error [ e ])
       l (Ok [])
+end
+
+module Result = struct
+  let map f = function Ok x -> Ok (f x) | Error e -> Error e
 end

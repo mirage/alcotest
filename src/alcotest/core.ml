@@ -308,10 +308,11 @@ module Make (M : Monad.S) = struct
     | Invalid_argument f -> M.return @@ exn path "invalid" f
     | e -> M.return @@ exn path "exception" (Printexc.to_string e)
 
-  let perform_test t args Suite.{ path; fn; _ } =
-    let test = fn in
+  let perform_test t args suite =
+    let open Suite in
+    let test = suite.fn in
     let pp_event = pp_event t in
-    pp_event Fmt.stdout (`Start path);
+    pp_event Fmt.stdout (`Start suite.path);
     test args >|= fun result ->
     (* Store errors *)
     let () =
@@ -328,7 +329,7 @@ module Make (M : Monad.S) = struct
       in
       t.errors <- error @ t.errors
     in
-    pp_event Fmt.stdout (`Result (path, result));
+    pp_event Fmt.stdout (`Result (suite.path, result));
     result
 
   let perform_tests t tests args = M.List.map_s (perform_test t args) tests
