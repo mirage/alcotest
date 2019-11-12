@@ -110,7 +110,12 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   let flags_with_defaults defaults =
     Term.(
       pure (v_runtime_flags ~defaults)
-      $ verbose $ compact $ show_errors $ quick_only $ json $ log_dir)
+      $ verbose
+      $ compact
+      $ show_errors
+      $ quick_only
+      $ json
+      $ log_dir)
 
   let regex =
     let parse s =
@@ -177,7 +182,10 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
         pure (run_test ~and_exit)
         $ flags
         $ pure (`Test_filter None)
-        $ set_color $ args $ pure library_name $ pure tests),
+        $ set_color
+        $ args
+        $ pure library_name
+        $ pure tests),
       Term.info exec_name ~doc )
 
   let test_cmd ~and_exit runtime_flags ~filter args library_name tests =
@@ -190,7 +198,12 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     in
     ( Term.(
         pure (run_test ~and_exit)
-        $ flags $ filter $ set_color $ args $ pure library_name $ pure tests),
+        $ flags
+        $ filter
+        $ set_color
+        $ args
+        $ pure library_name
+        $ pure tests),
       Term.info "test" ~doc )
 
   let list_cmd tests =

@@ -49,7 +49,9 @@ let () =
   try
     let rec loop () =
       let sanitized_line =
-        input_line in_channel |> uuid_replace |> build_context_replace
+        input_line in_channel
+        |> uuid_replace
+        |> build_context_replace
         |> time_replace
       in
       Printf.printf "%s\n" sanitized_line;
