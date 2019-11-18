@@ -77,7 +77,9 @@ let example_alias_stanza filename =
 let is_example filename = Filename.check_suffix filename ".ml"
 
 let main expect_failure =
-  Sys.readdir "." |> Array.to_list |> List.sort String.compare
+  Sys.readdir "."
+  |> Array.to_list
+  |> List.sort String.compare
   |> List.filter is_example
   |> function
   | [] -> () (* no tests to execute *)
