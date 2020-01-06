@@ -197,18 +197,43 @@ module Make (M : Monad.S) = struct
     | `Quick, _ -> 1
     | _, `Quick -> -1
 
-  let string_of_channel ic =
-    let n = 32768 in
-    let s = Bytes.create n in
-    let b = Buffer.create 1024 in
-    let rec iter ic b s =
-      let nread = try input ic s 0 n with End_of_file -> 0 in
-      if nread > 0 then (
-        Buffer.add_substring b (Bytes.unsafe_to_string s) 0 nread;
-        iter ic b s )
+  (*
+     Reverse a list, taking at most the first n elements of the original
+     list.
+  *)
+  let rev_head n l =
+    let rec aux acc n l =
+      match l with
+      | x :: xs -> if n > 0 then aux (x :: acc) (n - 1) xs else acc
+      | [] -> acc
     in
-    iter ic b s;
-    Buffer.contents b
+    aux [] n l
+
+  (*
+     Show the last lines of a log file.
+     The goal is to not clutter up the console output.
+  *)
+  let read_tail ?max_lines ic =
+    let rev_lines = ref [] in
+    try
+      while true do
+        rev_lines := input_line ic :: !rev_lines
+      done;
+      assert false
+    with End_of_file ->
+      let selected_lines =
+        match max_lines with
+        | None -> List.rev !rev_lines
+        | Some n -> rev_head n !rev_lines
+      in
+      let omitted_count = List.length !rev_lines - List.length selected_lines in
+      let display_lines =
+        if omitted_count = 0 then selected_lines
+        else
+          Printf.sprintf "... (omitting %i lines)" omitted_count
+          :: selected_lines
+      in
+      String.concat ~sep:"\n" display_lines ^ "\n"
 
   let log_dir t = Filename.concat t.log_dir t.run_id
 
@@ -276,7 +301,7 @@ module Make (M : Monad.S) = struct
       if verbose || not (Sys.file_exists filename) then Fmt.strf "%s\n" error
       else
         let file = open_in filename in
-        let output = string_of_channel file in
+        let output = read_tail ~max_lines:100 file in
         close_in file;
         Fmt.strf "in `%s`:\n%s" filename output
     in
