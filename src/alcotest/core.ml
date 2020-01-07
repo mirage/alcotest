@@ -230,7 +230,8 @@ module Make (M : Monad.S) = struct
       let display_lines =
         if omitted_count = 0 then selected_lines
         else
-          Printf.sprintf "... (omitting %i lines)" omitted_count
+          Fmt.strf "... (omitting %i line%a)" omitted_count Pp.pp_plural
+            omitted_count
           :: selected_lines
       in
       String.concat ~sep:"\n" display_lines ^ "\n"

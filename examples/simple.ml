@@ -53,6 +53,12 @@ let test_list_concat () =
     "same lists" [ 1; 2; 3 ]
     (To_test.list_concat [ 1 ] [ 2; 3 ])
 
+let test_error_output () =
+  for i = 1 to 1000 do
+    Printf.printf "output line %i\n" i
+  done;
+  Alcotest.fail "This was supposed to fail."
+
 (* Run it *)
 let () =
   Alcotest.run "Utils"
@@ -66,4 +72,6 @@ let () =
         [ Alcotest.test_case "String mashing" `Quick test_str_concat ] );
       ( "list-concat",
         [ Alcotest.test_case "List mashing" `Slow test_list_concat ] );
+      ( "fail-big-output",
+        [ Alcotest.test_case "Error output" `Quick test_error_output ] );
     ]
