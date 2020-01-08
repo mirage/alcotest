@@ -1,0 +1,9 @@
+Testing failing compact output.
+This run has ID `<uuid>`.
+..F...
+-- alpha.002 [3.] Failed --
+in `<build-context>/_build/_tests/<uuid>/alpha.002.output`:
+[failure] Error
+
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+1 error! in <test-duration>s. 6 tests run.
