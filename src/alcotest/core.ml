@@ -345,8 +345,7 @@ module Make (M : Monad.S) = struct
     Unix.dup2 fd_file fd_stdout;
     Unix.dup2 fd_file fd_stderr;
     Unix.close fd_file;
-    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e)
-    >|= fun r ->
+    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e) >|= fun r ->
     flush stdout;
     flush stderr;
     Unix.dup2 fd_old_stdout fd_stdout;
@@ -384,8 +383,7 @@ module Make (M : Monad.S) = struct
 
   let select_speed speed_level (test_case : 'a Suite.test_case) :
       'a Suite.test_case =
-    if compare_speed_level test_case.speed_level speed_level >= 0 then
-      test_case
+    if compare_speed_level test_case.speed_level speed_level >= 0 then test_case
     else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
@@ -412,8 +410,8 @@ module Make (M : Monad.S) = struct
     let re = Re.(compile @@ Pcre.re pattern) in
     if not (Re.execp re name) then
       let msg =
-        Fmt.strf "%a %S is not a valid test label (must match %s)." red
-          "Error:" name pattern
+        Fmt.strf "%a %S is not a valid test label (must match %s)." red "Error:"
+          name pattern
       in
       Error msg
     else Ok ()

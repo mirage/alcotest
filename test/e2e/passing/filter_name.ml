@@ -10,7 +10,6 @@ let () =
         ] );
       ( "test-b",
         [
-          test_case "Skipped failing test" `Quick (fun () ->
-              invalid_arg "boom");
+          test_case "Skipped failing test" `Quick (fun () -> invalid_arg "boom");
         ] );
     ]

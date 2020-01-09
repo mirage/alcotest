@@ -120,8 +120,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   let regex =
     let parse s =
       try Ok Re.(compile @@ Pcre.re s) with
-      | Re.Perl.Parse_error ->
-          Error (`Msg "Perl-compatible regexp parse error")
+      | Re.Perl.Parse_error -> Error (`Msg "Perl-compatible regexp parse error")
       | Re.Perl.Not_supported -> Error (`Msg "unsupported regexp feature")
     in
     let print = Re.pp_re in
@@ -148,8 +147,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       | () -> Ok !set
       | exception Invalid_format ->
           Error
-            (`Msg
-              "must be a comma-separated list of integers / integer ranges")
+            (`Msg "must be a comma-separated list of integers / integer ranges")
     in
     let print ppf set =
       Fmt.pf ppf "%a" Fmt.(braces @@ list ~sep:comma int) (IntSet.elements set)
@@ -220,8 +218,8 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     let choices =
       [
         list_cmd tl;
-        test_cmd ~and_exit runtime_flags ~filter:(`Test_filter filter) args
-          name tl;
+        test_cmd ~and_exit runtime_flags ~filter:(`Test_filter filter) args name
+          tl;
       ]
     in
     match
