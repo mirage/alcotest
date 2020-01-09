@@ -89,12 +89,12 @@ let () =
        [
          ( "basic",
            [
-             test_case' "Plain" `Quick test_lowercase;
+             test_case_sync "Plain" `Quick test_lowercase;
              test_case "Lwt" `Quick test_lowercase_lwt;
            ] );
          ( "exceptions",
            [
-             test_case' "Plain" `Quick test_exn;
+             test_case_sync "Plain" `Quick test_exn;
              test_case "Lwt toplevel" `Quick test_exn_lwt_toplevel;
              test_case "Lwt internal" `Quick test_exn_lwt_internal;
            ] );
