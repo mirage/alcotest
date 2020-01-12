@@ -48,6 +48,7 @@ module type S = sig
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
+    ?max_log_lines:int option ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -161,6 +162,7 @@ module Make (M : Monad.S) = struct
     json : bool;
     verbose : bool;
     compact : bool;
+    max_log_lines : int option;
     log_dir : string;
     run_id : string;
   }
@@ -172,6 +174,7 @@ module Make (M : Monad.S) = struct
     let max_label = 0 in
     let verbose = false in
     let compact = false in
+    let max_log_lines = None in
     let speed_level = `Slow in
     let show_errors = false in
     let json = false in
@@ -187,6 +190,7 @@ module Make (M : Monad.S) = struct
       json;
       verbose;
       compact;
+      max_log_lines;
       log_dir;
       run_id;
     }
@@ -213,7 +217,7 @@ module Make (M : Monad.S) = struct
      Show the last lines of a log file.
      The goal is to not clutter up the console output.
   *)
-  let read_tail ?max_lines ic =
+  let read_tail ~max_lines ic =
     let rev_lines = ref [] in
     try
       while true do
@@ -296,13 +300,14 @@ module Make (M : Monad.S) = struct
 
   let bold_s fmt = color `Bold fmt
 
-  let pp_error ~verbose ~doc_of_path ~output_file ppf (path, error) =
+  let pp_error ~verbose ~doc_of_path ~output_file ~max_log_lines ppf
+      (path, error) =
     let logs =
       let filename = output_file path in
       if verbose || not (Sys.file_exists filename) then Fmt.strf "%s\n" error
       else
         let file = open_in filename in
-        let output = read_tail ~max_lines:100 file in
+        let output = read_tail ~max_lines:max_log_lines file in
         close_in file;
         Fmt.strf "in `%s`:\n%s" filename output
     in
@@ -345,7 +350,7 @@ module Make (M : Monad.S) = struct
       let pp_error =
         pp_error ~verbose:t.verbose
           ~doc_of_path:(Suite.doc_of_path t.suite)
-          ~output_file:(output_file t)
+          ~output_file:(output_file t) ~max_log_lines:t.max_log_lines
       in
       let error =
         match result with
@@ -499,6 +504,7 @@ module Make (M : Monad.S) = struct
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
+    ?max_log_lines:int option ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -507,8 +513,9 @@ module Make (M : Monad.S) = struct
     'a
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(quick_only = false) ?(show_errors = false) ?(json = false) ?filter
-      ?(log_dir = default_log_dir ()) name args (tl : 'a test list) =
+      ?(max_log_lines = None) ?(quick_only = false) ?(show_errors = false)
+      ?(json = false) ?filter ?(log_dir = default_log_dir ()) name args
+      (tl : 'a test list) =
     let speed_level = if quick_only then `Quick else `Slow in
     let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
@@ -519,6 +526,7 @@ module Make (M : Monad.S) = struct
         name;
         verbose;
         compact;
+        max_log_lines;
         speed_level;
         json;
         show_errors;
@@ -540,8 +548,8 @@ module Make (M : Monad.S) = struct
         | _, true -> exit 1
         | _, false -> raise Test_error )
 
-  let run ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json ?filter
-      ?log_dir name (tl : unit test list) =
-    run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
-      ?filter ?log_dir name () tl
+  let run ?and_exit ?verbose ?compact ?max_log_lines ?quick_only ?show_errors
+      ?json ?filter ?log_dir name (tl : unit test list) =
+    run_with_args ?and_exit ?verbose ?compact ?max_log_lines ?quick_only
+      ?show_errors ?json ?filter ?log_dir name () tl
 end
