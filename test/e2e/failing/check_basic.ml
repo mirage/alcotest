@@ -1,7 +1,6 @@
 (* Check that v of type [typ] matches with itself *)
 let id_case typ typ_str v1 v2 =
-  Alcotest.test_case typ_str `Quick (fun () ->
-      Alcotest.check typ typ_str v1 v2)
+  Alcotest.test_case typ_str `Quick (fun () -> Alcotest.check typ typ_str v1 v2)
 
 let () =
   let open Alcotest in
