@@ -21,6 +21,7 @@ depends: [
   "cmdliner"
   "uuidm"
   "re"
+  "stdlib-shims"
 ]
 
 synopsis: "Alcotest is a lightweight and colourful test framework"
