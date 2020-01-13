@@ -45,7 +45,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   type runtime_options = {
     verbose : bool;
     compact : bool;
-    max_log_lines : int option;
+    tail_errors : int option;
     show_errors : bool;
     quick_only : bool;
     json : bool;
@@ -53,7 +53,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   }
 
   let v_runtime_flags ~defaults (`Verbose verbose) (`Compact compact)
-      (`Max_log_lines max_log_lines) (`Show_errors show_errors)
+      (`Tail_errors tail_errors) (`Show_errors show_errors)
       (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) =
     let verbose = verbose || defaults.verbose in
     let compact = compact || defaults.compact in
@@ -61,19 +61,19 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     let quick_only = quick_only || defaults.quick_only in
     let json = json || defaults.json in
     let log_dir = Some log_dir in
-    { verbose; compact; max_log_lines; show_errors; quick_only; json; log_dir }
+    { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
 
   let run_test ~and_exit
       {
         verbose;
         compact;
-        max_log_lines;
+        tail_errors;
         show_errors;
         quick_only;
         json;
         log_dir;
       } (`Test_filter filter) () tests name args =
-    run_with_args ~and_exit ~verbose ~compact ~max_log_lines ~quick_only
+    run_with_args ~and_exit ~verbose ~compact ~tail_errors ~quick_only
       ~show_errors ~json ?filter ?log_dir name tests args
 
   let json =
@@ -103,16 +103,16 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(app (const (fun x -> `Compact x)))
       Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
 
-  let max_log_lines =
-    let env = Arg.env_var "ALCOTEST_MAX_LOG_LINES" in
+  let tail_errors =
+    let env = Arg.env_var "ALCOTEST_TAIL_ERRORS" in
     let doc =
       "Show only the last $(docv) lines of output in case of an error."
     in
-    Term.(app (const (fun x -> `Max_log_lines x)))
+    Term.(app (const (fun x -> `Tail_errors x)))
       Arg.(
         value
         & opt (some int) None
-        & info ~env [ "m"; "max-log-lines" ] ~docv:"N" ~doc)
+        & info ~env [ "tail-errors" ] ~docv:"N" ~doc)
 
   let show_errors =
     let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
@@ -131,7 +131,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       pure (v_runtime_flags ~defaults)
       $ verbose
       $ compact
-      $ max_log_lines
+      $ tail_errors
       $ show_errors
       $ quick_only
       $ json
@@ -230,14 +230,14 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       Term.info "list" ~doc )
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(max_log_lines = None) ?(quick_only = false) ?(show_errors = false)
+      ?(tail_errors = None) ?(quick_only = false) ?(show_errors = false)
       ?(json = false) ?filter ?log_dir ?argv name (args : 'a Term.t)
       (tl : 'a test list) =
     let runtime_flags =
       {
         verbose;
         compact;
-        max_log_lines;
+        tail_errors;
         show_errors;
         quick_only;
         json;
@@ -260,8 +260,8 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     | `Error _ -> raise Test_error
     | _ -> if and_exit then exit 0 else M.return ()
 
-  let run ?and_exit ?verbose ?compact ?max_log_lines ?quick_only ?show_errors
+  let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir ?argv name tl =
-    run_with_args ?and_exit ?verbose ?compact ?max_log_lines ?quick_only
+    run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
       ?show_errors ?json ?filter ?log_dir ?argv name (Term.pure ()) tl
 end
