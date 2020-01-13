@@ -45,7 +45,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   type runtime_options = {
     verbose : bool;
     compact : bool;
-    tail_errors : int option;
+    tail_errors : [ `Unlimited | `Limit of int ];
     show_errors : bool;
     quick_only : bool;
     json : bool;
@@ -64,15 +64,8 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
 
   let run_test ~and_exit
-      {
-        verbose;
-        compact;
-        tail_errors;
-        show_errors;
-        quick_only;
-        json;
-        log_dir;
-      } (`Test_filter filter) () tests name args =
+      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
+      (`Test_filter filter) () tests name args =
     run_with_args ~and_exit ~verbose ~compact ~tail_errors ~quick_only
       ~show_errors ~json ?filter ?log_dir name tests args
 
@@ -103,6 +96,25 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(app (const (fun x -> `Compact x)))
       Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
 
+  let limit_parser s =
+    match s with
+    | "unlimited" -> Ok `Unlimited
+    | s -> (
+        match int_of_string_opt s with
+        | Some n ->
+            if n < 0 then
+              Error (`Msg "numeric limit must be nonnegative or 'unlimited'")
+            else Ok (`Limit n)
+        | None -> Error (`Msg "invalid numeric limit") )
+
+  let limit_printer ppf limit =
+    match limit with
+    | `Unlimited -> Fmt.pf ppf "unlimited"
+    | `Limit n -> Fmt.pf ppf "%i" n
+
+  (* Parse/print a nonnegative number of lines or "unlimited". *)
+  let limit = Cmdliner.Arg.conv (limit_parser, limit_printer)
+
   let tail_errors =
     let env = Arg.env_var "ALCOTEST_TAIL_ERRORS" in
     let doc =
@@ -111,7 +123,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(app (const (fun x -> `Tail_errors x)))
       Arg.(
         value
-        & opt (some int) None
+        & opt limit `Unlimited
         & info ~env [ "tail-errors" ] ~docv:"N" ~doc)
 
   let show_errors =
@@ -230,19 +242,11 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       Term.info "list" ~doc )
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(tail_errors = None) ?(quick_only = false) ?(show_errors = false)
+      ?(tail_errors = `Unlimited) ?(quick_only = false) ?(show_errors = false)
       ?(json = false) ?filter ?log_dir ?argv name (args : 'a Term.t)
       (tl : 'a test list) =
     let runtime_flags =
-      {
-        verbose;
-        compact;
-        tail_errors;
-        show_errors;
-        quick_only;
-        json;
-        log_dir;
-      }
+      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
     in
     let choices =
       [

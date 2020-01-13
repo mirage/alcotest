@@ -48,7 +48,7 @@ module type S = sig
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
-    ?tail_errors:int option ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->

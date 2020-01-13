@@ -48,7 +48,7 @@ module type S = sig
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
-    ?tail_errors:int option ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -162,7 +162,7 @@ module Make (M : Monad.S) = struct
     json : bool;
     verbose : bool;
     compact : bool;
-    tail_errors : int option;
+    tail_errors : [ `Unlimited | `Limit of int ];
     log_dir : string;
     run_id : string;
   }
@@ -174,7 +174,7 @@ module Make (M : Monad.S) = struct
     let max_label = 0 in
     let verbose = false in
     let compact = false in
-    let tail_errors = None in
+    let tail_errors = `Unlimited in
     let speed_level = `Slow in
     let show_errors = false in
     let json = false in
@@ -217,7 +217,7 @@ module Make (M : Monad.S) = struct
      Show the last lines of a log file.
      The goal is to not clutter up the console output.
   *)
-  let read_tail ~max_lines ic =
+  let read_tail max_lines ic =
     let rev_lines = ref [] in
     try
       while true do
@@ -227,8 +227,8 @@ module Make (M : Monad.S) = struct
     with End_of_file ->
       let selected_lines =
         match max_lines with
-        | None -> List.rev !rev_lines
-        | Some n -> rev_head n !rev_lines
+        | `Unlimited -> List.rev !rev_lines
+        | `Limit n -> rev_head n !rev_lines
       in
       let omitted_count = List.length !rev_lines - List.length selected_lines in
       let display_lines =
@@ -300,14 +300,14 @@ module Make (M : Monad.S) = struct
 
   let bold_s fmt = color `Bold fmt
 
-  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ppf
-      (path, error) =
+  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ppf (path, error)
+      =
     let logs =
       let filename = output_file path in
       if verbose || not (Sys.file_exists filename) then Fmt.strf "%s\n" error
       else
         let file = open_in filename in
-        let output = read_tail ~max_lines:tail_errors file in
+        let output = read_tail tail_errors file in
         close_in file;
         Fmt.strf "in `%s`:\n%s" filename output
     in
@@ -504,7 +504,7 @@ module Make (M : Monad.S) = struct
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
-    ?tail_errors:int option ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -513,7 +513,7 @@ module Make (M : Monad.S) = struct
     'a
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(tail_errors = None) ?(quick_only = false) ?(show_errors = false)
+      ?(tail_errors = `Unlimited) ?(quick_only = false) ?(show_errors = false)
       ?(json = false) ?filter ?(log_dir = default_log_dir ()) name args
       (tl : 'a test list) =
     let speed_level = if quick_only then `Quick else `Slow in
