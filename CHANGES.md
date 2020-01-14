@@ -11,6 +11,8 @@
   without use of the `argv` parameter. (#182, @CraigFe)
 - Add `--compact` option for more concise result reporting. (#149,
   @andersfugmann)
+- Add `--tail-errors` option for limiting the size of error logs printed to
+  standard output. (#200, @mjambon)
 - Add support for executing subsets of tests via the `test` subcommand. (#158,
   @CraigFe)
 - Change the `float` check to include equality of `isNaN` and infinities. See
