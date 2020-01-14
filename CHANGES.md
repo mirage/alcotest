@@ -1,4 +1,4 @@
-### Unreleased
+### 1.0.0 (2019-01-14)
 
 - Require OCaml 4.03. (#159, @hannesm)
 - Change `Alcotest_{async,lwt}.test_case` to return monadic values. These must
