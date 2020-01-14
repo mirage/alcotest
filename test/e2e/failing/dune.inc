@@ -1,6 +1,7 @@
 (executables
  (names
    check_basic
+   compact
    exception_in_test
    invalid_arg_in_test
    unicode_testname
@@ -8,6 +9,7 @@
  (libraries alcotest)
  (modules
    check_basic
+   compact
    exception_in_test
    invalid_arg_in_test
    unicode_testname
@@ -37,6 +39,32 @@
  (name runtest)
  (action
    (diff check_basic.expected check_basic.processed)
+ )
+)
+
+(rule
+ (target compact.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../expect_failure.exe %{dep:compact.exe})
+  )
+ )
+)
+
+(rule
+ (target compact.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:compact.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff compact.expected compact.processed)
  )
 )
 
