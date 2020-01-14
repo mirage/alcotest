@@ -1,3 +1,33 @@
+### Unreleased
+
+- Require OCaml 4.03. (#159, @hannesm)
+- Change `Alcotest_{async,lwt}.test_case` to return monadic values. These must
+  be run with the new `Alcotest_{async,lwt}.run` functions. See
+  [examples/lwt/test.ml](https://github.com/mirage/alcotest/blob/878c500f3b25f6ebbdafc7236ebc2b7756dafe9d/examples/lwt/test.ml#L85)
+  for an example of the new API. (#167, @CraigFe)
+- Add generation of `latest` symlinks in the `_test` directory which point to
+  the most recent test output directory. (#155, @cfcs)
+- Allow all CLI options to be passed directly to `Alcotest.{run,run_with_args}`
+  without use of the `argv` parameter. (#182, @CraigFe)
+- Add `--compact` option for more concise result reporting. (#149,
+  @andersfugmann)
+- Add support for executing subsets of tests via the `test` subcommand. (#158,
+  @CraigFe)
+- Change the `float` check to include equality of `isNaN` and infinities. See
+  [examples/floats.ml](https://github.com/mirage/alcotest/blob/47908b1f576d65f4418bcf778d2a1db213f5a7ff/examples/floats.ml)
+  for demonstrations of the new semantics. (#152, @psafont)
+- Reject test suites with colliding output directories. (#176, @CraigFe)
+- Restrict the set of characters allowed in test names to alphanumerics,
+  hyphens, underscores and spaces. (#161, @CraigFe)
+- Fix a race condition on creating output directories. (#150, @edwintorok)
+- Report test suite durations in real time rather than system time. (#162,
+  @CraigFe)
+- Improve documentation of the `?argv` parameter. (#164, @ian-barnes)
+- Remove version number from test binary help pages. (#186, @CraigFe)
+- Remove dependency on `tput`. (#189, @samoht)
+- Remove result dependency. (#159, @hannesm)
+- Remove uses of deprecated `Pervasives.compare`. (#173, @CraigFe)
+
 ### 0.8.5 (2018-12-11)
 - Port build to Dune from jbuilder (#139 @samoht)
 - Fix output path on Windows/Cygwin (#141 @kkirstein)
