@@ -10,7 +10,7 @@ end)
 
 include Tester
 
-let test_case' n s f = test_case n s (fun x -> Deferred.return (f x))
+let test_case_sync n s f = test_case n s (fun x -> Deferred.return (f x))
 
 let run_test timeout name fn args =
   Clock.with_timeout timeout (fn args) >>| function

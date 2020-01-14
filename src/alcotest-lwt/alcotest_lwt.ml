@@ -17,7 +17,7 @@
 module Tester = Alcotest.Core.Make (Lwt)
 include Tester
 
-let test_case' n s f = test_case n s (fun x -> Lwt.return (f x))
+let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
 
 let run_test fn args =
   let async_ex, async_waker = Lwt.wait () in
