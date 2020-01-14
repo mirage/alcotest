@@ -45,7 +45,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   type runtime_options = {
     verbose : bool;
     compact : bool;
-    tail_errors : [ `Unlimited | `Limit of int ];
+    tail_errors : [ `Unlimited | `Limit of int ] option;
     show_errors : bool;
     quick_only : bool;
     json : bool;
@@ -55,18 +55,20 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   let v_runtime_flags ~defaults (`Verbose verbose) (`Compact compact)
       (`Tail_errors tail_errors) (`Show_errors show_errors)
       (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) =
+    let ( ||* ) a b = match (a, b) with Some a, _ -> Some a | None, b -> b in
     let verbose = verbose || defaults.verbose in
     let compact = compact || defaults.compact in
     let show_errors = show_errors || defaults.show_errors in
     let quick_only = quick_only || defaults.quick_only in
     let json = json || defaults.json in
     let log_dir = Some log_dir in
+    let tail_errors = tail_errors ||* defaults.tail_errors in
     { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
 
   let run_test ~and_exit
       { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
       (`Test_filter filter) () tests name args =
-    run_with_args ~and_exit ~verbose ~compact ~tail_errors ~quick_only
+    run_with_args ~and_exit ~verbose ~compact ?tail_errors ~quick_only
       ~show_errors ~json ?filter ?log_dir name tests args
 
   let json =
@@ -123,7 +125,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(app (const (fun x -> `Tail_errors x)))
       Arg.(
         value
-        & opt limit `Unlimited
+        & opt (some limit) None
         & info ~env [ "tail-errors" ] ~docv:"N" ~doc)
 
   let show_errors =
@@ -242,9 +244,8 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       Term.info "list" ~doc )
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(tail_errors = `Unlimited) ?(quick_only = false) ?(show_errors = false)
-      ?(json = false) ?filter ?log_dir ?argv name (args : 'a Term.t)
-      (tl : 'a test list) =
+      ?tail_errors ?(quick_only = false) ?(show_errors = false) ?(json = false)
+      ?filter ?log_dir ?argv name (args : 'a Term.t) (tl : 'a test list) =
     let runtime_flags =
       { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
     in
