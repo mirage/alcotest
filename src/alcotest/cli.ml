@@ -100,12 +100,12 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     match s with
     | "unlimited" -> Ok `Unlimited
     | s -> (
-        match int_of_string_opt s with
-        | Some n ->
-            if n < 0 then
-              Error (`Msg "numeric limit must be nonnegative or 'unlimited'")
-            else Ok (`Limit n)
-        | None -> Error (`Msg "invalid numeric limit") )
+        try
+          let n = int_of_string s in
+          if n < 0 then
+            Error (`Msg "numeric limit must be nonnegative or 'unlimited'")
+          else Ok (`Limit n)
+        with Failure _ -> Error (`Msg "invalid numeric limit") )
 
   let limit_printer ppf limit =
     match limit with
