@@ -4,6 +4,8 @@
    compact
    exception_in_test
    invalid_arg_in_test
+   tail_errors_limit
+   tail_errors_unlimited
    unicode_testname
  )
  (libraries alcotest)
@@ -12,6 +14,8 @@
    compact
    exception_in_test
    invalid_arg_in_test
+   tail_errors_limit
+   tail_errors_unlimited
    unicode_testname
  )
 )
@@ -117,6 +121,58 @@
  (name runtest)
  (action
    (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)
+ )
+)
+
+(rule
+ (target tail_errors_limit.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../expect_failure.exe %{dep:tail_errors_limit.exe})
+  )
+ )
+)
+
+(rule
+ (target tail_errors_limit.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:tail_errors_limit.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff tail_errors_limit.expected tail_errors_limit.processed)
+ )
+)
+
+(rule
+ (target tail_errors_unlimited.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../expect_failure.exe %{dep:tail_errors_unlimited.exe})
+  )
+ )
+)
+
+(rule
+ (target tail_errors_unlimited.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:tail_errors_unlimited.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff tail_errors_unlimited.expected tail_errors_unlimited.processed)
  )
 )
 
