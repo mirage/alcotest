@@ -48,6 +48,7 @@ module type S = sig
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -161,6 +162,7 @@ module Make (M : Monad.S) = struct
     json : bool;
     verbose : bool;
     compact : bool;
+    tail_errors : [ `Unlimited | `Limit of int ];
     log_dir : string;
     run_id : string;
   }
@@ -172,6 +174,7 @@ module Make (M : Monad.S) = struct
     let max_label = 0 in
     let verbose = false in
     let compact = false in
+    let tail_errors = `Unlimited in
     let speed_level = `Slow in
     let show_errors = false in
     let json = false in
@@ -187,6 +190,7 @@ module Make (M : Monad.S) = struct
       json;
       verbose;
       compact;
+      tail_errors;
       log_dir;
       run_id;
     }
@@ -197,18 +201,44 @@ module Make (M : Monad.S) = struct
     | `Quick, _ -> 1
     | _, `Quick -> -1
 
-  let string_of_channel ic =
-    let n = 32768 in
-    let s = Bytes.create n in
-    let b = Buffer.create 1024 in
-    let rec iter ic b s =
-      let nread = try input ic s 0 n with End_of_file -> 0 in
-      if nread > 0 then (
-        Buffer.add_substring b (Bytes.unsafe_to_string s) 0 nread;
-        iter ic b s )
+  (*
+     Reverse a list, taking at most the first n elements of the original
+     list.
+  *)
+  let rev_head n l =
+    let rec aux acc n l =
+      match l with
+      | x :: xs -> if n > 0 then aux (x :: acc) (n - 1) xs else acc
+      | [] -> acc
     in
-    iter ic b s;
-    Buffer.contents b
+    aux [] n l
+
+  (*
+     Show the last lines of a log file.
+     The goal is to not clutter up the console output.
+  *)
+  let read_tail max_lines ic =
+    let rev_lines = ref [] in
+    try
+      while true do
+        rev_lines := input_line ic :: !rev_lines
+      done;
+      assert false
+    with End_of_file ->
+      let selected_lines =
+        match max_lines with
+        | `Unlimited -> List.rev !rev_lines
+        | `Limit n -> rev_head n !rev_lines
+      in
+      let omitted_count = List.length !rev_lines - List.length selected_lines in
+      let display_lines =
+        if omitted_count = 0 then selected_lines
+        else
+          Fmt.strf "... (omitting %i line%a)" omitted_count Pp.pp_plural
+            omitted_count
+          :: selected_lines
+      in
+      String.concat ~sep:"\n" display_lines ^ "\n"
 
   let log_dir t = Filename.concat t.log_dir t.run_id
 
@@ -270,13 +300,14 @@ module Make (M : Monad.S) = struct
 
   let bold_s fmt = color `Bold fmt
 
-  let pp_error ~verbose ~doc_of_path ~output_file ppf (path, error) =
+  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ppf (path, error)
+      =
     let logs =
       let filename = output_file path in
       if verbose || not (Sys.file_exists filename) then Fmt.strf "%s\n" error
       else
         let file = open_in filename in
-        let output = string_of_channel file in
+        let output = read_tail tail_errors file in
         close_in file;
         Fmt.strf "in `%s`:\n%s" filename output
     in
@@ -319,7 +350,7 @@ module Make (M : Monad.S) = struct
       let pp_error =
         pp_error ~verbose:t.verbose
           ~doc_of_path:(Suite.doc_of_path t.suite)
-          ~output_file:(output_file t)
+          ~output_file:(output_file t) ~tail_errors:t.tail_errors
       in
       let error =
         match result with
@@ -473,6 +504,7 @@ module Make (M : Monad.S) = struct
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -481,8 +513,9 @@ module Make (M : Monad.S) = struct
     'a
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(quick_only = false) ?(show_errors = false) ?(json = false) ?filter
-      ?(log_dir = default_log_dir ()) name args (tl : 'a test list) =
+      ?(tail_errors = `Unlimited) ?(quick_only = false) ?(show_errors = false)
+      ?(json = false) ?filter ?(log_dir = default_log_dir ()) name args
+      (tl : 'a test list) =
     let speed_level = if quick_only then `Quick else `Slow in
     let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
@@ -493,6 +526,7 @@ module Make (M : Monad.S) = struct
         name;
         verbose;
         compact;
+        tail_errors;
         speed_level;
         json;
         show_errors;
@@ -514,8 +548,8 @@ module Make (M : Monad.S) = struct
         | _, true -> exit 1
         | _, false -> raise Test_error )
 
-  let run ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json ?filter
-      ?log_dir name (tl : unit test list) =
-    run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
-      ?filter ?log_dir name () tl
+  let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
+      ?json ?filter ?log_dir name (tl : unit test list) =
+    run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir name () tl
 end

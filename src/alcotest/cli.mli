@@ -52,7 +52,7 @@ module type S = sig
     return)
     with_options
   (** [run_with_args n a t] Similar to [run a t] but take an extra
-      argument [a]. Every test function will receive as arguement the
+      argument [a]. Every test function will receive as argument the
       evaluation of the [Cdmliner] term [a]: this is useful to configure
       the test behaviors using the CLI. *)
 end

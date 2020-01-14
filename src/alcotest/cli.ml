@@ -45,6 +45,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   type runtime_options = {
     verbose : bool;
     compact : bool;
+    tail_errors : [ `Unlimited | `Limit of int ] option;
     show_errors : bool;
     quick_only : bool;
     json : bool;
@@ -52,21 +53,23 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   }
 
   let v_runtime_flags ~defaults (`Verbose verbose) (`Compact compact)
-      (`Show_errors show_errors) (`Quick_only quick_only) (`Json json)
-      (`Log_dir log_dir) =
+      (`Tail_errors tail_errors) (`Show_errors show_errors)
+      (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) =
+    let ( ||* ) a b = match (a, b) with Some a, _ -> Some a | None, b -> b in
     let verbose = verbose || defaults.verbose in
     let compact = compact || defaults.compact in
     let show_errors = show_errors || defaults.show_errors in
     let quick_only = quick_only || defaults.quick_only in
     let json = json || defaults.json in
     let log_dir = Some log_dir in
-    { verbose; compact; show_errors; quick_only; json; log_dir }
+    let tail_errors = tail_errors ||* defaults.tail_errors in
+    { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
 
   let run_test ~and_exit
-      { verbose; compact; show_errors; quick_only; json; log_dir }
+      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
       (`Test_filter filter) () tests name args =
-    run_with_args ~and_exit ~verbose ~compact ~quick_only ~show_errors ~json
-      ?filter ?log_dir name tests args
+    run_with_args ~and_exit ~verbose ~compact ?tail_errors ~quick_only
+      ~show_errors ~json ?filter ?log_dir name tests args
 
   let json =
     let doc = "Display JSON for the results, to be used by a script." in
@@ -95,6 +98,36 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(app (const (fun x -> `Compact x)))
       Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
 
+  let limit_parser s =
+    match s with
+    | "unlimited" -> Ok `Unlimited
+    | s -> (
+        try
+          let n = int_of_string s in
+          if n < 0 then
+            Error (`Msg "numeric limit must be nonnegative or 'unlimited'")
+          else Ok (`Limit n)
+        with Failure _ -> Error (`Msg "invalid numeric limit") )
+
+  let limit_printer ppf limit =
+    match limit with
+    | `Unlimited -> Fmt.pf ppf "unlimited"
+    | `Limit n -> Fmt.pf ppf "%i" n
+
+  (* Parse/print a nonnegative number of lines or "unlimited". *)
+  let limit = Cmdliner.Arg.conv (limit_parser, limit_printer)
+
+  let tail_errors =
+    let env = Arg.env_var "ALCOTEST_TAIL_ERRORS" in
+    let doc =
+      "Show only the last $(docv) lines of output in case of an error."
+    in
+    Term.(app (const (fun x -> `Tail_errors x)))
+      Arg.(
+        value
+        & opt (some limit) None
+        & info ~env [ "tail-errors" ] ~docv:"N" ~doc)
+
   let show_errors =
     let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
     let doc = "Display the test errors." in
@@ -112,6 +145,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       pure (v_runtime_flags ~defaults)
       $ verbose
       $ compact
+      $ tail_errors
       $ show_errors
       $ quick_only
       $ json
@@ -210,10 +244,10 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       Term.info "list" ~doc )
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(quick_only = false) ?(show_errors = false) ?(json = false) ?filter
-      ?log_dir ?argv name (args : 'a Term.t) (tl : 'a test list) =
+      ?tail_errors ?(quick_only = false) ?(show_errors = false) ?(json = false)
+      ?filter ?log_dir ?argv name (args : 'a Term.t) (tl : 'a test list) =
     let runtime_flags =
-      { verbose; compact; show_errors; quick_only; json; log_dir }
+      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
     in
     let choices =
       [
@@ -231,8 +265,8 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     | `Error _ -> raise Test_error
     | _ -> if and_exit then exit 0 else M.return ()
 
-  let run ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json ?filter
-      ?log_dir ?argv name tl =
-    run_with_args ?and_exit ?verbose ?compact ?quick_only ?show_errors ?json
-      ?filter ?log_dir ?argv name (Term.pure ()) tl
+  let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
+      ?json ?filter ?log_dir ?argv name tl =
+    run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?argv name (Term.pure ()) tl
 end

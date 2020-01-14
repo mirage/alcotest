@@ -48,6 +48,7 @@ module type S = sig
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
@@ -62,6 +63,8 @@ module type S = sig
       - [verbose] (default [false]). Display the test std.out and std.err (rather
         than redirecting to a log file).
       - [compact] (default [false]). Compact the output of the tests.
+      - [tail_errors] (default unlimited). Show only the last N lines of
+        output of failed tests.
       - [quick_only] (default [false]). Don't run tests with the
         {{!Core.speed_level} [`Slow] speed level}.
       - [show_errors] (default [false]). Display the test errors.
