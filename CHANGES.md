@@ -1,3 +1,8 @@
+### Unreleased
+
+- Add support for an `ALCOTEST_COLOR={auto,always,never}` environment variable
+  to control the colorization of terminal output. (#209, @mjambon)
+
 ### 1.0.0 (2019-01-14)
 
 - Require OCaml 4.03. (#159, @hannesm)
