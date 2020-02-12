@@ -6,7 +6,7 @@
  (action
   (with-stdout-to
     %{targets}
-   (run ../gen_dune_rules.exe)
+   (run ../../gen_dune_rules.exe --expect-failure --package "alcotest-lwt" --libraries "alcotest-lwt lwt lwt.unix")
   )
  )
 )

@@ -20,6 +20,8 @@ module type S = sig
   val return : 'a -> 'a t
 
   val bind : 'a t -> ('a -> 'b t) -> 'b t
+
+  val catch : (unit -> 'a t) -> (exn -> 'a t) -> 'a t
 end
 
 module Identity : S with type 'a t = 'a

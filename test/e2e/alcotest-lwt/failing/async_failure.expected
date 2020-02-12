@@ -1,0 +1,11 @@
+Testing foo.
+This run has ID `<uuid>`.
+ ...                all          0   one.[FAIL]              all          0   one.
+ ...                all          1   two.[OK]                all          1   two.
+-- all.000 [one.] Failed --
+in `<build-context>/_build/_tests/<uuid>/all.000.output`:
+freeing all resources
+[failure] All is broken
+
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+1 error! in <test-duration>s. 2 tests run.

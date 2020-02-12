@@ -15,26 +15,29 @@ let chop_extension name =
   in
   search_dot (String.length name - 1)
 
-let global_stanza filenames =
+let global_stanza ~libraries filenames =
   let bases = List.map chop_extension filenames in
+  let libraries = List.map (( ^ ) " ") libraries in
   let pp_sexp_list = Fmt.(list ~sep:(const string "\n   ")) in
   Fmt.pr
     {|(executables
  (names
    %a
  )
- (libraries alcotest)
+ (libraries alcotest%a)
  (modules
    %a
  )
 )
 |}
-    (pp_sexp_list Fmt.string) bases (pp_sexp_list Fmt.string) bases
+    (pp_sexp_list Fmt.string) bases
+    Fmt.(list string)
+    libraries (pp_sexp_list Fmt.string) bases
 
 let example_rule_stanza ~expect_failure filename =
   let base = chop_extension filename in
   let expect_failure =
-    if expect_failure then "../expect_failure.exe " else ""
+    if expect_failure then "../../expect_failure.exe " else ""
   in
   (* Run Alcotest to get *.actual, then pass through the strip_randomness
      sanitiser to get *.processed. *)
@@ -53,7 +56,7 @@ let example_rule_stanza ~expect_failure filename =
  (target %s.processed)
  (action
   (with-outputs-to %%{target}
-   (run ../strip_randomness.exe %%{dep:%s.actual})
+   (run ../../strip_randomness.exe %%{dep:%s.actual})
   )
  )
 )
@@ -61,22 +64,23 @@ let example_rule_stanza ~expect_failure filename =
 |}
     base expect_failure base base base
 
-let example_alias_stanza filename =
+let example_alias_stanza ~package filename =
   let base = chop_extension filename in
   Fmt.pr
     {|
 (alias
  (name runtest)
+ (package %s)
  (action
    (diff %s.expected %s.processed)
  )
 )
 |}
-    base base
+    package base base
 
 let is_example filename = Filename.check_suffix filename ".ml"
 
-let main expect_failure =
+let main package expect_failure libraries =
   Sys.readdir "."
   |> Array.to_list
   |> List.sort String.compare
@@ -84,14 +88,28 @@ let main expect_failure =
   |> function
   | [] -> () (* no tests to execute *)
   | tests ->
-      global_stanza tests;
+      global_stanza ~libraries tests;
       List.iter
         (fun test ->
           example_rule_stanza ~expect_failure test;
-          example_alias_stanza test)
+          example_alias_stanza ~package test)
         tests
 
 open Cmdliner
+
+let package =
+  let doc =
+    Arg.info ~doc:"Package with which to associate the executables"
+      [ "package" ]
+  in
+  Arg.(required & opt (some string) None & doc)
+
+let libraries =
+  let doc =
+    Arg.info ~doc:"Additional libraries to make available to the executable"
+      [ "libraries" ]
+  in
+  Arg.(value & opt (list string) [] & doc)
 
 let expect_failure =
   let doc =
@@ -101,6 +119,7 @@ let expect_failure =
 
 let term =
   Term.
-    (const main $ expect_failure, info ~version:"%%VERSION%%" "gen_dune_rules")
+    ( const main $ package $ expect_failure $ libraries,
+      info ~version:"%%VERSION%%" "gen_dune_rules" )
 
 let () = Term.(exit @@ eval term)
