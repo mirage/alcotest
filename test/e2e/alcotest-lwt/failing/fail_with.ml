@@ -1,11 +1,4 @@
-let free () =
-  print_endline "freeing all resources";
-  Lwt.return ()
-
-let test_lwt switch () =
-  Lwt_switch.add_hook (Some switch) free;
-  Lwt.async (fun () -> failwith "All is broken");
-  Lwt_unix.sleep 10.
+let test_lwt _switch () = Lwt.fail_with "should fail"
 
 let () =
   let open Alcotest_lwt in
