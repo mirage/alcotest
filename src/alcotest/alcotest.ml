@@ -146,9 +146,9 @@ let check_err fmt =
   Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
 
 let check t msg x y =
-  show_assert msg;
   if not (equal t x y) then
-    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) x (pp t) y
+    ( show_assert msg;
+      Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) x (pp t) y )
     |> failwith
 
 let fail msg =
@@ -166,14 +166,15 @@ let collect_exception f =
   with e -> Some e
 
 let check_raises msg exn f =
-  show_assert msg;
   match collect_exception f with
   | None ->
+      show_assert msg;
       check_err "Fail %s: expecting %s, got nothing." msg
         (Printexc.to_string exn)
   | Some e ->
-      if e <> exn then
+      if e <> exn then (
+        show_assert msg;
         check_err "Fail %s: expecting %s, got %s." msg (Printexc.to_string exn)
-          (Printexc.to_string e)
+          (Printexc.to_string e) )
 
 let () = at_exit (Format.pp_print_flush Format.err_formatter)

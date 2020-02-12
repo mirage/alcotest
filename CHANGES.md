@@ -1,3 +1,6 @@
+- Remove the extra asserts printed sometimes after the results of a test. (#215,
+  @icristescu)
+
 ### 1.0.1 (2020-02-12)
 
 - Add support for an `ALCOTEST_COLOR={auto,always,never}` environment variable

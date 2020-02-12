@@ -23,6 +23,3 @@ This run has ID `<uuid>`.
  ...                fuzzy equality               1   sorted list.[OK]                fuzzy equality               1   sorted list.
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
 Test Successful in <test-duration>s. 21 tests run.
-ASSERT 0-tuple
-ASSERT 1-tuple
-ASSERT 2-tuple
