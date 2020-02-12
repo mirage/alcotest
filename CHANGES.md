@@ -1,9 +1,11 @@
-### Unreleased
+### 1.0.1 (2020-02-12)
 
 - Add support for an `ALCOTEST_COLOR={auto,always,never}` environment variable
   to control the colorization of terminal output. (#209, @mjambon)
+- Fix handling of asynchronous exceptions in `Alcotest_{async,lwt}`. (#212,
+  @CraigFe @talex5)
 
-### 1.0.0 (2019-01-14)
+### 1.0.0 (2020-01-14)
 
 - Require OCaml 4.03. (#159, @hannesm)
 - Change `Alcotest_{async,lwt}.test_case` to return monadic values. These must
