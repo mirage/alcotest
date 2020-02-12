@@ -2,8 +2,8 @@
 
 - Add support for an `ALCOTEST_COLOR={auto,always,never}` environment variable
   to control the colorization of terminal output. (#209, @mjambon)
-- Fix handling of asynchronous exceptions in `Alcotest_{async,lwt}`. (#212,
-  @CraigFe @talex5)
+- Fix handling of exceptions in `Alcotest_{async,lwt}`. (#212, @CraigFe
+  @talex5)
 
 ### 1.0.0 (2020-01-14)
 
