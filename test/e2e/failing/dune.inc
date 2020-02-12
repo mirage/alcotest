@@ -1,5 +1,6 @@
 (executables
  (names
+   async_failure
    check_basic
    compact
    exception_in_test
@@ -8,8 +9,9 @@
    tail_errors_unlimited
    unicode_testname
  )
- (libraries alcotest)
+ (libraries alcotest alcotest-lwt lwt lwt.unix)
  (modules
+   async_failure
    check_basic
    compact
    exception_in_test
@@ -17,6 +19,32 @@
    tail_errors_limit
    tail_errors_unlimited
    unicode_testname
+ )
+)
+
+(rule
+ (target async_failure.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../expect_failure.exe %{dep:async_failure.exe})
+  )
+ )
+)
+
+(rule
+ (target async_failure.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../strip_randomness.exe %{dep:async_failure.actual})
+  )
+ )
+)
+
+
+(alias
+ (name runtest)
+ (action
+   (diff async_failure.expected async_failure.processed)
  )
 )
 

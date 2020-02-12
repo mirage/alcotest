@@ -11,7 +11,7 @@
    quick_only
    quick_only_regex
  )
- (libraries alcotest)
+ (libraries alcotest alcotest-lwt lwt lwt.unix)
  (modules
    and_exit_false
    and_exit_true

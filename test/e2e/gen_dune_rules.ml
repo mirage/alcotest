@@ -23,7 +23,7 @@ let global_stanza filenames =
  (names
    %a
  )
- (libraries alcotest)
+ (libraries alcotest alcotest-lwt lwt lwt.unix)
  (modules
    %a
  )

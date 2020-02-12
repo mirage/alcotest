@@ -1,0 +1,4 @@
+Testing foo.
+This run has ID `<uuid>`.
+ ...                all          0   one.freeing all resources
+Fatal error: exception Failure("All is broken")
