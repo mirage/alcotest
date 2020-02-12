@@ -6,7 +6,7 @@
  (action
   (with-stdout-to
     %{targets}
-   (run ../gen_dune_rules.exe)
+   (run ../../gen_dune_rules.exe --package "alcotest" --expect-failure)
   )
  )
 )

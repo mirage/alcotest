@@ -1,6 +1,5 @@
 (executables
  (names
-   async_failure
    check_basic
    compact
    exception_in_test
@@ -9,9 +8,8 @@
    tail_errors_unlimited
    unicode_testname
  )
- (libraries alcotest alcotest-lwt lwt lwt.unix)
+ (libraries alcotest)
  (modules
-   async_failure
    check_basic
    compact
    exception_in_test
@@ -19,32 +17,6 @@
    tail_errors_limit
    tail_errors_unlimited
    unicode_testname
- )
-)
-
-(rule
- (target async_failure.actual)
- (action
-  (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:async_failure.exe})
-  )
- )
-)
-
-(rule
- (target async_failure.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:async_failure.actual})
-  )
- )
-)
-
-
-(alias
- (name runtest)
- (action
-   (diff async_failure.expected async_failure.processed)
  )
 )
 
@@ -52,7 +24,7 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:check_basic.exe})
+   (run ../../expect_failure.exe %{dep:check_basic.exe})
   )
  )
 )
@@ -61,7 +33,7 @@
  (target check_basic.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:check_basic.actual})
+   (run ../../strip_randomness.exe %{dep:check_basic.actual})
   )
  )
 )
@@ -69,6 +41,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff check_basic.expected check_basic.processed)
  )
@@ -78,7 +51,7 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:compact.exe})
+   (run ../../expect_failure.exe %{dep:compact.exe})
   )
  )
 )
@@ -87,7 +60,7 @@
  (target compact.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:compact.actual})
+   (run ../../strip_randomness.exe %{dep:compact.actual})
   )
  )
 )
@@ -95,6 +68,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff compact.expected compact.processed)
  )
@@ -104,7 +78,7 @@
  (target exception_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:exception_in_test.exe})
+   (run ../../expect_failure.exe %{dep:exception_in_test.exe})
   )
  )
 )
@@ -113,7 +87,7 @@
  (target exception_in_test.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:exception_in_test.actual})
+   (run ../../strip_randomness.exe %{dep:exception_in_test.actual})
   )
  )
 )
@@ -121,6 +95,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff exception_in_test.expected exception_in_test.processed)
  )
@@ -130,7 +105,7 @@
  (target invalid_arg_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:invalid_arg_in_test.exe})
+   (run ../../expect_failure.exe %{dep:invalid_arg_in_test.exe})
   )
  )
 )
@@ -139,7 +114,7 @@
  (target invalid_arg_in_test.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:invalid_arg_in_test.actual})
+   (run ../../strip_randomness.exe %{dep:invalid_arg_in_test.actual})
   )
  )
 )
@@ -147,6 +122,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)
  )
@@ -156,7 +132,7 @@
  (target tail_errors_limit.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:tail_errors_limit.exe})
+   (run ../../expect_failure.exe %{dep:tail_errors_limit.exe})
   )
  )
 )
@@ -165,7 +141,7 @@
  (target tail_errors_limit.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:tail_errors_limit.actual})
+   (run ../../strip_randomness.exe %{dep:tail_errors_limit.actual})
   )
  )
 )
@@ -173,6 +149,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff tail_errors_limit.expected tail_errors_limit.processed)
  )
@@ -182,7 +159,7 @@
  (target tail_errors_unlimited.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:tail_errors_unlimited.exe})
+   (run ../../expect_failure.exe %{dep:tail_errors_unlimited.exe})
   )
  )
 )
@@ -191,7 +168,7 @@
  (target tail_errors_unlimited.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:tail_errors_unlimited.actual})
+   (run ../../strip_randomness.exe %{dep:tail_errors_unlimited.actual})
   )
  )
 )
@@ -199,6 +176,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff tail_errors_unlimited.expected tail_errors_unlimited.processed)
  )
@@ -208,7 +186,7 @@
  (target unicode_testname.actual)
  (action
   (with-outputs-to %{target}
-   (run ../expect_failure.exe %{dep:unicode_testname.exe})
+   (run ../../expect_failure.exe %{dep:unicode_testname.exe})
   )
  )
 )
@@ -217,7 +195,7 @@
  (target unicode_testname.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:unicode_testname.actual})
+   (run ../../strip_randomness.exe %{dep:unicode_testname.actual})
   )
  )
 )
@@ -225,6 +203,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff unicode_testname.expected unicode_testname.processed)
  )

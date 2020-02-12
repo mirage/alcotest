@@ -11,7 +11,7 @@
    quick_only
    quick_only_regex
  )
- (libraries alcotest alcotest-lwt lwt lwt.unix)
+ (libraries alcotest)
  (modules
    and_exit_false
    and_exit_true
@@ -39,7 +39,7 @@
  (target and_exit_false.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:and_exit_false.actual})
+   (run ../../strip_randomness.exe %{dep:and_exit_false.actual})
   )
  )
 )
@@ -47,6 +47,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff and_exit_false.expected and_exit_false.processed)
  )
@@ -65,7 +66,7 @@
  (target and_exit_true.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:and_exit_true.actual})
+   (run ../../strip_randomness.exe %{dep:and_exit_true.actual})
   )
  )
 )
@@ -73,6 +74,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff and_exit_true.expected and_exit_true.processed)
  )
@@ -91,7 +93,7 @@
  (target basic.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:basic.actual})
+   (run ../../strip_randomness.exe %{dep:basic.actual})
   )
  )
 )
@@ -99,6 +101,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff basic.expected basic.processed)
  )
@@ -117,7 +120,7 @@
  (target check_basic.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:check_basic.actual})
+   (run ../../strip_randomness.exe %{dep:check_basic.actual})
   )
  )
 )
@@ -125,6 +128,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff check_basic.expected check_basic.processed)
  )
@@ -143,7 +147,7 @@
  (target filter_name.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:filter_name.actual})
+   (run ../../strip_randomness.exe %{dep:filter_name.actual})
   )
  )
 )
@@ -151,6 +155,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff filter_name.expected filter_name.processed)
  )
@@ -169,7 +174,7 @@
  (target filter_name_regex.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:filter_name_regex.actual})
+   (run ../../strip_randomness.exe %{dep:filter_name_regex.actual})
   )
  )
 )
@@ -177,6 +182,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff filter_name_regex.expected filter_name_regex.processed)
  )
@@ -195,7 +201,7 @@
  (target json_output.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:json_output.actual})
+   (run ../../strip_randomness.exe %{dep:json_output.actual})
   )
  )
 )
@@ -203,6 +209,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff json_output.expected json_output.processed)
  )
@@ -221,7 +228,7 @@
  (target list_tests.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:list_tests.actual})
+   (run ../../strip_randomness.exe %{dep:list_tests.actual})
   )
  )
 )
@@ -229,6 +236,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff list_tests.expected list_tests.processed)
  )
@@ -247,7 +255,7 @@
  (target quick_only.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:quick_only.actual})
+   (run ../../strip_randomness.exe %{dep:quick_only.actual})
   )
  )
 )
@@ -255,6 +263,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff quick_only.expected quick_only.processed)
  )
@@ -273,7 +282,7 @@
  (target quick_only_regex.processed)
  (action
   (with-outputs-to %{target}
-   (run ../strip_randomness.exe %{dep:quick_only_regex.actual})
+   (run ../../strip_randomness.exe %{dep:quick_only_regex.actual})
   )
  )
 )
@@ -281,6 +290,7 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (action
    (diff quick_only_regex.expected quick_only_regex.processed)
  )
