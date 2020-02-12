@@ -12,7 +12,8 @@ are fully displayed at the end of the run (with the full logs ready to
 inspect), with a simple (yet expressive) query language to select the
 tests to run.
 
-[![Build Status](https://travis-ci.org/mirage/alcotest.svg)](https://travis-ci.org/mirage/alcotest)
+[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Fmirage%2Falcotest%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/mirage/alcotest)
+[![TravisCI Build Status](https://travis-ci.org/mirage/alcotest.svg)](https://travis-ci.org/mirage/alcotest)
 [![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/alcotest/alcotest/index.html)
 
 ### Examples
