@@ -331,13 +331,15 @@ module Make (M : Monad.S) = struct
 
   let protect_test path (f : 'a run) : 'a rrun =
    fun args ->
-    try f args >|= fun () -> `Ok with
-    | Check_error err ->
-        let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
-        M.return @@ `Error (path, err)
-    | Failure f -> M.return @@ exn path "failure" f
-    | Invalid_argument f -> M.return @@ exn path "invalid" f
-    | e -> M.return @@ exn path "exception" (Printexc.to_string e)
+    M.catch
+      (fun () -> f args >|= fun () -> `Ok)
+      (function
+        | Check_error err ->
+            let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
+            M.return @@ `Error (path, err)
+        | Failure f -> M.return @@ exn path "failure" f
+        | Invalid_argument f -> M.return @@ exn path "invalid" f
+        | e -> M.return @@ exn path "exception" (Printexc.to_string e))
 
   let perform_test t args suite =
     let open Suite in
