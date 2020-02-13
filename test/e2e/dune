@@ -1,18 +1,14 @@
 (executable
  (name gen_dune_rules)
  (libraries cmdliner fmt)
- (modules gen_dune_rules)
-)
+ (modules gen_dune_rules))
 
 (executable
  (name expect_failure)
  (libraries unix fmt)
- (modules expect_failure)
-)
+ (modules expect_failure))
 
 (executable
  (name strip_randomness)
  (libraries unix re)
- (modules strip_randomness)
-)
-
+ (modules strip_randomness))
