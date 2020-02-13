@@ -29,13 +29,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest-lwt)
  (action
-   (diff async_failure.expected async_failure.processed)
- )
-)
+   (diff async_failure.expected async_failure.processed)))
 
 (rule
  (target fail_with.actual)
@@ -56,10 +54,8 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest-lwt)
  (action
-   (diff fail_with.expected fail_with.processed)
- )
-)
+   (diff fail_with.expected fail_with.processed)))

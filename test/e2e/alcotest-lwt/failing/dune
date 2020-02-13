@@ -11,7 +11,6 @@
  )
 )
 
-(alias
- (name runtest)
- (action (diff dune.inc dune.gen))
-)
+(rule
+ (alias runtest)
+ (action (diff dune.inc dune.gen)))

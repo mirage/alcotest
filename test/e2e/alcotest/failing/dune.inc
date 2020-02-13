@@ -39,13 +39,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff check_basic.expected check_basic.processed)
- )
-)
+   (diff check_basic.expected check_basic.processed)))
 
 (rule
  (target compact.actual)
@@ -66,13 +64,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff compact.expected compact.processed)
- )
-)
+   (diff compact.expected compact.processed)))
 
 (rule
  (target exception_in_test.actual)
@@ -93,13 +89,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff exception_in_test.expected exception_in_test.processed)
- )
-)
+   (diff exception_in_test.expected exception_in_test.processed)))
 
 (rule
  (target invalid_arg_in_test.actual)
@@ -120,13 +114,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)
- )
-)
+   (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)))
 
 (rule
  (target tail_errors_limit.actual)
@@ -147,13 +139,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff tail_errors_limit.expected tail_errors_limit.processed)
- )
-)
+   (diff tail_errors_limit.expected tail_errors_limit.processed)))
 
 (rule
  (target tail_errors_unlimited.actual)
@@ -174,13 +164,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff tail_errors_unlimited.expected tail_errors_unlimited.processed)
- )
-)
+   (diff tail_errors_unlimited.expected tail_errors_unlimited.processed)))
 
 (rule
  (target unicode_testname.actual)
@@ -201,10 +189,8 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff unicode_testname.expected unicode_testname.processed)
- )
-)
+   (diff unicode_testname.expected unicode_testname.processed)))
