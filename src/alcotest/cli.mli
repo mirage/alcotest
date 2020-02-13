@@ -15,7 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** This module extends {Core} to allow CLI options to be passed to
+(** This module extends {!Core} to allow CLI options to be passed to
     Alcotest executables. In particular:
      - tests can be selectively executed using the "test" subcommand;
      - the {!run_with_args} function can be used to pass arguments to tests
