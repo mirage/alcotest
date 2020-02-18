@@ -5,7 +5,7 @@ This run has ID `<uuid>`.
  ...                test-b          0   Another pass.[OK]                test-b          0   Another pass.
 -- test-a.001 [Failing.] Failed --
 in `<build-context>/_build/_tests/<uuid>/test-a.001.output`:
-[exception] Exception_in_test.Foo("message")
+[exception] Dune__exe__Exception_in_test.Foo("message")
 
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
 1 error! in <test-duration>s. 3 tests run.

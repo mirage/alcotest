@@ -2,16 +2,14 @@
 
 (rule
  (targets dune.gen)
- (deps (source_tree .))
+ (deps
+  (source_tree .))
  (action
   (with-stdout-to
-    %{targets}
-   (run ../../gen_dune_rules.exe --package "alcotest")
-  )
- )
-)
+   %{targets}
+   (run ../../gen_dune_rules.exe --package "alcotest"))))
 
-(alias
- (name runtest)
- (action (diff dune.inc dune.gen))
-)
+(rule
+ (alias runtest)
+ (action
+  (diff dune.inc dune.gen)))

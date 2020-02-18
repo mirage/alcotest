@@ -45,13 +45,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff and_exit_false.expected and_exit_false.processed)
- )
-)
+   (diff and_exit_false.expected and_exit_false.processed)))
 
 (rule
  (target and_exit_true.actual)
@@ -72,13 +70,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff and_exit_true.expected and_exit_true.processed)
- )
-)
+   (diff and_exit_true.expected and_exit_true.processed)))
 
 (rule
  (target basic.actual)
@@ -99,13 +95,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff basic.expected basic.processed)
- )
-)
+   (diff basic.expected basic.processed)))
 
 (rule
  (target check_basic.actual)
@@ -126,13 +120,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff check_basic.expected check_basic.processed)
- )
-)
+   (diff check_basic.expected check_basic.processed)))
 
 (rule
  (target filter_name.actual)
@@ -153,13 +145,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff filter_name.expected filter_name.processed)
- )
-)
+   (diff filter_name.expected filter_name.processed)))
 
 (rule
  (target filter_name_regex.actual)
@@ -180,13 +170,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff filter_name_regex.expected filter_name_regex.processed)
- )
-)
+   (diff filter_name_regex.expected filter_name_regex.processed)))
 
 (rule
  (target json_output.actual)
@@ -207,13 +195,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff json_output.expected json_output.processed)
- )
-)
+   (diff json_output.expected json_output.processed)))
 
 (rule
  (target list_tests.actual)
@@ -234,13 +220,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff list_tests.expected list_tests.processed)
- )
-)
+   (diff list_tests.expected list_tests.processed)))
 
 (rule
  (target quick_only.actual)
@@ -261,13 +245,11 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff quick_only.expected quick_only.processed)
- )
-)
+   (diff quick_only.expected quick_only.processed)))
 
 (rule
  (target quick_only_regex.actual)
@@ -288,10 +270,8 @@
 )
 
 
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package alcotest)
  (action
-   (diff quick_only_regex.expected quick_only_regex.processed)
- )
-)
+   (diff quick_only_regex.expected quick_only_regex.processed)))

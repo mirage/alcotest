@@ -68,13 +68,11 @@ let example_alias_stanza ~package filename =
   let base = chop_extension filename in
   Fmt.pr
     {|
-(alias
- (name runtest)
+(rule
+ (alias runtest)
  (package %s)
  (action
-   (diff %s.expected %s.processed)
- )
-)
+   (diff %s.expected %s.processed)))
 |}
     package base base
 
