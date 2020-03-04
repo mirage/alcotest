@@ -1,3 +1,7 @@
+### Unreleased
+
+- Fix handling of CLI options for `Alcotest_{async,lwt}.run`. (#222, @CraigFe)
+
 ### 1.0.1 (2020-02-12)
 
 - Add support for an `ALCOTEST_COLOR={auto,always,never}` environment variable
