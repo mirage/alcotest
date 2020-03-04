@@ -34,8 +34,6 @@ let options_of_test_file file =
   let options_file = chop_extension file ^ ".opts" in
   if not (Sys.file_exists options_file) then [] else read_file options_file
 
-let pp_options = Fmt.(list (const string " " ++ string))
-
 let global_stanza ~libraries filenames =
   let bases = List.map chop_extension filenames in
   let libraries = List.map (( ^ ) " ") libraries in
@@ -57,7 +55,7 @@ let global_stanza ~libraries filenames =
 
 let example_rule_stanza ~expect_failure filename =
   let base = chop_extension filename in
-  let options = options_of_test_file filename in
+  let options = options_of_test_file filename |> List.map (( ^ ) " ") in
   let expect_failure =
     if expect_failure then "../../expect_failure.exe " else ""
   in
@@ -74,7 +72,9 @@ let example_rule_stanza ~expect_failure filename =
  )
 )
 |}
-    base expect_failure base pp_options options;
+    base expect_failure base
+    Fmt.(list string)
+    options;
 
   Fmt.pr
     {|
