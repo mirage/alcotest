@@ -18,7 +18,7 @@
     {!run} returns a promise that runs the tests when scheduled, catching
     any asynchronous exceptions thrown by the tests. *)
 
-include Alcotest.Core.S with type return = unit Lwt.t
+include Alcotest.Cli.S with type return = unit Lwt.t
 
 val test_case :
   string ->

@@ -15,6 +15,25 @@ let chop_extension name =
   in
   search_dot (String.length name - 1)
 
+(* Read a file-path to a list of strings corresponding to lines in the file. *)
+let read_file filename =
+  let lines = ref [] in
+  let chan = open_in filename in
+  try
+    while true do
+      lines := input_line chan :: !lines
+    done;
+    assert false
+  with End_of_file ->
+    close_in chan;
+    List.rev !lines
+
+(* A test executable [foo.ml] may require certain options to be passed as
+  specified in a [foo.opts] file. *)
+let options_of_test_file file =
+  let options_file = chop_extension file ^ ".opts" in
+  if not (Sys.file_exists options_file) then [] else read_file options_file
+
 let global_stanza ~libraries filenames =
   let bases = List.map chop_extension filenames in
   let libraries = List.map (( ^ ) " ") libraries in
@@ -36,6 +55,7 @@ let global_stanza ~libraries filenames =
 
 let example_rule_stanza ~expect_failure filename =
   let base = chop_extension filename in
+  let options = options_of_test_file filename |> List.map (( ^ ) " ") in
   let expect_failure =
     if expect_failure then "../../expect_failure.exe " else ""
   in
@@ -47,11 +67,17 @@ let example_rule_stanza ~expect_failure filename =
  (target %s.actual)
  (action
   (with-outputs-to %%{target}
-   (run %s%%{dep:%s.exe})
+   (run %s%%{dep:%s.exe}%a)
   )
  )
 )
+|}
+    base expect_failure base
+    Fmt.(list string)
+    options;
 
+  Fmt.pr
+    {|
 (rule
  (target %s.processed)
  (action
@@ -62,7 +88,7 @@ let example_rule_stanza ~expect_failure filename =
 )
 
 |}
-    base expect_failure base base base
+    base base
 
 let example_alias_stanza ~package filename =
   let base = chop_extension filename in
