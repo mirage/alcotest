@@ -27,6 +27,7 @@ depends: [
   "uuidm"
   "re"
   "stdlib-shims"
+  "bisect_ppx" {dev & >= "2.0.0"}
 ]
 build: [
   ["dune" "subst"] {pinned}
@@ -43,3 +44,6 @@ build: [
   ]
 ]
 dev-repo: "git+https://github.com/mirage/alcotest.git"
+pin-depends: [
+  ["bisect_ppx.git" "git+https://github.com/aantron/bisect_ppx.git"]
+]

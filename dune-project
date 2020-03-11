@@ -30,7 +30,9 @@ tests to run.
   cmdliner
   uuidm
   re
-  stdlib-shims))
+  stdlib-shims
+  (bisect_ppx (and :dev (>= 2.0.0)))
+  ))
 
 (package
  (name alcotest-async)
