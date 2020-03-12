@@ -324,8 +324,8 @@ module Make (M : Monad.S) = struct
     let open Suite in
     let test = suite.fn in
     let pp_event = pp_event t in
-    M.return () >>= fun () ->
     pp_event Fmt.stdout (`Start suite.path);
+    Fmt.(flush stdout) () (* Show event before any test stderr *);
     test args >|= fun result ->
     (* Store errors *)
     let () =
@@ -342,14 +342,18 @@ module Make (M : Monad.S) = struct
       in
       t.errors <- error @ t.errors
     in
+    (* Show any remaining test output before the event *)
+    Fmt.(flush stdout ());
+    Fmt.(flush stderr ());
     pp_event Fmt.stdout (`Result (suite.path, result));
     result
 
   let perform_tests t tests args = M.List.map_s (perform_test t args) tests
 
   let with_redirect file fn =
-    flush stdout;
-    flush stderr;
+    M.return () >>= fun () ->
+    Fmt.(flush stdout) ();
+    Fmt.(flush stderr) ();
     let fd_stdout = Unix.descr_of_out_channel stdout in
     let fd_stderr = Unix.descr_of_out_channel stderr in
     let fd_old_stdout = Unix.dup fd_stdout in
@@ -359,8 +363,8 @@ module Make (M : Monad.S) = struct
     Unix.dup2 fd_file fd_stderr;
     Unix.close fd_file;
     (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e) >|= fun r ->
-    flush stdout;
-    flush stderr;
+    Fmt.(flush stdout ());
+    Fmt.(flush stderr ());
     Unix.dup2 fd_old_stdout fd_stdout;
     Unix.dup2 fd_old_stderr fd_stderr;
     Unix.close fd_old_stdout;

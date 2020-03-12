@@ -8,7 +8,7 @@ let () =
         [
           Alcotest.test_case "check → stdout" `Quick (fun () ->
               Alcotest.(check unit) "alpha-0 check" () ();
-              Format.printf "\nalpha-0 standard out\n");
+              Format.printf "alpha-0 standard out\n");
           Alcotest.test_case "stdout → check" `Quick (fun () ->
               Format.printf "\nalpha-1 standard out\n";
               Alcotest.(check unit) "alpha-1 check" () ());

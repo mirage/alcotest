@@ -5,6 +5,3 @@ This run has ID `<uuid>`.
  ...                beta           0   tc0.[OK]                beta           0   tc0.
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
 Test Successful in <test-duration>s. 3 tests run.
-ASSERT alpha-0 check
-ASSERT alpha-1 check
-ASSERT beta-0 check

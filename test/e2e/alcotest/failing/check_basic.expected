@@ -14,6 +14,7 @@ This run has ID `<uuid>`.
  ...                different composite          4   pair.[FAIL]              different composite          4   pair.
 -- different basic.000 [bool.] Failed --
 in `<build-context>/_build/_tests/<uuid>/different basic.000.output`:
+ASSERT bool
 [failure] Error bool: expecting
 true, got
 false.

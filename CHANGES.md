@@ -1,6 +1,8 @@
 ### Unreleased
 
 - Fix handling of CLI options for `Alcotest_{async,lwt}.run`. (#222, @CraigFe)
+- Fix interleaving of ASSERT outputs with the other test code, and ensure that
+  it is correctly captured in log files. (#215 #228, @icristescu @CraigFe)
 
 ### 1.0.1 (2020-02-12)
 

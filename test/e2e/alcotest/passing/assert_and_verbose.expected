@@ -1,8 +1,7 @@
 Testing assert-and-verbose.
 This run has ID `<uuid>`.
- ...                alpha          0   check → stdout.
+ ...                alpha          0   check → stdout.ASSERT alpha-0 check
 alpha-0 standard out
-ASSERT alpha-0 check
 [OK]                alpha          0   check → stdout.
  ...                alpha          1   stdout → check.
 alpha-1 standard out

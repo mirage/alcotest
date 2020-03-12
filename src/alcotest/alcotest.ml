@@ -140,7 +140,9 @@ let reject (type a) =
   (module M : TESTABLE with type t = M.t)
 
 let show_assert msg =
-  Format.eprintf "%a %s\n" Fmt.(styled `Yellow string) "ASSERT" msg
+  (* Flush any test stdout preceding the assert *)
+  Fmt.(flush stdout) ();
+  Format.eprintf "%a %s\n%!" Fmt.(styled `Yellow string) "ASSERT" msg
 
 let check_err fmt =
   Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
