@@ -324,6 +324,7 @@ module Make (M : Monad.S) = struct
     let open Suite in
     let test = suite.fn in
     let pp_event = pp_event t in
+    M.return () >>= fun () ->
     pp_event Fmt.stdout (`Start suite.path);
     test args >|= fun result ->
     (* Store errors *)
