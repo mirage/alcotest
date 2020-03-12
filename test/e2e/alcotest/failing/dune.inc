@@ -4,6 +4,7 @@
    compact
    duplicate_test_names
    exception_in_test
+   filter_all_tests
    invalid_arg_in_test
    tail_errors_limit
    tail_errors_unlimited
@@ -15,6 +16,7 @@
    compact
    duplicate_test_names
    exception_in_test
+   filter_all_tests
    invalid_arg_in_test
    tail_errors_limit
    tail_errors_unlimited
@@ -121,6 +123,31 @@
  (package alcotest)
  (action
    (diff exception_in_test.expected exception_in_test.processed)))
+
+(rule
+ (target filter_all_tests.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:filter_all_tests.exe} test bar 1)
+  )
+ )
+)
+
+(rule
+ (target filter_all_tests.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:filter_all_tests.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff filter_all_tests.expected filter_all_tests.processed)))
 
 (rule
  (target invalid_arg_in_test.actual)
