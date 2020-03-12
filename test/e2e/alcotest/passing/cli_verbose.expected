@@ -1,0 +1,5 @@
+Testing cli_verbose.
+This run has ID `<uuid>`.
+ ...                alpha          0   0.SHOULD APPEAR IN TEST OUTPUT
+[OK]                alpha          0   0.
+Test Successful in <test-duration>s. 1 test run.
