@@ -16,17 +16,16 @@
 
 (** A lightweight and colourful test framework.
 
-    [Alcotest] provides a simple interface to perform unit tests. It
-    exposes a simple {{!TESTABLE}TESTABLE} module type, a
-    {{!check}check function} to assert test predicates and a
-    {{!run}run} function to perform a list of [unit -> unit] test
-    callbacks.
+    [Alcotest] provides a simple interface to perform unit tests. It exposes a
+    simple {{!TESTABLE} TESTABLE} module type, a {{!check} check function} to
+    assert test predicates and a {{!run} run} function to perform a list of
+    [unit -> unit] test callbacks.
 
-    From these descriptions, [Alcotest] builds a quiet and colorful
-    output where only faulty runs are fully displayed at the end of
-    the run (with the full logs ready to inspect).
+    From these descriptions, [Alcotest] builds a quiet and colorful output where
+    only faulty runs are fully displayed at the end of the run (with the full
+    logs ready to inspect).
 
-    {e Release %%VERSION%% } *)
+    {e Release %%VERSION%%} *)
 
 module Core : module type of Core
 
@@ -38,8 +37,7 @@ include Cli.S with type return = unit
 
 (** {2 Assert functions} *)
 
-(** [TESTABLE] provides an abstract description for testable
-    values. *)
+(** [TESTABLE] provides an abstract description for testable values. *)
 module type TESTABLE = sig
   type t
   (** The type to test. *)
@@ -92,8 +90,7 @@ val list : 'a testable -> 'a list testable
 (** [list t] tests lists of [t]s. *)
 
 val slist : 'a testable -> ('a -> 'a -> int) -> 'a list testable
-(** [slist t comp] tests sorted lists of [t]s. The list are sorted
-    using [comp]. *)
+(** [slist t comp] tests sorted lists of [t]s. The list are sorted using [comp]. *)
 
 val array : 'a testable -> 'a array testable
 (** [array t] tests arrays of [t]s. *)
@@ -108,8 +105,8 @@ val pair : 'a testable -> 'b testable -> ('a * 'b) testable
 (** [pair a b] tests pairs of [a]s and [b]s. *)
 
 val of_pp : 'a Fmt.t -> 'a testable
-(** [of_pp pp] tests values which can be printed using [pp] and
-    compared using {!Pervasives.compare} *)
+(** [of_pp pp] tests values which can be printed using [pp] and compared using
+    {!Pervasives.compare} *)
 
 val pass : 'a testable
 (** [pass] tests values of any type and always succeeds. *)
@@ -127,8 +124,8 @@ val failf : ('a, Format.formatter, unit, 'b) format4 -> 'a
 (** Simply fail with a formatted message. *)
 
 val neg : 'a testable -> 'a testable
-(** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it
-    is [false] when [t] is [true]. *)
+(** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it is
+    [false] when [t] is [true]. *)
 
 val check_raises : string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
