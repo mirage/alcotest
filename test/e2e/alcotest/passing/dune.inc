@@ -2,6 +2,7 @@
  (names
    and_exit_false
    and_exit_true
+   assert_not_printed
    basic
    check_basic
    filter_name
@@ -15,6 +16,7 @@
  (modules
    and_exit_false
    and_exit_true
+   assert_not_printed
    basic
    check_basic
    filter_name
@@ -75,6 +77,31 @@
  (package alcotest)
  (action
    (diff and_exit_true.expected and_exit_true.processed)))
+
+(rule
+ (target assert_not_printed.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:assert_not_printed.exe})
+  )
+ )
+)
+
+(rule
+ (target assert_not_printed.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:assert_not_printed.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff assert_not_printed.expected assert_not_printed.processed)))
 
 (rule
  (target basic.actual)
