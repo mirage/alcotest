@@ -34,6 +34,8 @@ module type S = sig
     with_options
 end
 
+module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+
 module Make (M : Monad.S) : S with type return = unit M.t = struct
   module C = Core.Make (M)
   include C

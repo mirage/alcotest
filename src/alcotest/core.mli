@@ -20,13 +20,17 @@ module IntSet : Set.S with type elt = int
 
 module type S = sig
   type return
+  (** The return type of each test case run by Alcotest. For the standard
+      {!Alcotest} module, [return = unit]. The concurrent backends
+      [Alcotest_lwt] and [Alcotest_async] set [return = unit Lwt.t] and
+      [return = Async_kernel.Deferred.t] respectively. *)
 
   type speed_level = [ `Quick | `Slow ]
   (** Speed level of a test. Tests marked as [`Quick] are always run. Tests
       marked as [`Slow] are skipped when the `-q` flag is passed. *)
 
   type 'a test_case = string * speed_level * ('a -> return)
-  (** A test case is an UTF-8 encoded documentation string, a speed level and a
+  (** A test case is a UTF-8 encoded documentation string, a speed level and a
       function to execute. Typically, the testing function calls the helper
       functions provided below (such as [check] and [fail]). *)
 
@@ -38,7 +42,7 @@ module type S = sig
       function [f]. *)
 
   type 'a test = string * 'a test_case list
-  (** A test is an US-ASCII encoded name and a list of test cases. The name can
+  (** A test is a US-ASCII encoded name and a list of test cases. The name can
       be used for filtering which tests to run on the CLI *)
 
   val list_tests : 'a test list -> return
@@ -70,16 +74,18 @@ module type S = sig
       - [show_errors] (default [false]). Display the test errors.
       - [json] (default [false]). Print test results in a JSON-compatible
         format.
-      - [log_dir] (default "$PWD/_build/_tests/"). The directory in which to log
-        the output of the tests (if [verbose] is not set). *)
+      - [log_dir] (default ["$PWD/_build/_tests/"]). The directory in which to
+        log the output of the tests (if [verbose] is not set). *)
 
   val run : (string -> unit test list -> return) with_options
 
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
+module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+
+module Make : MAKER
 (** Functor for building a tester that sequences tests of type
     [('a -> unit M.t)] within a given concurrency monad [M.t]. The [run] and
     [run_with_args] functions must be scheduled in a global event loop. Intended
     for use by the {!Alcotest_lwt} and {!Alcotest_async} backends. *)
-module Make (M : Monad.S) : S with type return = unit M.t

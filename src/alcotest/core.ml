@@ -61,7 +61,9 @@ module type S = sig
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
-module Make (M : Monad.S) = struct
+module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+
+module Make (M : Monad.S) : S with type return = unit M.t = struct
   module M = Monad.Extend (M)
   include M.Infix
 

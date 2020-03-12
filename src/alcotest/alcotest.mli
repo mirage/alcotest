@@ -27,12 +27,6 @@
 
     {e Release %%VERSION%%} *)
 
-module Core : module type of Core
-
-module Cli : module type of Cli
-
-module Monad : module type of Monad
-
 include Cli.S with type return = unit
 
 (** {2 Assert functions} *)
@@ -129,3 +123,21 @@ val neg : 'a testable -> 'a testable
 
 val check_raises : string -> exn -> (unit -> unit) -> unit
 (** Check that an exception is raised. *)
+
+(** {1 Monadic test runners} *)
+
+(** These modules provide the ability to run tests inside a concurrency monad:
+    that is, to sequence test cases of type ['a -> unit m] into a computation of
+    type ['a -> unit m] (for some concurrency monad [m]) with can then be
+    scheduled in a main event loop. For tests using [Lwt.t] or
+    [Async_kernel.Deferred.t], use the [Alcotest_lwt] and [Alcotest_async]
+    packages directly. *)
+
+module Core : module type of Core
+(** Defines monadic test runners {i without} command-line interfaces. *)
+
+module Cli : module type of Cli
+(** Wraps {!Core} to provide a command-line interface. *)
+
+module Monad : module type of Monad
+(** Monad signatures for use with {!Core} and {!Cli}. *)
