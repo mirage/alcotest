@@ -2,6 +2,7 @@
  (names
    and_exit_false
    and_exit_true
+   assert_and_verbose
    assert_not_printed
    basic
    check_basic
@@ -16,6 +17,7 @@
  (modules
    and_exit_false
    and_exit_true
+   assert_and_verbose
    assert_not_printed
    basic
    check_basic
@@ -77,6 +79,31 @@
  (package alcotest)
  (action
    (diff and_exit_true.expected and_exit_true.processed)))
+
+(rule
+ (target assert_and_verbose.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:assert_and_verbose.exe})
+  )
+ )
+)
+
+(rule
+ (target assert_and_verbose.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:assert_and_verbose.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff assert_and_verbose.expected assert_and_verbose.processed)))
 
 (rule
  (target assert_not_printed.actual)
