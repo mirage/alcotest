@@ -35,6 +35,15 @@ module type S = sig
 end
 
 module Make (M : Monad.S) : S with type return = unit M.t = struct
+  (** *)
+
+  (** The priority order for determining options should be as follows:
+      1. if a CLI flag/option is _explicitly_ set, use that;
+      2. if the corresponding environment variable is _explicitly_ set, use that;
+      3. if the flag/option is set by [run ?argv]
+      4. if the flag/option is passed to [run] directly, use that;
+      5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
+
   module C = Core.Make (M)
   include C
 
@@ -45,45 +54,55 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(const set_color $ Fmt_cli.style_renderer ~env ())
 
   type runtime_options = {
-    verbose : bool;
-    compact : bool;
+    verbose : bool option;
+    compact : bool option;
     tail_errors : [ `Unlimited | `Limit of int ] option;
-    show_errors : bool;
-    quick_only : bool;
-    json : bool;
+    show_errors : bool option;
+    quick_only : bool option;
+    json : bool option;
     log_dir : string option;
   }
+
+  (* Merge two ['a option]s with a left [Some] taking priority *)
+  let ( ||* ) a b = match (a, b) with Some a, _ -> Some a | None, b -> b
 
   let v_runtime_flags ~defaults (`Verbose verbose) (`Compact compact)
       (`Tail_errors tail_errors) (`Show_errors show_errors)
       (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) =
-    let ( ||* ) a b = match (a, b) with Some a, _ -> Some a | None, b -> b in
-    let verbose = verbose || defaults.verbose in
-    let compact = compact || defaults.compact in
-    let show_errors = show_errors || defaults.show_errors in
-    let quick_only = quick_only || defaults.quick_only in
-    let json = json || defaults.json in
+    let verbose = verbose ||* defaults.verbose in
+    let compact = compact ||* defaults.compact in
+    let show_errors = show_errors ||* defaults.show_errors in
+    let quick_only = quick_only ||* defaults.quick_only in
+    let json = json ||* defaults.json in
     let log_dir = Some log_dir in
     let tail_errors = tail_errors ||* defaults.tail_errors in
     { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
 
-  let run_test ~and_exit
+  let run_test ?and_exit
       { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
       (`Test_filter filter) () tests name args =
-    run_with_args ~and_exit ~verbose ~compact ?tail_errors ~quick_only
-      ~show_errors ~json ?filter ?log_dir name tests args
+    run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir name tests args
+
+  let fmap f x = Term.(app (const f) x)
+
+  (* If a Cmdliner flag is _not_ set, we interpret it as 'use the program
+     default' rather than an explicit 'disable'. This changes the type of
+     {!Cmdliner.Arg.flag} to reflect that fact. *)
+  let to_tristate = fmap (function true -> Some true | false -> None)
 
   let json =
     let doc = "Display JSON for the results, to be used by a script." in
-    Term.(app (const (fun x -> `Json x)))
-      Arg.(value & flag & info [ "json" ] ~docv:"" ~doc)
+    Arg.(value & flag & info [ "json" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Json x)
 
   let log_dir =
     let fname_concat l = List.fold_left Filename.concat "" l in
     let default_dir = fname_concat [ Sys.getcwd (); "_build"; "_tests" ] in
     let doc = "Where to store the log files of the tests." in
-    Term.(app (const (fun x -> `Log_dir x)))
-      Arg.(value & opt dir default_dir & info [ "o" ] ~docv:"DIR" ~doc)
+    Arg.(value & opt dir default_dir & info [ "o" ] ~docv:"DIR" ~doc)
+    |> fmap (fun x -> `Log_dir x)
 
   let verbose =
     let env = Arg.env_var "ALCOTEST_VERBOSE" in
@@ -91,14 +110,16 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       "Display the test outputs. $(b,WARNING:) when using this option the \
        output logs will not be available for further inspection."
     in
-    Term.(app (const (fun x -> `Verbose x)))
-      Arg.(value & flag & info ~env [ "v"; "verbose" ] ~docv:"" ~doc)
+    Arg.(value & flag & info ~env [ "v"; "verbose" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Verbose x)
 
   let compact =
     let env = Arg.env_var "ALCOTEST_COMPACT" in
     let doc = "Compact the output of the tests" in
-    Term.(app (const (fun x -> `Compact x)))
-      Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
+    Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Compact x)
 
   let limit_parser s =
     match s with
@@ -124,23 +145,23 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     let doc =
       "Show only the last $(docv) lines of output in case of an error."
     in
-    Term.(app (const (fun x -> `Tail_errors x)))
-      Arg.(
-        value
-        & opt (some limit) None
-        & info ~env [ "tail-errors" ] ~docv:"N" ~doc)
+    Arg.(
+      value & opt (some limit) None & info ~env [ "tail-errors" ] ~docv:"N" ~doc)
+    |> fmap (fun x -> `Tail_errors x)
 
   let show_errors =
     let env = Arg.env_var "ALCOTEST_SHOW_ERRORS" in
     let doc = "Display the test errors." in
-    Term.(app (const (fun x -> `Show_errors x)))
-      Arg.(value & flag & info ~env [ "e"; "show-errors" ] ~docv:"" ~doc)
+    Arg.(value & flag & info ~env [ "e"; "show-errors" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Show_errors x)
 
   let quick_only =
     let env = Arg.env_var "ALCOTEST_QUICK_TESTS" in
     let doc = "Run only the quick tests." in
-    Term.(app (const (fun x -> `Quick_only x)))
-      Arg.(value & flag & info ~env [ "q"; "quick-tests" ] ~docv:"" ~doc)
+    Arg.(value & flag & info ~env [ "q"; "quick-tests" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Quick_only x)
 
   let flags_with_defaults defaults =
     Term.(
@@ -208,12 +229,12 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     Term.(
       pure (fun n t -> `Test_filter (Some (n, t))) $ name_regex $ number_filter)
 
-  let default_cmd ~and_exit runtime_flags args library_name tests =
+  let default_cmd ?and_exit runtime_flags args library_name tests =
     let exec_name = Filename.basename Sys.argv.(0) in
     let doc = "Run all the tests." in
     let flags = flags_with_defaults runtime_flags in
     ( Term.(
-        pure (run_test ~and_exit)
+        pure (run_test ?and_exit)
         $ flags
         $ pure (`Test_filter None)
         $ set_color
@@ -222,7 +243,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
         $ pure tests),
       Term.info exec_name ~doc )
 
-  let test_cmd ~and_exit runtime_flags ~filter args library_name tests =
+  let test_cmd ?and_exit runtime_flags ~filter args library_name tests =
     let doc = "Run a subset of the tests." in
     let flags = flags_with_defaults runtime_flags in
     let filter =
@@ -231,7 +252,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
         $ test_filter)
     in
     ( Term.(
-        pure (run_test ~and_exit)
+        pure (run_test ?and_exit)
         $ flags
         $ filter
         $ set_color
@@ -245,27 +266,27 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     ( Term.(pure (fun () -> list_tests) $ set_color $ pure tests),
       Term.info "list" ~doc )
 
-  let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?tail_errors ?(quick_only = false) ?(show_errors = false) ?(json = false)
-      ?filter ?log_dir ?argv name (args : 'a Term.t) (tl : 'a test list) =
+  let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?argv name (args : 'a Term.t)
+      (tl : 'a test list) =
     let runtime_flags =
       { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
     in
     let choices =
       [
         list_cmd tl;
-        test_cmd ~and_exit runtime_flags ~filter:(`Test_filter filter) args name
+        test_cmd ?and_exit runtime_flags ~filter:(`Test_filter filter) args name
           tl;
       ]
     in
     match
       Term.eval_choice ?argv
-        (default_cmd ~and_exit runtime_flags args name tl)
+        (default_cmd ?and_exit runtime_flags args name tl)
         choices
     with
     | `Ok im -> im
     | `Error _ -> raise Test_error
-    | _ -> if and_exit then exit 0 else M.return ()
+    | _ -> ( match and_exit with Some true -> exit 0 | _ -> M.return () )
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir ?argv name tl =
