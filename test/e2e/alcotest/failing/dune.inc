@@ -2,6 +2,7 @@
  (names
    check_basic
    compact
+   duplicate_test_names
    exception_in_test
    invalid_arg_in_test
    tail_errors_limit
@@ -12,6 +13,7 @@
  (modules
    check_basic
    compact
+   duplicate_test_names
    exception_in_test
    invalid_arg_in_test
    tail_errors_limit
@@ -69,6 +71,31 @@
  (package alcotest)
  (action
    (diff compact.expected compact.processed)))
+
+(rule
+ (target duplicate_test_names.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:duplicate_test_names.exe})
+  )
+ )
+)
+
+(rule
+ (target duplicate_test_names.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:duplicate_test_names.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff duplicate_test_names.expected duplicate_test_names.processed)))
 
 (rule
  (target exception_in_test.actual)
