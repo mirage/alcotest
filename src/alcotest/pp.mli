@@ -50,8 +50,8 @@ val suite_results :
 
 val pp_plural : Format.formatter -> int -> unit
 (** This is for adding an 's' to words that should be pluralized, e.g.
-{[
-     let n = List.length items in
-     Fmt.pr "Found %i item%a." n pp_plural n
-]}
-*)
+
+    {[
+      let n = List.length items in
+      Fmt.pr "Found %i item%a." n pp_plural n
+    ]} *)
