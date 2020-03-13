@@ -10,6 +10,7 @@
    filter_name_regex
    json_output
    list_tests
+   only_monadic_effects
    quick_only
    quick_only_regex
  )
@@ -25,6 +26,7 @@
    filter_name_regex
    json_output
    list_tests
+   only_monadic_effects
    quick_only
    quick_only_regex
  )
@@ -279,6 +281,31 @@
  (package alcotest)
  (action
    (diff list_tests.expected list_tests.processed)))
+
+(rule
+ (target only_monadic_effects.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:only_monadic_effects.exe})
+  )
+ )
+)
+
+(rule
+ (target only_monadic_effects.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:only_monadic_effects.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff only_monadic_effects.expected only_monadic_effects.processed)))
 
 (rule
  (target quick_only.actual)

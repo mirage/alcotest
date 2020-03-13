@@ -1,0 +1,5 @@
+Testing event_ordering.
+This run has ID `<uuid>`.
+ ...                alpha          0   check + stdout + stderr.ASSERT SHOULD NOT BE PRINTED
+stdout: SHOULD NOT BE PRINTED
+stderr: SHOULD NOT BE PRINTED
