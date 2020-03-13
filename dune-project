@@ -35,6 +35,7 @@ tests to run.
 (package
  (name alcotest-async)
  (synopsis "Async-based helpers for Alcotest")
+ (description "Async-based helpers for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (ocaml (>= 4.03.0))
@@ -45,6 +46,7 @@ tests to run.
 (package
  (name alcotest-lwt)
  (synopsis "Lwt-based helpers for Alcotest")
+ (description "Lwt-based helpers for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (ocaml (>= 4.03.0))
