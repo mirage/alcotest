@@ -26,4 +26,13 @@ let () =
                  Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
                  nullam malesuada dictum tortor in venenatis.");
         ] );
+      ( "delta",
+        [
+          Alcotest.test_case "1 newline + long check" `Quick (fun () ->
+              Format.printf "Print inside delta\n";
+              Alcotest.(check unit)
+                "Lorem ipsum dolor sit amet, consectetur adipiscing elit, \
+                 nullam malesuada dictum tortor in venenatis."
+                () ());
+        ] );
     ]
