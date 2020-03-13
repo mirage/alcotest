@@ -19,6 +19,7 @@ module Cli = Cli
 module Monad = Monad
 module T = Cli.Make (Monad.Identity)
 include T
+open Utils
 
 module type TESTABLE = sig
   type t
