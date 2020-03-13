@@ -4,6 +4,7 @@
    and_exit_true
    basic
    check_basic
+   cli_verbose
    filter_name
    filter_name_regex
    json_output
@@ -17,6 +18,7 @@
    and_exit_true
    basic
    check_basic
+   cli_verbose
    filter_name
    filter_name_regex
    json_output
@@ -125,6 +127,31 @@
  (package alcotest)
  (action
    (diff check_basic.expected check_basic.processed)))
+
+(rule
+ (target cli_verbose.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:cli_verbose.exe} --verbose)
+  )
+ )
+)
+
+(rule
+ (target cli_verbose.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:cli_verbose.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff cli_verbose.expected cli_verbose.processed)))
 
 (rule
  (target filter_name.actual)
