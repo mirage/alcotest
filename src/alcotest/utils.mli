@@ -11,3 +11,9 @@ end
 module Result : sig
   val map : ('a -> 'b) -> ('a, 'e) result -> ('b, 'e) result
 end
+
+module Unix : sig
+  include module type of Unix
+
+  val mkdir_p : string -> file_perm -> unit
+end

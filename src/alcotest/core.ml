@@ -257,31 +257,10 @@ module Make (M : Monad.S) = struct
 
   let output_file t path = Filename.concat (log_dir t) (file_of_path path)
 
-  let mkdir_p path mode =
-    let is_win_drive_letter x =
-      String.length x = 2 && x.[1] = ':' && Char.Ascii.is_letter x.[0]
-    in
-    let sep = Filename.dir_sep in
-    let rec mk parent = function
-      | [] -> ()
-      | name :: names ->
-          let path = parent ^ sep ^ name in
-          ( try Unix.mkdir path mode
-            with Unix.Unix_error (Unix.EEXIST, _, _) ->
-              if Sys.is_directory path then () (* the directory exists *)
-              else Fmt.strf "mkdir: %s: is a file" path |> failwith );
-          mk path names
-    in
-    match String.cuts ~empty:true ~sep path with
-    | "" :: xs -> mk sep xs
-    (* check for Windows drive letter *)
-    | dl :: xs when is_win_drive_letter dl -> mk dl xs
-    | xs -> mk "." xs
-
   let prepare t =
     let log_dir = log_dir t in
     if not (Sys.file_exists log_dir) then (
-      mkdir_p log_dir 0o770;
+      Unix.mkdir_p log_dir 0o770;
       if Sys.unix || Sys.cygwin then (
         let this_exe = Filename.concat t.log_dir t.name
         and latest = Filename.concat t.log_dir "latest" in
