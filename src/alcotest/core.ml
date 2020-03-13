@@ -324,6 +324,7 @@ module Make (M : Monad.S) = struct
     let open Suite in
     let test = suite.fn in
     let pp_event = pp_event t in
+    M.return () >>= fun () ->
     pp_event Fmt.stdout (`Start suite.path);
     Fmt.(flush stdout) () (* Show event before any test stderr *);
     test args >|= fun result ->
@@ -524,7 +525,9 @@ module Make (M : Monad.S) = struct
         Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
         exit 1
     | Ok t -> (
-        ( Fmt.(pf stdout) "Testing %a.\n" bold_s name;
+        ( (* Only print inside the concurrency monad *)
+          M.return () >>= fun () ->
+          Fmt.(pf stdout) "Testing %a.\n" bold_s name;
           Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
           run_tests ?filter t () args )
         >|= fun test_failures ->

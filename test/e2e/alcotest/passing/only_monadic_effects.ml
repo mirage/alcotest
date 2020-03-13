@@ -8,7 +8,11 @@
 
     This is tested by building a runner over the [Terminal] monad, which reduces
     to [()] immediately on evaluation and so discovers any effects in the
-    evaluation of the bottom-most value in the computation. *)
+    evaluation of the bottom-most value in the computation.
+
+    This is a regression test for a bug in which test effects were partially
+    observable during evaluation of the computation. See
+    https://github.com/mirage/alcotest/pull/228 for more details. *)
 
 module Terminal : Alcotest.Monad.S = struct
   type 'a t = unit
