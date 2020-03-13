@@ -25,6 +25,7 @@
 
 module type S = sig
   include Core.S
+  (** @inline *)
 
   val run :
     (?argv:string array -> string -> unit test list -> return) with_options
@@ -56,5 +57,7 @@ module type S = sig
       [Cdmliner] term [a]: this is useful to configure the test behaviors using
       the CLI. *)
 end
+
+module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
 
 module Make (M : Monad.S) : S with type return = unit M.t
