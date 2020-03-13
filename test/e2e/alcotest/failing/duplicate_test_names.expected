@@ -1,0 +1,4 @@
+duplicate_test_names.exe: internal error, uncaught exception:
+                          Alcotest__Core.Registration_error("Duplicate test name: duped")
+                          
+Fatal error: exception Alcotest__Core.Make(M).Test_error
