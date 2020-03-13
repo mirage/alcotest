@@ -2,6 +2,8 @@
  (names
    and_exit_false
    and_exit_true
+   assert_and_verbose
+   assert_not_printed
    basic
    check_basic
    cli_verbose
@@ -9,6 +11,7 @@
    filter_name_regex
    json_output
    list_tests
+   only_monadic_effects
    quick_only
    quick_only_regex
  )
@@ -16,6 +19,8 @@
  (modules
    and_exit_false
    and_exit_true
+   assert_and_verbose
+   assert_not_printed
    basic
    check_basic
    cli_verbose
@@ -23,6 +28,7 @@
    filter_name_regex
    json_output
    list_tests
+   only_monadic_effects
    quick_only
    quick_only_regex
  )
@@ -77,6 +83,56 @@
  (package alcotest)
  (action
    (diff and_exit_true.expected and_exit_true.processed)))
+
+(rule
+ (target assert_and_verbose.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:assert_and_verbose.exe})
+  )
+ )
+)
+
+(rule
+ (target assert_and_verbose.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:assert_and_verbose.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff assert_and_verbose.expected assert_and_verbose.processed)))
+
+(rule
+ (target assert_not_printed.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:assert_not_printed.exe})
+  )
+ )
+)
+
+(rule
+ (target assert_not_printed.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:assert_not_printed.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff assert_not_printed.expected assert_not_printed.processed)))
 
 (rule
  (target basic.actual)
@@ -252,6 +308,31 @@
  (package alcotest)
  (action
    (diff list_tests.expected list_tests.processed)))
+
+(rule
+ (target only_monadic_effects.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:only_monadic_effects.exe})
+  )
+ )
+)
+
+(rule
+ (target only_monadic_effects.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:only_monadic_effects.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff only_monadic_effects.expected only_monadic_effects.processed)))
 
 (rule
  (target quick_only.actual)

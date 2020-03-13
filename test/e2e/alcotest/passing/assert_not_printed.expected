@@ -1,0 +1,7 @@
+Testing assert-not-printed.
+This run has ID `<uuid>`.
+ ...                alpha          0   0.[OK]                alpha          0   0.
+ ...                alpha          1   1.[OK]                alpha          1   1.
+ ...                beta           0   2.[OK]                beta           0   2.
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 3 tests run.

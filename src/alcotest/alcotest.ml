@@ -19,6 +19,7 @@ module Cli = Cli
 module Monad = Monad
 module T = Cli.Make (Monad.Identity)
 include T
+open Utils
 
 module type TESTABLE = sig
   type t
@@ -140,7 +141,8 @@ let reject (type a) =
   (module M : TESTABLE with type t = M.t)
 
 let show_assert msg =
-  Format.eprintf "%a %s\n" Fmt.(styled `Yellow string) "ASSERT" msg
+  Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
+  Format.eprintf "%a %s\n%!" Fmt.(styled `Yellow string) "ASSERT" msg
 
 let check_err fmt =
   Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt

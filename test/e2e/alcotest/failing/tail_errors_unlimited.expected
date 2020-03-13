@@ -103,8 +103,8 @@ output line 97
 output line 98
 output line 99
 output line 100
+ASSERT Logs above should be 101 lines long.
 Test error: Error Logs above should be 101 lines long..
 
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
 1 error! in <test-duration>s. 1 test run.
-ASSERT Logs above should be 101 lines long.

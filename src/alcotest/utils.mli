@@ -17,3 +17,9 @@ module Unix : sig
 
   val mkdir_p : string -> file_perm -> unit
 end
+
+module Fmt : sig
+  include module type of Fmt
+
+  val flush : 'a t
+end

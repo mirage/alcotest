@@ -54,3 +54,14 @@ module Unix = struct
     | dl :: xs when is_win_drive_letter dl -> mk dl xs
     | xs -> mk "." xs
 end
+
+module Fmt = struct
+  [@@@warning "-32"]
+
+  (* Re-implement [flush] for pre-0.8.6 compatibility *)
+  let flush ppf _ = Format.pp_print_flush ppf ()
+
+  [@@@warning "+32"]
+
+  include Fmt
+end
