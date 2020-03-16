@@ -9,6 +9,7 @@
    tail_errors_limit
    tail_errors_unlimited
    unicode_testname
+   unknown_option
  )
  (libraries alcotest)
  (modules
@@ -21,6 +22,7 @@
    tail_errors_limit
    tail_errors_unlimited
    unicode_testname
+   unknown_option
  )
 )
 
@@ -248,3 +250,28 @@
  (package alcotest)
  (action
    (diff unicode_testname.expected unicode_testname.processed)))
+
+(rule
+ (target unknown_option.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:unknown_option.exe} --dry-runn)
+  )
+ )
+)
+
+(rule
+ (target unknown_option.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:unknown_option.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff unknown_option.expected unknown_option.processed)))
