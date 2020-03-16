@@ -37,14 +37,16 @@ end
 module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
 
 module Make (M : Monad.S) : S with type return = unit M.t = struct
-  (** *)
+  (**  *)
 
   (** The priority order for determining options should be as follows:
-      1. if a CLI flag/option is _explicitly_ set, use that;
-      2. if the corresponding environment variable is _explicitly_ set, use that;
-      3. if the flag/option is set by [run ?argv]
-      4. if the flag/option is passed to [run] directly, use that;
-      5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
+
+      + 1. if a CLI flag/option is _explicitly_ set, use that;
+      + 2. if the corresponding environment variable is _explicitly_ set, use
+        that;
+      + 3. if the flag/option is set by [run ?argv]
+      + 4. if the flag/option is passed to [run] directly, use that;
+      + 5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
 
   module C = Core.Make (M)
   include C
