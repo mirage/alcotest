@@ -1,4 +1,3 @@
 unknown_option.exe: unknown option `--dry-runn'.
 Usage: unknown_option.exe COMMAND ...
 Try `unknown_option.exe --help' for more information.
-Fatal error: exception Alcotest__Core.Make(M).Test_error
