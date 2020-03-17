@@ -1,0 +1,11 @@
+Testing suite-name.
+This run has ID `<uuid>`.
+ ...                alpha          0   0 newlines.Print inside alpha[OK]                alpha          0   0 newlines.
+ ...                beta           0   1 newline.Print inside beta
+[OK]                beta           0   1 newline.
+ ...                gamma          0   1 newline + long line.Print inside gamma
+Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.[OK]                gamma          0   1 newline + long line.
+ ...                delta          0   1 newline + long check.Print inside delta
+[OK]                delta          0   1 newline + long check.
+Test Successful in <test-duration>s. 4 tests run.
+ASSERT Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.

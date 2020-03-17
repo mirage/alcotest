@@ -14,6 +14,7 @@
    only_monadic_effects
    quick_only
    quick_only_regex
+   verbose_newlines
  )
  (libraries alcotest)
  (modules
@@ -31,6 +32,7 @@
    only_monadic_effects
    quick_only
    quick_only_regex
+   verbose_newlines
  )
 )
 
@@ -383,3 +385,28 @@
  (package alcotest)
  (action
    (diff quick_only_regex.expected quick_only_regex.processed)))
+
+(rule
+ (target verbose_newlines.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:verbose_newlines.exe})
+  )
+ )
+)
+
+(rule
+ (target verbose_newlines.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:verbose_newlines.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff verbose_newlines.expected verbose_newlines.processed)))
