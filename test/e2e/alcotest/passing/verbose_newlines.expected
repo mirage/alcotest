@@ -6,6 +6,6 @@ This run has ID `<uuid>`.
  ...                gamma          0   1 newline + long line.Print inside gamma
 Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.[OK]                gamma          0   1 newline + long line.
  ...                delta          0   1 newline + long check.Print inside delta
+ASSERT Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.
 [OK]                delta          0   1 newline + long check.
 Test Successful in <test-duration>s. 4 tests run.
-ASSERT Lorem ipsum dolor sit amet, consectetur adipiscing elit, nullam malesuada dictum tortor in venenatis.
