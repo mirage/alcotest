@@ -33,8 +33,8 @@ include Cli.S with type return = unit
 
 (** [TESTABLE] provides an abstract description for testable values. *)
 module type TESTABLE = sig
-  type t
   (** The type to test. *)
+  type t
 
   val pp : t Fmt.t
   (** A way to pretty-print the value. *)
@@ -43,8 +43,8 @@ module type TESTABLE = sig
   (** Test for equality between two values. *)
 end
 
-type 'a testable = (module TESTABLE with type t = 'a)
 (** The type for testable values. *)
+type 'a testable = (module TESTABLE with type t = 'a)
 
 val testable : 'a Fmt.t -> ('a -> 'a -> bool) -> 'a testable
 (** [testable pp eq] is a new {!testable} with the pretty-printer [pp] and
@@ -133,11 +133,11 @@ val check_raises : string -> exn -> (unit -> unit) -> unit
     [Async_kernel.Deferred.t], use the [Alcotest_lwt] and [Alcotest_async]
     packages directly. *)
 
-module Core : module type of Core
 (** Defines monadic test runners {i without} command-line interfaces. *)
+module Core : module type of Core
 
-module Cli : module type of Cli
 (** Wraps {!Core} to provide a command-line interface. *)
+module Cli : module type of Cli
 
-module Monad : module type of Monad
 (** Monad signatures for use with {!Core} and {!Cli}. *)
+module Monad : module type of Monad

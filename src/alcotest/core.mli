@@ -19,46 +19,35 @@ exception Check_error of string
 module IntSet : Set.S with type elt = int
 
 module type S = sig
-  type return
   (** The return type of each test case run by Alcotest. For the standard
       {!Alcotest} module, [return = unit]. The concurrent backends
       [Alcotest_lwt] and [Alcotest_async] set [return = unit Lwt.t] and
       [return = Async_kernel.Deferred.t] respectively. *)
+  type return
 
-  type speed_level = [ `Quick | `Slow ]
   (** Speed level of a test. Tests marked as [`Quick] are always run. Tests
       marked as [`Slow] are skipped when the `-q` flag is passed. *)
+  type speed_level = [ `Quick | `Slow ]
 
-  type 'a test_case = string * speed_level * ('a -> return)
   (** A test case is a UTF-8 encoded documentation string, a speed level and a
       function to execute. Typically, the testing function calls the helper
       functions provided below (such as [check] and [fail]). *)
+  type 'a test_case = string * speed_level * ('a -> return)
 
-  exception Test_error
   (** The exception return by {!run} in case of errors. *)
+  exception Test_error
 
   val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
   (** [test_case n s f] is the test case [n] running at speed [s] using the
       function [f]. *)
 
-  type 'a test = string * 'a test_case list
   (** A test is a US-ASCII encoded name and a list of test cases. The name can
       be used for filtering which tests to run on the CLI *)
+  type 'a test = string * 'a test_case list
 
   val list_tests : 'a test list -> return
   (** Print all of the test cases in a human-readable form *)
 
-  type 'a with_options =
-    ?and_exit:bool ->
-    ?verbose:bool ->
-    ?compact:bool ->
-    ?tail_errors:[ `Unlimited | `Limit of int ] ->
-    ?quick_only:bool ->
-    ?show_errors:bool ->
-    ?json:bool ->
-    ?filter:Re.re option * IntSet.t option ->
-    ?log_dir:string ->
-    'a
   (** The various options taken by the tests runners {!run} and
       {!run_with_args}:
 
@@ -76,6 +65,17 @@ module type S = sig
         format.
       - [log_dir] (default ["$PWD/_build/_tests/"]). The directory in which to
         log the output of the tests (if [verbose] is not set). *)
+  type 'a with_options =
+    ?and_exit:bool ->
+    ?verbose:bool ->
+    ?compact:bool ->
+    ?tail_errors:[ `Unlimited | `Limit of int ] ->
+    ?quick_only:bool ->
+    ?show_errors:bool ->
+    ?json:bool ->
+    ?filter:Re.re option * IntSet.t option ->
+    ?log_dir:string ->
+    'a
 
   val run : (string -> unit test list -> return) with_options
 
@@ -84,8 +84,8 @@ end
 
 module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
 
-module Make : MAKER
 (** Functor for building a tester that sequences tests of type
     [('a -> unit M.t)] within a given concurrency monad [M.t]. The [run] and
     [run_with_args] functions must be scheduled in a global event loop. Intended
     for use by the {!Alcotest_lwt} and {!Alcotest_async} backends. *)
+module Make : MAKER

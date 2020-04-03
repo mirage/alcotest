@@ -24,8 +24,8 @@
     - all of the regular options to Alcotest.run can be set via CLI flags. *)
 
 module type S = sig
-  include Core.S
   (** @inline *)
+  include Core.S
 
   val run :
     (?argv:string array -> string -> unit test list -> return) with_options
