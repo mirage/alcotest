@@ -37,14 +37,16 @@ end
 module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
 
 module Make (M : Monad.S) : S with type return = unit M.t = struct
-  (** *)
+  (**  *)
 
   (** The priority order for determining options should be as follows:
-      1. if a CLI flag/option is _explicitly_ set, use that;
-      2. if the corresponding environment variable is _explicitly_ set, use that;
-      3. if the flag/option is set by [run ?argv]
-      4. if the flag/option is passed to [run] directly, use that;
-      5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
+
+      + 1. if a CLI flag/option is _explicitly_ set, use that;
+      + 2. if the corresponding environment variable is _explicitly_ set, use
+        that;
+      + 3. if the flag/option is set by [run ?argv]
+      + 4. if the flag/option is passed to [run] directly, use that;
+      + 5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
 
   module C = Core.Make (M)
   include C
@@ -271,6 +273,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
       ?show_errors ?json ?filter ?log_dir ?argv name (args : 'a Term.t)
       (tl : 'a test list) =
+    let ( >>= ) = M.bind in
     let runtime_flags =
       { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
     in
@@ -281,14 +284,20 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
           tl;
       ]
     in
-    match
+    let exit_or_return result =
+      match and_exit with
+      | Some true -> exit (Term.exit_status_of_result result)
+      | _ -> M.return ()
+    in
+    let result =
       Term.eval_choice ?argv
         (default_cmd ?and_exit runtime_flags args name tl)
         choices
-    with
-    | `Ok im -> im
-    | `Error _ -> raise Test_error
-    | _ -> ( match and_exit with Some true -> exit 0 | _ -> M.return () )
+    in
+    match result with
+    | `Ok unit_m -> unit_m >>= fun () -> exit_or_return result
+    | `Help | `Version -> exit_or_return result
+    | `Error _ -> exit (Term.exit_status_of_result result)
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir ?argv name tl =
