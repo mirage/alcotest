@@ -61,10 +61,11 @@ module type S = sig
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
-module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> S with type return = unit M.t
 
-module Make (M : Monad.S) : S with type return = unit M.t = struct
+module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t = struct
   module M = Monad.Extend (M)
+  module P = P (M)
   include M.Infix
 
   (* Types *)
@@ -259,20 +260,6 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
 
   let output_file t path = Filename.concat (log_dir t) (file_of_path path)
 
-  let prepare t =
-    let log_dir = log_dir t in
-    if not (Sys.file_exists log_dir) then (
-      Unix.mkdir_p log_dir 0o770;
-      if Sys.unix || Sys.cygwin then (
-        let this_exe = Filename.concat t.log_dir t.name
-        and latest = Filename.concat t.log_dir "latest" in
-        if Sys.file_exists this_exe then Sys.remove this_exe;
-        if Sys.file_exists latest then Sys.remove latest;
-        Unix.symlink ~to_dir:true log_dir this_exe;
-        Unix.symlink ~to_dir:true log_dir latest ) )
-    else if not (Sys.is_directory log_dir) then
-      failwith (Fmt.strf "exists but is not a directory: %S" log_dir)
-
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
   let red_s fmt = color `Red fmt
@@ -353,27 +340,6 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
 
   let perform_tests t tests args = M.List.map_s (perform_test t args) tests
 
-  let with_redirect file fn =
-    M.return () >>= fun () ->
-    Fmt.(flush stdout) ();
-    Fmt.(flush stderr) ();
-    let fd_stdout = Unix.descr_of_out_channel stdout in
-    let fd_stderr = Unix.descr_of_out_channel stderr in
-    let fd_old_stdout = Unix.dup fd_stdout in
-    let fd_old_stderr = Unix.dup fd_stderr in
-    let fd_file = Unix.(openfile file [ O_WRONLY; O_TRUNC; O_CREAT ] 0o660) in
-    Unix.dup2 fd_file fd_stdout;
-    Unix.dup2 fd_file fd_stderr;
-    Unix.close fd_file;
-    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e) >|= fun r ->
-    Fmt.(flush stdout ());
-    Fmt.(flush stderr ());
-    Unix.dup2 fd_old_stdout fd_stdout;
-    Unix.dup2 fd_old_stderr fd_stderr;
-    Unix.close fd_old_stdout;
-    Unix.close fd_old_stderr;
-    match r with `Ok x -> x | `Error e -> raise e
-
   let skip_fun _ = M.return `Skip
 
   let skip_label test_case = Suite.{ test_case with fn = skip_fun }
@@ -394,10 +360,10 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
   let redirect_test_output t test_case =
     let output_file = output_file t test_case.Suite.path in
     let fn args =
-      with_redirect output_file (fun () ->
-          test_case.fn args >|= fun result ->
-          Pp.rresult_error Fmt.stdout result;
-          result)
+      P.with_redirect output_file (fun () ->
+            test_case.fn args >|= fun result ->
+            Pp.rresult_error Fmt.stdout result;
+            result)
     in
     { test_case with fn }
 
@@ -407,14 +373,14 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
-    prepare t;
-    let start_time = Unix.time () in
+    P.prepare ~base:t.log_dir ~dir:(log_dir t) ~name:t.name;
+    let start_time = P.time () in
     let test =
       if t.verbose then test else List.map (redirect_test_output t) test
     in
     let test = List.map (select_speed t.speed_level) test in
     perform_tests t test args >|= fun results ->
-    let time = Unix.time () -. start_time in
+    let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter failure results) in
     Pp.{ time; success; failures; errors = List.rev t.errors }

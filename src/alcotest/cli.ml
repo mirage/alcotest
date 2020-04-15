@@ -34,9 +34,9 @@ module type S = sig
     with_options
 end
 
-module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> S with type return = unit M.t
 
-module Make (M : Monad.S) : S with type return = unit M.t = struct
+module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t = struct
   (**  *)
 
   (** The priority order for determining options should be as follows:
@@ -48,7 +48,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       + 4. if the flag/option is passed to [run] directly, use that;
       + 5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
 
-  module C = Core.Make (M)
+  module C = Core.Make (P) (M)
   include C
 
   let set_color style_renderer = Fmt_tty.setup_std_outputs ?style_renderer ()

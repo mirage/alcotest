@@ -58,6 +58,6 @@ module type S = sig
       the CLI. *)
 end
 
-module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> S with type return = unit M.t
 
-module Make (M : Monad.S) : S with type return = unit M.t
+module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t

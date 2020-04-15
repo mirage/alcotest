@@ -1,4 +1,4 @@
-module Tester = Alcotest.Cli.Make (Lwt)
+module Tester = Alcotest.Cli.Make (Alcotest.Platform.None) (Lwt)
 include Tester
 
 let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))

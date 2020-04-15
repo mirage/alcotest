@@ -1,5 +1,3 @@
-open Astring
-
 module List = struct
   include List
 
@@ -28,31 +26,6 @@ end
 
 module Result = struct
   let map f = function Ok x -> Ok (f x) | Error e -> Error e
-end
-
-module Unix = struct
-  include Unix
-
-  let mkdir_p path mode =
-    let is_win_drive_letter x =
-      String.length x = 2 && x.[1] = ':' && Char.Ascii.is_letter x.[0]
-    in
-    let sep = Filename.dir_sep in
-    let rec mk parent = function
-      | [] -> ()
-      | name :: names ->
-          let path = parent ^ sep ^ name in
-          ( try Unix.mkdir path mode
-            with Unix.Unix_error (Unix.EEXIST, _, _) ->
-              if Sys.is_directory path then () (* the directory exists *)
-              else Fmt.strf "mkdir: %s: is a file" path |> failwith );
-          mk path names
-    in
-    match String.cuts ~empty:true ~sep path with
-    | "" :: xs -> mk sep xs
-    (* check for Windows drive letter *)
-    | dl :: xs when is_win_drive_letter dl -> mk dl xs
-    | xs -> mk "." xs
 end
 
 module Fmt = struct
