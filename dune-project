@@ -53,3 +53,14 @@ tests to run.
   (alcotest (= :version))
   lwt
   logs))
+
+(package
+ (name alcotest-mirage)
+ (synopsis "Mirage implementation for Alcotest")
+ (description "Mirage implementation for Alcotest")
+ (documentation "https://mirage.github.io/alcotest")
+ (depends
+  (ocaml (>= 4.03.0))
+  (alcotest (= :version))
+  lwt
+  logs))
