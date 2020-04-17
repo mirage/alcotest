@@ -5,7 +5,7 @@ let main =
     ~packages:[
       package "alcotest-mirage";
     ]
-    "Unikernel" (job)
+    "Unikernel.Main" (mclock @-> job)
 
 let () =
-  register "alcotest" [main]
+  register "alcotest" [main $ default_monotonic_clock]

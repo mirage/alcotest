@@ -62,5 +62,7 @@ tests to run.
  (depends
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
+  mirage-clock
+  duration
   lwt
   logs))

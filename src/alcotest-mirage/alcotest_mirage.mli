@@ -14,17 +14,21 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** [Alcotest_lwt] enables testing functions which return an Lwt promise. {!run}
+(** [Alcotest_mirage] enables testing functions which return an Lwt promise. {!run}
     returns a promise that runs the tests when scheduled, catching any
     asynchronous exceptions thrown by the tests. *)
 
-include Alcotest.Cli.S with type return = unit Lwt.t
+module Make (C: Mirage_clock.MCLOCK) : sig
 
-val test_case :
-  string ->
-  Alcotest.speed_level ->
-  (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-  'a test_case
+  include Alcotest.Cli.S with type return = unit Lwt.t
+  
+  val test_case :
+    string ->
+    Alcotest.speed_level ->
+    (Lwt_switch.t -> 'a -> unit Lwt.t) ->
+    'a test_case
+  
+  val test_case_sync :
+    string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
 
-val test_case_sync :
-  string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
+end
