@@ -50,8 +50,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
 
   module C = Core.Make (P) (M)
   include C
+  module P = P (M) 
 
-  let set_color style_renderer = Fmt_tty.setup_std_outputs ?style_renderer ()
+  let set_color style_renderer = P.setup_std_outputs ?style_renderer ()
 
   let set_color =
     let env = Arg.env_var "ALCOTEST_COLOR" in
