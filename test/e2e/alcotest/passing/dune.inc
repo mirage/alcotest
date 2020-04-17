@@ -16,7 +16,7 @@
    quick_only_regex
    verbose_newlines
  )
- (libraries alcotest)
+ (libraries alcotest alcotest.unix)
  (modules
    and_exit_false
    and_exit_true

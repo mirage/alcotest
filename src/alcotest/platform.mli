@@ -10,4 +10,3 @@ end
 module type MAKER = functor (M : Monad.S) -> S with type return = Pp.run_result M.t
 
 module None : MAKER
-module Unix : MAKER

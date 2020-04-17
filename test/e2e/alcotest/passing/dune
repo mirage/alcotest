@@ -7,7 +7,7 @@
  (action
   (with-stdout-to
    %{targets}
-   (run ../../gen_dune_rules.exe --package "alcotest"))))
+   (run ../../gen_dune_rules.exe --package "alcotest" --libraries "alcotest.unix"))))
 
 (rule
  (alias runtest)

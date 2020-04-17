@@ -1,0 +1,4 @@
+(library
+ (public_name alcotest.unix)
+ (name alcotest_unix)
+ (libraries alcotest astring fmt.tty))

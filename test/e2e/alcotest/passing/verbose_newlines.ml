@@ -2,7 +2,7 @@
     interaction between `--verbose` and newlines in the test stdout. *)
 
 let () =
-  Alcotest.run ~verbose:true "suite-name"
+  Alcotest_unix.run ~verbose:true "suite-name"
     [
       ( "alpha",
         [

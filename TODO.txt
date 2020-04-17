@@ -1,4 +1,3 @@
-src/alcotest/platform.ml : separate Unix into custom module (and package)
 src/alcotest/alcotest.ml : remove module T = .. include T (depends on unix)
 
 src/alcotest-mirage/ : implement of Platform.MAKER

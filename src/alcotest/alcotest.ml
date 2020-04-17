@@ -18,7 +18,8 @@ module Core = Core
 module Cli = Cli
 module Monad = Monad
 module Platform = Platform
-module T = Cli.Make (Platform.Unix) (Monad.Identity)
+module Pp = Pp
+module T = Cli.Make (Platform.None) (Monad.Identity)
 include T
 open Utils
 

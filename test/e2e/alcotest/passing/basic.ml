@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  run "suite-name"
+  Alcotest_unix.run "suite-name"
     [
       ( "test-a",
         [

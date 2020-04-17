@@ -4,7 +4,7 @@ let id_case typ typ_str v1 v2 =
 
 let () =
   let open Alcotest in
-  run "failing testables"
+  Alcotest_unix.run "failing testables"
     [
       ( "different basic",
         [
