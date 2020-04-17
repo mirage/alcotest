@@ -1,6 +1,8 @@
 module Unix (M : Alcotest.Monad.S) = struct
 
   module M = Alcotest.Monad.Extend (M)
+
+  module Fmt = Alcotest.Fmt
  
   module Unix = struct
     open Astring

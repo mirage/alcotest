@@ -19,6 +19,7 @@ module Cli = Cli
 module Monad = Monad
 module Platform = Platform
 module Pp = Pp
+module Fmt = Utils.Fmt
 module T = Cli.Make (Platform.None) (Monad.Identity)
 include T
 open Utils

@@ -148,3 +148,5 @@ module Monad : module type of Monad
 module Platform : module type of Platform
 
 module Pp : module type of Pp
+
+module Fmt : module type of Utils.Fmt

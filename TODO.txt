@@ -1,3 +1,0 @@
-src/alcotest/alcotest.ml : remove module T = .. include T (depends on unix)
-
-src/alcotest-mirage/ : implement of Platform.MAKER
