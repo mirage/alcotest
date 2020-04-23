@@ -1,7 +1,8 @@
 (** Test the interaction between ASSERT prints and the `--verbose` option. *)
 
 let () =
-  Alcotest_unix.run ~verbose:true "assert-and-verbose"
+  let open Alcotest in
+  run ~verbose:true "assert-and-verbose"
     [
       ( "alpha",
         [

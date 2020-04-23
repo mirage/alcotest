@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  Alcotest_unix.run ~argv:[| ""; "test"; "test-a" |] "suite-name"
+  run ~argv:[| ""; "test"; "test-a" |] "suite-name"
     [
       ( "test-a",
         [

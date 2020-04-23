@@ -2,7 +2,7 @@
 
 let () =
   let open Alcotest in
-  Alcotest_unix.run ~verbose:false (* CLI flag should take priority over this option *)
+  run ~verbose:false (* CLI flag should take priority over this option *)
     "cli_verbose"
     [
       ( "alpha",

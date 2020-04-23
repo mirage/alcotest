@@ -3,8 +3,9 @@
     https://github.com/mirage/alcotest/pull/228 for details. *)
 
 let () =
+  let open Alcotest in
   let s tc = tc ^ ": SHOULD NOT BE PRINTED" in
-  Alcotest_unix.run "assert-not-printed"
+  run "assert-not-printed"
     [
       ( "alpha",
         [

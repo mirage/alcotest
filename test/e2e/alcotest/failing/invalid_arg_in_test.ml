@@ -1,6 +1,6 @@
 let () =
   let open Alcotest in
-  Alcotest_unix.run "suite-with-failures"
+  run "suite-with-failures"
     [
       ( "test-a",
         [

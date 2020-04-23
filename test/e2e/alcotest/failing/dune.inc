@@ -12,7 +12,7 @@
    unicode_testname
    unknown_option
  )
- (libraries alcotest alcotest.unix)
+ (libraries alcotest)
  (modules
    check_basic
    compact
