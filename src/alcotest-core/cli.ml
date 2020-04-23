@@ -50,7 +50,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
 
   module C = Core.Make (P) (M)
   include C
-  module P = P (M) 
+  module P = P (M)
 
   let set_color style_renderer = P.setup_std_outputs ?style_renderer ()
 

@@ -15,7 +15,7 @@ module type S = sig
 
   val with_redirect : string -> (unit -> return) -> return
   (** [with_redirect output_file f] is called for each test. On Unix, it
-      it deals with redirection of standard streams to the [output_file]. 
+      it deals with redirection of standard streams to the [output_file].
       The implementation of [with_redirect] has to make sure to call [f]
       in order to run the test case. *)
 

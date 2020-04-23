@@ -21,13 +21,13 @@
 module Make (C: Mirage_clock.MCLOCK) : sig
 
   include Alcotest_core.Cli.S with type return = unit Lwt.t
-  
+
   val test_case :
     string ->
     speed_level ->
     (Lwt_switch.t -> 'a -> unit Lwt.t) ->
     'a test_case
-  
+
   val test_case_sync :
     string -> speed_level -> ('a -> unit) -> 'a test_case
 

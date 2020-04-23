@@ -5,7 +5,7 @@ module Unix (M : Alcotest_core.Monad.S) = struct
   module M = Alcotest_core.Monad.Extend (M)
 
   module Fmt = Alcotest_core.Utils.Fmt
- 
+
   module Unix = struct
     open Astring
 
@@ -73,7 +73,7 @@ module Unix (M : Alcotest_core.Monad.S) = struct
     Unix.close fd_old_stderr;
     match r with `Ok x -> x | `Error e -> raise e
 
-  let setup_std_outputs = Fmt_tty.setup_std_outputs 
+  let setup_std_outputs = Fmt_tty.setup_std_outputs
 end
 
 module T = Alcotest_core.Cli.Make (Unix) (Alcotest_core.Monad.Identity)

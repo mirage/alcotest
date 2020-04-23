@@ -2,18 +2,18 @@ module Make (C: Mirage_clock.MCLOCK) = struct
 
   module Platform (M : Alcotest_core.Monad.S) = struct
     type return = Alcotest_core.Pp.run_result M.t
-  
+
     let time () = Duration.to_f @@ C.elapsed_ns ()
     let prepare ~base:_ ~dir:_ ~name:_ = ()
     let with_redirect _ fn = fn ()
     let setup_std_outputs ?style_renderer:_ ?utf_8:_ () = ()
   end
-  
+
   module Tester = Alcotest_core.Cli.Make (Platform) (Lwt)
   include Tester
-  
+
   let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
-  
+
   let run_test fn args =
     let async_ex, async_waker = Lwt.wait () in
     let handle_exn ex =
@@ -22,7 +22,7 @@ module Make (C: Mirage_clock.MCLOCK) = struct
     in
     Lwt.async_exception_hook := handle_exn;
     Lwt_switch.with_switch (fun sw -> Lwt.pick [ fn sw args; async_ex ])
-  
+
   let test_case n s f = test_case n s (run_test f)
 
 end
