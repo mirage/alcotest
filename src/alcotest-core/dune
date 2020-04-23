@@ -1,0 +1,4 @@
+(library
+ (name alcotest_core)
+ (public_name alcotest-core)
+ (libraries fmt astring cmdliner fmt.cli uuidm re stdlib-shims))

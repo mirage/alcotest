@@ -11,6 +11,7 @@ bug-reports: "https://github.com/mirage/alcotest/issues"
 depends: [
   "dune" {>= "2.0"}
   "ocaml" {>= "4.03.0"}
+  "alcotest-core" {= version}
   "alcotest" {= version}
   "async_unix" {>= "v0.9.0"}
   "core_kernel" {>= "v0.9.0"}

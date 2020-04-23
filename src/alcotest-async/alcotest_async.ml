@@ -2,7 +2,7 @@ open Core
 open Async_kernel
 open Async_unix
 
-module Tester = Alcotest.Cli.Make (Alcotest_unix.Unix) (struct
+module Tester = Alcotest_core.Cli.Make (Alcotest.Unix) (struct
   include Deferred
 
   let bind x f = bind x ~f

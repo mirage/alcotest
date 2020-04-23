@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-module Tester = Alcotest.Cli.Make (Alcotest_unix.Unix) (Lwt)
+module Tester = Alcotest_core.Cli.Make (Alcotest.Unix) (Lwt)
 include Tester
 
 let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
