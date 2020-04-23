@@ -6,6 +6,7 @@ module Main (C : Mirage_clock.MCLOCK) = struct
     let id () = () in
     run "suite-name"
       [
-        ("test", [ test_case_sync "A test case for alcotest with mirage" `Quick id ]);
+        ( "test",
+          [ test_case_sync "A test case for alcotest with mirage" `Quick id ] );
       ]
 end
