@@ -61,9 +61,11 @@ module type S = sig
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
-module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
+  S with type return = unit M.t
 
-module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t = struct
+module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
+struct
   module P = P (M)
   module M = Monad.Extend (M)
   include M.Infix
@@ -361,9 +363,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
     let output_file = output_file t test_case.Suite.path in
     let fn args =
       P.with_redirect output_file (fun () ->
-            test_case.fn args >|= fun result ->
-            Pp.rresult_error Fmt.stdout result;
-            result)
+          test_case.fn args >|= fun result ->
+          Pp.rresult_error Fmt.stdout result;
+          result)
     in
     { test_case with fn }
 

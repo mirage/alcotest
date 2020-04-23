@@ -87,9 +87,9 @@ tests to run.
  (description "Mirage implementation for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
  (depends
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.07.0))
   (alcotest-core (= :version))
-  mirage-clock
+  (mirage-clock (>= 2.0.0))
   duration
   lwt
   logs))

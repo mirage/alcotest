@@ -34,9 +34,11 @@ module type S = sig
     with_options
 end
 
-module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
+  S with type return = unit M.t
 
-module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t = struct
+module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
+struct
   (**  *)
 
   (** The priority order for determining options should be as follows:
