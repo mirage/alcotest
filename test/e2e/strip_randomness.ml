@@ -42,6 +42,12 @@ let time_replace =
   let re = compile t in
   replace ~all:true re ~f:(fun g -> Group.get g 1 ^ "<test-duration>s")
 
+let exception_name_replace =
+  let open Re in
+  let t = str "Alcotest_core__Core.Registration_error" in
+  let re = compile t in
+  replace_string ~all:true re ~by:"Alcotest_core.Core.Registration_error"
+
 (* Remove all non-deterministic output in a given Alcotest log and write
    the result to std.out *)
 let () =
@@ -53,6 +59,7 @@ let () =
         |> uuid_replace
         |> build_context_replace
         |> time_replace
+        |> exception_name_replace
       in
       Printf.printf "%s\n" sanitized_line;
       loop ()
