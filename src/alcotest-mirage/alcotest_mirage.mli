@@ -16,7 +16,12 @@
 
 (** [Alcotest_mirage] enables testing functions which return an Lwt promise.
     {!run} returns a promise that runs the tests when scheduled, catching any
-    asynchronous exceptions thrown by the tests. *)
+    asynchronous exceptions thrown by the tests.
+
+    Please note that this backend does not support redirection of standard
+    streams into files (MirageOS does not have a file system).  It writes all
+    test output to the console.
+*)
 
 module Make (C : Mirage_clock.MCLOCK) : sig
   include Alcotest_core.Cli.S with type return = unit Lwt.t
