@@ -14,19 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** A lightweight and colourful test framework.
-
-    [Alcotest] provides a simple interface to perform unit tests. It exposes a
-    simple {{!TESTABLE} TESTABLE} module type, a {{!check} check function} to
-    assert test predicates and a {{!run} run} function to perform a list of
-    [unit -> unit] test callbacks.
-
-    From these descriptions, [Alcotest] builds a quiet and colorful output where
-    only faulty runs are fully displayed at the end of the run (with the full
-    logs ready to inspect).
-
-    {e Release %%VERSION%%} *)
-
 (** {2 Assert functions} *)
 
 (** [TESTABLE] provides an abstract description for testable values. *)

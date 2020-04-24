@@ -10,8 +10,11 @@ module type S = sig
       testrun. *)
 
   val prepare : base:string -> dir:string -> name:string -> unit
-  (** [prepare ~base ~dir ~name] is called before test suite execution. For
-      example, on Unix it creates directories for the test output. *)
+  (** [prepare ~base ~dir ~name] is called before test suite execution. [base]
+      is the parent of the log directory, [dir] the log directory (including
+      unique testrun ID), and [name] is the test name. On Unix, this function
+      creates the log directory [dir] for the test output, and sets up the
+      symlink [latest] to the latest result. *)
 
   val with_redirect : string -> (unit -> return) -> return
   (** [with_redirect output_file f] is called for each test. On Unix, it it
