@@ -106,7 +106,7 @@ struct
 
   let log_dir =
     let fname_concat l = List.fold_left Filename.concat "" l in
-    let default_dir = fname_concat [ Sys.getcwd (); "_build"; "_tests" ] in
+    let default_dir = fname_concat [ P.getcwd (); "_build"; "_tests" ] in
     let doc = "Where to store the log files of the tests." in
     Arg.(value & opt dir default_dir & info [ "o" ] ~docv:"DIR" ~doc)
     |> fmap (fun x -> `Log_dir x)

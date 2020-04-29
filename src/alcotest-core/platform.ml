@@ -3,6 +3,8 @@ module type S = sig
 
   val time : unit -> float
 
+  val getcwd : unit -> string
+
   val prepare : base:string -> dir:string -> name:string -> unit
 
   val with_redirect : string -> (unit -> return) -> return

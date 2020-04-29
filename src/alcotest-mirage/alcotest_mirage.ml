@@ -4,6 +4,8 @@ module Make (C : Mirage_clock.MCLOCK) = struct
 
     let time () = Duration.to_f @@ C.elapsed_ns ()
 
+    let getcwd () = ""
+
     let prepare ~base:_ ~dir:_ ~name:_ = ()
 
     let with_redirect _ fn = fn ()

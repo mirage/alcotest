@@ -36,6 +36,8 @@ module Unix (M : Alcotest_core.Monad.S) = struct
 
   let time = Unix.time
 
+  let getcwd = Sys.getcwd
+
   let prepare ~base ~dir ~name =
     if not (Sys.file_exists dir) then (
       Unix.mkdir_p dir 0o770;

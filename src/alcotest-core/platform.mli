@@ -9,6 +9,9 @@ module type S = sig
   (** [time ()] returns the current timestamp, used to measure the duration of a
       testrun. *)
 
+  val getcwd : unit -> string
+  (** [getcwd ()] returns the current working directory. *)
+
   val prepare : base:string -> dir:string -> name:string -> unit
   (** [prepare ~base ~dir ~name] is called before test suite execution. [base]
       is the parent of the log directory, [dir] the log directory (including

@@ -183,7 +183,7 @@ struct
     let speed_level = `Slow in
     let show_errors = false in
     let json = false in
-    let log_dir = Sys.getcwd () in
+    let log_dir = P.getcwd () in
     let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
     {
       name;
@@ -455,7 +455,7 @@ struct
 
   let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
-    fname_concat [ Sys.getcwd (); "_build"; "_tests" ]
+    fname_concat [ P.getcwd (); "_build"; "_tests" ]
 
   type 'a with_options =
     ?and_exit:bool ->
