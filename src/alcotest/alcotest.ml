@@ -147,11 +147,13 @@ let show_assert msg =
 let check_err fmt =
   Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
 
-let check t msg x y =
+let check t msg expected actual =
   show_assert msg;
-  if not (equal t x y) then
-    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) x (pp t) y
+  if not (equal t expected actual) then
+    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t) actual
     |> failwith
+
+let check' ~t ~msg ~expected ~actual = check t msg expected actual
 
 let fail msg =
   show_assert msg;

@@ -111,6 +111,9 @@ val reject : 'a testable
 val check : 'a testable -> string -> 'a -> 'a -> unit
 (** Check that two values are equal. *)
 
+val check' : 'a testable -> msg:string -> expected:'a -> actual:'a -> unit
+(** Check that two values are equal (labeled variant of {!check}). *)
+
 val fail : string -> 'a
 (** Simply fail. *)
 
