@@ -426,7 +426,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
     |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
 
   let validate_name name =
-    let pattern = "^[a-zA-Z0-9_- ]+$" in
+    let pattern = "^[a-zA-Z0-9 _-]+$" in
     let re = Re.(compile @@ Pcre.re pattern) in
     if not (Re.execp re name) then
       let msg =
