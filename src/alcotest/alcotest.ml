@@ -150,10 +150,11 @@ let check_err fmt =
 let check t msg expected actual =
   show_assert msg;
   if not (equal t expected actual) then
-    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t) actual
+    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t)
+      actual
     |> failwith
 
-let check' ~t ~msg ~expected ~actual = check t msg expected actual
+let check' t ~msg ~expected ~actual = check t msg expected actual
 
 let fail msg =
   show_assert msg;

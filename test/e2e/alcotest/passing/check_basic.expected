@@ -21,5 +21,6 @@ This run has ID `<uuid>`.
  ...                negation                     1   negated testables.[OK]                negation                     1   negated testables.
  ...                fuzzy equality               0   float thresholds.[OK]                fuzzy equality               0   float thresholds.
  ...                fuzzy equality               1   sorted list.[OK]                fuzzy equality               1   sorted list.
+ ...                labeled check                0   passing.[OK]                labeled check                0   passing.
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
-Test Successful in <test-duration>s. 21 tests run.
+Test Successful in <test-duration>s. 22 tests run.

@@ -37,6 +37,8 @@ let sorted_list () =
   let int_compare : int -> int -> int = compare in
   Alcotest.(check (slist int int_compare)) "sorted" [ 1; 2; 3 ] [ 3; 2; 1 ]
 
+let labeled_check () = Alcotest.(check' int) ~msg:"Foo" ~expected:1 ~actual:1
+
 let () =
   let open Alcotest in
   run "passing testables"
@@ -74,4 +76,5 @@ let () =
           test_case "float thresholds" `Quick float_threshold;
           test_case "sorted list" `Quick sorted_list;
         ] );
+      ("labeled check", [ test_case "passing" `Quick labeled_check ]);
     ]
