@@ -9,24 +9,6 @@
 (maintainers "thomas@gazagnaire.org")
 
 (package
- (name alcotest-core)
- (synopsis "Alcotest is a lightweight and colourful test framework")
- (documentation "https://mirage.github.io/alcotest")
- (description "\
-Alcotest-core exposes a simple interface to perform unit tests. The interface
-consists of the TESTABLE module type and a check function to assert test
-predicates.
-")
- (depends
-  (ocaml (>= 4.03.0))
-  (fmt (>= 0.8.6))
-  astring
-  cmdliner
-  uuidm
-  re
-  stdlib-shims))
-
-(package
  (name alcotest)
  (synopsis "Alcotest is a lightweight and colourful test framework")
  (documentation "https://mirage.github.io/alcotest")
@@ -44,8 +26,11 @@ tests to run.
  (depends
   (ocaml (>= 4.03.0))
   (fmt (>= 0.8.6))
-  (alcotest-core (= :version))
-  astring))
+  astring
+  cmdliner
+  uuidm
+  re
+  stdlib-shims))
 
 (package
  (name alcotest-async)
@@ -54,7 +39,6 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (ocaml (>= 4.03.0))
-  (alcotest-core (= :version))
   (alcotest (= :version))
   (async_unix (>= v0.9.0))
   (core_kernel (>= v0.9.0))))
@@ -66,7 +50,6 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (ocaml (>= 4.03.0))
-  (alcotest-core (= :version))
   (alcotest (= :version))
   lwt
   logs))
@@ -78,7 +61,7 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (ocaml (>= 4.03.0))
-  (alcotest-core (= :version))
+  (alcotest (= :version))
   (mirage-clock (>= 2.0.0))
   duration
   lwt

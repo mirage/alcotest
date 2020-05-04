@@ -22,8 +22,11 @@ depends: [
   "dune" {>= "2.0"}
   "ocaml" {>= "4.03.0"}
   "fmt" {>= "0.8.6"}
-  "alcotest-core" {= version}
   "astring"
+  "cmdliner"
+  "uuidm"
+  "re"
+  "stdlib-shims"
 ]
 build: [
   ["dune" "subst"] {pinned}

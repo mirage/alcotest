@@ -11,7 +11,7 @@ bug-reports: "https://github.com/mirage/alcotest/issues"
 depends: [
   "dune" {>= "2.0"}
   "ocaml" {>= "4.03.0"}
-  "alcotest-core" {= version}
+  "alcotest" {= version}
   "mirage-clock" {>= "2.0.0"}
   "duration"
   "lwt"
