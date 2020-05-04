@@ -1,5 +1,8 @@
 ### Unreleased
 
+- Add `Alcotest.check'`, a variant of `Alcotest.check` with labeled arguments.
+  (#239, @hartmut27)
+
 - Fix bug with validation of test names containing path separators (these break
   Alcotest when attempting to generate a corresponding log file). The accepted
   characters are: alphanumerics, underscore, hypen and space. (#241, @mefyl)
