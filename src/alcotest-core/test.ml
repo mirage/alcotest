@@ -146,7 +146,7 @@ let check t msg expected actual =
     Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t) actual
     |> failwith
 
-let check' ~t ~msg ~expected ~actual = check t msg expected actual
+let check' t ~msg ~expected ~actual = check t msg expected actual
 
 let fail msg =
   show_assert msg;
