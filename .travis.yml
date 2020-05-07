@@ -3,7 +3,7 @@ install: wget https://raw.githubusercontent.com/ocaml/ocaml-ci-scripts/master/.t
 script: bash -ex .travis-opam.sh
 env:
   global:
-    - PINS="alcotest:. alcotest-lwt:. alcotest-async:. alcotest-mirage:."
+    - PINS="alcotest.~dev:. alcotest-lwt.~dev:. alcotest-async.~dev:. alcotest-mirage.~dev:."
 matrix:
   include:
     - os: linux
