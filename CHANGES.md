@@ -10,6 +10,17 @@
 - Add an `alcotest-mirage` package, allowing the construction of MirageOS
   unikernels that run Alcotest test suites. (#238, @hannesm @linse)
 
+- Default to `--color=always` when running inside Dune (#242, @CraigFe). The
+  value can be overridden by setting the `ALCOTEST_COLOR` variable in a `dune`
+  file, for example:
+
+```dune
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR auto))))
+```
+
 ### 1.1.0 (2020-04-03)
 
 - Fix handling of CLI options for `Alcotest_{async,lwt}.run`. (#222, @CraigFe)
