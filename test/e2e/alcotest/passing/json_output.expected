@@ -1,5 +1,6 @@
-Testing suite-name.
-This run has ID `<uuid>`.
+Testing `suite-name'.
+This run has ID `<uuid>'.
+
 {
   "success": 3,
   "failures": 0,

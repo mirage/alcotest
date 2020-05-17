@@ -1,23 +1,30 @@
-Testing failing testables.
-This run has ID `<uuid>`.
- ...                different basic              0   bool.[FAIL]              different basic              0   bool.
- ...                different basic              1   int.[FAIL]              different basic              1   int.
- ...                different basic              2   int32.[FAIL]              different basic              2   int32.
- ...                different basic              3   int64.[FAIL]              different basic              3   int64.
- ...                different basic              4   float.[FAIL]              different basic              4   float.
- ...                different basic              5   char.[FAIL]              different basic              5   char.
- ...                different basic              6   string.[FAIL]              different basic              6   string.
- ...                different composite          0   list.[FAIL]              different composite          0   list.
- ...                different composite          1   array.[FAIL]              different composite          1   array.
- ...                different composite          2   option some.[FAIL]              different composite          2   option some.
- ...                different composite          3   result.[FAIL]              different composite          3   result.
- ...                different composite          4   pair.[FAIL]              different composite          4   pair.
--- different basic.000 [bool.] Failed --
-in `<build-context>/_build/_tests/<uuid>/different basic.000.output`:
-ASSERT bool
-[failure] Error bool: expecting
-true, got
-false.
+Testing `failing testables'.
+This run has ID `<uuid>'.
 
-The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+  ...           different basic              0   bool.> [ERROR]       different basic              0   bool.
+  ...           different basic              1   int.  [ERROR]       different basic              1   int.
+  ...           different basic              2   int32.  [ERROR]       different basic              2   int32.
+  ...           different basic              3   int64.  [ERROR]       different basic              3   int64.
+  ...           different basic              4   float.  [ERROR]       different basic              4   float.
+  ...           different basic              5   char.  [ERROR]       different basic              5   char.
+  ...           different basic              6   string.  [ERROR]       different basic              6   string.
+  ...           different composite          0   list.  [ERROR]       different composite          0   list.
+  ...           different composite          1   array.  [ERROR]       different composite          1   array.
+  ...           different composite          2   option some.  [ERROR]       different composite          2   option some.
+  ...           different composite          3   result.  [ERROR]       different composite          3   result.
+  ...           different composite          4   pair.  [ERROR]       different composite          4   pair.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              0   bool.                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+ASSERT bool
+ERROR bool
+
+   Expected: true
+   Received: false
+
+Logs saved to `<build-context>/_build/_tests/latest/different basic.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/latest'.
 12 errors! in <test-duration>s. 12 tests run.

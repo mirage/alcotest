@@ -1,7 +1,9 @@
-Testing test_color.
-This run has ID `<uuid>`.
- ...                alpha          0   Output may or may not contain ANSII escape codes.[OK]                alpha          0   Output may or may not contain ANSII escape codes.
- ...                alpha          1   according to whether or not [--color] is set.[OK]                alpha          1   according to whether or not [--color] is set.
- ...                alpha          2   (See the corresponding [dune] file.).[OK]                alpha          2   (See the corresponding [dune] file.).
-The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Testing `test_color'.
+This run has ID `<uuid>'.
+
+  ...           alpha          0   Output may or may not contain ANSII escape codes.  [OK]          alpha          0   Output may or may not contain ANSII escape codes.
+  ...           alpha          1   according to whether or not [--color] is set.  [OK]          alpha          1   according to whether or not [--color] is set.
+  ...           alpha          2   (See the corresponding [dune] file.).  [OK]          alpha          2   (See the corresponding [dune] file.).
+
+Full test results in `<build-context>/_build/_tests/latest'.
 Test Successful in <test-duration>s. 3 tests run.

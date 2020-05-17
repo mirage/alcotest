@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+val terminal_width : unit -> int
+
 type path = [ `Path of string * int ]
 
 val info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
@@ -22,9 +24,12 @@ val info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
 type run_result =
   [ `Ok
   | `Exn of path * string * string
-  | `Error of path * string
+  | `Error of path * unit Fmt.t
   | `Skip
   | `Todo of string ]
+
+val is_failure : run_result -> bool
+(** [is_failure] holds for test results that are error states. *)
 
 type event = [ `Result of path * run_result | `Start of path ]
 
@@ -32,13 +37,19 @@ type result = {
   success : int;
   failures : int;
   time : float;
-  errors : string list;
+  errors : unit Fmt.t list;
 }
 
 val rresult_error : run_result Fmt.t
 
+val event_line : max_label:int -> doc_of_path:(path -> string) -> event Fmt.t
+
 val event :
-  compact:bool -> max_label:int -> doc_of_path:(path -> string) -> event Fmt.t
+  compact:bool ->
+  max_label:int ->
+  doc_of_path:(path -> string) ->
+  selector_on_failure:bool ->
+  event Fmt.t
 
 val suite_results :
   verbose:bool ->
@@ -48,7 +59,14 @@ val suite_results :
   log_dir:string ->
   result Fmt.t
 
-val pp_plural : Format.formatter -> int -> unit
+val quoted : 'a Fmt.t -> 'a Fmt.t
+(** Wraps a formatter with `GNU-style quotation marks'. *)
+
+val unicode_boxed : 'a Fmt.t -> 'a Fmt.t
+(** Wraps a formatter with a Unicode box with width given by {!terminal_width}.
+    This uses characters from code page 437, so should be fairly portable. *)
+
+val pp_plural : int Fmt.t
 (** This is for adding an 's' to words that should be pluralized, e.g.
 
     {[

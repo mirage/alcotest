@@ -44,7 +44,8 @@ module type EXTENDED = sig
   end
 
   module List : sig
-    val map_s : ('a -> 'b t) -> 'a list -> 'b list t
+    val fold_map_s :
+      ('acc -> 'a -> ('acc * 'b) t) -> 'acc -> 'a list -> 'b list t
   end
 end
 
@@ -60,11 +61,13 @@ module Extend (M : S) = struct
   open Infix
 
   module List = struct
-    let map_s f l =
-      let rec inner acc = function
-        | [] -> return (List.rev acc)
-        | hd :: tl -> f hd >>= fun r -> (inner [@ocaml.tailcall]) (r :: acc) tl
+    let fold_map_s f init l =
+      let rec inner acc results = function
+        | [] -> return (List.rev results)
+        | hd :: tl ->
+            f acc hd >>= fun (acc, r) ->
+            (inner [@ocaml.tailcall]) acc (r :: results) tl
       in
-      inner [] l
+      inner init [] l
   end
 end
