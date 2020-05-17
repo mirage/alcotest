@@ -54,11 +54,37 @@ struct
   include C
   module P = P (M)
 
-  let set_color style_renderer = P.setup_std_outputs ?style_renderer ()
+  let set_color color_flag =
+    let style_renderer =
+      match color_flag with
+      | Some `Auto -> None
+      | Some (`Ansi_tty | `None) as a -> a
+      | None -> (
+          try
+            (* Default to [always] when running inside Dune *)
+            let (_ : string) = Sys.getenv "INSIDE_DUNE" in
+            Some `Ansi_tty
+          with Not_found -> None )
+    in
+    P.setup_std_outputs ?style_renderer ()
 
   let set_color =
     let env = Arg.env_var "ALCOTEST_COLOR" in
-    Term.(const set_color $ Fmt_cli.style_renderer ~env ())
+    let style_renderer =
+      let enum = [ ("auto", `Auto); ("always", `Ansi_tty); ("never", `None) ] in
+      let color = Arg.enum enum in
+      let enum_alts = Arg.doc_alts_enum enum in
+      let doc =
+        strf
+          "Colorize the output. $(docv) must be %s. Defaults to %s when \
+           running inside Dune, otherwise defaults to %s."
+          enum_alts (Arg.doc_quote "always") (Arg.doc_quote "auto")
+      in
+
+      Arg.(
+        value & opt (some color) None & info [ "color" ] ~env ~doc ~docv:"WHEN")
+    in
+    Term.(const set_color $ style_renderer)
 
   type runtime_options = {
     verbose : bool option;
