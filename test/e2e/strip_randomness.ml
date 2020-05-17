@@ -29,7 +29,10 @@ let time_replace =
         group
           (alt
              [
-               str "Test Successful in ";
+               opt cntrl (* Maybe ANSII escape, depending on [--color] *);
+               str "Test Successful";
+               opt cntrl;
+               str " in ";
                seq [ rep1 digit; str " error! in " ];
                seq [ rep1 digit; str " errors! in " ];
              ]);
