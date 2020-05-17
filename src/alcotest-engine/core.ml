@@ -27,7 +27,7 @@ end)
 
 exception Registration_error of string
 
-exception Check_error of string
+exception Check_error of unit Fmt.t
 
 module type S = sig
   type return
@@ -159,7 +159,7 @@ struct
     name : string;
     suite : 'a Suite.t;
     (* runtime state. *)
-    mutable errors : string list;
+    mutable errors : unit Fmt.t list;
     (* runtime options. *)
     max_label : int;
     speed_level : speed_level;
@@ -245,22 +245,28 @@ struct
       in
       String.concat ~sep:"\n" display_lines ^ "\n"
 
-  let log_dir t = Filename.concat t.log_dir t.run_id
+  let log_dir ~alias t =
+    Filename.concat t.log_dir (if alias then "latest" else t.run_id)
 
   let pp_suite_results t =
     Pp.suite_results ~verbose:t.verbose ~show_errors:t.show_errors ~json:t.json
-      ~compact:t.compact ~log_dir:(log_dir t)
+      ~compact:t.compact ~log_dir:(log_dir ~alias:true t)
 
-  let pp_event t =
+  let pp_event ~prior_error t =
+    let selector_on_failure =
+      (not prior_error) && not (t.verbose || t.show_errors)
+    in
     if not t.json then
       Pp.event ~compact:t.compact ~max_label:t.max_label
         ~doc_of_path:(Suite.doc_of_path t.suite)
+        ~selector_on_failure
     else Fmt.nop
 
   let pp_info t =
     Pp.info ~max_label:t.max_label ~doc_of_path:(Suite.doc_of_path t.suite)
 
-  let output_file t path = Filename.concat (log_dir t) (file_of_path path)
+  let output_file t path =
+    Filename.concat (log_dir ~alias:true t) (file_of_path path)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
@@ -270,24 +276,35 @@ struct
 
   let bold_s fmt = color `Bold fmt
 
-  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ppf (path, error)
-      =
-    let logs =
+  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ~max_label ppf
+      (path, error_fmt) =
+    let pp_logs ppf () =
       let filename = output_file path in
-      if verbose || not (Sys.file_exists filename) then Fmt.strf "%s\n" error
+      if verbose || not (Sys.file_exists filename) then
+        Fmt.pf ppf "%a@," error_fmt ()
       else
         let file = open_in filename in
         let output = read_tail tail_errors file in
         close_in file;
-        Fmt.strf "in `%s`:\n%s" filename output
+        Fmt.pf ppf "%s@,Logs saved to %a.@," output
+          Fmt.(Pp.quoted (styled `Cyan string))
+          filename
     in
-    Fmt.pf ppf "-- %s [%s] Failed --\n%s"
-      (short_string_of_path path)
-      (doc_of_path path) logs
-
-  let failure : Pp.run_result -> bool = function
-    | `Ok | `Skip -> false
-    | `Error _ | `Exn _ | `Todo _ -> true
+    let pp_line =
+      Fmt.(
+        const string " "
+        ++ const
+             (styled `Faint string)
+             ( List.init (Pp.terminal_width () - 2) (fun _ -> "─")
+             |> String.concat )
+        ++ cut)
+    in
+    Fmt.pf ppf "%a%a%a@,"
+      (Pp.unicode_boxed (fun ppf () ->
+           Fmt.pf ppf "%a"
+             (Pp.event_line ~max_label ~doc_of_path)
+             (`Result (path, `Error (path, error_fmt)))))
+      () pp_logs () pp_line ()
 
   let has_run : Pp.run_result -> bool = function
     | `Ok | `Error _ | `Exn _ -> true
@@ -305,42 +322,46 @@ struct
       (fun () -> f args >|= fun () -> `Ok)
       (function
         | Check_error err ->
-            let err = Printf.sprintf "Test error: %s%s" err (bt ()) in
+            let err = Fmt.(err ++ const string (bt ())) in
             M.return @@ `Error (path, err)
         | Failure f -> M.return @@ exn path "failure" f
         | Invalid_argument f -> M.return @@ exn path "invalid" f
         | e -> M.return @@ exn path "exception" (Printexc.to_string e))
 
-  let perform_test t args suite =
+  let perform_test t args prior_error suite =
     let open Suite in
     let test = suite.fn in
-    let pp_event = pp_event t in
+    let pp_event = pp_event t ~prior_error in
     M.return () >>= fun () ->
     pp_event Fmt.stdout (`Start suite.path);
     Fmt.(flush stdout) () (* Show event before any test stderr *);
     test args >|= fun result ->
     (* Store errors *)
-    let () =
+    let errored : bool =
       let pp_error =
         pp_error ~verbose:t.verbose
           ~doc_of_path:(Suite.doc_of_path t.suite)
           ~output_file:(output_file t) ~tail_errors:t.tail_errors
+          ~max_label:t.max_label
       in
-      let error =
+      let error, errored =
         match result with
-        | `Exn (p, n, _) -> [ Fmt.strf "%a" pp_error (p, n) ]
-        | `Error e -> [ Fmt.strf "%a" pp_error e ]
-        | _ -> []
+        | `Exn (p, n, _) ->
+            ([ Fmt.const pp_error (p, Fmt.(const string) n) ], true)
+        | `Error e -> ([ Fmt.const pp_error e ], true)
+        | _ -> ([], false)
       in
-      t.errors <- error @ t.errors
+      t.errors <- error @ t.errors;
+      errored
     in
     (* Show any remaining test output before the event *)
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
     pp_event Fmt.stdout (`Result (suite.path, result));
-    result
+    (prior_error || errored, result)
 
-  let perform_tests t tests args = M.List.map_s (perform_test t args) tests
+  let perform_tests t tests args =
+    M.List.fold_map_s (perform_test t args) false tests
 
   let skip_fun _ = M.return `Skip
 
@@ -375,7 +396,7 @@ struct
     else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
-    P.prepare ~base:t.log_dir ~dir:(log_dir t) ~name:t.name;
+    P.prepare ~base:t.log_dir ~dir:(log_dir ~alias:false t) ~name:t.name;
     let start_time = P.time () in
     let test =
       if t.verbose then test else List.map (redirect_test_output t) test
@@ -384,7 +405,7 @@ struct
     perform_tests t test args >|= fun results ->
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
-    let failures = List.length (List.filter failure results) in
+    let failures = List.length (List.filter Pp.is_failure results) in
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
@@ -495,8 +516,12 @@ struct
     let t = register_all t tl in
     ( (* Only print inside the concurrency monad *)
       M.return () >>= fun () ->
-      Fmt.(pf stdout) "Testing %a.\n" bold_s name;
-      Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
+      let open Fmt in
+      pr "Testing %a.@," (Pp.quoted bold_s) name;
+      pr "@[<v>%a@]"
+        (styled `Faint (fun ppf () ->
+             pf ppf "This run has ID %a.@,@," (Pp.quoted string) run_id))
+        ();
       run_tests ?filter t () args )
     >|= fun test_failures ->
     match (test_failures, and_exit) with

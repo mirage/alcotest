@@ -6,6 +6,7 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   long_test_case_name
    tail_errors_limit
    tail_errors_unlimited
    unknown_option
@@ -18,6 +19,7 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   long_test_case_name
    tail_errors_limit
    tail_errors_unlimited
    unknown_option
@@ -173,6 +175,31 @@
  (package alcotest)
  (action
    (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)))
+
+(rule
+ (target long_test_case_name.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:long_test_case_name.exe})
+  )
+ )
+)
+
+(rule
+ (target long_test_case_name.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:long_test_case_name.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff long_test_case_name.expected long_test_case_name.processed)))
 
 (rule
  (target tail_errors_limit.actual)

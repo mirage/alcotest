@@ -141,14 +141,21 @@ let show_assert msg =
   Format.eprintf "%a %s\n%!" Fmt.(styled `Yellow string) "ASSERT" msg
 
 let check_err fmt =
-  Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
+  Format.kasprintf
+    (fun err -> raise (Core.Check_error (Fmt.(const string) err)))
+    fmt
 
-let check t msg expected actual =
+let check (type a) (t : a testable) msg (expected : a) (actual : a) =
   show_assert msg;
   if not (equal t expected actual) then
-    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t)
-      actual
-    |> failwith
+    let open Fmt in
+    let s = const string in
+    let pp_error = const (styled `Red string) "ERROR" ++ s (" " ^ msg)
+    and pp_expected = s "   Expected: " ++ const (styled `Green (pp t)) expected
+    and pp_actual = s "   Received: " ++ const (styled `Red (pp t)) actual in
+    raise
+      (Core.Check_error
+         Fmt.(vbox (pp_error ++ cut ++ cut ++ pp_expected ++ cut ++ pp_actual)))
 
 let check' t ~msg ~expected ~actual = check t msg expected actual
 

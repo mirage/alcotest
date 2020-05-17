@@ -1,11 +1,17 @@
-Testing suite-with-failures.
-This run has ID `<uuid>`.
- ...                test-a          0   Passing.[OK]                test-a          0   Passing.
- ...                test-a          1   Failing.[FAIL]              test-a          1   Failing.
- ...                test-b          0   Another pass.[OK]                test-b          0   Another pass.
--- test-a.001 [Failing.] Failed --
-in `<build-context>/_build/_tests/<uuid>/test-a.001.output`:
+Testing `suite-with-failures'.
+This run has ID `<uuid>'.
+
+  ...           test-a          0   Passing.  [OK]          test-a          0   Passing.
+  ...           test-a          1   Failing.> [FAIL]        test-a          1   Failing.
+  ...           test-b          0   Another pass.  [OK]          test-b          0   Another pass.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       test-a          1   Failing.                                   │
+└──────────────────────────────────────────────────────────────────────────────┘
 [exception] Dune__exe__Exception_in_test.Foo("message")
 
-The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Logs saved to `<build-context>/_build/_tests/latest/test-a.001.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/latest'.
 1 error! in <test-duration>s. 3 tests run.

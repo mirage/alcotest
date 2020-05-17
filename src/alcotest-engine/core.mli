@@ -14,7 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-exception Check_error of string
+exception Check_error of unit Fmt.t
 
 module IntSet : Set.S with type elt = int
 

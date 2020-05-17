@@ -9,7 +9,6 @@ let build_context_replace =
     ( group (alt [ char '`'; str "(absent=" ]),
       group (alt [ char '`'; char ')' ]) )
   in
-
   let t = seq [ lterm; rep any; str "_build"; group (rep any); rterm ] in
   let re = compile t in
   replace ~all:true re ~f:(fun g ->
