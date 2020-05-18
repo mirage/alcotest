@@ -75,3 +75,11 @@ end
 
 module T = Alcotest_engine.Cli.Make (Unix) (Alcotest_engine.Monad.Identity)
 include T
+
+module Core = struct
+  module Make = Alcotest_engine.Core.Make (Unix)
+end
+
+module Cli = struct
+  module Make = Alcotest_engine.Cli.Make (Unix)
+end

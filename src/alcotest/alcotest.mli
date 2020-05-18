@@ -29,7 +29,27 @@
 
 include Alcotest_engine.Cli.S with type return = unit
 
+(** {1 Assert functions} *)
+
 include module type of Alcotest_engine.Test
 (** @inline *)
 
-module Unix : Alcotest_engine.Platform.MAKER
+(** {1 Unix-specific engine constructors}
+
+    The [Alcotest_engine] package provides the most general form of the Alcotest
+    API, parameterised over the thread implementation and the platform. This
+    package provides the [Unix] platform implementation. *)
+
+open Alcotest_engine
+
+module Unix : Platform.MAKER
+
+(** {!Core.Make} is [Alcotest_engine.Core.Make (Unix)] *)
+module Core : sig
+  module Make : module type of Alcotest_engine.Core.Make (Unix)
+end
+
+(** {!Cli.Make} is [Alcotest_engine.Cli.Make (Unix)] *)
+module Cli : sig
+  module Make : module type of Alcotest_engine.Cli.Make (Unix)
+end
