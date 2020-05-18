@@ -16,6 +16,7 @@
  *)
 
 open Astring
+open Utils
 
 let terminal_width = Fun.const 80
 
