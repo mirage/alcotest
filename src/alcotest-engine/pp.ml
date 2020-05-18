@@ -69,12 +69,31 @@ let pp_path ~max_label ppf (`Path (n, i)) =
 let info ~max_label ~doc_of_path ppf p =
   Fmt.pf ppf "%a   %s" (pp_path ~max_label) p (doc_of_path p)
 
-let pp_result ppf = function
-  | `Ok -> left left_c green_s ppf "[OK]"
-  | `Exn _ -> left left_c red_s ppf "[FAIL]"
-  | `Error _ -> left left_c red_s ppf "[ERROR]"
-  | `Skip -> left left_c yellow_s ppf "[SKIP]"
-  | `Todo _ -> left left_c yellow_s ppf "[TODO]"
+let pp_tag ~wrapped ppf typ =
+  let colour, tag =
+    match typ with
+    | `Ok -> (`Green, "OK")
+    | `Fail -> (`Red, "FAIL")
+    | `Error -> (`Red, "ERROR")
+    | `Skip -> (`Yellow, "SKIP")
+    | `Todo -> (`Yellow, "TODO")
+    | `Assert -> (`Yellow, "ASSERT")
+  in
+  let tag = if wrapped then "[" ^ tag ^ "]" else tag in
+  Fmt.pf ppf "%a" Fmt.(styled colour string) tag
+
+let tag = pp_tag ~wrapped:false
+
+let pp_result ppf result =
+  let tag =
+    match result with
+    | `Ok -> `Ok
+    | `Exn _ -> `Fail
+    | `Error _ -> `Error
+    | `Skip -> `Skip
+    | `Todo _ -> `Todo
+  in
+  left left_c (pp_tag ~wrapped:true) ppf tag
 
 let pp_result_compact ppf result =
   let char =
