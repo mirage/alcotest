@@ -198,12 +198,11 @@ let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
 |}
         r.success r.failures r.time
   | false ->
-      Fmt.pf ppf "\n%a%a%a%a"
-        (if compact then Fmt.cut else Fmt.nop)
-        ()
-        (pp_suite_errors ~show_all:(verbose || show_errors) r.errors)
-        ()
-        (if print_summary && not verbose then pp_full_logs else Fmt.nop)
-        log_dir
-        (if print_summary then pp_summary else Fmt.nop)
-        r
+      Format.pp_force_newline ppf ();
+      Format.pp_open_vbox ppf 0;
+      if compact then Fmt.cut ppf ();
+      (pp_suite_errors ~show_all:(verbose || show_errors) r.errors) ppf ();
+      if print_summary then (
+        if not verbose then pp_full_logs ppf log_dir;
+        pp_summary ppf r );
+      Format.pp_close_box ppf ()
