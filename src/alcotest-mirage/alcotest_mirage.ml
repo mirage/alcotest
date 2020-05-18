@@ -1,6 +1,6 @@
 module Make (C : Mirage_clock.MCLOCK) = struct
   module Platform (M : Alcotest_engine.Monad.S) = struct
-    type return = Alcotest_engine.Pp.run_result M.t
+    type return = Alcotest_engine.Private.Pp.run_result M.t
 
     let time () = Duration.to_f @@ C.elapsed_ns ()
 

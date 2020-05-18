@@ -2,7 +2,7 @@ include Alcotest_engine.Test
 
 module Unix (M : Alcotest_engine.Monad.S) = struct
   module M = Alcotest_engine.Monad.Extend (M)
-  module Fmt = Alcotest_engine.Fmt
+  module Fmt = Alcotest_engine.Private.Utils.Fmt
 
   module Unix = struct
     open Astring
@@ -30,7 +30,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
       | xs -> mk "." xs
   end
 
-  type return = Alcotest_engine.Pp.run_result M.t
+  type return = Alcotest_engine.Private.Pp.run_result M.t
 
   open M.Infix
 
