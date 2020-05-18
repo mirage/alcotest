@@ -107,7 +107,7 @@ output line 98
 output line 99
 output line 100
 ASSERT Logs above should be 101 lines long.
-Error Logs above should be 101 lines long..
+FAIL Logs above should be 101 lines long.
 
 Logs saved to `<build-context>/_build/_tests/latest/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────

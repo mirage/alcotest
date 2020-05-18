@@ -21,6 +21,8 @@ type path = [ `Path of string * int ]
 
 val info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
 
+val tag : [ `Ok | `Fail | `Error | `Skip | `Todo | `Assert ] Fmt.t
+
 type run_result =
   [ `Ok
   | `Exn of path * string * string
