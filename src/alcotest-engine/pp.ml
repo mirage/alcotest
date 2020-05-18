@@ -133,16 +133,23 @@ let event_line ~max_label ~doc_of_path ppf = function
       (info ~max_label ~doc_of_path) ppf p
   | _ -> assert false
 
-let event ~compact ~max_label ~doc_of_path ~selector_on_failure ppf = function
-  | `Start _ when compact -> ()
-  | `Start p ->
+let event ~compact ~max_label ~doc_of_path ~selector_on_failure ~tests_so_far
+    ppf event =
+  match (compact, event) with
+  | true, `Start _ -> ()
+  | true, `Result (_, r) ->
+      pp_result_compact ppf r;
+      (* Wrap compact output to terminal width manually *)
+      if (tests_so_far + 1) mod terminal_width () = 0 then
+        Format.pp_force_newline ppf ();
+      ()
+  | false, `Start p ->
       Fmt.(
         left_padding ~with_selector:false
         ++ const (left left_c yellow_s) "..."
         ++ const (info ~max_label ~doc_of_path) p)
         ppf ()
-  | `Result (_, r) when compact -> pp_result_compact ppf r
-  | `Result (p, r) ->
+  | false, `Result (p, r) ->
       Fmt.pf ppf "\r%a@,"
         (pp_result_full ~max_label ~doc_of_path ~selector_on_failure)
         (p, r)

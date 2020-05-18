@@ -51,6 +51,7 @@ val event :
   max_label:int ->
   doc_of_path:(path -> string) ->
   selector_on_failure:bool ->
+  tests_so_far:int ->
   event Fmt.t
 
 val suite_results :
