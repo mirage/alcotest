@@ -9,6 +9,9 @@ module Make (C : Mirage_clock.MCLOCK) = struct
     let with_redirect _ fn = fn ()
 
     let setup_std_outputs ?style_renderer:_ ?utf_8:_ () = ()
+
+    let home_directory () =
+      Error (`Msg "Home directory not available for the MirageOS platform")
   end
 
   module Tester = Alcotest_engine.Cli.Make (Platform) (Lwt)

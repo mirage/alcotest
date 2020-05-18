@@ -70,6 +70,20 @@ struct
   module M = Monad.Extend (M)
   include M.Infix
 
+  (** Take a string path and collapse a leading [$HOME] path segment to [~]. *)
+  let maybe_collapse_home path =
+    match P.home_directory () with
+    | Error _ -> path
+    | Ok home -> (
+        (* Astring doesn't have [cut_prefix]. *)
+        match String.is_prefix ~affix:home path with
+        | false -> path
+        | true ->
+            let tail =
+              String.Sub.to_string (String.sub ~start:(String.length home) path)
+            in
+            "~" ^ tail )
+
   (* Types *)
   type return = unit M.t
 
@@ -248,9 +262,9 @@ struct
   let log_dir ~alias t =
     Filename.concat t.log_dir (if alias then "latest" else t.run_id)
 
-  let pp_suite_results t =
-    Pp.suite_results ~verbose:t.verbose ~show_errors:t.show_errors ~json:t.json
-      ~compact:t.compact ~log_dir:(log_dir ~alias:true t)
+  let pp_suite_results ({ verbose; show_errors; json; compact; _ } as t) =
+    let log_dir = log_dir ~alias:true t |> maybe_collapse_home in
+    Pp.suite_results ~verbose ~show_errors ~json ~compact ~log_dir
 
   let pp_event ~prior_error t =
     let selector_on_failure =
@@ -288,7 +302,7 @@ struct
         close_in file;
         Fmt.pf ppf "%s@,Logs saved to %a.@," output
           Fmt.(Pp.quoted (styled `Cyan string))
-          filename
+          (maybe_collapse_home filename)
     in
     let pp_line =
       Fmt.(

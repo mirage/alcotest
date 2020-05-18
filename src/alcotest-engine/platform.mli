@@ -26,6 +26,9 @@ module type S = sig
     ?style_renderer:Fmt.style_renderer -> ?utf_8:bool -> unit -> unit
   (** [setup_std_outputs ~style_renderer ~utf_8 ()] is called at startup of
       alcotest and sets up the standard streams for colored output. *)
+
+  val home_directory : unit -> (string, [ `Msg of string ]) result
+  (** [home_directory ()] is the current user's HOME directory, if it exists. *)
 end
 
 module type MAKER = functor (M : Monad.S) -> S with type 'a promise := 'a M.t
