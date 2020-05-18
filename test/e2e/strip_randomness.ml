@@ -44,9 +44,9 @@ let time_replace =
 
 let exception_name_replace =
   let open Re in
-  let t = str "Alcotest_core__Core.Registration_error" in
+  let t = str "Alcotest_engine__Core.Registration_error" in
   let re = compile t in
-  replace_string ~all:true re ~by:"Alcotest_core.Core.Registration_error"
+  replace_string ~all:true re ~by:"Alcotest_engine.Core.Registration_error"
 
 (* Remove all non-deterministic output in a given Alcotest log and write
    the result to std.out *)

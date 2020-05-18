@@ -27,9 +27,9 @@
 
     {e Release %%VERSION%%} *)
 
-include Alcotest_core.Cli.S with type return = unit
+include Alcotest_engine.Cli.S with type return = unit
 
-include module type of Alcotest_core.Test
+include module type of Alcotest_engine.Test
 (** @inline *)
 
-module Unix : Alcotest_core.Platform.MAKER
+module Unix : Alcotest_engine.Platform.MAKER

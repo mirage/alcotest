@@ -8,7 +8,7 @@
   (with-stdout-to
    %{targets}
    (run ../../gen_dune_rules.exe --package "alcotest" --libraries
-     "alcotest.core"))))
+     "alcotest.engine"))))
 
 (rule
  (alias runtest)

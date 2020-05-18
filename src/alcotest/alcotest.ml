@@ -1,8 +1,8 @@
-include Alcotest_core.Test
+include Alcotest_engine.Test
 
-module Unix (M : Alcotest_core.Monad.S) = struct
-  module M = Alcotest_core.Monad.Extend (M)
-  module Fmt = Alcotest_core.Fmt
+module Unix (M : Alcotest_engine.Monad.S) = struct
+  module M = Alcotest_engine.Monad.Extend (M)
+  module Fmt = Alcotest_engine.Fmt
 
   module Unix = struct
     open Astring
@@ -30,7 +30,7 @@ module Unix (M : Alcotest_core.Monad.S) = struct
       | xs -> mk "." xs
   end
 
-  type return = Alcotest_core.Pp.run_result M.t
+  type return = Alcotest_engine.Pp.run_result M.t
 
   open M.Infix
 
@@ -75,5 +75,5 @@ module Unix (M : Alcotest_core.Monad.S) = struct
   let setup_std_outputs = Fmt_tty.setup_std_outputs
 end
 
-module T = Alcotest_core.Cli.Make (Unix) (Alcotest_core.Monad.Identity)
+module T = Alcotest_engine.Cli.Make (Unix) (Alcotest_engine.Monad.Identity)
 include T

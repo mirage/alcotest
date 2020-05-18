@@ -14,11 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** Alcotest-core provides a platform-independent test framework.
+(** [Alcotest_engine] provides a platform-independent test framework.
 
     The main building blocks and combinators are defined here. These can be used
     to defined tests, the platform-specific runners for these tests are in
-    alcotest, alcotest-lwt, alcotest-async, alcotest-mirage. *)
+    [alcotest], [alcotest-lwt], [alcotest-async] and [alcotest-mirage]. *)
 
 (** {1 Assert functions} *)
 

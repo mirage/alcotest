@@ -1,6 +1,6 @@
 module Make (C : Mirage_clock.MCLOCK) = struct
-  module Platform (M : Alcotest_core.Monad.S) = struct
-    type return = Alcotest_core.Pp.run_result M.t
+  module Platform (M : Alcotest_engine.Monad.S) = struct
+    type return = Alcotest_engine.Pp.run_result M.t
 
     let time () = Duration.to_f @@ C.elapsed_ns ()
 
@@ -13,7 +13,7 @@ module Make (C : Mirage_clock.MCLOCK) = struct
     let setup_std_outputs ?style_renderer:_ ?utf_8:_ () = ()
   end
 
-  module Tester = Alcotest_core.Cli.Make (Platform) (Lwt)
+  module Tester = Alcotest_engine.Cli.Make (Platform) (Lwt)
   include Tester
 
   let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
