@@ -80,7 +80,7 @@ let pp_tag ~wrapped ppf typ =
     | `Assert -> (`Yellow, "ASSERT")
   in
   let tag = if wrapped then "[" ^ tag ^ "]" else tag in
-  Fmt.pf ppf "%a" Fmt.(styled colour string) tag
+  Fmt.(styled colour string) ppf tag
 
 let tag = pp_tag ~wrapped:false
 
@@ -115,27 +115,26 @@ let left_padding ~with_selector =
 let pp_result_full ~max_label ~doc_of_path ~selector_on_failure ppf
     (path, result) =
   let with_selector = selector_on_failure && is_failure result in
-  Fmt.pf ppf "%a%a%a"
-    (left_padding ~with_selector)
-    () pp_result result
-    (info ~max_label ~doc_of_path)
-    path
+  (left_padding ~with_selector) ppf ();
+  pp_result ppf result;
+  (info ~max_label ~doc_of_path) ppf path;
+  ()
 
 let event_line ~max_label ~doc_of_path ppf = function
   | `Result (p, r) ->
-      Fmt.pf ppf "%a%a" pp_result r (info ~max_label ~doc_of_path) p
+      pp_result ppf r;
+      (info ~max_label ~doc_of_path) ppf p
   | _ -> assert false
 
 let event ~compact ~max_label ~doc_of_path ~selector_on_failure ppf = function
   | `Start _ when compact -> ()
   | `Start p ->
-      Fmt.pf ppf "%a"
-        Fmt.(
-          left_padding ~with_selector:false
-          ++ const (left left_c yellow_s) "..."
-          ++ const (info ~max_label ~doc_of_path) p)
-        ()
-  | `Result (_, r) when compact -> Fmt.pf ppf "%a" pp_result_compact r
+      Fmt.(
+        left_padding ~with_selector:false
+        ++ const (left left_c yellow_s) "..."
+        ++ const (info ~max_label ~doc_of_path) p)
+        ppf ()
+  | `Result (_, r) when compact -> pp_result_compact ppf r
   | `Result (p, r) ->
       Fmt.pf ppf "\r%a@,"
         (pp_result_full ~max_label ~doc_of_path ~selector_on_failure)
@@ -171,7 +170,7 @@ let unicode_boxed (type a) (f : a Fmt.t) : a Fmt.t =
   let top = s ("┌" ^ bars ^ "┐")
   and mid = Fmt.(s "│ " ++ f ++ s (right_padding ^ " │"))
   and bottom = s ("└" ^ bars ^ "┘") in
-  Fmt.pf ppf "%a" Fmt.(top ++ cut ++ mid ++ cut ++ bottom ++ cut) a
+  Fmt.(top ++ cut ++ mid ++ cut ++ bottom ++ cut) ppf a
 
 let pp_full_logs ppf log_dir =
   Fmt.pf ppf "Full test results in %a.@,"
