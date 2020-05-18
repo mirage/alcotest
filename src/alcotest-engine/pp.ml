@@ -69,33 +69,40 @@ let pp_path ~max_label ppf (`Path (n, i)) =
 let info ~max_label ~doc_of_path ppf p =
   Fmt.pf ppf "%a   %s" (pp_path ~max_label) p (doc_of_path p)
 
+let tag_of_result = function
+  | `Ok -> `Ok
+  | `Exn _ -> `Fail
+  | `Error _ -> `Error
+  | `Skip -> `Skip
+  | `Todo _ -> `Todo
+
+let colour_of_tag = function
+  | `Ok -> `Green
+  | `Fail | `Error -> `Red
+  | `Skip | `Todo | `Assert -> `Yellow
+
+let string_of_tag = function
+  | `Ok -> "OK"
+  | `Fail -> "FAIL"
+  | `Error -> "ERROR"
+  | `Skip -> "SKIP"
+  | `Todo -> "TODO"
+  | `Assert -> "ASSERT"
+
 let pp_tag ~wrapped ppf typ =
-  let colour, tag =
-    match typ with
-    | `Ok -> (`Green, "OK")
-    | `Fail -> (`Red, "FAIL")
-    | `Error -> (`Red, "ERROR")
-    | `Skip -> (`Yellow, "SKIP")
-    | `Todo -> (`Yellow, "TODO")
-    | `Assert -> (`Yellow, "ASSERT")
-  in
+  let colour = colour_of_tag typ in
+  let tag = string_of_tag typ in
   let tag = if wrapped then "[" ^ tag ^ "]" else tag in
   Fmt.(styled colour string) ppf tag
 
 let tag = pp_tag ~wrapped:false
 
 let pp_result ppf result =
-  let tag =
-    match result with
-    | `Ok -> `Ok
-    | `Exn _ -> `Fail
-    | `Error _ -> `Error
-    | `Skip -> `Skip
-    | `Todo _ -> `Todo
-  in
+  let tag = tag_of_result result in
   left left_c (pp_tag ~wrapped:true) ppf tag
 
 let pp_result_compact ppf result =
+  let colour = result |> tag_of_result |> colour_of_tag in
   let char =
     match result with
     | `Ok -> '.'
@@ -104,7 +111,7 @@ let pp_result_compact ppf result =
     | `Skip -> 'S'
     | `Todo _ -> 'T'
   in
-  Fmt.char ppf char
+  Fmt.(styled colour char) ppf char
 
 let left_padding ~with_selector =
   let open Fmt in
