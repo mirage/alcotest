@@ -1,31 +1,160 @@
-Testing `failing testables'.
+Testing `check_basic'.
 This run has ID `<uuid>'.
 
-  ...           different basic              0   bool.> [ERROR]       different basic              0   bool.
-  ...           different basic              1   int.  [ERROR]       different basic              1   int.
-  ...           different basic              2   int32.  [ERROR]       different basic              2   int32.
-  ...           different basic              3   int64.  [ERROR]       different basic              3   int64.
-  ...           different basic              4   float.  [ERROR]       different basic              4   float.
-  ...           different basic              5   char.  [ERROR]       different basic              5   char.
-  ...           different basic              6   string.  [ERROR]       different basic              6   string.
-  ...           different basic              7   bytes.  [ERROR]       different basic              7   bytes.
-  ...           different composite          0   list.  [ERROR]       different composite          0   list.
-  ...           different composite          1   array.  [ERROR]       different composite          1   array.
-  ...           different composite          2   option some.  [ERROR]       different composite          2   option some.
-  ...           different composite          3   result.  [ERROR]       different composite          3   result.
-  ...           different composite          4   pair.  [ERROR]       different composite          4   pair.
+  ...           different basic              0   bool.ASSERT bool
+  [ERROR]       different basic              0   bool.
+  ...           different basic              1   int.ASSERT int
+  [ERROR]       different basic              1   int.
+  ...           different basic              2   int32.ASSERT int32
+  [ERROR]       different basic              2   int32.
+  ...           different basic              3   int64.ASSERT int64
+  [ERROR]       different basic              3   int64.
+  ...           different basic              4   float.ASSERT float
+  [ERROR]       different basic              4   float.
+  ...           different basic              5   char.ASSERT char
+  [ERROR]       different basic              5   char.
+  ...           different basic              6   string.ASSERT string
+  [ERROR]       different basic              6   string.
+  ...           different basic              7   bytes.ASSERT bytes
+  [ERROR]       different basic              7   bytes.
+  ...           different composite          0   list.ASSERT list
+  [ERROR]       different composite          0   list.
+  ...           different composite          1   array.ASSERT array
+  [ERROR]       different composite          1   array.
+  ...           different composite          2   option some.ASSERT option some
+  [ERROR]       different composite          2   option some.
+  ...           different composite          3   result.ASSERT result
+  [ERROR]       different composite          3   result.
+  ...           different composite          4   pair.ASSERT pair
+  [ERROR]       different composite          4   pair.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [ERROR]       different basic              0   bool.                         │
 └──────────────────────────────────────────────────────────────────────────────┘
-ASSERT bool
 ERROR bool
 
    Expected: true
    Received: false
-
-Logs saved to `<build-context>/_build/_tests/latest/different basic.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
-Full test results in `<build-context>/_build/_tests/latest'.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              1   int.                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR int
+
+   Expected: 1
+   Received: 2
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              2   int32.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR int32
+
+   Expected: 2147483647
+   Received: -2147483648
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              3   int64.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR int64
+
+   Expected: 9223372036854775807
+   Received: -9223372036854775808
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              4   float.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR float
+
+   Expected: 1
+   Received: 2
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              5   char.                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR char
+
+   Expected: a
+   Received: b
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              6   string.                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR string
+
+   Expected: Lorem ipsum
+   Received: dolor sit amet.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different basic              7   bytes.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR bytes
+
+   Expected: "\001\002\003"
+   Received: "\001\000\003"
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different composite          0   list.                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR list
+
+   Expected: [a; b]
+   Received: [a; c]
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different composite          1   array.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR array
+
+   Expected: [|0; 9223372036854775807|]
+   Received: [|0; 1; 9223372036854775807|]
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different composite          2   option some.                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR option some
+
+   Expected: Some 1
+   Received: Some 2
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different composite          3   result.                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR result
+
+   Expected: Ok 1
+   Received: Error ()
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       different composite          4   pair.                         │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR pair
+
+   Expected: (1, a)
+   Received: (1, b)
+ ──────────────────────────────────────────────────────────────────────────────
+
 13 errors! in <test-duration>s. 13 tests run.

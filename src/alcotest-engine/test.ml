@@ -151,7 +151,12 @@ let check (type a) (t : a testable) msg (expected : a) (actual : a) =
     let open Fmt in
     let s = const string in
     let pp_error = const Pp.tag `Error ++ s (" " ^ msg)
-    and pp_expected = s "   Expected: " ++ const (styled `Green (pp t)) expected
+    and pp_expected ppf () =
+      Fmt.string ppf "   Expected: ";
+      (styled `Green (pp t)) ppf expected;
+      Format.pp_print_if_newline ppf ();
+      Fmt.cut ppf ();
+      ()
     and pp_actual = s "   Received: " ++ const (styled `Red (pp t)) actual in
     raise
       (Core.Check_error

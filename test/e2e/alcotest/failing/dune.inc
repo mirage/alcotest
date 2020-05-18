@@ -1,6 +1,7 @@
 (executables
  (names
    check_basic
+   check_long
    compact
    duplicate_test_names
    exception_in_test
@@ -14,6 +15,7 @@
  (libraries alcotest)
  (modules
    check_basic
+   check_long
    compact
    duplicate_test_names
    exception_in_test
@@ -50,6 +52,31 @@
  (package alcotest)
  (action
    (diff check_basic.expected check_basic.processed)))
+
+(rule
+ (target check_long.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:check_long.exe})
+  )
+ )
+)
+
+(rule
+ (target check_long.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:check_long.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff check_long.expected check_long.processed)))
 
 (rule
  (target compact.actual)
