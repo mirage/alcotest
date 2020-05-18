@@ -315,8 +315,8 @@ struct
     in
     Fmt.pf ppf "%a%a%a@,"
       (Pp.unicode_boxed (fun ppf () ->
-           Fmt.pf ppf "%a"
-             (Pp.event_line ~max_label ~doc_of_path)
+           (Pp.event_line ~max_label ~doc_of_path)
+             ppf
              (`Result (path, `Error (path, error_fmt)))))
       () pp_logs () pp_line ()
 
@@ -476,7 +476,7 @@ struct
           let tests = filter_test_cases ~subst:true labels suite in
           result t tests args )
     >|= fun result ->
-    Fmt.(pf stdout) "%a" (pp_suite_results t) result;
+    (pp_suite_results t) Fmt.stdout result;
     result.failures
 
   let list_tests (tl : 'a test list) =

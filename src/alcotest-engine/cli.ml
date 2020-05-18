@@ -240,7 +240,7 @@ struct
             (`Msg "must be a comma-separated list of integers / integer ranges")
     in
     let print ppf set =
-      Fmt.pf ppf "%a" Fmt.(braces @@ list ~sep:comma int) (IntSet.elements set)
+      Fmt.(braces @@ list ~sep:comma int) ppf (IntSet.elements set)
     in
     Arg.conv (parse, print)
 
