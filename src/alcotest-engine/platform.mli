@@ -1,10 +1,4 @@
 module type S = sig
-  type return
-  (** The return type of each test case run by Alcotest. For the standard
-      {!Alcotest} module, [return = unit]. The concurrent backends
-      [Alcotest_lwt] and [Alcotest_async] set [return = unit Lwt.t] and
-      [return = Async_kernel.Deferred.t] respectively. *)
-
   val time : unit -> float
   (** [time ()] returns the current timestamp, used to measure the duration of a
       testrun. *)
@@ -19,7 +13,10 @@ module type S = sig
       creates the log directory [dir] for the test output, and sets up the
       symlink [latest] to the latest result. *)
 
-  val with_redirect : string -> (unit -> return) -> return
+  type 'a promise
+  (** The type of monadic actions handled by {!with_redirect}. *)
+
+  val with_redirect : string -> (unit -> 'a promise) -> 'a promise
   (** [with_redirect output_file f] is called for each test. On Unix, it it
       deals with redirection of standard streams to the [output_file]. The
       implementation of [with_redirect] has to make sure to call [f] in order to
@@ -31,5 +28,4 @@ module type S = sig
       alcotest and sets up the standard streams for colored output. *)
 end
 
-module type MAKER = functor (M : Monad.S) ->
-  S with type return = Pp.run_result M.t
+module type MAKER = functor (M : Monad.S) -> S with type 'a promise := 'a M.t

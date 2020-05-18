@@ -30,8 +30,6 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
       | xs -> mk "." xs
   end
 
-  type return = Alcotest_engine.Private.Pp.run_result M.t
-
   open M.Infix
 
   let time = Unix.time
