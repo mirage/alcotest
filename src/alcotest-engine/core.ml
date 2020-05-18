@@ -266,14 +266,14 @@ struct
     let log_dir = log_dir ~alias:true t |> maybe_collapse_home in
     Pp.suite_results ~verbose ~show_errors ~json ~compact ~log_dir
 
-  let pp_event ~prior_error t =
+  let pp_event ~prior_error ~tests_so_far t =
     let selector_on_failure =
       (not prior_error) && not (t.verbose || t.show_errors)
     in
     if not t.json then
       Pp.event ~compact:t.compact ~max_label:t.max_label
         ~doc_of_path:(Suite.doc_of_path t.suite)
-        ~selector_on_failure
+        ~selector_on_failure ~tests_so_far
     else Fmt.nop
 
   let pp_info t =
@@ -342,10 +342,13 @@ struct
         | Invalid_argument f -> M.return @@ exn path "invalid" f
         | e -> M.return @@ exn path "exception" (Printexc.to_string e))
 
-  let perform_test t args prior_error suite =
+  type running_state = { tests_so_far : int; prior_error : bool }
+  (** State that is kept during the test executions. *)
+
+  let perform_test t args { tests_so_far; prior_error } suite =
     let open Suite in
     let test = suite.fn in
-    let pp_event = pp_event t ~prior_error in
+    let pp_event = pp_event t ~prior_error ~tests_so_far in
     M.return () >>= fun () ->
     pp_event Fmt.stdout (`Start suite.path);
     Fmt.(flush stdout) () (* Show event before any test stderr *);
@@ -372,10 +375,15 @@ struct
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
     pp_event Fmt.stdout (`Result (suite.path, result));
-    (prior_error || errored, result)
+    let state =
+      { tests_so_far = tests_so_far + 1; prior_error = errored || prior_error }
+    in
+    (state, result)
 
   let perform_tests t tests args =
-    M.List.fold_map_s (perform_test t args) false tests
+    M.List.fold_map_s (perform_test t args)
+      { tests_so_far = 0; prior_error = false }
+      tests
 
   let skip_fun _ = M.return `Skip
 
