@@ -1,184 +1,85 @@
-(*
- * Copyright (c) 2013-2016 Thomas Gazagnaire <thomas@gazagnaire.org>
- *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
- *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
- *)
+include Alcotest_engine.Test
 
-module Core = Core
-module Cli = Cli
-module Monad = Monad
-module T = Cli.Make (Monad.Identity)
-include T
-open Utils
+module Unix (M : Alcotest_engine.Monad.S) = struct
+  module M = Alcotest_engine.Monad.Extend (M)
+  module Fmt = Alcotest_engine.Private.Utils.Fmt
 
-module type TESTABLE = sig
-  type t
+  module Unix = struct
+    open Astring
+    include Unix
 
-  val pp : t Fmt.t
+    let mkdir_p path mode =
+      let is_win_drive_letter x =
+        String.length x = 2 && x.[1] = ':' && Char.Ascii.is_letter x.[0]
+      in
+      let sep = Filename.dir_sep in
+      let rec mk parent = function
+        | [] -> ()
+        | name :: names ->
+            let path = parent ^ sep ^ name in
+            ( try Unix.mkdir path mode
+              with Unix.Unix_error (Unix.EEXIST, _, _) ->
+                if Sys.is_directory path then () (* the directory exists *)
+                else Fmt.strf "mkdir: %s: is a file" path |> failwith );
+            mk path names
+      in
+      match String.cuts ~empty:true ~sep path with
+      | "" :: xs -> mk sep xs
+      (* check for Windows drive letter *)
+      | dl :: xs when is_win_drive_letter dl -> mk dl xs
+      | xs -> mk "." xs
+  end
 
-  val equal : t -> t -> bool
+  open M.Infix
+
+  let time = Unix.time
+
+  let getcwd = Sys.getcwd
+
+  let prepare ~base ~dir ~name =
+    if not (Sys.file_exists dir) then (
+      Unix.mkdir_p dir 0o770;
+      if Sys.unix || Sys.cygwin then (
+        let this_exe = Filename.concat base name
+        and latest = Filename.concat base "latest" in
+        if Sys.file_exists this_exe then Sys.remove this_exe;
+        if Sys.file_exists latest then Sys.remove latest;
+        Unix.symlink ~to_dir:true dir this_exe;
+        Unix.symlink ~to_dir:true dir latest ) )
+    else if not (Sys.is_directory dir) then
+      failwith (Fmt.strf "exists but is not a directory: %S" dir)
+
+  let with_redirect file fn =
+    M.return () >>= fun () ->
+    Fmt.(flush stdout) ();
+    Fmt.(flush stderr) ();
+    let fd_stdout = Unix.descr_of_out_channel stdout in
+    let fd_stderr = Unix.descr_of_out_channel stderr in
+    let fd_old_stdout = Unix.dup fd_stdout in
+    let fd_old_stderr = Unix.dup fd_stderr in
+    let fd_file = Unix.(openfile file [ O_WRONLY; O_TRUNC; O_CREAT ] 0o660) in
+    Unix.dup2 fd_file fd_stdout;
+    Unix.dup2 fd_file fd_stderr;
+    Unix.close fd_file;
+    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e) >|= fun r ->
+    Fmt.(flush stdout ());
+    Fmt.(flush stderr ());
+    Unix.dup2 fd_old_stdout fd_stdout;
+    Unix.dup2 fd_old_stderr fd_stderr;
+    Unix.close fd_old_stdout;
+    Unix.close fd_old_stderr;
+    match r with `Ok x -> x | `Error e -> raise e
+
+  let setup_std_outputs = Fmt_tty.setup_std_outputs
 end
 
-type 'a testable = (module TESTABLE with type t = 'a)
+module T = Alcotest_engine.Cli.Make (Unix) (Alcotest_engine.Monad.Identity)
+include T
 
-let pp (type a) (t : a testable) =
-  let (module T) = t in
-  T.pp
+module Core = struct
+  module Make = Alcotest_engine.Core.Make (Unix)
+end
 
-let equal (type a) (t : a testable) =
-  let (module T) = t in
-  T.equal
-
-let isnan f = FP_nan = classify_float f
-
-let testable (type a) (pp : a Fmt.t) (equal : a -> a -> bool) : a testable =
-  let module M = struct
-    type t = a
-
-    let pp = pp
-
-    let equal = equal
-  end in
-  (module M)
-
-let int32 = testable Fmt.int32 ( = )
-
-let int64 = testable Fmt.int64 ( = )
-
-let int = testable Fmt.int ( = )
-
-let float eps =
-  let same x y =
-    (isnan x && isnan y)
-    (* compare infinities *)
-    || x = y
-    || abs_float (x -. y) <= eps
-  in
-  testable Fmt.float same
-
-let char = testable Fmt.char ( = )
-
-let string = testable Fmt.string ( = )
-
-let bool = testable Fmt.bool ( = )
-
-let unit = testable (Fmt.unit "()") ( = )
-
-let list e =
-  let rec eq l1 l2 =
-    match (l1, l2) with
-    | x :: xs, y :: ys -> equal e x y && eq xs ys
-    | [], [] -> true
-    | _ -> false
-  in
-  testable (Fmt.Dump.list (pp e)) eq
-
-let slist (type a) (a : a testable) compare =
-  let l = list a in
-  let eq l1 l2 = equal l (List.sort compare l1) (List.sort compare l2) in
-  testable (pp l) eq
-
-let array e =
-  let eq a1 a2 =
-    let m, n = Array.(length a1, length a2) in
-    let rec go i = i = m || (equal e a1.(i) a2.(i) && go (i + 1)) in
-    m = n && go 0
-  in
-  testable (Fmt.Dump.array (pp e)) eq
-
-let pair a b =
-  let eq (a1, b1) (a2, b2) = equal a a1 a2 && equal b b1 b2 in
-  testable (Fmt.Dump.pair (pp a) (pp b)) eq
-
-let option e =
-  let eq x y =
-    match (x, y) with
-    | Some a, Some b -> equal e a b
-    | None, None -> true
-    | _ -> false
-  in
-  testable (Fmt.Dump.option (pp e)) eq
-
-let result a e =
-  let eq x y =
-    match (x, y) with
-    | Ok x, Ok y -> equal a x y
-    | Error x, Error y -> equal e x y
-    | _ -> false
-  in
-  testable (Fmt.Dump.result ~ok:(pp a) ~error:(pp e)) eq
-
-let of_pp pp = testable pp ( = )
-
-let pass (type a) =
-  let module M = struct
-    type t = a
-
-    let pp fmt _ = Fmt.string fmt "Alcotest.pass"
-
-    let equal _ _ = true
-  end in
-  (module M : TESTABLE with type t = M.t)
-
-let reject (type a) =
-  let module M = struct
-    type t = a
-
-    let pp fmt _ = Fmt.string fmt "Alcotest.reject"
-
-    let equal _ _ = false
-  end in
-  (module M : TESTABLE with type t = M.t)
-
-let show_assert msg =
-  Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
-  Format.eprintf "%a %s\n%!" Fmt.(styled `Yellow string) "ASSERT" msg
-
-let check_err fmt =
-  Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
-
-let check t msg expected actual =
-  show_assert msg;
-  if not (equal t expected actual) then
-    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t)
-      actual
-    |> failwith
-
-let check' t ~msg ~expected ~actual = check t msg expected actual
-
-let fail msg =
-  show_assert msg;
-  check_err "Error %s." msg
-
-let failf fmt = Fmt.kstrf fail fmt
-
-let neg t = testable (pp t) (fun x y -> not (equal t x y))
-
-let collect_exception f =
-  try
-    f ();
-    None
-  with e -> Some e
-
-let check_raises msg exn f =
-  show_assert msg;
-  match collect_exception f with
-  | None ->
-      check_err "Fail %s: expecting %s, got nothing." msg
-        (Printexc.to_string exn)
-  | Some e ->
-      if e <> exn then
-        check_err "Fail %s: expecting %s, got %s." msg (Printexc.to_string exn)
-          (Printexc.to_string e)
-
-let () = at_exit (Format.pp_print_flush Format.err_formatter)
+module Cli = struct
+  module Make = Alcotest_engine.Cli.Make (Unix)
+end

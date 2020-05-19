@@ -14,7 +14,7 @@
     observable during evaluation of the computation. See
     https://github.com/mirage/alcotest/pull/228 for more details. *)
 
-module Terminal : Alcotest.Monad.S = struct
+module Terminal : Alcotest_engine.Monad.S = struct
   type 'a t = unit
 
   let return _ = ()
@@ -24,7 +24,7 @@ module Terminal : Alcotest.Monad.S = struct
   let catch f on_error = match f () with x -> x | exception ex -> on_error ex
 end
 
-module Runner = Alcotest.Core.Make (Terminal)
+module Runner = Alcotest_engine.Core.Make (Alcotest.Unix) (Terminal)
 
 let () =
   let (_ : unit Terminal.t) =

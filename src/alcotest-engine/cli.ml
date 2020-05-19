@@ -34,9 +34,11 @@ module type S = sig
     with_options
 end
 
-module type MAKER = functor (M : Monad.S) -> S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
+  S with type return = unit M.t
 
-module Make (M : Monad.S) : S with type return = unit M.t = struct
+module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
+struct
   (**  *)
 
   (** The priority order for determining options should be as follows:
@@ -48,10 +50,11 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
       + 4. if the flag/option is passed to [run] directly, use that;
       + 5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
 
-  module C = Core.Make (M)
+  module C = Core.Make (P) (M)
   include C
+  module P = P (M)
 
-  let set_color style_renderer = Fmt_tty.setup_std_outputs ?style_renderer ()
+  let set_color style_renderer = P.setup_std_outputs ?style_renderer ()
 
   let set_color =
     let env = Arg.env_var "ALCOTEST_COLOR" in
@@ -103,7 +106,7 @@ module Make (M : Monad.S) : S with type return = unit M.t = struct
 
   let log_dir =
     let fname_concat l = List.fold_left Filename.concat "" l in
-    let default_dir = fname_concat [ Sys.getcwd (); "_build"; "_tests" ] in
+    let default_dir = fname_concat [ P.getcwd (); "_build"; "_tests" ] in
     let doc = "Where to store the log files of the tests." in
     Arg.(value & opt dir default_dir & info [ "o" ] ~docv:"DIR" ~doc)
     |> fmap (fun x -> `Log_dir x)

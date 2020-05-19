@@ -2,14 +2,17 @@ open Core
 open Async_kernel
 open Async_unix
 
-module Tester = Alcotest.Cli.Make (struct
-  include Deferred
+module Tester =
+  Alcotest_engine.Cli.Make
+    (Alcotest.Unix)
+    (struct
+      include Deferred
 
-  let bind x f = bind x ~f
+      let bind x f = bind x ~f
 
-  let catch t on_error =
-    try_with t >>= function Ok a -> return a | Error exn -> on_error exn
-end)
+      let catch t on_error =
+        try_with t >>= function Ok a -> return a | Error exn -> on_error exn
+    end)
 
 include Tester
 
