@@ -14,8 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** {2 Assert functions} *)
-
 (** [TESTABLE] provides an abstract description for testable values. *)
 module type TESTABLE = sig
   type t

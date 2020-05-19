@@ -14,15 +14,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** Alcotest-core provides a platform-independent test framework.
+(** [Alcotest_engine] provides a platform-independent test framework.
 
     The main building blocks and combinators are defined here. These can be used
-    to defined tests, the platform-specific runners for these tests are in
-    alcotest, alcotest-lwt, alcotest-async, alcotest-mirage. *)
+    to defined tests. The platform-specific runners for these tests are in
+    [alcotest], [alcotest-lwt], [alcotest-async] and [alcotest-mirage]. *)
 
 (** {1 Assert functions} *)
 
-module Test : module type of Test
+module Test = Test
 
 (** {1 Monadic test runners} *)
 
@@ -33,20 +33,21 @@ module Test : module type of Test
     [Async_kernel.Deferred.t], use the [Alcotest_lwt] and [Alcotest_async]
     packages directly. *)
 
-module Core : module type of Core
+module Core = Core
 (** Defines monadic test runners {i without} command-line interfaces. *)
 
-module Cli : module type of Cli
+module Cli = Cli
 (** Wraps {!Core} to provide a command-line interface. *)
 
-module Monad : module type of Monad
+module Monad = Monad
 (** Monad signatures for use with {!Core} and {!Cli}. *)
 
-module Platform : module type of Platform
+module Platform = Platform
 (** Defines platform-dependent functions. *)
 
-module Fmt : module type of Utils.Fmt
-(** Extends the Fmt library for backwards compatibility. *)
-
-module Pp : module type of Pp
-(** Defines pretty-printing utilities. *)
+(** These modules are exposed for use internally by other Alcotest packages.
+    They do not provide a stable interface. *)
+module Private : sig
+  module Utils = Utils
+  module Pp = Pp
+end
