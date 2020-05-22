@@ -1,0 +1,4 @@
+(test
+ (name test_distance)
+ (package alcotest)
+ (libraries alcotest alcotest.engine fmt))

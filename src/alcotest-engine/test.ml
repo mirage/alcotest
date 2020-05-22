@@ -14,41 +14,63 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-module type TESTABLE = sig
-  type t
+open Utils
 
-  val pp : t Fmt.t
+type output = unit Fmt.t
+(** Staged pretty-printed output waiting on styling details supplied elsewhere. *)
 
-  val equal : t -> t -> bool
+module Diff = struct
+  (** Diffs can be rendered as a 'merged' output that compares the two input
+      values in some way, or as two distinct outputs: one for each input. *)
+  type t = Diff of { expected : output; actual : output }
 end
 
-type 'a testable = (module TESTABLE with type t = 'a)
+let merge_diffs ((expected : output), (actual : output)) : output =
+  let open Fmt in
+  let s = const string in
+  let pp_expected =
+    s "   Expected: "
+    ++ styled `Faint expected
+    ++ Format.pp_print_if_newline
+    ++ cut
+  and pp_actual = s "   Received: " ++ styled `Faint actual in
+  vbox (pp_expected ++ cut ++ pp_actual)
 
-let pp (type a) (t : a testable) =
-  let (module T) = t in
-  T.pp
+type check_result = Pass | Fail of Diff.t
 
-let equal (type a) (t : a testable) =
-  let (module T) = t in
-  T.equal
+type 'a check = 'a -> 'a -> check_result
+(** An equality check extended with the ability to pretty-print diffs in the
+    failure case. *)
+
+type 'a testable =
+  | Testable : { pp : 'a Fmt.t; equal : 'a check } -> 'a testable
+
+let testable (type a) (pp : a Fmt.t) (equal : a check) : a testable =
+  Testable { pp; equal }
+
+let testable' (type a) (pp : a Fmt.t) (equal : a -> a -> bool) : a testable =
+  let equal a b =
+    match equal a b with
+    | true -> Pass
+    | false ->
+        Fail (Diff { expected = Fmt.(const pp a); actual = Fmt.(const pp b) })
+  in
+  Testable { pp; equal }
+
+let pp (type a) (Testable { pp; _ } : a testable) : a Fmt.t = pp
+
+let eq (type a) (Testable { equal; _ } : a testable) : a check = equal
+
+let equal (type a) (t : a testable) : a -> a -> bool =
+ fun a b -> match eq t a b with Pass -> true | Fail _ -> false
 
 let isnan f = FP_nan = classify_float f
 
-let testable (type a) (pp : a Fmt.t) (equal : a -> a -> bool) : a testable =
-  let module M = struct
-    type t = a
+let int32 = testable' Fmt.int32 ( = )
 
-    let pp = pp
+let int64 = testable' Fmt.int64 ( = )
 
-    let equal = equal
-  end in
-  (module M)
-
-let int32 = testable Fmt.int32 ( = )
-
-let int64 = testable Fmt.int64 ( = )
-
-let int = testable Fmt.int ( = )
+let int = testable' Fmt.int ( = )
 
 let float eps =
   let same x y =
@@ -57,41 +79,103 @@ let float eps =
     || x = y
     || abs_float (x -. y) <= eps
   in
-  testable Fmt.float same
+  testable' Fmt.float same
 
-let char = testable Fmt.char ( = )
+let char = testable' Fmt.char ( = )
 
-let string = testable Fmt.string ( = )
+let string = testable' Fmt.string ( = )
 
-let bool = testable Fmt.bool ( = )
+let bool = testable' Fmt.bool ( = )
 
-let unit = testable (Fmt.unit "()") ( = )
+let unit = testable' (Fmt.unit "()") ( = )
 
-let list e =
-  let rec eq l1 l2 =
-    match (l1, l2) with
-    | x :: xs, y :: ys -> equal e x y && eq xs ys
-    | [], [] -> true
-    | _ -> false
+let map_indices : type a. int list -> (a -> a) -> a list -> a list =
+ fun indices f ->
+  let rec inner current indices l =
+    match (indices, l) with
+    | [], _ -> l
+    | n :: _, [] -> Fmt.invalid_arg "map_indices: index %d out-of-bounds" n
+    | i :: is, x :: xs when i = current -> f x :: inner (current + 1) is xs
+    | _, x :: xs -> x :: inner (current + 1) indices xs
   in
-  testable (Fmt.Dump.list (pp e)) eq
+  inner 0 indices
+
+let diff_of_edit_script (type a) ~(pp_elt : a Fmt.t)
+    ~(combine : unit Fmt.t list -> unit Fmt.t) (l1 : a list) (l2 : a list)
+    (edits : a Distance.edit_script) : Diff.t =
+  let highlight_left, highlight_right =
+    edits
+    |> List.fold_left
+         (fun (lefts, rights) -> function
+           | Distance.Insert { actual; _ } -> (lefts, actual :: rights)
+           | Delete { expected } -> (expected :: lefts, rights)
+           | Substitute { expected; actual } ->
+               (expected :: lefts, actual :: rights))
+         ([], [])
+    |> fun (lefts, rights) -> (List.rev lefts, List.rev rights)
+  in
+  let expected, actual =
+    ((l1, highlight_left, `Green), (l2, highlight_right, `Red))
+    |> Pair.map (fun (list, to_highlight, highlight) ->
+           list
+           |> List.map Fmt.(const (box pp_elt))
+           |> map_indices to_highlight (Fmt.styled (`Fg (`Hi highlight)))
+           |> combine)
+  in
+  Diff { expected; actual }
+
+(* Types with diffs computed by levenshtein distance. *)
+
+let list (type a) (elt : a testable) : a list testable =
+  let elt_equal = equal elt in
+  let equal l1 l2 =
+    (* Avoid cost of computing Levenshtein distance in the common case of the
+       check succeeding. *)
+    match List.equal elt_equal l1 l2 with
+    | true -> Pass
+    | false -> (
+        match Distance.levenshtein_script ~equal:elt_equal l1 l2 with
+        | [] ->
+            assert false (* Levenshtein distance of zero for non-equal lists. *)
+        | _ :: _ as edits ->
+            Fail
+              (diff_of_edit_script ~pp_elt:(pp elt)
+                 ~combine:Fmt.(concat ~sep:semi >> brackets)
+                 l1 l2 edits) )
+  in
+  let pp = Fmt.Dump.list (pp elt) in
+  testable pp equal
 
 let slist (type a) (a : a testable) compare =
   let l = list a in
   let eq l1 l2 = equal l (List.sort compare l1) (List.sort compare l2) in
-  testable (pp l) eq
+  testable' (pp l) eq
 
-let array e =
-  let eq a1 a2 =
-    let m, n = Array.(length a1, length a2) in
-    let rec go i = i = m || (equal e a1.(i) a2.(i) && go (i + 1)) in
-    m = n && go 0
+let array (type a) (elt : a testable) : a array testable =
+  let oxford_brackets pp_v =
+    Fmt.(box ~indent:2 (const string "[|" ++ pp_v ++ const string "|]"))
   in
-  testable (Fmt.Dump.array (pp e)) eq
+  let elt_equal = equal elt in
+  let equal a1 a2 =
+    match Array.equal elt_equal a1 a2 with
+    | true -> Pass
+    | false -> (
+        let l1, l2 = Pair.map Array.to_list (a1, a2) in
+        match Distance.levenshtein_script ~equal:elt_equal l1 l2 with
+        | [] ->
+            assert false (* Levenshtein distance of zero for non-equal arrays *)
+        | _ :: _ as edits ->
+            Fail
+              (diff_of_edit_script ~pp_elt:(pp elt)
+                 ~combine:Fmt.(concat ~sep:semi >> oxford_brackets)
+                 l1 l2 edits) )
+  in
+  let pp = Fmt.Dump.array (pp elt) in
+  testable pp equal
 
 let pair a b =
   let eq (a1, b1) (a2, b2) = equal a a1 a2 && equal b b1 b2 in
-  testable (Fmt.Dump.pair (pp a) (pp b)) eq
+  testable' (Fmt.Dump.pair (pp a) (pp b)) eq
 
 let option e =
   let eq x y =
@@ -100,7 +184,7 @@ let option e =
     | None, None -> true
     | _ -> false
   in
-  testable (Fmt.Dump.option (pp e)) eq
+  testable' (Fmt.Dump.option (pp e)) eq
 
 let result a e =
   let eq x y =
@@ -109,29 +193,25 @@ let result a e =
     | Error x, Error y -> equal e x y
     | _ -> false
   in
-  testable (Fmt.Dump.result ~ok:(pp a) ~error:(pp e)) eq
+  testable' (Fmt.Dump.result ~ok:(pp a) ~error:(pp e)) eq
 
-let of_pp pp = testable pp ( = )
+let of_pp pp = testable' pp ( = )
 
-let pass (type a) =
-  let module M = struct
-    type t = a
+let pass (type a) : a testable =
+  let pp fmt _ = Fmt.string fmt "Alcotest.pass" and equal _ _ = Pass in
+  Testable { pp; equal }
 
-    let pp fmt _ = Fmt.string fmt "Alcotest.pass"
-
-    let equal _ _ = true
-  end in
-  (module M : TESTABLE with type t = M.t)
-
-let reject (type a) =
-  let module M = struct
-    type t = a
-
-    let pp fmt _ = Fmt.string fmt "Alcotest.reject"
-
-    let equal _ _ = false
-  end in
-  (module M : TESTABLE with type t = M.t)
+let reject (type a) : a testable =
+  let pp fmt _ = Fmt.string fmt "Alcotest.reject"
+  and equal _ _ =
+    Fail
+      (Diff.Diff
+         {
+           expected = Fmt.(const string) "__";
+           actual = Fmt.(const string) "__";
+         })
+  in
+  Testable { pp; equal }
 
 let show_assert msg =
   Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
@@ -139,22 +219,15 @@ let show_assert msg =
 
 let check_err fmt = raise (Core.Check_error fmt)
 
-let check (type a) (t : a testable) msg (expected : a) (actual : a) =
+let check (type a) (Testable { equal; _ } : a testable) msg (expected : a)
+    (actual : a) =
   show_assert msg;
-  if not (equal t expected actual) then
-    let open Fmt in
-    let s = const string in
-    let pp_error = const Pp.tag `Error ++ s (" " ^ msg)
-    and pp_expected ppf () =
-      Fmt.string ppf "   Expected: ";
-      (styled `Green (pp t)) ppf expected;
-      Format.pp_print_if_newline ppf ();
-      Fmt.cut ppf ();
-      ()
-    and pp_actual = s "   Received: " ++ const (styled `Red (pp t)) actual in
-    raise
-      (Core.Check_error
-         Fmt.(vbox (pp_error ++ cut ++ cut ++ pp_expected ++ cut ++ pp_actual)))
+  match equal expected actual with
+  | Pass -> ()
+  | Fail (Diff { expected; actual }) ->
+      let pp_error = Fmt.(const Pp.tag `Error ++ const string (" " ^ msg)) in
+      let merged = merge_diffs (expected, actual) in
+      raise (Core.Check_error Fmt.(pp_error ++ cut ++ cut ++ merged))
 
 let check' t ~msg ~expected ~actual = check t msg expected actual
 
@@ -164,7 +237,7 @@ let fail msg =
 
 let failf fmt = Fmt.kstrf fail fmt
 
-let neg t = testable (pp t) (fun x y -> not (equal t x y))
+let neg t = testable' (pp t) (fun x y -> not (equal t x y))
 
 let collect_exception f =
   try
@@ -186,3 +259,16 @@ let check_raises msg exn f =
               (Printexc.to_string exn) (Printexc.to_string e))
 
 let () = at_exit (Format.pp_print_flush Format.err_formatter)
+
+module type TESTABLE = sig
+  type t
+
+  val pp : t Fmt.t
+
+  val equal : t -> t -> bool
+end
+
+let testable_of_module (type a) (module T : TESTABLE with type t = a) =
+  testable' T.pp T.equal
+
+let testable = testable'

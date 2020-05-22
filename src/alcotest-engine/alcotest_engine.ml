@@ -5,6 +5,7 @@ module Monad = Monad
 module Platform = Platform
 
 module Private = struct
+  module Distance = Distance
   module Utils = Utils
   module Pp = Pp
 end

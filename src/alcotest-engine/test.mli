@@ -15,6 +15,16 @@
  *)
 
 (** [TESTABLE] provides an abstract description for testable values. *)
+
+type 'a testable
+(** The type for testable values. *)
+
+val testable : 'a Fmt.t -> ('a -> 'a -> bool) -> 'a testable
+(** [testable pp eq] is a new {!testable} with the pretty-printer [pp] and
+    equality [eq]. *)
+
+(** Construct {!testable}s from modules. *)
+
 module type TESTABLE = sig
   type t
   (** The type to test. *)
@@ -26,12 +36,7 @@ module type TESTABLE = sig
   (** Test for equality between two values. *)
 end
 
-type 'a testable = (module TESTABLE with type t = 'a)
-(** The type for testable values. *)
-
-val testable : 'a Fmt.t -> ('a -> 'a -> bool) -> 'a testable
-(** [testable pp eq] is a new {!testable} with the pretty-printer [pp] and
-    equality [eq]. *)
+val testable_of_module : (module TESTABLE with type t = 'a) -> 'a testable
 
 val pp : 'a testable -> 'a Fmt.t
 (** [pp t] is [t]'s pretty-printer. *)
