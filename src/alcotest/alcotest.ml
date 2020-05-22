@@ -2,7 +2,6 @@ include Alcotest_engine.Test
 
 module Unix (M : Alcotest_engine.Monad.S) = struct
   module M = Alcotest_engine.Monad.Extend (M)
-  module Fmt = Alcotest_engine.Private.Utils.Fmt
 
   module Unix = struct
     open Astring

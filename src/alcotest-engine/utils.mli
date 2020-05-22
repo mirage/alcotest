@@ -11,9 +11,3 @@ end
 module Result : sig
   val map : ('a -> 'b) -> ('a, 'e) result -> ('b, 'e) result
 end
-
-module Fmt : sig
-  include module type of Fmt
-
-  val flush : 'a t
-end

@@ -134,7 +134,7 @@ let reject (type a) =
   (module M : TESTABLE with type t = M.t)
 
 let show_assert msg =
-  Utils.Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
+  Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
   Format.eprintf "%a %s\n%!" Fmt.(styled `Yellow string) "ASSERT" msg
 
 let check_err fmt =
