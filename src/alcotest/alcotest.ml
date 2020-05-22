@@ -36,18 +36,43 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
 
   let getcwd = Sys.getcwd
 
+  let unlink_if_exists file =
+    let rec inner ~retries =
+      try Unix.unlink file with
+      | Unix.Unix_error (Unix.ENOENT, _, _) -> ()
+      | Unix.Unix_error (Unix.EINTR, _, _) ->
+          if retries > 5 then
+            Fmt.failwith "Failed %d times to unlink file %s (Unix.EINTR)."
+              retries file
+          else inner ~retries:(retries + 1)
+    in
+    inner ~retries:0
+
+  let symlink ~to_dir ~target ~link_name =
+    let rec inner ~retries =
+      try Unix.symlink ~to_dir target link_name
+      with Unix.Unix_error (Unix.EEXIST, _, _) ->
+        if retries > 5 then
+          Fmt.failwith "Failed %d times to create symlink %s (Unix.EEXIST)"
+            retries target
+        else (
+          unlink_if_exists link_name;
+          inner ~retries:(retries + 1) )
+    in
+    inner ~retries:0
+
   let prepare ~base ~dir ~name =
     if not (Sys.file_exists dir) then (
       Unix.mkdir_p dir 0o770;
       if Sys.unix || Sys.cygwin then (
         let this_exe = Filename.concat base name
         and latest = Filename.concat base "latest" in
-        if Sys.file_exists this_exe then Sys.remove this_exe;
-        if Sys.file_exists latest then Sys.remove latest;
-        Unix.symlink ~to_dir:true dir this_exe;
-        Unix.symlink ~to_dir:true dir latest ) )
+        unlink_if_exists this_exe;
+        unlink_if_exists latest;
+        symlink ~to_dir:true ~target:dir ~link_name:this_exe;
+        symlink ~to_dir:true ~target:dir ~link_name:latest ) )
     else if not (Sys.is_directory dir) then
-      failwith (Fmt.strf "exists but is not a directory: %S" dir)
+      Fmt.failwith "exists but is not a directory: %S" dir
 
   let with_redirect file fn =
     M.return () >>= fun () ->
