@@ -44,7 +44,10 @@ type result = {
 
 val rresult_error : run_result Fmt.t
 
-val event_line : max_label:int -> doc_of_path:(path -> string) -> event Fmt.t
+val event_line :
+  max_label:int ->
+  doc_of_path:(path -> string) ->
+  [ `Result of path * [< run_result ] | `Start of path ] Fmt.t
 
 val event :
   compact:bool ->
