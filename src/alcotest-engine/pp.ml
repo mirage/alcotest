@@ -24,7 +24,7 @@ type path = [ `Path of string * int ]
 
 type run_result =
   [ `Ok
-  | `Exn of path * string * string
+  | `Exn of path * string * unit Fmt.t
   | `Error of path * unit Fmt.t
   | `Skip
   | `Todo of string ]
@@ -37,7 +37,7 @@ type event = [ `Result of path * run_result | `Start of path ]
 
 let rresult_error ppf = function
   | `Error (_, e) -> Fmt.pf ppf "%a@," e ()
-  | `Exn (_, n, s) -> Fmt.pf ppf "[%s] %s@," n s
+  | `Exn (_, n, e) -> Fmt.pf ppf "[%s] @[<v>%a@]" n e ()
   | `Ok | `Todo _ | `Skip -> ()
 
 (* Colours *)

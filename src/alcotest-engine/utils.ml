@@ -1,3 +1,5 @@
+let ( >> ) f g x = x |> f |> g
+
 module List = struct
   include List
 

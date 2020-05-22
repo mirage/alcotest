@@ -25,7 +25,7 @@ val tag : [ `Ok | `Fail | `Error | `Skip | `Todo | `Assert ] Fmt.t
 
 type run_result =
   [ `Ok
-  | `Exn of path * string * string
+  | `Exn of path * string * unit Fmt.t
   | `Error of path * unit Fmt.t
   | `Skip
   | `Todo of string ]
