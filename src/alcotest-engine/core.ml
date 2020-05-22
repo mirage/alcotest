@@ -293,9 +293,7 @@ struct
   let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ~max_label ppf e
       =
     let path, error_fmt =
-      match e with
-      | `Error (p, f) -> (p, f)
-      | `Exn (p, _, s) -> (p, Fmt.(const string s))
+      match e with `Error (p, f) -> (p, f) | `Exn (p, _, f) -> (p, f)
     in
     let pp_logs ppf () =
       let filename = output_file path in
@@ -332,21 +330,20 @@ struct
 
   let bt () = match Printexc.get_backtrace () with "" -> "" | s -> "\n" ^ s
 
-  let exn path name err =
-    let err = Printf.sprintf "%s%s" err (bt ()) in
-    `Exn (path, name, err)
+  let exn path name pp = `Exn (path, name, Fmt.(pp ++ const lines (bt ())))
 
   let protect_test path (f : 'a run) : 'a rrun =
    fun args ->
     M.catch
       (fun () -> f args >|= fun () -> `Ok)
-      (function
-        | Check_error err ->
-            let err = Fmt.(err ++ const string (bt ())) in
-            M.return @@ `Error (path, err)
-        | Failure f -> M.return @@ exn path "failure" f
-        | Invalid_argument f -> M.return @@ exn path "invalid" f
-        | e -> M.return @@ exn path "exception" (Printexc.to_string e))
+      ( (function
+          | Check_error err ->
+              let err = Fmt.(err ++ const string (bt ())) in
+              `Error (path, err)
+          | Failure s -> exn path "failure" Fmt.(const string s)
+          | Invalid_argument s -> exn path "invalid" Fmt.(const string s)
+          | e -> exn path "exception" Fmt.(const exn e))
+      >> M.return )
 
   type running_state = { tests_so_far : int; prior_error : bool }
   (** State that is kept during the test executions. *)
@@ -369,8 +366,7 @@ struct
       in
       let error, errored =
         match result with
-        | `Exn (_, _, _) as e -> ([ Fmt.const pp_error e ], true)
-        | `Error _ as e -> ([ Fmt.const pp_error e ], true)
+        | (`Error _ | `Exn (_, _, _)) as e -> ([ Fmt.const pp_error e ], true)
         | _ -> ([], false)
       in
       t.errors <- error @ t.errors;

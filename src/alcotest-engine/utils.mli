@@ -1,3 +1,5 @@
+val ( >> ) : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
+
 module List : sig
   include module type of List
 
