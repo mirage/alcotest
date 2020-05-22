@@ -3,6 +3,6 @@ This run has ID `<uuid>'.
 
   ...           test-a          0   Test case.  [OK]          test-a          0   Test case.
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/suite-name'.
 Test Successful in <test-duration>s. 1 test run.
  Program execution continued!

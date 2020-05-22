@@ -5,5 +5,5 @@ Testing `[1mtest_color[0m'.
   [33m...[0m           [36malpha[0m          1   according to whether or not [--color] is set.  [32m[OK][0m          [36malpha[0m          1   according to whether or not [--color] is set.
   [33m...[0m           [36malpha[0m          2   (See the corresponding [dune] file.).  [32m[OK][0m          [36malpha[0m          2   (See the corresponding [dune] file.).
 
-Full test results in `<build-context>/_build/_tests/latest[0m'.
+Full test results in `<build-context>/_build/_tests/test_color[0m'.
 [32mTest Successful[0m in <test-duration>s. 3 tests run.

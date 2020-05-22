@@ -18,8 +18,8 @@ output line 100
 ASSERT Logs should be 10 lines long, including this line (omitting 92).
 FAIL Logs should be 10 lines long, including this line (omitting 92).
 
-Logs saved to `<build-context>/_build/_tests/latest/failing.000.output'.
+Logs saved to `<build-context>/_build/_tests/tail_errors_limit/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/tail_errors_limit'.
 1 error! in <test-duration>s. 1 test run.

@@ -9,8 +9,8 @@ This run has ID `<uuid>'.
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] should fail
 
-Logs saved to `<build-context>/_build/_tests/latest/all.000.output'.
+Logs saved to `<build-context>/_build/_tests/foo/all.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/foo'.
 1 error! in <test-duration>s. 2 tests run.

@@ -6,5 +6,5 @@ This run has ID `<uuid>'.
   ...           test-b          0   Third test case.  [OK]          test-b          0   Third test case.
   ...           test-c          0   Fourth test case.  [OK]          test-c          0   Fourth test case.
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/suite-name'.
 Test Successful in <test-duration>s. 4 tests run.

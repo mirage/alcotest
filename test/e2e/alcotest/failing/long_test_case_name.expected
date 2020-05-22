@@ -10,8 +10,8 @@ This run has ID `<uuid>'.
 ASSERT Failed
 FAIL Failed
 
-Logs saved to `<build-context>/_build/_tests/latest/test-a.001.output'.
+Logs saved to `<build-context>/_build/_tests/suite-with-failures/test-a.001.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/suite-with-failures'.
 1 error! in <test-duration>s. 2 tests run.
