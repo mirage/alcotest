@@ -6,7 +6,7 @@ This run has ID `<uuid>'.
   ...           test-b          0   Another pass.  [OK]          test-b          0   Another pass.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       test-a          1   Failing.                                   │
+│ [FAIL]        test-a          1   Failing.                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 [invalid] Failing test
 

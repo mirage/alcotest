@@ -290,8 +290,13 @@ struct
 
   let bold_s fmt = color `Bold fmt
 
-  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ~max_label ppf
-      (path, error_fmt) =
+  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ~max_label ppf e
+      =
+    let path, error_fmt =
+      match e with
+      | `Error (p, f) -> (p, f)
+      | `Exn (p, _, s) -> (p, Fmt.(const string s))
+    in
     let pp_logs ppf () =
       let filename = output_file path in
       if verbose || not (Sys.file_exists filename) then
@@ -313,12 +318,13 @@ struct
              |> String.concat )
         ++ cut)
     in
-    Fmt.pf ppf "%a%a%a@,"
-      (Pp.unicode_boxed (fun ppf () ->
-           (Pp.event_line ~max_label ~doc_of_path)
-             ppf
-             (`Result (path, `Error (path, error_fmt)))))
-      () pp_logs () pp_line ()
+    Fmt.(
+      Pp.unicode_boxed
+        (const (Pp.event_line ~max_label ~doc_of_path) (`Result (path, e)))
+      ++ pp_logs
+      ++ pp_line
+      ++ cut)
+      ppf ()
 
   let has_run : Pp.run_result -> bool = function
     | `Ok | `Error _ | `Exn _ -> true
@@ -363,9 +369,8 @@ struct
       in
       let error, errored =
         match result with
-        | `Exn (p, n, _) ->
-            ([ Fmt.const pp_error (p, Fmt.(const string) n) ], true)
-        | `Error e -> ([ Fmt.const pp_error e ], true)
+        | `Exn (_, _, _) as e -> ([ Fmt.const pp_error e ], true)
+        | `Error _ as e -> ([ Fmt.const pp_error e ], true)
         | _ -> ([], false)
       in
       t.errors <- error @ t.errors;
