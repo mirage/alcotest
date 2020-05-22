@@ -259,11 +259,11 @@ struct
       in
       String.concat ~sep:"\n" display_lines ^ "\n"
 
-  let log_dir ~alias t =
-    Filename.concat t.log_dir (if alias then t.name else t.run_id)
+  let log_dir ~via_symlink t =
+    Filename.concat t.log_dir (if via_symlink then t.name else t.run_id)
 
   let pp_suite_results ({ verbose; show_errors; json; compact; _ } as t) =
-    let log_dir = log_dir ~alias:true t |> maybe_collapse_home in
+    let log_dir = log_dir ~via_symlink:true t |> maybe_collapse_home in
     Pp.suite_results ~verbose ~show_errors ~json ~compact ~log_dir
 
   let pp_event ~prior_error ~tests_so_far t =
@@ -280,7 +280,7 @@ struct
     Pp.info ~max_label:t.max_label ~doc_of_path:(Suite.doc_of_path t.suite)
 
   let output_file t path =
-    Filename.concat (log_dir ~alias:true t) (file_of_path path)
+    Filename.concat (log_dir ~via_symlink:true t) (file_of_path path)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
@@ -419,7 +419,7 @@ struct
     else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
-    P.prepare ~base:t.log_dir ~dir:(log_dir ~alias:false t) ~name:t.name;
+    P.prepare ~base:t.log_dir ~dir:(log_dir ~via_symlink:false t) ~name:t.name;
     let start_time = P.time () in
     let test =
       if t.verbose then test else List.map (redirect_test_output t) test
