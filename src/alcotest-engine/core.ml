@@ -260,7 +260,7 @@ struct
       String.concat ~sep:"\n" display_lines ^ "\n"
 
   let log_dir ~alias t =
-    Filename.concat t.log_dir (if alias then "latest" else t.run_id)
+    Filename.concat t.log_dir (if alias then t.name else t.run_id)
 
   let pp_suite_results ({ verbose; show_errors; json; compact; _ } as t) =
     let log_dir = log_dir ~alias:true t |> maybe_collapse_home in

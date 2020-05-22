@@ -8,8 +8,8 @@ This run has ID `<uuid>'.
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] Error
 
-Logs saved to `<build-context>/_build/_tests/latest/alpha.002.output'.
+Logs saved to `<build-context>/_build/_tests/failing compact output/alpha.002.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/failing compact output'.
 1 error! in <test-duration>s. 6 tests run.

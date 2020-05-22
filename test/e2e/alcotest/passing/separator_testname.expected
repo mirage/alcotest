@@ -3,5 +3,5 @@ This run has ID `<uuid>'.
 
   ...           withU+002Fseparator          0   First test case.  [OK]          withU+002Fseparator          0   First test case.
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/suite-name'.
 Test Successful in <test-duration>s. 1 test run.

@@ -25,5 +25,5 @@ This run has ID `<uuid>'.
   ...           fuzzy equality               1   sorted list.  [OK]          fuzzy equality               1   sorted list.
   ...           labeled check                0   passing.  [OK]          labeled check                0   passing.
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/passing testables'.
 Test Successful in <test-duration>s. 23 tests run.

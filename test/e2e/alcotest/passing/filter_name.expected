@@ -5,5 +5,5 @@ This run has ID `<uuid>'.
   ...           test-a          1   Second test case.  [OK]          test-a          1   Second test case.
   ...           test-b          0   Skipped failing test.  [SKIP]        test-b          0   Skipped failing test.
 
-Full test results in `<build-context>/_build/_tests/latest'.
+Full test results in `<build-context>/_build/_tests/suite-name'.
 Test Successful in <test-duration>s. 2 tests run.
