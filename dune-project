@@ -25,7 +25,7 @@ tests to run.
 ")
  (depends
   (ocaml (>= 4.03.0))
-  (fmt (>= 0.8.6))
+  (fmt (>= 0.8.7))
   astring
   cmdliner
   uuidm

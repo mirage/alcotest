@@ -27,14 +27,3 @@ end
 module Result = struct
   let map f = function Ok x -> Ok (f x) | Error e -> Error e
 end
-
-module Fmt = struct
-  [@@@warning "-32"]
-
-  (* Re-implement [flush] for pre-0.8.6 compatibility *)
-  let flush ppf _ = Format.pp_print_flush ppf ()
-
-  [@@@warning "+32"]
-
-  include Fmt
-end
