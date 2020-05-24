@@ -91,8 +91,6 @@ let float eps =
 
 let char = testable' Fmt.char ( = )
 
-let string = testable' Fmt.string ( = )
-
 let bool = testable' Fmt.bool ( = )
 
 let unit = testable' (Fmt.unit "()") ( = )
@@ -170,8 +168,7 @@ let list (type a) (elt : a testable) : a list testable =
         { result = `Pass; diff = { expected; actual } }
     | false -> (
         match
-          Distance.levenshtein_script ~equal:elt_equal (Array.of_list expected)
-            (Array.of_list actual)
+          Distance.(levenshtein_script List) ~equal:elt_equal expected actual
         with
         | [] ->
             assert false (* Levenshtein distance of zero for non-equal lists. *)
@@ -200,7 +197,9 @@ let array (type a) (elt : a testable) : a array testable =
         let expected = Fmt.const pp expected and actual = Fmt.const pp actual in
         { result = `Pass; diff = { expected; actual } }
     | false -> (
-        match Distance.levenshtein_script ~equal:elt_equal expected actual with
+        match
+          Distance.(levenshtein_script Array) ~equal:elt_equal expected actual
+        with
         | [] ->
             assert false (* Levenshtein distance of zero for non-equal arrays *)
         | _ :: _ as edits ->
@@ -209,6 +208,29 @@ let array (type a) (elt : a testable) : a array testable =
               (Array.to_list expected) (Array.to_list actual) edits )
   in
   testable pp equal
+
+let string =
+  let equal ~expected ~actual =
+    match String.equal expected actual with
+    | true ->
+        let expected = Fmt.(const string) expected
+        and actual = Fmt.(const string) actual in
+        { result = `Pass; diff = { expected; actual } }
+    | false -> (
+        match
+          Distance.(levenshtein_script String) ~equal:Char.equal expected actual
+        with
+        | [] ->
+            assert false (* Levenshtein distance of zero for non-equal arrays *)
+        | _ :: _ as edits ->
+            check_result_of_edit_script ~pp_elt:Fmt.char
+              ~combine:Fmt.(concat ~sep:nop)
+              (expected |> String.to_seq |> Seq.to_list)
+              (actual |> String.to_seq |> Seq.to_list)
+              edits )
+  in
+
+  testable Fmt.string equal
 
 let merge_results : check_result * check_result -> check_result =
  fun (res_a, res_b) ->

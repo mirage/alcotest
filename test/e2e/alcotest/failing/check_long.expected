@@ -1,17 +1,29 @@
 Testing `check_long'.
 This run has ID `<uuid>'.
 
-  ...           wrapping          0   list.ASSERT list
-  [ERROR]       wrapping          0   list.
-  ...           wrapping          1   array.ASSERT array
-  [ERROR]       wrapping          1   array.
-  ...           wrapping          2   (int * int) list.ASSERT (int * int) list
-  [ERROR]       wrapping          2   (int * int) list.
-  ...           wrapping          3   nested options.ASSERT nested options
-  [ERROR]       wrapping          3   nested options.
+  ...           wrapping          0   string.ASSERT string
+  [ERROR]       wrapping          0   string.
+  ...           wrapping          1   list.ASSERT list
+  [ERROR]       wrapping          1   list.
+  ...           wrapping          2   array.ASSERT array
+  [ERROR]       wrapping          2   array.
+  ...           wrapping          3   (int * int) list.ASSERT (int * int) list
+  [ERROR]       wrapping          3   (int * int) list.
+  ...           wrapping          4   nested options.ASSERT nested options
+  [ERROR]       wrapping          4   nested options.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       wrapping          0   list.                                    │
+│ [ERROR]       wrapping          0   string.                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR string
+
+   Expected: This is the very last straw
+   Received: This is the first straw
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       wrapping          1   list.                                    │
 └──────────────────────────────────────────────────────────────────────────────┘
 ERROR list
 
@@ -26,7 +38,7 @@ ERROR list
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       wrapping          1   array.                                   │
+│ [ERROR]       wrapping          2   array.                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 ERROR array
 
@@ -51,7 +63,7 @@ ERROR array
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       wrapping          2   (int * int) list.                        │
+│ [ERROR]       wrapping          3   (int * int) list.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
 ERROR (int * int) list
 
@@ -61,7 +73,7 @@ ERROR (int * int) list
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       wrapping          3   nested options.                          │
+│ [ERROR]       wrapping          4   nested options.                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 ERROR nested options
 
@@ -138,4 +150,4 @@ ERROR nested options
                                                                     Some 2
  ──────────────────────────────────────────────────────────────────────────────
 
-4 errors! in <test-duration>s. 4 tests run.
+5 errors! in <test-duration>s. 5 tests run.

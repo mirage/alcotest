@@ -62,6 +62,16 @@ module Array : sig
   [@@@warning "+32"]
 end
 
+module Seq : sig
+  include module type of Seq
+
+  [@@@warning "-32"]
+
+  val to_list : 'a t -> 'a list
+
+  [@@@warning "+32"]
+end
+
 module Result : sig
   include FUNCTOR2 with type ('a, 'e) t := ('a, 'e) result
 end

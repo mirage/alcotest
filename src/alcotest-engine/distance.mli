@@ -10,6 +10,16 @@ type 'a command =
 
 type 'a edit_script = 'a command list
 
+type ('a, _) typ =
+  | Array : ('a, 'a array) typ
+  | List : ('a, 'a list) typ
+  | String : (char, string) typ
+
 val levenshtein_script :
-  equal:('a -> 'a -> bool) -> 'a array -> 'a array -> 'a edit_script
-(** [O(n^2)]-space computation of Levenshtein edit scripts. *)
+  ('a, 'container) typ ->
+  equal:('a -> 'a -> bool) ->
+  'container ->
+  'container ->
+  'a edit_script
+(** [O(n^2)]-space computation of Levenshtein edit scripts. Guarantees to be
+    [O(n)] time in the case that the containers are equal. *)

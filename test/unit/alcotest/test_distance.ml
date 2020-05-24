@@ -13,7 +13,7 @@ module Levenshtein = struct
   (* Basic test case *)
   let lev ?(speed = `Quick) a b msg expected =
     Alcotest.test_case msg speed (fun () ->
-        Distance.levenshtein_script ~equal:Int.equal a b
+        Distance.(levenshtein_script Array) ~equal:Int.equal a b
         |> Alcotest.check test_edit_script msg expected)
 
   let long_arrays =

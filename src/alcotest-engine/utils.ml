@@ -90,3 +90,15 @@ end
 module Result = struct
   let map f = function Ok x -> Ok (f x) | Error e -> Error e
 end
+
+module Seq = struct
+  include Seq
+
+  let to_list =
+    let rec inner acc f =
+      match f () with
+      | Nil -> List.rev acc
+      | Cons (x, xf) -> (inner [@tailrec]) (x :: acc) xf
+    in
+    fun seq -> inner [] seq
+end

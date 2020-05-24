@@ -5,6 +5,10 @@ open Alcotest_engine.Private.Utils
 let id_case typ typ_str v1 v2 =
   Alcotest.test_case typ_str `Quick (fun () -> Alcotest.check typ typ_str v1 v2)
 
+let test_string =
+  id_case Alcotest.string "string" "This is the very last straw"
+    "This is the first straw"
+
 let test_char_list =
   let alphabet = List.init 26 (fun i -> Char.chr (0x61 + i)) in
   id_case
@@ -48,6 +52,10 @@ let () =
     [
       ( "wrapping",
         [
-          test_char_list; test_int64_array; test_pair_list; test_nested_options;
+          test_string;
+          test_char_list;
+          test_int64_array;
+          test_pair_list;
+          test_nested_options;
         ] );
     ]
