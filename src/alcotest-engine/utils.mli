@@ -23,6 +23,14 @@ module Triple : sig
 
   include FUNCTOR with type 'a t := ('a, 'a, 'a) t
 
+  val fst : ('a, 'b, 'c) t -> 'a
+
+  val snd : ('a, 'b, 'c) t -> 'b
+
+  val trd : ('a, 'b, 'c) t -> 'c
+
+  val minimum : compare:('a -> 'a -> int) -> ('a, 'a, 'a) t -> 'a
+
   val minimum_on :
     compare:('b -> 'b -> int) -> ('a -> 'b) -> ('a, 'a, 'a) t -> 'a
   (** Smallest component of a triple as given by a function [f]. *)

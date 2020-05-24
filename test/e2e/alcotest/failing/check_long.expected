@@ -5,8 +5,10 @@ This run has ID `<uuid>'.
   [ERROR]       wrapping          0   list.
   ...           wrapping          1   array.ASSERT array
   [ERROR]       wrapping          1   array.
-  ...           wrapping          2   nested options.ASSERT nested options
-  [ERROR]       wrapping          2   nested options.
+  ...           wrapping          2   (int * int) list.ASSERT (int * int) list
+  [ERROR]       wrapping          2   (int * int) list.
+  ...           wrapping          3   nested options.ASSERT nested options
+  [ERROR]       wrapping          3   nested options.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [ERROR]       wrapping          0   list.                                    │
@@ -14,10 +16,12 @@ This run has ID `<uuid>'.
 ERROR list
 
    Expected: [a; b; c; d; e; f; g; h; i; j; k; l; m; n; o; p; q; r; s; 
-              t; u; v; w; x; y; z; A]
+              t; u; v; w; x; y; z; A; a; b; c; d; e; f; g; h; i; j; k; 
+              l; m; n; o; p; q; r; s; t; u; v; w; x; y; z]
 
    Received: [a; b; c; d; e; f; g; h; i; j; k; l; m; n; o; p; q; r; s; 
-              t; u; v; w; x; y; z; B]
+              t; u; v; w; x; y; z; B; a; b; c; d; e; f; g; h; i; j; k; 
+              l; m; n; o; p; q; r; s; t; u; v; w; x; y; z]
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -47,7 +51,17 @@ ERROR array
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       wrapping          2   nested options.                          │
+│ [ERROR]       wrapping          2   (int * int) list.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+ERROR (int * int) list
+
+   Expected: [(0, 1); (2, 3); (4, 5)]
+   Received: [(1, 1); (0, 1); (2, 3); (4, 5)]
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [ERROR]       wrapping          3   nested options.                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 ERROR nested options
 
@@ -124,4 +138,4 @@ ERROR nested options
                                                                     Some 2
  ──────────────────────────────────────────────────────────────────────────────
 
-3 errors! in <test-duration>s. 3 tests run.
+4 errors! in <test-duration>s. 4 tests run.

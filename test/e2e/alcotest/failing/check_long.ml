@@ -7,7 +7,11 @@ let id_case typ typ_str v1 v2 =
 
 let test_char_list =
   let alphabet = List.init 26 (fun i -> Char.chr (0x61 + i)) in
-  id_case Alcotest.(list char) "list" (alphabet @ [ 'A' ]) (alphabet @ [ 'B' ])
+  id_case
+    Alcotest.(list char)
+    "list"
+    (alphabet @ [ 'A' ] @ alphabet)
+    (alphabet @ [ 'B' ] @ alphabet)
 
 let test_int64_array =
   let ns = Array.init 100 Int64.of_int in
@@ -16,6 +20,10 @@ let test_int64_array =
     "array"
     (Array.append ns Int64.[| max_int |])
     (Array.append ns Int64.[| min_int |])
+
+let test_pair_list =
+  let is = List.init 3 (fun i -> (2 * i, (2 * i) + 1)) in
+  id_case Alcotest.(list (pair int int)) "(int * int) list" is ((1, 1) :: is)
 
 type with_testables = E : 'a Alcotest.testable * 'a * 'a -> with_testables
 
@@ -37,4 +45,9 @@ let test_nested_options =
 let () =
   let open Alcotest in
   run ~verbose:true "check_long"
-    [ ("wrapping", [ test_char_list; test_int64_array; test_nested_options ]) ]
+    [
+      ( "wrapping",
+        [
+          test_char_list; test_int64_array; test_pair_list; test_nested_options;
+        ] );
+    ]

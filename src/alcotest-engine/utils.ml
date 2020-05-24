@@ -21,6 +21,12 @@ end
 module Triple = struct
   type ('a, 'b, 'c) t = 'a * 'b * 'c
 
+  let fst (a, _, _) = a
+
+  let snd (_, b, _) = b
+
+  let trd (_, _, c) = c
+
   let map f (a, b, c) = (f a, f b, f c)
 
   let minimum_on ~compare f (a, b, c) =
@@ -34,6 +40,8 @@ module Triple = struct
         (* non-transitive : fb < fa <= fc < fb *) assert false
     | true, false, true ->
         (* non-transitive : fa <= fb <= fc > fa *) assert false
+
+  let minimum ~compare = minimum_on ~compare Fun.id
 end
 
 module List = struct

@@ -11,5 +11,5 @@ type 'a command =
 type 'a edit_script = 'a command list
 
 val levenshtein_script :
-  equal:('a -> 'a -> bool) -> 'a list -> 'a list -> 'a edit_script
+  equal:('a -> 'a -> bool) -> 'a array -> 'a array -> 'a edit_script
 (** [O(n^2)]-space computation of Levenshtein edit scripts. *)
