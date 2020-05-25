@@ -31,7 +31,7 @@ OPTIONS
        --json
            Display JSON for the results, to be used by a script.
 
-       -o DIR (absent=/home/craigfe/t/alcotest/_build/default/_build/_tests)
+       -o DIR (absent=<build-context>/_build/_tests)
            Where to store the log files of the tests.
 
        -q, --quick-tests (absent ALCOTEST_QUICK_TESTS env)
