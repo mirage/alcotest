@@ -169,7 +169,7 @@ let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
 
 let quoted f = Fmt.(const char '`' ++ f ++ const char '\'')
 
-let unicode_boxed (type a) (f : a Fmt.t) : a Fmt.t =
+let with_surrounding_box (type a) (f : a Fmt.t) : a Fmt.t =
  fun ppf a ->
   (* Peek at the value being pretty-printed to determine the length of the box
      we're going to need. Fortunately, this will not include ANSII colour
@@ -185,6 +185,15 @@ let unicode_boxed (type a) (f : a Fmt.t) : a Fmt.t =
   and mid = Fmt.(s "│ " ++ f ++ s (right_padding ^ " │"))
   and bottom = s ("└" ^ bars ^ "┘") in
   Fmt.(top ++ cut ++ mid ++ cut ++ bottom ++ cut) ppf a
+
+let horizontal_rule (type a) ppf (_ : a) =
+  let open Fmt in
+  ( const string " "
+  ++ const
+       (styled `Faint string)
+       (List.init (terminal_width () - 2) (fun _ -> "─") |> String.concat)
+  ++ cut )
+    ppf ()
 
 let pp_full_logs ppf log_dir =
   Fmt.pf ppf "Full test results in %a.@,"
