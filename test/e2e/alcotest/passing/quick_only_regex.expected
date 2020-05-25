@@ -6,5 +6,5 @@ This run has ID `<uuid>'.
   ...           test-b          0   Slow & fails filter.  [SKIP]        test-b          0   Slow & fails filter.
   ...           test-b          1   Quick & fails filter.  [SKIP]        test-b          1   Quick & fails filter.
 
-Full test results in `<build-context>/_build/_tests/suite-name'.
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
 Test Successful in <test-duration>s. 1 test run.

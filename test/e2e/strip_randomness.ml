@@ -5,15 +5,33 @@ let standardise_filesep =
 let build_context_replace =
   let open Re in
   let lterm, rterm =
-    (* Contexts in which directories are printed (tests, manpage output etc.). *)
+    (* Contexts in which directories are printed (tests, manpage output
+       etc.). *)
     ( group (alt [ char '`'; str "(absent=" ]),
-      group (alt [ char '`'; char ')' ]) )
+      group (alt [ char '\''; char ')' ]) )
   in
-  let t = seq [ lterm; rep any; str "_build"; group (rep any); rterm ] in
+  let t =
+    seq
+      [
+        lterm;
+        rep any;
+        str ("_build" ^ Filename.dir_sep ^ "_tests" ^ Filename.dir_sep);
+        group (rep (diff any (set Filename.dir_sep)))
+        (* <test-dir>: May be a UUID or a suite name (symlink), depending on
+           whether or not we're running on Windows *);
+        group (opt (seq [ str Filename.dir_sep; rep any ]));
+        rterm;
+      ]
+  in
   let re = compile t in
   replace ~all:true re ~f:(fun g ->
-      let test_dir = standardise_filesep (Group.get g 2) in
-      Group.get g 1 ^ "<build-context>/_build" ^ test_dir ^ Group.get g 3)
+      let test_dir_opt = if Group.get g 2 = "" then "" else "<test-dir>" in
+      let test_name = standardise_filesep (Group.get g 3) in
+      Group.get g 1
+      ^ "<build-context>/_build/_tests/"
+      ^ test_dir_opt
+      ^ test_name
+      ^ Group.get g 4)
 
 let uuid_replace =
   let open Re in

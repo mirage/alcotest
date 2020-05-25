@@ -4,5 +4,5 @@ This run has ID `<uuid>'.
   ...           U+1F525             0   Non ASCII unicode character.  [OK]          U+1F525             0   Non ASCII unicode character.
   ...           U+1F525a-b          0   Non ASCII and ASCII characters.  [OK]          U+1F525a-b          0   Non ASCII and ASCII characters.
 
-Full test results in `<build-context>/_build/_tests/suite-name'.
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
 Test Successful in <test-duration>s. 2 tests run.

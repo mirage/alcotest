@@ -7,5 +7,5 @@ This run has ID `<uuid>'.
   ...           basic-run-c            0   Executed.  [OK]          basic-run-c            0   Executed.
   ...           complex-run-a          0   Skipped.  [SKIP]        complex-run-a          0   Skipped.
 
-Full test results in `<build-context>/_build/_tests/suite-name'.
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
 Test Successful in <test-duration>s. 3 tests run.

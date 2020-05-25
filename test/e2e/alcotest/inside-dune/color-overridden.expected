@@ -5,5 +5,5 @@ This run has ID `<uuid>'.
   ...           alpha          1   according to whether or not [--color] is set.  [OK]          alpha          1   according to whether or not [--color] is set.
   ...           alpha          2   (See the corresponding [dune] file.).  [OK]          alpha          2   (See the corresponding [dune] file.).
 
-Full test results in `<build-context>/_build/_tests/test_color'.
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
 Test Successful in <test-duration>s. 3 tests run.

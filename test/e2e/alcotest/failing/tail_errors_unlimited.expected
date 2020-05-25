@@ -109,8 +109,8 @@ output line 100
 ASSERT Logs above should be 101 lines long.
 FAIL Logs above should be 101 lines long.
 
-Logs saved to `<build-context>/_build/_tests/tail_errors_unlimited/failing.000.output'.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
-Full test results in `<build-context>/_build/_tests/tail_errors_unlimited'.
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
 1 error! in <test-duration>s. 1 test run.

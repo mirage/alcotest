@@ -260,6 +260,10 @@ struct
       String.concat ~sep:"\n" display_lines ^ "\n"
 
   let log_dir ~via_symlink t =
+    let via_symlink =
+      (* We don't create symlinks on Windows. *)
+      via_symlink && not Sys.win32
+    in
     Filename.concat t.log_dir (if via_symlink then t.name else t.run_id)
 
   let pp_suite_results ({ verbose; show_errors; json; compact; _ } as t) =
