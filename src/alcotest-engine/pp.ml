@@ -18,7 +18,7 @@
 open Astring
 open Utils
 
-let terminal_width = Fun.const 80
+let terminal_width () = 80
 
 type path = [ `Path of string * int ]
 
