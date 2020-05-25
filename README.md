@@ -7,10 +7,10 @@ a simple `TESTABLE` module type, a `check` function to assert test
 predicates and a `run` function to perform a list of `unit -> unit`
 test callbacks.
 
-Alcotest provides a quiet and colorful output where only faulty runs
-are fully displayed at the end of the run (with the full logs ready to
-inspect), with a simple (yet expressive) query language to select the
-tests to run.
+Alcotest provides a quiet and colorful output where only faulty runs are fully
+displayed at the end of the run (with the full logs ready to inspect), with a
+simple (yet expressive) query language to select the tests to run. See [the
+manpage](./alcotest-help.txt) for details.
 
 [![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Fmirage%2Falcotest%2Fmaster&logo=ocaml)](https://ci.ocamllabs.io/github/mirage/alcotest)
 [![TravisCI Build Status](https://travis-ci.org/mirage/alcotest.svg)](https://travis-ci.org/mirage/alcotest)

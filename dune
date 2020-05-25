@@ -1,0 +1,9 @@
+(rule
+ (with-stdout-to
+  alcotest-help.txt.gen
+  (run examples/simple.exe --help=plain)))
+
+(rule
+ (alias runtest)
+ (action
+  (diff alcotest-help.txt alcotest-help.txt.gen)))
