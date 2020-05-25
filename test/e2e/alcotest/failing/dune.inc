@@ -12,7 +12,7 @@
    tail_errors_unlimited
    unknown_option
  )
- (libraries alcotest)
+ (libraries alcotest alcotest.engine)
  (modules
    check_basic
    check_long
