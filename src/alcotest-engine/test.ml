@@ -140,10 +140,7 @@ let show_assert msg =
   Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
   Format.eprintf "%a %s\n%!" Pp.tag `Assert msg
 
-let check_err fmt =
-  Format.kasprintf
-    (fun err -> raise (Core.Check_error (Fmt.(const string) err)))
-    fmt
+let check_err fmt = raise (Core.Check_error fmt)
 
 let check (type a) (t : a testable) msg (expected : a) (actual : a) =
   show_assert msg;
@@ -166,7 +163,7 @@ let check' t ~msg ~expected ~actual = check t msg expected actual
 
 let fail msg =
   show_assert msg;
-  check_err "%a %s" Pp.tag `Fail msg
+  check_err (fun ppf () -> Fmt.pf ppf "%a %s" Pp.tag `Fail msg)
 
 let failf fmt = Fmt.kstrf fail fmt
 
@@ -182,11 +179,13 @@ let check_raises msg exn f =
   show_assert msg;
   match collect_exception f with
   | None ->
-      check_err "%a %s: expecting %s, got nothing." Pp.tag `Fail msg
-        (Printexc.to_string exn)
+      check_err (fun ppf () ->
+          Fmt.pf ppf "%a %s: expecting %s, got nothing." Pp.tag `Fail msg
+            (Printexc.to_string exn))
   | Some e ->
       if e <> exn then
-        check_err "%a %s: expecting %s, got %s." Pp.tag `Fail msg
-          (Printexc.to_string exn) (Printexc.to_string e)
+        check_err (fun ppf () ->
+            Fmt.pf ppf "%a %s: expecting %s, got %s." Pp.tag `Fail msg
+              (Printexc.to_string exn) (Printexc.to_string e))
 
 let () = at_exit (Format.pp_print_flush Format.err_formatter)
