@@ -393,16 +393,26 @@ struct
     |> List.sort compare_path
     |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
 
-  let validate_name name =
-    let pattern = "^[a-zA-Z0-9 _-]+$" in
-    let re = Re.(compile @@ Pcre.re pattern) in
-    if not (Re.execp re name) then
-      let msg =
-        Fmt.strf "%a %S is not a valid test label (must match %s)." red "Error:"
-          name pattern
-      in
-      Error msg
-    else Ok ()
+  let normalize_name ?encoding (src : [ `String of string ]) =
+    let rec loop d buf =
+      match Uutf.decode d with
+      | `Uchar u ->
+          if Uchar.is_char u then
+            match Uchar.to_char u with
+            | ('a' .. 'z' | '0' .. '9' | '_' | '-' | ' ') as c ->
+                Buffer.add_char buf c
+            | _ ->
+                Buffer.add_string buf (Printf.sprintf "U+%04X" (Uchar.to_int u))
+          else Buffer.add_string buf (Printf.sprintf "U+%04X" (Uchar.to_int u));
+          loop d buf
+      | `End -> Ok (Buffer.contents buf)
+      | `Malformed _ ->
+          Uutf.Buffer.add_utf_8 buf Uutf.u_rep;
+          loop d buf
+      | `Await -> Error (Fmt.strf "")
+    in
+    let nln = `Readline (Uchar.of_int 0x000A) in
+    loop (Uutf.decoder ~nln ?encoding src) (Buffer.create 512)
 
   let register t (name, (ts : 'a test_case list)) =
     let max_label = max t.max_label (String.length name) in
@@ -421,7 +431,10 @@ struct
     { t with suite; max_label }
 
   let register_all t tl =
-    let validate (n, ts) = validate_name n |> Result.map (fun _ -> (n, ts)) in
+    let validate (n, ts) =
+      normalize_name (`String n)
+      |> Result.map (fun normalized_name -> (normalized_name, ts))
+    in
     List.map validate tl
     |> List.lift_result
     |> Result.map (List.fold_left register t)

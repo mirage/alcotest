@@ -14,6 +14,8 @@
    only_monadic_effects
    quick_only
    quick_only_regex
+   separator_testname
+   unicode_testname
    verbose_newlines
  )
  (libraries alcotest alcotest.engine)
@@ -32,6 +34,8 @@
    only_monadic_effects
    quick_only
    quick_only_regex
+   separator_testname
+   unicode_testname
    verbose_newlines
  )
 )
@@ -385,6 +389,56 @@
  (package alcotest)
  (action
    (diff quick_only_regex.expected quick_only_regex.processed)))
+
+(rule
+ (target separator_testname.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:separator_testname.exe})
+  )
+ )
+)
+
+(rule
+ (target separator_testname.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:separator_testname.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff separator_testname.expected separator_testname.processed)))
+
+(rule
+ (target unicode_testname.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:unicode_testname.exe})
+  )
+ )
+)
+
+(rule
+ (target unicode_testname.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:unicode_testname.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff unicode_testname.expected unicode_testname.processed)))
 
 (rule
  (target verbose_newlines.actual)
