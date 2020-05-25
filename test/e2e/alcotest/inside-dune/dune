@@ -2,29 +2,6 @@
  (name test_color)
  (libraries alcotest))
 
-;; Run `test_color` with no command-line options
-
-(rule
- (target color-default.actual)
- (action
-  (with-outputs-to
-   %{target}
-   ;; No `--color` command-line option passed → output should be colored
-   (run %{dep:test_color.exe}))))
-
-(rule
- (target color-default.processed)
- (action
-  (with-outputs-to
-   %{target}
-   (run ../../strip_randomness.exe %{dep:color-default.actual}))))
-
-(rule
- (alias runtest)
- (package alcotest)
- (action
-  (diff color-default.expected color-default.processed)))
-
 ;; Run `test_color` with `--color=auto`
 
 (rule
