@@ -14,7 +14,7 @@
    unicode_testname
    unknown_option
  )
- (libraries alcotest)
+ (libraries alcotest alcotest.engine)
  (modules
    check_basic
    check_long

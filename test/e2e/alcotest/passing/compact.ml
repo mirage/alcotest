@@ -1,3 +1,5 @@
+open Alcotest_engine.Private.Utils
+
 let () =
   let open Alcotest in
   let id () = () in
