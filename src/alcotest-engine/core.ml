@@ -307,20 +307,11 @@ struct
           Fmt.(Pp.quoted (styled `Cyan string))
           (maybe_collapse_home filename)
     in
-    let pp_line =
-      Fmt.(
-        const string " "
-        ++ const
-             (styled `Faint string)
-             ( List.init (Pp.terminal_width () - 2) (fun _ -> "─")
-             |> String.concat )
-        ++ cut)
-    in
     Fmt.(
-      Pp.unicode_boxed
+      Pp.with_surrounding_box
         (const (Pp.event_line ~max_label ~doc_of_path) (`Result (path, e)))
       ++ pp_logs
-      ++ pp_line
+      ++ Pp.horizontal_rule
       ++ cut)
       ppf ()
 

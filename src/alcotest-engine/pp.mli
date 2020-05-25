@@ -68,9 +68,13 @@ val suite_results :
 val quoted : 'a Fmt.t -> 'a Fmt.t
 (** Wraps a formatter with `GNU-style quotation marks'. *)
 
-val unicode_boxed : 'a Fmt.t -> 'a Fmt.t
+val with_surrounding_box : 'a Fmt.t -> 'a Fmt.t
 (** Wraps a formatter with a Unicode box with width given by {!terminal_width}.
-    This uses characters from code page 437, so should be fairly portable. *)
+    Uses box-drawing characters from code page 437. *)
+
+val horizontal_rule : _ Fmt.t
+(** Horizontal rule of length {!terminal_width}. Uses box-drawing characters
+    from code page 437. *)
 
 val pp_plural : int Fmt.t
 (** This is for adding an 's' to words that should be pluralized, e.g.
