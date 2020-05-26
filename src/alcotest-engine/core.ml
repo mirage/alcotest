@@ -393,16 +393,24 @@ struct
     |> List.sort compare_path
     |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
 
-  let validate_name name =
-    let pattern = "^[a-zA-Z0-9 _-]+$" in
-    let re = Re.(compile @@ Pcre.re pattern) in
-    if not (Re.execp re name) then
-      let msg =
-        Fmt.strf "%a %S is not a valid test label (must match %s)." red "Error:"
-          name pattern
-      in
-      Error msg
-    else Ok ()
+  let get_codepoint buf u =
+    Buffer.add_string buf (Printf.sprintf "U+%04X" (Uchar.to_int u))
+
+  let normalize_name (name : string) =
+    let buf = Buffer.create (String.length name * 2) in
+    let get_normalized_char _ _ u =
+      match u with
+      | `Uchar u ->
+          if Uchar.is_char u then
+            match Uchar.to_char u with
+            | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ') as c ->
+                Buffer.add_char buf c
+            | _ -> get_codepoint buf u
+          else get_codepoint buf u
+      | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
+    in
+    Uutf.String.fold_utf_8 get_normalized_char () name;
+    Buffer.contents buf
 
   let register t (name, (ts : 'a test_case list)) =
     let max_label = max t.max_label (String.length name) in
@@ -421,10 +429,8 @@ struct
     { t with suite; max_label }
 
   let register_all t tl =
-    let validate (n, ts) = validate_name n |> Result.map (fun _ -> (n, ts)) in
-    List.map validate tl
-    |> List.lift_result
-    |> Result.map (List.fold_left register t)
+    let normalize (n, ts) = (normalize_name n, ts) in
+    List.map normalize tl |> List.fold_left register t
 
   let run_tests ?filter t () args =
     let suite = Suite.tests t.suite in
@@ -445,13 +451,9 @@ struct
     result.failures
 
   let list_tests (tl : 'a test list) =
-    match register_all (empty ()) tl with
-    | Error error_acc ->
-        Fmt.(pf stderr) "%a\n" Fmt.(list string) error_acc;
-        exit 1
-    | Ok t ->
-        list_registered_tests t ();
-        M.return ()
+    let t = register_all (empty ()) tl in
+    list_registered_tests t ();
+    M.return ()
 
   let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
@@ -490,22 +492,18 @@ struct
         log_dir;
       }
     in
-    match register_all t tl with
-    | Error error_acc ->
-        Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
-        exit 1
-    | Ok t -> (
-        ( (* Only print inside the concurrency monad *)
-          M.return () >>= fun () ->
-          Fmt.(pf stdout) "Testing %a.\n" bold_s name;
-          Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
-          run_tests ?filter t () args )
-        >|= fun test_failures ->
-        match (test_failures, and_exit) with
-        | 0, true -> exit 0
-        | 0, false -> ()
-        | _, true -> exit 1
-        | _, false -> raise Test_error )
+    let t = register_all t tl in
+    ( (* Only print inside the concurrency monad *)
+      M.return () >>= fun () ->
+      Fmt.(pf stdout) "Testing %a.\n" bold_s name;
+      Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
+      run_tests ?filter t () args )
+    >|= fun test_failures ->
+    match (test_failures, and_exit) with
+    | 0, true -> exit 0
+    | 0, false -> ()
+    | _, true -> exit 1
+    | _, false -> raise Test_error
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir name (tl : unit test list) =

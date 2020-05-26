@@ -30,7 +30,8 @@ tests to run.
   cmdliner
   uuidm
   re
-  stdlib-shims))
+  stdlib-shims
+  uutf))
 
 (package
  (name alcotest-async)

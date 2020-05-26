@@ -6,10 +6,8 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
-   separator_testname
    tail_errors_limit
    tail_errors_unlimited
-   unicode_testname
    unknown_option
  )
  (libraries alcotest)
@@ -20,10 +18,8 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
-   separator_testname
    tail_errors_limit
    tail_errors_unlimited
-   unicode_testname
    unknown_option
  )
 )
@@ -179,31 +175,6 @@
    (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)))
 
 (rule
- (target separator_testname.actual)
- (action
-  (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:separator_testname.exe})
-  )
- )
-)
-
-(rule
- (target separator_testname.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:separator_testname.actual})
-  )
- )
-)
-
-
-(rule
- (alias runtest)
- (package alcotest)
- (action
-   (diff separator_testname.expected separator_testname.processed)))
-
-(rule
  (target tail_errors_limit.actual)
  (action
   (with-outputs-to %{target}
@@ -252,31 +223,6 @@
  (package alcotest)
  (action
    (diff tail_errors_unlimited.expected tail_errors_unlimited.processed)))
-
-(rule
- (target unicode_testname.actual)
- (action
-  (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:unicode_testname.exe})
-  )
- )
-)
-
-(rule
- (target unicode_testname.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unicode_testname.actual})
-  )
- )
-)
-
-
-(rule
- (alias runtest)
- (package alcotest)
- (action
-   (diff unicode_testname.expected unicode_testname.processed)))
 
 (rule
  (target unknown_option.actual)

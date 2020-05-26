@@ -10,6 +10,9 @@
 - Add an `alcotest-mirage` package, allowing the construction of MirageOS
   unikernels that run Alcotest test suites. (#238, @hannesm @linse)
 
+- Fix handling of test names by normalizing them, allowing all UTF-8 characters
+  (#249, @gs0510)
+
 ### 1.1.0 (2020-04-03)
 
 - Fix handling of CLI options for `Alcotest_{async,lwt}.run`. (#222, @CraigFe)
