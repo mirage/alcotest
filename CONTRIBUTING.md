@@ -83,6 +83,23 @@ To add a new test, create a new `foo.{ml,expected}` pair in one of the test
 directories and run `dune test --auto-promote` to automatically generate the
 Dune rules necessary to run your test.
 
+### Random output in tests
 
+Some sections of the Alcotest output are not portable / reproducible under test,
+for instance:
 
+- the time taken to run a particular test;
+- randomly-generated unique identifiers;
+- the full path to the repository on disk.
 
+When running an expect test, these portions of the output are sanitized by
+[`strip_randomness.ml`](./test/e2e/strip_randomness.ml) before being compared to
+the `.expected` file, resulting in files with portable placeholders:
+
+```
+The full test results are available in `<build-context>/_build/_tests/<uuid>`.
+Test Successful in <test-duration>s. 4 tests run.
+```
+
+If your change adds non-determinism to the Alcotest output, you may need to
+alter `strip_randomness.ml` to get it past the CI.
