@@ -27,6 +27,7 @@ depends: [
   "uuidm"
   "re"
   "stdlib-shims"
+  "uutf"
 ]
 build: [
   ["dune" "subst"] {pinned}
