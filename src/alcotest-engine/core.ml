@@ -410,7 +410,7 @@ struct
       | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
     in
     Uutf.String.fold_utf_8 get_normalized_char () name;
-    Ok (Buffer.contents buf)
+    Buffer.contents buf
 
   let register t (name, (ts : 'a test_case list)) =
     let max_label = max t.max_label (String.length name) in
@@ -429,13 +429,8 @@ struct
     { t with suite; max_label }
 
   let register_all t tl =
-    let normalize (n, ts) =
-      normalize_name n
-      |> Result.map (fun normalized_name -> (normalized_name, ts))
-    in
-    List.map normalize tl
-    |> List.lift_result
-    |> Result.map (List.fold_left register t)
+    let normalize (n, ts) = (normalize_name n, ts) in
+    List.map normalize tl |> List.fold_left register t
 
   let run_tests ?filter t () args =
     let suite = Suite.tests t.suite in
@@ -456,13 +451,9 @@ struct
     result.failures
 
   let list_tests (tl : 'a test list) =
-    match register_all (empty ()) tl with
-    | Error error_acc ->
-        Fmt.(pf stderr) "%a\n" Fmt.(list string) error_acc;
-        exit 1
-    | Ok t ->
-        list_registered_tests t ();
-        M.return ()
+    let t = register_all (empty ()) tl in
+    list_registered_tests t ();
+    M.return ()
 
   let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
@@ -501,22 +492,18 @@ struct
         log_dir;
       }
     in
-    match register_all t tl with
-    | Error error_acc ->
-        Fmt.(pf stderr) "%a\n" Fmt.(list string) (List.rev error_acc);
-        exit 1
-    | Ok t -> (
-        ( (* Only print inside the concurrency monad *)
-          M.return () >>= fun () ->
-          Fmt.(pf stdout) "Testing %a.\n" bold_s name;
-          Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
-          run_tests ?filter t () args )
-        >|= fun test_failures ->
-        match (test_failures, and_exit) with
-        | 0, true -> exit 0
-        | 0, false -> ()
-        | _, true -> exit 1
-        | _, false -> raise Test_error )
+    let t = register_all t tl in
+    ( (* Only print inside the concurrency monad *)
+      M.return () >>= fun () ->
+      Fmt.(pf stdout) "Testing %a.\n" bold_s name;
+      Fmt.(pf stdout) "This run has ID `%s`.\n" run_id;
+      run_tests ?filter t () args )
+    >|= fun test_failures ->
+    match (test_failures, and_exit) with
+    | 0, true -> exit 0
+    | 0, false -> ()
+    | _, true -> exit 1
+    | _, false -> raise Test_error
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir name (tl : unit test list) =
