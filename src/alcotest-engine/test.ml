@@ -63,7 +63,8 @@ let char = testable Fmt.char ( = )
 
 let string = testable Fmt.string ( = )
 
-let bytes = testable (fun fmt bytes -> Fmt.fmt "%S" fmt (Bytes.to_string bytes)) ( = )
+let bytes =
+  testable (fun fmt bytes -> Fmt.fmt "%S" fmt (Bytes.to_string bytes)) ( = )
 
 let bool = testable Fmt.bool ( = )
 
