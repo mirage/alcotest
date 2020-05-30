@@ -60,6 +60,9 @@ val char : char testable
 val string : string testable
 (** [string] tests OCaml strings. *)
 
+val bytes : bytes testable
+(** [bytes] tests OCaml bytes. *)
+
 val unit : unit testable
 (** [unit] tests unit values (useful for functions with side-effects). *)
 

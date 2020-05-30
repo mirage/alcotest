@@ -7,6 +7,7 @@ This run has ID `<uuid>`.
  ...                different basic              4   float.[FAIL]              different basic              4   float.
  ...                different basic              5   char.[FAIL]              different basic              5   char.
  ...                different basic              6   string.[FAIL]              different basic              6   string.
+ ...                different basic              7   bytes.[FAIL]              different basic              7   bytes.
  ...                different composite          0   list.[FAIL]              different composite          0   list.
  ...                different composite          1   array.[FAIL]              different composite          1   array.
  ...                different composite          2   option some.[FAIL]              different composite          2   option some.
@@ -20,4 +21,4 @@ true, got
 false.
 
 The full test results are available in `<build-context>/_build/_tests/<uuid>`.
-12 errors! in <test-duration>s. 12 tests run.
+13 errors! in <test-duration>s. 13 tests run.

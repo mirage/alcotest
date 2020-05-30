@@ -15,6 +15,7 @@ let () =
           id_case (float 0.0) "float" 1.0 2.0;
           id_case char "char" 'a' 'b';
           id_case string "string" "Lorem ipsum" "dolor sit amet.";
+          id_case bytes "bytes" (Bytes.of_string "\x01\x02\x03") (Bytes.of_string "\x01\x00\x03");
         ] );
       ( "different composite",
         [
