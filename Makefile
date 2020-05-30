@@ -9,4 +9,5 @@ test:
 clean:
 	dune clean
 
-.PHONY: all clean
+format:
+	ocamlformat --inplace $(git ls-files '*.ml' '*.mli')
