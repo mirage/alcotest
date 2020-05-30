@@ -10,4 +10,4 @@ clean:
 	dune clean
 
 format:
-	ocamlformat --inplace $(git ls-files '*.ml' '*.mli')
+	dune build --auto-promote @fmt
