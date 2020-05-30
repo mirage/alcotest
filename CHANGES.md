@@ -13,6 +13,8 @@
 - Fix handling of test names by normalizing them, allowing all UTF-8 characters
   (#249, @gs0510)
 
+- Add a testable for the `bytes` type. (#253, @mefyl)
+
 ### 1.1.0 (2020-04-03)
 
 - Fix handling of CLI options for `Alcotest_{async,lwt}.run`. (#222, @CraigFe)
