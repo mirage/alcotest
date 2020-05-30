@@ -9,4 +9,5 @@ test:
 clean:
 	dune clean
 
-.PHONY: all clean
+format:
+	dune build --auto-promote @fmt

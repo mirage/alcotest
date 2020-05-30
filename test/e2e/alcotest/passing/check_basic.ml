@@ -53,6 +53,7 @@ let () =
           id_case (float 0.0) "float" 1.0;
           id_case char "char" 'a';
           id_case string "string" "Lorem ipsum dolor sit amet.";
+          id_case bytes "bytes" (Bytes.of_string "\x01\x02\x03");
         ] );
       ( "reflexive composite",
         [
