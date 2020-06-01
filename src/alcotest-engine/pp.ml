@@ -71,20 +71,18 @@ let info ~max_label ~doc_of_path ppf p =
 
 let tag_of_result = function
   | `Ok -> `Ok
-  | `Exn _ -> `Fail
-  | `Error _ -> `Error
+  | `Exn _ | `Error _ -> `Fail
   | `Skip -> `Skip
   | `Todo _ -> `Todo
 
 let colour_of_tag = function
   | `Ok -> `Green
-  | `Fail | `Error -> `Red
+  | `Fail -> `Red
   | `Skip | `Todo | `Assert -> `Yellow
 
 let string_of_tag = function
   | `Ok -> "OK"
   | `Fail -> "FAIL"
-  | `Error -> "ERROR"
   | `Skip -> "SKIP"
   | `Todo -> "TODO"
   | `Assert -> "ASSERT"
@@ -106,8 +104,7 @@ let pp_result_compact ppf result =
   let char =
     match result with
     | `Ok -> '.'
-    | `Exn _ -> 'F'
-    | `Error _ -> 'E'
+    | `Exn _ | `Error _ -> 'F'
     | `Skip -> 'S'
     | `Todo _ -> 'T'
   in
@@ -203,7 +200,7 @@ let pp_full_logs ppf log_dir =
 let pp_summary ppf r =
   let pp_failures ppf = function
     | 0 -> green_s ppf "Test Successful"
-    | n -> red ppf "%d error%a!" n pp_plural n
+    | n -> red ppf "%d failure%a!" n pp_plural n
   in
   Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
     r.success pp_plural r.success

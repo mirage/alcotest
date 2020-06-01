@@ -1,10 +1,10 @@
 Testing `tail_errors_unlimited'.
 This run has ID `<uuid>'.
 
-  ...           failing          0   test.> [ERROR]       failing          0   test.
+  ...           failing          0   test.> [FAIL]        failing          0   test.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       failing          0   test.                                     │
+│ [FAIL]        failing          0   test.                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
 output line 1
 output line 2
@@ -113,4 +113,4 @@ Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
-1 error! in <test-duration>s. 1 test run.
+1 failure! in <test-duration>s. 1 test run.

@@ -147,7 +147,7 @@ let check (type a) (t : a testable) msg (expected : a) (actual : a) =
   if not (equal t expected actual) then
     let open Fmt in
     let s = const string in
-    let pp_error = const Pp.tag `Error ++ s (" " ^ msg)
+    let pp_error = const Pp.tag `Fail ++ s (" " ^ msg)
     and pp_expected ppf () =
       Fmt.string ppf "   Expected: ";
       (styled `Green (pp t)) ppf expected;

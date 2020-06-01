@@ -2,36 +2,36 @@ Testing `check_basic'.
 This run has ID `<uuid>'.
 
   ...           different basic              0   bool.ASSERT bool
-  [ERROR]       different basic              0   bool.
+  [FAIL]        different basic              0   bool.
   ...           different basic              1   int.ASSERT int
-  [ERROR]       different basic              1   int.
+  [FAIL]        different basic              1   int.
   ...           different basic              2   int32.ASSERT int32
-  [ERROR]       different basic              2   int32.
+  [FAIL]        different basic              2   int32.
   ...           different basic              3   int64.ASSERT int64
-  [ERROR]       different basic              3   int64.
+  [FAIL]        different basic              3   int64.
   ...           different basic              4   float.ASSERT float
-  [ERROR]       different basic              4   float.
+  [FAIL]        different basic              4   float.
   ...           different basic              5   char.ASSERT char
-  [ERROR]       different basic              5   char.
+  [FAIL]        different basic              5   char.
   ...           different basic              6   string.ASSERT string
-  [ERROR]       different basic              6   string.
+  [FAIL]        different basic              6   string.
   ...           different basic              7   bytes.ASSERT bytes
-  [ERROR]       different basic              7   bytes.
+  [FAIL]        different basic              7   bytes.
   ...           different composite          0   list.ASSERT list
-  [ERROR]       different composite          0   list.
+  [FAIL]        different composite          0   list.
   ...           different composite          1   array.ASSERT array
-  [ERROR]       different composite          1   array.
+  [FAIL]        different composite          1   array.
   ...           different composite          2   option some.ASSERT option some
-  [ERROR]       different composite          2   option some.
+  [FAIL]        different composite          2   option some.
   ...           different composite          3   result.ASSERT result
-  [ERROR]       different composite          3   result.
+  [FAIL]        different composite          3   result.
   ...           different composite          4   pair.ASSERT pair
-  [ERROR]       different composite          4   pair.
+  [FAIL]        different composite          4   pair.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              0   bool.                         │
+│ [FAIL]        different basic              0   bool.                         │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR bool
+FAIL bool
 
    Expected: true
    Received: false
@@ -39,9 +39,9 @@ ERROR bool
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              1   int.                          │
+│ [FAIL]        different basic              1   int.                          │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR int
+FAIL int
 
    Expected: 1
    Received: 2
@@ -49,9 +49,9 @@ ERROR int
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              2   int32.                        │
+│ [FAIL]        different basic              2   int32.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR int32
+FAIL int32
 
    Expected: 2147483647
    Received: -2147483648
@@ -59,9 +59,9 @@ ERROR int32
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              3   int64.                        │
+│ [FAIL]        different basic              3   int64.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR int64
+FAIL int64
 
    Expected: 9223372036854775807
    Received: -9223372036854775808
@@ -69,9 +69,9 @@ ERROR int64
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              4   float.                        │
+│ [FAIL]        different basic              4   float.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR float
+FAIL float
 
    Expected: 1
    Received: 2
@@ -79,9 +79,9 @@ ERROR float
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              5   char.                         │
+│ [FAIL]        different basic              5   char.                         │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR char
+FAIL char
 
    Expected: a
    Received: b
@@ -89,9 +89,9 @@ ERROR char
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              6   string.                       │
+│ [FAIL]        different basic              6   string.                       │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR string
+FAIL string
 
    Expected: Lorem ipsum
    Received: dolor sit amet.
@@ -99,9 +99,9 @@ ERROR string
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different basic              7   bytes.                        │
+│ [FAIL]        different basic              7   bytes.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR bytes
+FAIL bytes
 
    Expected: "\001\002\003"
    Received: "\001\000\003"
@@ -109,9 +109,9 @@ ERROR bytes
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different composite          0   list.                         │
+│ [FAIL]        different composite          0   list.                         │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR list
+FAIL list
 
    Expected: [a; b]
    Received: [a; c]
@@ -119,9 +119,9 @@ ERROR list
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different composite          1   array.                        │
+│ [FAIL]        different composite          1   array.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR array
+FAIL array
 
    Expected: [|0; 9223372036854775807|]
    Received: [|0; 1; 9223372036854775807|]
@@ -129,9 +129,9 @@ ERROR array
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different composite          2   option some.                  │
+│ [FAIL]        different composite          2   option some.                  │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR option some
+FAIL option some
 
    Expected: Some 1
    Received: Some 2
@@ -139,9 +139,9 @@ ERROR option some
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different composite          3   result.                       │
+│ [FAIL]        different composite          3   result.                       │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR result
+FAIL result
 
    Expected: Ok 1
    Received: Error ()
@@ -149,12 +149,12 @@ ERROR result
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [ERROR]       different composite          4   pair.                         │
+│ [FAIL]        different composite          4   pair.                         │
 └──────────────────────────────────────────────────────────────────────────────┘
-ERROR pair
+FAIL pair
 
    Expected: (1, a)
    Received: (1, b)
  ──────────────────────────────────────────────────────────────────────────────
 
-13 errors! in <test-duration>s. 13 tests run.
+13 failures! in <test-duration>s. 13 tests run.
