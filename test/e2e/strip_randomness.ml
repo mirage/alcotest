@@ -4,11 +4,17 @@ let standardise_filesep =
 
 let build_context_replace =
   let open Re in
-  let t = seq [ char '`'; rep any; str "_build"; group (rep any); char '`' ] in
+  let lterm, rterm =
+    (* Contexts in which directories are printed (tests, manpage output etc.). *)
+    ( group (alt [ char '`'; str "(absent=" ]),
+      group (alt [ char '`'; char ')' ]) )
+  in
+
+  let t = seq [ lterm; rep any; str "_build"; group (rep any); rterm ] in
   let re = compile t in
   replace ~all:true re ~f:(fun g ->
-      let test_dir = standardise_filesep (Group.get g 1) in
-      "`<build-context>/_build" ^ test_dir ^ "`")
+      let test_dir = standardise_filesep (Group.get g 2) in
+      Group.get g 1 ^ "<build-context>/_build" ^ test_dir ^ Group.get g 3)
 
 let uuid_replace =
   let open Re in
