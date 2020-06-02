@@ -7,7 +7,7 @@ env:
 matrix:
   include:
     - os: linux
-      env: OCAML_VERSION=4.04 PACKAGE="alcotest-lwt"
+      env: OCAML_VERSION=4.05 PACKAGE="alcotest-lwt"
     - os: linux
       env: OCAML_VERSION=4.05 PACKAGE="alcotest-async"
     - os: linux
