@@ -16,24 +16,12 @@
  *)
 
 open Astring
+open Model
 open Utils
 
 let terminal_width () = 80
 
-type path = [ `Path of string * int ]
-
-type run_result =
-  [ `Ok
-  | `Exn of path * string * unit Fmt.t
-  | `Error of path * unit Fmt.t
-  | `Skip
-  | `Todo of string ]
-
-let is_failure : run_result -> bool = function
-  | `Ok | `Skip -> false
-  | `Error _ | `Exn _ | `Todo _ -> true
-
-type event = [ `Result of path * run_result | `Start of path ]
+type event = [ `Result of Test_name.t * Run_result.t | `Start of Test_name.t ]
 
 let rresult_error ppf = function
   | `Error (_, e) -> Fmt.pf ppf "%a@," e ()
@@ -42,8 +30,6 @@ let rresult_error ppf = function
 
 (* Colours *)
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
-
-let cyan_s fmt = color `Cyan fmt
 
 let red_s fmt = color `Red fmt
 
@@ -63,11 +49,18 @@ let left nb pp ppf a =
     pp ppf a;
     Fmt.string ppf (String.v ~len:nb (fun _ -> ' ')) )
 
-let pp_path ~max_label ppf (`Path (n, i)) =
-  Fmt.pf ppf "%a%3d" (left (max_label + 8) cyan_s) n i
+let pp_test_name ~max_label ppf tname =
+  let name_len = Test_name.length tname in
+  let index = Test_name.index tname in
+  let padding =
+    match max_label + 8 - name_len with
+    | n when n <= 0 -> ""
+    | n -> String.v ~len:n (fun _ -> ' ')
+  in
+  Fmt.pf ppf "%a%s%3d" Fmt.(styled `Cyan Test_name.pp) tname padding index
 
-let info ~max_label ~doc_of_path ppf p =
-  Fmt.pf ppf "%a   %s" (pp_path ~max_label) p (doc_of_path p)
+let info ~max_label ~doc_of_test_name ppf tname =
+  Fmt.pf ppf "%a   %s" (pp_test_name ~max_label) tname (doc_of_test_name tname)
 
 let tag_of_result = function
   | `Ok -> `Ok
@@ -116,22 +109,22 @@ let left_padding ~with_selector =
   else const char ' ' )
   ++ const char ' '
 
-let pp_result_full ~max_label ~doc_of_path ~selector_on_failure ppf
+let pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure ppf
     (path, result) =
-  let with_selector = selector_on_failure && is_failure result in
+  let with_selector = selector_on_failure && Run_result.is_failure result in
   (left_padding ~with_selector) ppf ();
   pp_result ppf result;
-  (info ~max_label ~doc_of_path) ppf path;
+  (info ~max_label ~doc_of_test_name) ppf path;
   ()
 
-let event_line ~max_label ~doc_of_path ppf = function
+let event_line ~max_label ~doc_of_test_name ppf = function
   | `Result (p, r) ->
       pp_result ppf r;
-      (info ~max_label ~doc_of_path) ppf p
+      (info ~max_label ~doc_of_test_name) ppf p
   | _ -> assert false
 
-let event ~compact ~max_label ~doc_of_path ~selector_on_failure ~tests_so_far
-    ppf event =
+let event ~compact ~max_label ~doc_of_test_name ~selector_on_failure
+    ~tests_so_far ppf event =
   match (compact, event) with
   | true, `Start _ -> ()
   | true, `Result (_, r) ->
@@ -140,16 +133,16 @@ let event ~compact ~max_label ~doc_of_path ~selector_on_failure ~tests_so_far
       if (tests_so_far + 1) mod terminal_width () = 0 then
         Format.pp_force_newline ppf ();
       ()
-  | false, `Start p ->
+  | false, `Start tname ->
       Fmt.(
         left_padding ~with_selector:false
         ++ const (left left_c yellow_s) "..."
-        ++ const (info ~max_label ~doc_of_path) p)
+        ++ const (info ~max_label ~doc_of_test_name) tname)
         ppf ()
-  | false, `Result (p, r) ->
+  | false, `Result (tname, r) ->
       Fmt.pf ppf "\r%a@,"
-        (pp_result_full ~max_label ~doc_of_path ~selector_on_failure)
-        (p, r)
+        (pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure)
+        (tname, r)
 
 type result = {
   success : int;

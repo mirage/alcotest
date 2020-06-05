@@ -15,25 +15,16 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+open Model
+
 val terminal_width : unit -> int
 
-type path = [ `Path of string * int ]
-
-val info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
+val info :
+  max_label:int -> doc_of_test_name:(Test_name.t -> string) -> Test_name.t Fmt.t
 
 val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
 
-type run_result =
-  [ `Ok
-  | `Exn of path * string * unit Fmt.t
-  | `Error of path * unit Fmt.t
-  | `Skip
-  | `Todo of string ]
-
-val is_failure : run_result -> bool
-(** [is_failure] holds for test results that are error states. *)
-
-type event = [ `Result of path * run_result | `Start of path ]
+type event = [ `Result of Test_name.t * Run_result.t | `Start of Test_name.t ]
 
 type result = {
   success : int;
@@ -42,17 +33,17 @@ type result = {
   errors : unit Fmt.t list;
 }
 
-val rresult_error : run_result Fmt.t
+val rresult_error : Run_result.t Fmt.t
 
 val event_line :
   max_label:int ->
-  doc_of_path:(path -> string) ->
-  [ `Result of path * [< run_result ] | `Start of path ] Fmt.t
+  doc_of_test_name:(Test_name.t -> string) ->
+  [ `Result of Test_name.t * [< Run_result.t ] | `Start of Test_name.t ] Fmt.t
 
 val event :
   compact:bool ->
   max_label:int ->
-  doc_of_path:(path -> string) ->
+  doc_of_test_name:(Test_name.t -> string) ->
   selector_on_failure:bool ->
   tests_so_far:int ->
   event Fmt.t

@@ -42,8 +42,8 @@ module type S = sig
       function [f]. *)
 
   type 'a test = string * 'a test_case list
-  (** A test is a US-ASCII encoded name and a list of test cases. The name can
-      be used for filtering which tests to run on the CLI *)
+  (** A test is a UTF-8 encoded name and a list of test cases. The name can be
+      used for filtering which tests to run on the CLI. *)
 
   val list_tests : 'a test list -> return
   (** Print all of the test cases in a human-readable form *)

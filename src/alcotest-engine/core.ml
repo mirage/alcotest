@@ -15,6 +15,7 @@
  *)
 
 open Astring
+open Model
 open Utils
 
 let compare_int : int -> int -> int = compare
@@ -22,10 +23,8 @@ let compare_int : int -> int -> int = compare
 module IntSet = Set.Make (struct
   type t = int
 
-  let compare : int -> int -> int = compare
+  let compare = compare_int
 end)
-
-exception Registration_error of string
 
 exception Check_error of unit Fmt.t
 
@@ -68,6 +67,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
 struct
   module P = P (M)
   module M = Monad.Extend (M)
+  module Suite = Suite (M)
   include M.Infix
 
   (** Take a string path and collapse a leading [$HOME] path segment to [~]. *)
@@ -93,79 +93,11 @@ struct
 
   exception Test_error
 
-  let compare_path (`Path (s, i)) (`Path (s', i')) =
-    match String.compare s s' with 0 -> compare_int i i' | n -> n
-
-  let short_string_of_path (`Path (n, i)) = Printf.sprintf "%s.%03d" n i
-
-  let file_of_path (`Path (n, i)) =
-    let path = `Path (String.Ascii.lowercase n, i) in
-    Printf.sprintf "%s.output" (short_string_of_path path)
-
-  type 'a rrun = 'a -> Pp.run_result M.t
-
   type 'a test_case = string * speed_level * 'a run
 
   let test_case n s f = (n, s, f)
 
   type 'a test = string * 'a test_case list
-
-  module Suite : sig
-    type 'a t
-
-    type 'a test_case = {
-      path : Pp.path;
-      speed_level : speed_level;
-      fn : 'a rrun;
-    }
-
-    val empty : unit -> 'a t
-
-    val add : 'a t -> Pp.path * string * speed_level * 'a rrun -> 'a t
-
-    val tests : 'a t -> 'a test_case list
-
-    val doc_of_path : 'a t -> Pp.path -> string
-  end = struct
-    module String_set = Set.Make (String)
-
-    type 'a test_case = {
-      path : Pp.path;
-      speed_level : speed_level;
-      fn : 'a rrun;
-    }
-
-    type 'a t = {
-      tests : 'a test_case list;
-      (* caches computed from the library values. *)
-      filepaths : String_set.t;
-      doc : (Pp.path, string) Hashtbl.t;
-    }
-
-    let empty () =
-      let tests = [] in
-      let filepaths = String_set.empty in
-      let doc = Hashtbl.create 0 in
-      { tests; filepaths; doc }
-
-    let check_path_is_unique t path =
-      let exn_of_path (`Path (name, _)) =
-        Registration_error (Fmt.strf "Duplicate test name: %s" name)
-      in
-      if String_set.mem (file_of_path path) t.filepaths then
-        raise (exn_of_path path)
-
-    let add t (path, doc, speed_level, fn) =
-      check_path_is_unique t path;
-      let tests = { path; speed_level; fn } :: t.tests in
-      let filepaths = String_set.add (file_of_path path) t.filepaths in
-      Hashtbl.add t.doc path doc;
-      { t with tests; filepaths }
-
-    let tests t = List.rev t.tests
-
-    let doc_of_path t path = try Hashtbl.find t.doc path with Not_found -> ""
-  end
 
   (* global state *)
   type 'a t = {
@@ -276,15 +208,16 @@ struct
     in
     if not t.json then
       Pp.event ~compact:t.compact ~max_label:t.max_label
-        ~doc_of_path:(Suite.doc_of_path t.suite)
+        ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
         ~selector_on_failure ~tests_so_far
     else Fmt.nop
 
   let pp_info t =
-    Pp.info ~max_label:t.max_label ~doc_of_path:(Suite.doc_of_path t.suite)
+    Pp.info ~max_label:t.max_label
+      ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
 
-  let output_file t path =
-    Filename.concat (log_dir ~via_symlink:true t) (file_of_path path)
+  let output_file t tname =
+    Filename.concat (log_dir ~via_symlink:true t) (Test_name.file tname)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
 
@@ -294,8 +227,8 @@ struct
 
   let bold_s fmt = color `Bold fmt
 
-  let pp_error ~verbose ~doc_of_path ~output_file ~tail_errors ~max_label ppf e
-      =
+  let pp_error ~verbose ~doc_of_test_name ~output_file ~tail_errors ~max_label
+      ppf e =
     let path, error_fmt =
       match e with `Error (p, f) -> (p, f) | `Exn (p, _, f) -> (p, f)
     in
@@ -313,13 +246,13 @@ struct
     in
     Fmt.(
       Pp.with_surrounding_box
-        (const (Pp.event_line ~max_label ~doc_of_path) (`Result (path, e)))
+        (const (Pp.event_line ~max_label ~doc_of_test_name) (`Result (path, e)))
       ++ pp_logs
       ++ Pp.horizontal_rule
       ++ cut)
       ppf ()
 
-  let has_run : Pp.run_result -> bool = function
+  let has_run : Run_result.t -> bool = function
     | `Ok | `Error _ | `Exn _ -> true
     | `Skip | `Todo _ -> false
 
@@ -327,7 +260,7 @@ struct
 
   let exn path name pp = `Exn (path, name, Fmt.(pp ++ const lines (bt ())))
 
-  let protect_test path (f : 'a run) : 'a rrun =
+  let protect_test path (f : 'a run) : 'a -> Run_result.t M.t =
    fun args ->
     M.catch
       (fun () -> f args >|= fun () -> `Ok)
@@ -348,14 +281,14 @@ struct
     let test = suite.fn in
     let pp_event = pp_event t ~prior_error ~tests_so_far in
     M.return () >>= fun () ->
-    pp_event Fmt.stdout (`Start suite.path);
+    pp_event Fmt.stdout (`Start suite.name);
     Fmt.(flush stdout) () (* Show event before any test stderr *);
     test args >|= fun result ->
     (* Store errors *)
     let errored : bool =
       let pp_error =
         pp_error ~verbose:t.verbose
-          ~doc_of_path:(Suite.doc_of_path t.suite)
+          ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
           ~output_file:(output_file t) ~tail_errors:t.tail_errors
           ~max_label:t.max_label
       in
@@ -370,7 +303,7 @@ struct
     (* Show any remaining test output before the event *)
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
-    pp_event Fmt.stdout (`Result (suite.path, result));
+    pp_event Fmt.stdout (`Result (suite.name, result));
     let state =
       { tests_so_far = tests_so_far + 1; prior_error = errored || prior_error }
     in
@@ -386,7 +319,10 @@ struct
   let skip_label test_case = Suite.{ test_case with fn = skip_fun }
 
   let filter_test_case (regexp, cases) test_case =
-    let (`Path (n, i)) = test_case.Suite.path in
+    let n, i =
+      let tn = test_case.Suite.name in
+      Test_name.(name tn, index tn)
+    in
     let regexp_match = function None -> true | Some r -> Re.execp r n in
     let case_match = function None -> true | Some set -> IntSet.mem i set in
     regexp_match regexp && case_match cases
@@ -399,7 +335,7 @@ struct
            else None)
 
   let redirect_test_output t test_case =
-    let output_file = output_file t test_case.Suite.path in
+    let output_file = output_file t test_case.Suite.name in
     let fn args =
       P.with_redirect output_file (fun () ->
           test_case.fn args >|= fun result ->
@@ -408,8 +344,7 @@ struct
     in
     { test_case with fn }
 
-  let select_speed speed_level (test_case : 'a Suite.test_case) :
-      'a Suite.test_case =
+  let select_speed speed_level (test_case : 'a Suite.test_case as 'tc) : 'tc =
     if compare_speed_level test_case.speed_level speed_level >= 0 then test_case
     else Suite.{ test_case with fn = skip_fun }
 
@@ -423,53 +358,33 @@ struct
     perform_tests t test args >|= fun results ->
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
-    let failures = List.length (List.filter Pp.is_failure results) in
+    let failures = List.length (List.filter Run_result.is_failure results) in
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
     Suite.tests t.suite
-    |> List.map (fun t -> t.Suite.path)
-    |> List.sort compare_path
+    |> List.map (fun t -> t.Suite.name)
+    |> List.sort Test_name.compare
     |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
 
-  let get_codepoint buf u =
-    Buffer.add_string buf (Printf.sprintf "U+%04X" (Uchar.to_int u))
-
-  let normalize_name (name : string) =
-    let buf = Buffer.create (String.length name * 2) in
-    let get_normalized_char _ _ u =
-      match u with
-      | `Uchar u ->
-          if Uchar.is_char u then
-            match Uchar.to_char u with
-            | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ') as c ->
-                Buffer.add_char buf c
-            | _ -> get_codepoint buf u
-          else get_codepoint buf u
-      | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
-    in
-    Uutf.String.fold_utf_8 get_normalized_char () name;
-    Buffer.contents buf
-
-  let register t (name, (ts : 'a test_case list)) =
+  let register (type a) (t : a t) (name, (ts : a test_case list)) : a t =
     let max_label = max t.max_label (String.length name) in
     let test_details =
       List.mapi
-        (fun i (doc, speed, test) ->
-          let path = `Path (name, i) in
+        (fun index (doc, speed, test) ->
+          let path = Test_name.v ~name ~index in
           let doc =
             if doc = "" || doc.[String.length doc - 1] = '.' then doc
             else doc ^ "."
           in
-          (path, doc, speed, protect_test path test))
+          let test a = protect_test path test a in
+          (path, doc, speed, test))
         ts
     in
     let suite = List.fold_left Suite.add t.suite test_details in
     { t with suite; max_label }
 
-  let register_all t tl =
-    let normalize (n, ts) = (normalize_name n, ts) in
-    List.map normalize tl |> List.fold_left register t
+  let register_all t cases = List.fold_left register t cases
 
   let run_tests ?filter t () args =
     let suite = Suite.tests t.suite in
@@ -489,7 +404,7 @@ struct
     (pp_suite_results t) Fmt.stdout result;
     result.failures
 
-  let list_tests (tl : 'a test list) =
+  let list_tests (type a) (tl : a test list) =
     let t = register_all (empty ()) tl in
     list_registered_tests t ();
     M.return ()
@@ -512,8 +427,8 @@ struct
 
   let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
       ?(tail_errors = `Unlimited) ?(quick_only = false) ?(show_errors = false)
-      ?(json = false) ?filter ?(log_dir = default_log_dir ()) name args
-      (tl : 'a test list) =
+      ?(json = false) ?filter ?(log_dir = default_log_dir ()) name (type a)
+      (args : a) (tl : a test list) =
     let speed_level = if quick_only then `Quick else `Slow in
     let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
