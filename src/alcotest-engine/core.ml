@@ -102,7 +102,6 @@ struct
   (* global state *)
   type 'a t = {
     (* library values. *)
-    name : string;
     suite : 'a Suite.t;
     (* runtime state. *)
     mutable errors : unit Fmt.t list;
@@ -118,10 +117,9 @@ struct
     run_id : string;
   }
 
-  let empty () =
-    let name = Filename.basename Sys.argv.(0) in
+  let empty ~suite_name =
     let errors = [] in
-    let suite = Suite.empty () in
+    let suite = Suite.v ~name:suite_name in
     let max_label = 0 in
     let verbose = false in
     let compact = false in
@@ -132,7 +130,6 @@ struct
     let log_dir = P.getcwd () in
     let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
     {
-      name;
       errors;
       suite;
       max_label;
@@ -196,7 +193,8 @@ struct
       (* We don't create symlinks on Windows. *)
       via_symlink && not Sys.win32
     in
-    Filename.concat t.log_dir (if via_symlink then t.name else t.run_id)
+    Filename.concat t.log_dir
+      (if via_symlink then Suite.name t.suite else t.run_id)
 
   let pp_suite_results ({ verbose; show_errors; json; compact; _ } as t) =
     let log_dir = log_dir ~via_symlink:true t |> maybe_collapse_home in
@@ -224,8 +222,6 @@ struct
   let red_s fmt = color `Red fmt
 
   let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
-
-  let bold_s fmt = color `Bold fmt
 
   let pp_error ~verbose ~doc_of_test_name ~output_file ~tail_errors ~max_label
       ppf e =
@@ -349,7 +345,9 @@ struct
     else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
-    P.prepare ~base:t.log_dir ~dir:(log_dir ~via_symlink:false t) ~name:t.name;
+    P.prepare ~base:t.log_dir
+      ~dir:(log_dir ~via_symlink:false t)
+      ~name:(Suite.name t.suite);
     let start_time = P.time () in
     let test =
       if t.verbose then test else List.map (redirect_test_output t) test
@@ -405,7 +403,7 @@ struct
     result.failures
 
   let list_tests (type a) (tl : a test list) =
-    let t = register_all (empty ()) tl in
+    let t = register_all (empty ~suite_name:"") tl in
     list_registered_tests t ();
     M.return ()
 
@@ -434,9 +432,8 @@ struct
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
     let t =
       {
-        (empty ()) with
+        (empty ~suite_name:name) with
         run_id;
-        name;
         verbose;
         compact;
         tail_errors;
@@ -450,7 +447,7 @@ struct
     ( (* Only print inside the concurrency monad *)
       M.return () >>= fun () ->
       let open Fmt in
-      pr "Testing %a.@," (Pp.quoted bold_s) name;
+      pr "Testing %a.@," (Pp.quoted Fmt.(styled `Bold Suite.pp_name)) t.suite;
       pr "@[<v>%a@]"
         (styled `Faint (fun ppf () ->
              pf ppf "This run has ID %a.@,@," (Pp.quoted string) run_id))

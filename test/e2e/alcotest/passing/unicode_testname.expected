@@ -1,4 +1,4 @@
-Testing `suite-name'.
+Testing `Suite name containing file separators / and non-ASCII characters 🔥'.
 This run has ID `<uuid>'.
 
   ...           🔥                0   Non ASCII unicode character.  [OK]          🔥                0   Non ASCII unicode character.

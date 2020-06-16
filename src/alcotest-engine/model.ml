@@ -4,6 +4,27 @@ type speed_level = [ `Quick | `Slow ]
 
 exception Registration_error of string
 
+(** Given a UTF-8 encoded string, escape any characters not considered
+    "filesystem safe" as their [U+XXXX] notation form. *)
+let escape str =
+  let add_codepoint buf uchar =
+    Uchar.to_int uchar |> Fmt.str "U+%04X" |> Buffer.add_string buf
+  in
+  let buf = Buffer.create (String.length str * 2) in
+  let get_normalized_char _ _ u =
+    match u with
+    | `Uchar u ->
+        if Uchar.is_char u then
+          match Uchar.to_char u with
+          | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ') as c ->
+              Buffer.add_char buf c
+          | _ -> add_codepoint buf u
+        else add_codepoint buf u
+    | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
+  in
+  Uutf.String.fold_utf_8 get_normalized_char () str;
+  Buffer.contents buf
+
 module Test_name : sig
   type t
 
@@ -28,27 +49,6 @@ end = struct
   type t = { name : string; file : string; index : int }
 
   let index { index; _ } = index
-
-  (** Given a UTF-8 encoded string, escape any characters not considered
-      "filesystem safe" as their [U+XXXX] notation form. *)
-  let escape str =
-    let add_codepoint buf uchar =
-      Uchar.to_int uchar |> Fmt.str "U+%04X" |> Buffer.add_string buf
-    in
-    let buf = Buffer.create (String.length str * 2) in
-    let get_normalized_char _ _ u =
-      match u with
-      | `Uchar u ->
-          if Uchar.is_char u then
-            match Uchar.to_char u with
-            | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ') as c ->
-                Buffer.add_char buf c
-            | _ -> add_codepoint buf u
-          else add_codepoint buf u
-      | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
-    in
-    Uutf.String.fold_utf_8 get_normalized_char () str;
-    Buffer.contents buf
 
   let v ~name ~index =
     let file =
@@ -94,7 +94,14 @@ module Suite (M : Monad.S) : sig
     fn : 'a -> Run_result.t M.t;
   }
 
-  val empty : unit -> 'a t
+  val v : name:string -> _ t
+  (** Construct a new suite. Test cases must be added with {!add}. *)
+
+  val name : _ t -> string
+  (** An escaped form of the suite name. *)
+
+  val pp_name : _ t Fmt.t
+  (** Pretty-print the unescaped suite name. *)
 
   val add :
     'a t ->
@@ -114,17 +121,25 @@ end = struct
   }
 
   type 'a t = {
+    escaped_name : string;
+    pp_name : unit Fmt.t;
     tests : 'a test_case list;
     (* caches computed from the library values. *)
     filepaths : String_set.t;
     doc : (Test_name.t, string) Hashtbl.t;
   }
 
-  let empty () =
+  let v ~name =
+    let escaped_name = escape name in
+    let pp_name = Fmt.(const string) name in
     let tests = [] in
     let filepaths = String_set.empty in
     let doc = Hashtbl.create 0 in
-    { tests; filepaths; doc }
+    { escaped_name; pp_name; tests; filepaths; doc }
+
+  let name { escaped_name; _ } = escaped_name
+
+  let pp_name ppf { pp_name; _ } = pp_name ppf ()
 
   let check_path_is_unique t tname =
     let exn_of_test_name tname =

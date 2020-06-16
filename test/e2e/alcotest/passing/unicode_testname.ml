@@ -1,5 +1,6 @@
 let () =
-  Alcotest.run "suite-name"
+  Alcotest.run
+    "Suite name containing file separators / and non-ASCII characters 🔥"
     [
       ( "🔥",
         [
