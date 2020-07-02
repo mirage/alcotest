@@ -7,6 +7,7 @@
    basic
    check_basic
    cli_verbose
+   compact
    filter_name
    filter_name_regex
    json_output
@@ -27,6 +28,7 @@
    basic
    check_basic
    cli_verbose
+   compact
    filter_name
    filter_name_regex
    json_output
@@ -214,6 +216,31 @@
  (package alcotest)
  (action
    (diff cli_verbose.expected cli_verbose.processed)))
+
+(rule
+ (target compact.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:compact.exe} --compact)
+  )
+ )
+)
+
+(rule
+ (target compact.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:compact.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff compact.expected compact.processed)))
 
 (rule
  (target filter_name.actual)

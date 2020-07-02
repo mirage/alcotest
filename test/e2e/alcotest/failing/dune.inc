@@ -1,23 +1,27 @@
 (executables
  (names
    check_basic
+   check_long
    compact
    duplicate_test_names
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   long_test_case_name
    tail_errors_limit
    tail_errors_unlimited
    unknown_option
  )
- (libraries alcotest)
+ (libraries alcotest alcotest.engine)
  (modules
    check_basic
+   check_long
    compact
    duplicate_test_names
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   long_test_case_name
    tail_errors_limit
    tail_errors_unlimited
    unknown_option
@@ -48,6 +52,31 @@
  (package alcotest)
  (action
    (diff check_basic.expected check_basic.processed)))
+
+(rule
+ (target check_long.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:check_long.exe})
+  )
+ )
+)
+
+(rule
+ (target check_long.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:check_long.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff check_long.expected check_long.processed)))
 
 (rule
  (target compact.actual)
@@ -173,6 +202,31 @@
  (package alcotest)
  (action
    (diff invalid_arg_in_test.expected invalid_arg_in_test.processed)))
+
+(rule
+ (target long_test_case_name.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:long_test_case_name.exe})
+  )
+ )
+)
+
+(rule
+ (target long_test_case_name.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:long_test_case_name.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff long_test_case_name.expected long_test_case_name.processed)))
 
 (rule
  (target tail_errors_limit.actual)

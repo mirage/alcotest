@@ -16,27 +16,20 @@
  *)
 
 open Astring
+open Model
+open Utils
 
-type path = [ `Path of string * int ]
+let terminal_width () = 80
 
-type run_result =
-  [ `Ok
-  | `Exn of path * string * string
-  | `Error of path * string
-  | `Skip
-  | `Todo of string ]
-
-type event = [ `Result of path * run_result | `Start of path ]
+type event = [ `Result of Test_name.t * Run_result.t | `Start of Test_name.t ]
 
 let rresult_error ppf = function
-  | `Error (_, s) -> Fmt.pf ppf "%s\n" s
-  | `Exn (_, n, s) -> Fmt.pf ppf "[%s] %s\n" n s
+  | `Error (_, e) -> Fmt.pf ppf "%a@," e ()
+  | `Exn (_, n, e) -> Fmt.pf ppf "[%s] @[<v>%a@]" n e ()
   | `Ok | `Todo _ | `Skip -> ()
 
 (* Colours *)
 let color c ppf fmt = Fmt.(styled c string) ppf fmt
-
-let cyan_s fmt = color `Cyan fmt
 
 let red_s fmt = color `Red fmt
 
@@ -46,7 +39,7 @@ let green_s fmt = color `Green fmt
 
 let yellow_s fmt = color `Yellow fmt
 
-let left_c = 20
+let left_c = 14
 
 let left nb pp ppf a =
   let s = Fmt.to_to_string pp a in
@@ -56,66 +49,153 @@ let left nb pp ppf a =
     pp ppf a;
     Fmt.string ppf (String.v ~len:nb (fun _ -> ' ')) )
 
-let pp_path ~max_label ppf (`Path (n, i)) =
-  Fmt.pf ppf "%a%3d" (left (max_label + 8) cyan_s) n i
+let pp_test_name ~max_label ppf tname =
+  let name_len = Test_name.length tname in
+  let index = Test_name.index tname in
+  let padding =
+    match max_label + 8 - name_len with
+    | n when n <= 0 -> ""
+    | n -> String.v ~len:n (fun _ -> ' ')
+  in
+  Fmt.pf ppf "%a%s%3d" Fmt.(styled `Cyan Test_name.pp) tname padding index
 
-let info ~max_label ~doc_of_path ppf p =
-  Fmt.pf ppf "%a   %s" (pp_path ~max_label) p (doc_of_path p)
+let info ~max_label ~doc_of_test_name ppf tname =
+  Fmt.pf ppf "%a   %s" (pp_test_name ~max_label) tname (doc_of_test_name tname)
 
-let pp_result ppf = function
-  | `Ok -> left left_c green_s ppf "[OK]"
-  | `Exn _ -> left left_c red_s ppf "[FAIL]"
-  | `Error _ -> left left_c red_s ppf "[ERROR]"
-  | `Skip -> left left_c yellow_s ppf "[SKIP]"
-  | `Todo _ -> left left_c yellow_s ppf "[TODO]"
+let tag_of_result = function
+  | `Ok -> `Ok
+  | `Exn _ | `Error _ -> `Fail
+  | `Skip -> `Skip
+  | `Todo _ -> `Todo
+
+let colour_of_tag = function
+  | `Ok -> `Green
+  | `Fail -> `Red
+  | `Skip | `Todo | `Assert -> `Yellow
+
+let string_of_tag = function
+  | `Ok -> "OK"
+  | `Fail -> "FAIL"
+  | `Skip -> "SKIP"
+  | `Todo -> "TODO"
+  | `Assert -> "ASSERT"
+
+let pp_tag ~wrapped ppf typ =
+  let colour = colour_of_tag typ in
+  let tag = string_of_tag typ in
+  let tag = if wrapped then "[" ^ tag ^ "]" else tag in
+  Fmt.(styled colour string) ppf tag
+
+let tag = pp_tag ~wrapped:false
+
+let pp_result ppf result =
+  let tag = tag_of_result result in
+  left left_c (pp_tag ~wrapped:true) ppf tag
 
 let pp_result_compact ppf result =
+  let colour = result |> tag_of_result |> colour_of_tag in
   let char =
     match result with
     | `Ok -> '.'
-    | `Exn _ -> 'F'
-    | `Error _ -> 'E'
+    | `Exn _ | `Error _ -> 'F'
     | `Skip -> 'S'
     | `Todo _ -> 'T'
   in
-  Fmt.char ppf char
+  Fmt.(styled colour char) ppf char
 
-let pp_result_full ~max_label ~doc_of_path ppf (path, result) =
-  Fmt.pf ppf "%a%a" pp_result result (info ~max_label ~doc_of_path) path
+let left_padding ~with_selector =
+  let open Fmt in
+  ( if with_selector then const (styled `Bold (styled `Red char)) '>'
+  else const char ' ' )
+  ++ const char ' '
 
-let event ~compact ~max_label ~doc_of_path ppf = function
-  | `Start _ when compact -> ()
-  | `Start p ->
-      left left_c yellow_s ppf " ...";
-      Fmt.pf ppf "%a" (info ~max_label ~doc_of_path) p
-  | `Result (_, r) when compact -> Fmt.pr "%a" pp_result_compact r
+let pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure ppf
+    (path, result) =
+  let with_selector = selector_on_failure && Run_result.is_failure result in
+  (left_padding ~with_selector) ppf ();
+  pp_result ppf result;
+  (info ~max_label ~doc_of_test_name) ppf path;
+  ()
+
+let event_line ~max_label ~doc_of_test_name ppf = function
   | `Result (p, r) ->
-      Fmt.pf ppf "\r%a\n" (pp_result_full ~max_label ~doc_of_path) (p, r)
+      pp_result ppf r;
+      (info ~max_label ~doc_of_test_name) ppf p
+  | _ -> assert false
+
+let event ~compact ~max_label ~doc_of_test_name ~selector_on_failure
+    ~tests_so_far ppf event =
+  match (compact, event) with
+  | true, `Start _ -> ()
+  | true, `Result (_, r) ->
+      pp_result_compact ppf r;
+      (* Wrap compact output to terminal width manually *)
+      if (tests_so_far + 1) mod terminal_width () = 0 then
+        Format.pp_force_newline ppf ();
+      ()
+  | false, `Start tname ->
+      Fmt.(
+        left_padding ~with_selector:false
+        ++ const (left left_c yellow_s) "..."
+        ++ const (info ~max_label ~doc_of_test_name) tname)
+        ppf ()
+  | false, `Result (tname, r) ->
+      Fmt.pf ppf "\r%a@,"
+        (pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure)
+        (tname, r)
 
 type result = {
   success : int;
   failures : int;
   time : float;
-  errors : string list;
+  errors : unit Fmt.t list;
 }
 
-let pp_suite_errors ~show_all ppf = function
-  | [] -> ()
-  | x :: xs ->
-      (if show_all then x :: xs else [ x ])
-      |> Fmt.pf ppf "%a\n" Fmt.(list ~sep:(const string "\n") string)
+let pp_suite_errors ~show_all = function
+  | [] -> Fmt.nop
+  | x :: _ as xs -> (if show_all then xs else [ x ]) |> Fmt.concat
 
 let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
 
+let quoted f = Fmt.(const char '`' ++ f ++ const char '\'')
+
+let with_surrounding_box (type a) (f : a Fmt.t) : a Fmt.t =
+ fun ppf a ->
+  (* Peek at the value being pretty-printed to determine the length of the box
+     we're going to need. Fortunately, this will not include ANSII colour
+     escapes. *)
+  let true_width = Fmt.kstr String.length "| %a |" f a in
+  let min_width = terminal_width () in
+  let width = max min_width true_width in
+
+  let right_padding = String.v ~len:(width - true_width) (fun _ -> ' ') in
+  let s = Fmt.(const (styled `Faint string)) in
+  let bars = List.init (width - 2) (fun _ -> "─") |> String.concat in
+  let top = s ("┌" ^ bars ^ "┐")
+  and mid = Fmt.(s "│ " ++ f ++ s (right_padding ^ " │"))
+  and bottom = s ("└" ^ bars ^ "┘") in
+  Fmt.(top ++ cut ++ mid ++ cut ++ bottom ++ cut) ppf a
+
+let horizontal_rule (type a) ppf (_ : a) =
+  let open Fmt in
+  ( const string " "
+  ++ const
+       (styled `Faint string)
+       (List.init (terminal_width () - 2) (fun _ -> "─") |> String.concat)
+  ++ cut )
+    ppf ()
+
 let pp_full_logs ppf log_dir =
-  Fmt.pf ppf "The full test results are available in `%s`.\n" log_dir
+  Fmt.pf ppf "Full test results in %a.@,"
+    Fmt.(quoted (styled `Cyan string))
+    log_dir
 
 let pp_summary ppf r =
   let pp_failures ppf = function
     | 0 -> green_s ppf "Test Successful"
-    | n -> red ppf "%d error%a!" n pp_plural n
+    | n -> red ppf "%d failure%a!" n pp_plural n
   in
-  Fmt.pf ppf "%a in %.3fs. %d test%a run.\n" pp_failures r.failures r.time
+  Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
     r.success pp_plural r.success
 
 let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
@@ -131,12 +211,11 @@ let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
 |}
         r.success r.failures r.time
   | false ->
-      Fmt.pf ppf "%a%a%a%a%!"
-        (if compact then Format.pp_force_newline else Fmt.nop)
-        ()
-        (pp_suite_errors ~show_all:(verbose || show_errors))
-        r.errors
-        (if print_summary && not verbose then pp_full_logs else Fmt.nop)
-        log_dir
-        (if print_summary then pp_summary else Fmt.nop)
-        r
+      Format.pp_force_newline ppf ();
+      Format.pp_open_vbox ppf 0;
+      if compact then Fmt.cut ppf ();
+      (pp_suite_errors ~show_all:(verbose || show_errors) r.errors) ppf ();
+      if print_summary then (
+        if not verbose then pp_full_logs ppf log_dir;
+        pp_summary ppf r );
+      Format.pp_close_box ppf ()

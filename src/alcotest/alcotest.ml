@@ -95,6 +95,19 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
     match r with `Ok x -> x | `Error e -> raise e
 
   let setup_std_outputs = Fmt_tty.setup_std_outputs
+
+  (* Implementation similar to that of [Bos.Os.Dir]. *)
+  let home_directory () =
+    let env_var_fallback () =
+      try Ok (Sys.getenv "HOME")
+      with Not_found -> Error (`Msg "HOME environment variable is undefined")
+    in
+    if Sys.win32 then env_var_fallback ()
+    else
+      try
+        let uid = Unix.getuid () in
+        Ok (Unix.getpwuid uid).Unix.pw_dir
+      with Not_found -> env_var_fallback ()
 end
 
 module T = Alcotest_engine.Cli.Make (Unix) (Alcotest_engine.Monad.Identity)

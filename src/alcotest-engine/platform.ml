@@ -11,6 +11,8 @@ module type S = sig
 
   val setup_std_outputs :
     ?style_renderer:Fmt.style_renderer -> ?utf_8:bool -> unit -> unit
+
+  val home_directory : unit -> (string, [ `Msg of string ]) result
 end
 
 module type MAKER = functor (M : Monad.S) -> S with type 'a promise := 'a M.t

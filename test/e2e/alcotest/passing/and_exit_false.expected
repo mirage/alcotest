@@ -1,7 +1,8 @@
-Testing suite-name.
-This run has ID `<uuid>`.
- ...                test-a          0   Test case.[OK]                test-a          0   Test case.
-The full test results are available in `<build-context>/_build/_tests/<uuid>`.
-Test Successful in <test-duration>s. 1 test run.
+Testing `suite-name'.
+This run has ID `<uuid>'.
 
+  ...           test-a          0   Test case.  [OK]          test-a          0   Test case.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 1 test run.
  Program execution continued!

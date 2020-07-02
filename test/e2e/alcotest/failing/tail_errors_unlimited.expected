@@ -1,8 +1,11 @@
-Testing tail_errors_unlimited.
-This run has ID `<uuid>`.
- ...                failing          0   test.[ERROR]             failing          0   test.
--- failing.000 [test.] Failed --
-in `<build-context>/_build/_tests/<uuid>/failing.000.output`:
+Testing `tail_errors_unlimited'.
+This run has ID `<uuid>'.
+
+  ...           failing          0   test.> [FAIL]        failing          0   test.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        failing          0   test.                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
 output line 1
 output line 2
 output line 3
@@ -104,7 +107,10 @@ output line 98
 output line 99
 output line 100
 ASSERT Logs above should be 101 lines long.
-Test error: Error Logs above should be 101 lines long..
+FAIL Logs above should be 101 lines long.
 
-The full test results are available in `<build-context>/_build/_tests/<uuid>`.
-1 error! in <test-duration>s. 1 test run.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 1 test run.

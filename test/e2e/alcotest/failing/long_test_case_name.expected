@@ -1,0 +1,17 @@
+Testing `suite-with-failures'.
+This run has ID `<uuid>'.
+
+  ...           test-a          0   Passing.  [OK]          test-a          0   Passing.
+  ...           test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit.> [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit.
+
+┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit. │
+└───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ASSERT Failed
+FAIL Failed
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 2 tests run.

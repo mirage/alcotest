@@ -15,30 +15,38 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-type path = [ `Path of string * int ]
+open Model
 
-val info : max_label:int -> doc_of_path:(path -> string) -> path Fmt.t
+val terminal_width : unit -> int
 
-type run_result =
-  [ `Ok
-  | `Exn of path * string * string
-  | `Error of path * string
-  | `Skip
-  | `Todo of string ]
+val info :
+  max_label:int -> doc_of_test_name:(Test_name.t -> string) -> Test_name.t Fmt.t
 
-type event = [ `Result of path * run_result | `Start of path ]
+val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
+
+type event = [ `Result of Test_name.t * Run_result.t | `Start of Test_name.t ]
 
 type result = {
   success : int;
   failures : int;
   time : float;
-  errors : string list;
+  errors : unit Fmt.t list;
 }
 
-val rresult_error : run_result Fmt.t
+val rresult_error : Run_result.t Fmt.t
+
+val event_line :
+  max_label:int ->
+  doc_of_test_name:(Test_name.t -> string) ->
+  [ `Result of Test_name.t * [< Run_result.t ] | `Start of Test_name.t ] Fmt.t
 
 val event :
-  compact:bool -> max_label:int -> doc_of_path:(path -> string) -> event Fmt.t
+  compact:bool ->
+  max_label:int ->
+  doc_of_test_name:(Test_name.t -> string) ->
+  selector_on_failure:bool ->
+  tests_so_far:int ->
+  event Fmt.t
 
 val suite_results :
   verbose:bool ->
@@ -48,7 +56,18 @@ val suite_results :
   log_dir:string ->
   result Fmt.t
 
-val pp_plural : Format.formatter -> int -> unit
+val quoted : 'a Fmt.t -> 'a Fmt.t
+(** Wraps a formatter with `GNU-style quotation marks'. *)
+
+val with_surrounding_box : 'a Fmt.t -> 'a Fmt.t
+(** Wraps a formatter with a Unicode box with width given by {!terminal_width}.
+    Uses box-drawing characters from code page 437. *)
+
+val horizontal_rule : _ Fmt.t
+(** Horizontal rule of length {!terminal_width}. Uses box-drawing characters
+    from code page 437. *)
+
+val pp_plural : int Fmt.t
 (** This is for adding an 's' to words that should be pluralized, e.g.
 
     {[

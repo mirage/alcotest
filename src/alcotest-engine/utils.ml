@@ -1,3 +1,5 @@
+let ( >> ) f g x = x |> f |> g
+
 module List = struct
   include List
 
@@ -22,6 +24,10 @@ module List = struct
         | Error e, Error acc -> Error (e :: acc)
         | Error e, Ok _ -> Error [ e ])
       l (Ok [])
+
+  let init n f =
+    let rec aux acc i = if i >= n then rev acc else aux (f i :: acc) (i + 1) in
+    aux [] 0
 end
 
 module Result = struct

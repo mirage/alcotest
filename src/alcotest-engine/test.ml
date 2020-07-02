@@ -138,23 +138,32 @@ let reject (type a) =
 
 let show_assert msg =
   Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
-  Format.eprintf "%a %s\n%!" Fmt.(styled `Yellow string) "ASSERT" msg
+  Format.eprintf "%a %s\n%!" Pp.tag `Assert msg
 
-let check_err fmt =
-  Format.ksprintf (fun err -> raise (Core.Check_error err)) fmt
+let check_err fmt = raise (Core.Check_error fmt)
 
-let check t msg expected actual =
+let check (type a) (t : a testable) msg (expected : a) (actual : a) =
   show_assert msg;
   if not (equal t expected actual) then
-    Fmt.strf "Error %s: expecting@\n%a, got@\n%a." msg (pp t) expected (pp t)
-      actual
-    |> failwith
+    let open Fmt in
+    let s = const string in
+    let pp_error = const Pp.tag `Fail ++ s (" " ^ msg)
+    and pp_expected ppf () =
+      Fmt.string ppf "   Expected: ";
+      (styled `Green (pp t)) ppf expected;
+      Format.pp_print_if_newline ppf ();
+      Fmt.cut ppf ();
+      ()
+    and pp_actual = s "   Received: " ++ const (styled `Red (pp t)) actual in
+    raise
+      (Core.Check_error
+         Fmt.(vbox (pp_error ++ cut ++ cut ++ pp_expected ++ cut ++ pp_actual)))
 
 let check' t ~msg ~expected ~actual = check t msg expected actual
 
 let fail msg =
   show_assert msg;
-  check_err "Error %s." msg
+  check_err (fun ppf () -> Fmt.pf ppf "%a %s" Pp.tag `Fail msg)
 
 let failf fmt = Fmt.kstrf fail fmt
 
@@ -170,11 +179,13 @@ let check_raises msg exn f =
   show_assert msg;
   match collect_exception f with
   | None ->
-      check_err "Fail %s: expecting %s, got nothing." msg
-        (Printexc.to_string exn)
+      check_err (fun ppf () ->
+          Fmt.pf ppf "%a %s: expecting %s, got nothing." Pp.tag `Fail msg
+            (Printexc.to_string exn))
   | Some e ->
       if e <> exn then
-        check_err "Fail %s: expecting %s, got %s." msg (Printexc.to_string exn)
-          (Printexc.to_string e)
+        check_err (fun ppf () ->
+            Fmt.pf ppf "%a %s: expecting %s, got %s." Pp.tag `Fail msg
+              (Printexc.to_string exn) (Printexc.to_string e))
 
 let () = at_exit (Format.pp_print_flush Format.err_formatter)

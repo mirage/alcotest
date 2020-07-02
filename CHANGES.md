@@ -26,6 +26,9 @@
    (ALCOTEST_COLOR auto))))
 ```
 
+- Fix a crash when using non-filesystem-safe characters in test suite names.
+  (#246, @CraigFe)
+
 ### 1.1.0 (2020-04-03)
 
 - Fix handling of CLI options for `Alcotest_{async,lwt}.run`. (#222, @CraigFe)
