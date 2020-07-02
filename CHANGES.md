@@ -1,19 +1,14 @@
-### Unreleased
-
-- Add `Alcotest.check'`, a variant of `Alcotest.check` with labeled arguments.
-  (#239, @hartmut27)
-
-- Fix bug with validation of test names containing path separators (these break
-  Alcotest when attempting to generate a corresponding log file). The accepted
-  characters are: alphanumerics, underscore, hypen and space. (#241, @mefyl)
+### 1.2.0 (2020-07-13)
 
 - Add an `alcotest-mirage` package, allowing the construction of MirageOS
   unikernels that run Alcotest test suites. (#238, @hannesm @linse)
 
-- Fix handling of test names by normalizing them, allowing all UTF-8 characters
-  (#249, @gs0510)
+- Add `Alcotest.check'`, a variant of `Alcotest.check` with labeled arguments.
+  (#239, @hartmut27)
 
 - Add a testable for the `bytes` type. (#253, @mefyl)
+
+- Many assorted improvements to Alcotest output formatting. (#246, @CraigFe)
 
 - Default to `--color=always` when running inside Dune (#242, @CraigFe). The
   value can be overridden by setting the `ALCOTEST_COLOR` variable in a `dune`
@@ -26,8 +21,12 @@
    (ALCOTEST_COLOR auto))))
 ```
 
-- Fix a crash when using non-filesystem-safe characters in test suite names.
-  (#246, @CraigFe)
+- Support all UTF-8 characters in test names and suite names, by normalising
+  them for file-system interactions. (#249, @gs0510; #246, @CraigFe)
+
+- Fix various crashes when using non-filesystem-safe characters in test suite
+  names (these break Alcotest when attempting to generate a corresponding log
+  file). (#241, @mefyl; #246 @CraigFe)
 
 ### 1.1.0 (2020-04-03)
 
