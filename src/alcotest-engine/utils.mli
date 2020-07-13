@@ -1,5 +1,12 @@
 val ( >> ) : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
 
+module String : sig
+  include module type of Astring.String
+
+  val length_utf8 : string -> int
+  (** Get the length of a string in UTF-8 characters and malformed segments. *)
+end
+
 module List : sig
   include module type of List
 

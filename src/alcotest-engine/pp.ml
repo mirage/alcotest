@@ -15,7 +15,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Astring
 open Model
 open Utils
 
@@ -43,7 +42,7 @@ let left_c = 14
 
 let left nb pp ppf a =
   let s = Fmt.to_to_string pp a in
-  let nb = nb - String.length s in
+  let nb = nb - String.length_utf8 s in
   if nb <= 0 then pp ppf a
   else (
     pp ppf a;
@@ -164,7 +163,7 @@ let with_surrounding_box (type a) (f : a Fmt.t) : a Fmt.t =
   (* Peek at the value being pretty-printed to determine the length of the box
      we're going to need. Fortunately, this will not include ANSII colour
      escapes. *)
-  let true_width = Fmt.kstr String.length "| %a |" f a in
+  let true_width = Fmt.kstr String.length_utf8 "| %a |" f a in
   let min_width = terminal_width () in
   let width = max min_width true_width in
 

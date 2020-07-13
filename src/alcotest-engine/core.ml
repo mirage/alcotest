@@ -14,7 +14,6 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Astring
 open Model
 open Utils
 
@@ -107,6 +106,7 @@ struct
     mutable errors : unit Fmt.t list;
     (* runtime options. *)
     max_label : int;
+        (** Longest test label in the suite, in UTF-8 characters. *)
     speed_level : speed_level;
     show_errors : bool;
     json : bool;
@@ -366,7 +366,7 @@ struct
     |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
 
   let register (type a) (t : a t) (name, (ts : a test_case list)) : a t =
-    let max_label = max t.max_label (String.length name) in
+    let max_label = max t.max_label (String.length_utf8 name) in
     let test_details =
       List.mapi
         (fun index (doc, speed, test) ->

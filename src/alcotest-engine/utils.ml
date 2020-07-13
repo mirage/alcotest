@@ -1,5 +1,11 @@
 let ( >> ) f g x = x |> f |> g
 
+module String = struct
+  include Astring.String
+
+  let length_utf8 = Uutf.String.fold_utf_8 (fun count _ _ -> count + 1) 0
+end
+
 module List = struct
   include List
 
