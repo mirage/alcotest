@@ -16,7 +16,8 @@ let escape str =
     | `Uchar u ->
         if Uchar.is_char u then
           match Uchar.to_char u with
-          | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ') as c ->
+          | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ' | '.') as c
+            ->
               Buffer.add_char buf c
           | _ -> add_codepoint buf u
         else add_codepoint buf u
