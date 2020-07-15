@@ -1,3 +1,8 @@
+### Unreleased
+
+- Surround pretty-printed diffs with quotes to make trailing whitespace more
+  obvious. (#261, @CraigFe)
+
 ### 1.2.0 (2020-07-13)
 
 - Add an `alcotest-mirage` package, allowing the construction of MirageOS

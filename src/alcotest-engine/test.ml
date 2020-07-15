@@ -149,12 +149,13 @@ let check (type a) (t : a testable) msg (expected : a) (actual : a) =
     let s = const string in
     let pp_error = const Pp.tag `Fail ++ s (" " ^ msg)
     and pp_expected ppf () =
-      Fmt.string ppf "   Expected: ";
-      (styled `Green (pp t)) ppf expected;
+      Fmt.pf ppf "   Expected: `%a'" (styled `Green (pp t)) expected;
       Format.pp_print_if_newline ppf ();
       Fmt.cut ppf ();
       ()
-    and pp_actual = s "   Received: " ++ const (styled `Red (pp t)) actual in
+    and pp_actual ppf () =
+      Fmt.pf ppf "   Received: `%a'" (styled `Red (pp t)) actual
+    in
     raise
       (Core.Check_error
          Fmt.(vbox (pp_error ++ cut ++ cut ++ pp_expected ++ cut ++ pp_actual)))
