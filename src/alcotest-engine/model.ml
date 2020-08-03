@@ -51,8 +51,8 @@ end = struct
 
   let v ~name ~index =
     let file =
-      let name = name |> escape in
-      Fmt.str "%s.%03d.output" name index
+      let name = name |> escape |> function "" -> "" | n -> n ^ "." in
+      Fmt.str "%s%03d.output" name index
     in
     { name; file; index }
 
