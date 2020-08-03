@@ -1,4 +1,6 @@
-### unreleased
+### Unreleased
+
+- Fail gracefully when the user supplies an empty suite name. (#265, @CraigFe)
 
 - Fix compatibility with `fmt.0.8.8+dune` by adding a missing `fmt` dependency
   in `alcotest`'s dune file (#266, @NathanReb)
