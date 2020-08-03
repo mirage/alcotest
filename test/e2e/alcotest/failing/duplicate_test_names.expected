@@ -1,3 +1,1 @@
-duplicate_test_names.exe: internal error, uncaught exception:
-                          Alcotest_engine.Model.Registration_error("Duplicate test path: duped")
-                          
+ERROR: Duplicate test path: `duped'

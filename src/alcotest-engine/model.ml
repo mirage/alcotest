@@ -2,8 +2,6 @@ open Utils
 
 type speed_level = [ `Quick | `Slow ]
 
-exception Registration_error of string
-
 (** Given a UTF-8 encoded string, escape any characters not considered
     "filesystem safe" as their [U+XXXX] notation form. *)
 let escape str =
@@ -95,8 +93,9 @@ module Suite (M : Monad.S) : sig
     fn : 'a -> Run_result.t M.t;
   }
 
-  val v : name:string -> _ t
-  (** Construct a new suite. Test cases must be added with {!add}. *)
+  val v : name:string -> (_ t, [> `Empty_name ]) result
+  (** Construct a new suite, given a non-empty [name]. Test cases must be added
+      with {!add}. *)
 
   val name : _ t -> string
   (** An escaped form of the suite name. *)
@@ -107,7 +106,7 @@ module Suite (M : Monad.S) : sig
   val add :
     'a t ->
     Test_name.t * string * speed_level * ('a -> Run_result.t M.t) ->
-    'a t
+    ('a t, [ `Duplicate_test_path of string ]) result
 
   val tests : 'a t -> 'a test_case list
 
@@ -131,30 +130,33 @@ end = struct
   }
 
   let v ~name =
-    let escaped_name = escape name in
-    let pp_name = Fmt.(const string) name in
-    let tests = [] in
-    let filepaths = String_set.empty in
-    let doc = Hashtbl.create 0 in
-    { escaped_name; pp_name; tests; filepaths; doc }
+    match String.length name with
+    | 0 -> Error `Empty_name
+    | _ ->
+        let escaped_name = escape name in
+        let pp_name = Fmt.(const string) name in
+        let tests = [] in
+        let filepaths = String_set.empty in
+        let doc = Hashtbl.create 0 in
+        Ok { escaped_name; pp_name; tests; filepaths; doc }
 
   let name { escaped_name; _ } = escaped_name
 
   let pp_name ppf { pp_name; _ } = pp_name ppf ()
 
   let check_path_is_unique t tname =
-    let exn_of_test_name tname =
-      Registration_error (Fmt.strf "Duplicate test path: %a" Test_name.pp tname)
-    in
-    if String_set.mem (Test_name.file tname) t.filepaths then
-      raise (exn_of_test_name tname)
+    match String_set.mem (Test_name.file tname) t.filepaths with
+    | false -> Ok ()
+    | true -> Error (`Duplicate_test_path (Fmt.to_to_string Test_name.pp tname))
 
   let add t (tname, doc, speed_level, fn) =
-    check_path_is_unique t tname;
-    let tests = { name = tname; speed_level; fn } :: t.tests in
-    let filepaths = String_set.add (Test_name.file tname) t.filepaths in
-    Hashtbl.add t.doc tname doc;
-    { t with tests; filepaths }
+    match check_path_is_unique t tname with
+    | Error _ as e -> e
+    | Ok () ->
+        let tests = { name = tname; speed_level; fn } :: t.tests in
+        let filepaths = String_set.add (Test_name.file tname) t.filepaths in
+        Hashtbl.add t.doc tname doc;
+        Ok { t with tests; filepaths }
 
   let tests t = List.rev t.tests
 
