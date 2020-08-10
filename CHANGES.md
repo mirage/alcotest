@@ -1,3 +1,8 @@
+### unreleased
+
+- Fix compatibility with `fmt.0.8.8+dune` by adding a missing `fmt` dependency
+  in `alcotest`'s dune file (#266, @NathanReb)
+
 ### 1.2.1 (2020-07-15)
 
 - Surround pretty-printed diffs with quotes to make trailing whitespace more
