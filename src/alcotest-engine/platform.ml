@@ -16,6 +16,10 @@ module type S = sig
   type 'a promise
   (** The type of monadic actions handled by {!with_redirect}. *)
 
+  val stdout_isatty : unit -> bool
+  (** Return [true] if standard output refers to a terminal or console window,
+      [false] otherwise. *)
+
   val with_redirect : string -> (unit -> 'a promise) -> 'a promise
   (** [with_redirect output_file f] is called for each test. On Unix, it it
       deals with redirection of standard streams to the [output_file]. The

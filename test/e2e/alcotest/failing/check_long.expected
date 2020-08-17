@@ -1,12 +1,12 @@
 Testing `check_long'.
 This run has ID `<uuid>'.
 
-  ...           wrapping          0   list.ASSERT list
-  [FAIL]        wrapping          0   list.
-  ...           wrapping          1   array.ASSERT array
-  [FAIL]        wrapping          1   array.
-  ...           wrapping          2   nested options.ASSERT nested options
-  [FAIL]        wrapping          2   nested options.
+ASSERT list
+  [FAIL]        wrapping          0   list.
+ASSERT array
+  [FAIL]        wrapping          1   array.
+ASSERT nested options
+  [FAIL]        wrapping          2   nested options.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        wrapping          0   list.                                    │

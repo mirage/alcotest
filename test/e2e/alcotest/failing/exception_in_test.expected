@@ -1,9 +1,9 @@
 Testing `suite-with-failures'.
 This run has ID `<uuid>'.
 
-  ...           test-a          0   Passing.  [OK]          test-a          0   Passing.
-  ...           test-a          1   Failing.> [FAIL]        test-a          1   Failing.
-  ...           test-b          0   Another pass.  [OK]          test-b          0   Another pass.
+  [OK]          test-a          0   Passing.
+> [FAIL]        test-a          1   Failing.
+  [OK]          test-b          0   Another pass.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        test-a          1   Failing.                                   │

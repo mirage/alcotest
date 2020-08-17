@@ -1,32 +1,32 @@
 Testing `check_basic'.
 This run has ID `<uuid>'.
 
-  ...           different basic              0   bool.ASSERT bool
-  [FAIL]        different basic              0   bool.
-  ...           different basic              1   int.ASSERT int
-  [FAIL]        different basic              1   int.
-  ...           different basic              2   int32.ASSERT int32
-  [FAIL]        different basic              2   int32.
-  ...           different basic              3   int64.ASSERT int64
-  [FAIL]        different basic              3   int64.
-  ...           different basic              4   float.ASSERT float
-  [FAIL]        different basic              4   float.
-  ...           different basic              5   char.ASSERT char
-  [FAIL]        different basic              5   char.
-  ...           different basic              6   string.ASSERT string
-  [FAIL]        different basic              6   string.
-  ...           different basic              7   bytes.ASSERT bytes
-  [FAIL]        different basic              7   bytes.
-  ...           different composite          0   list.ASSERT list
-  [FAIL]        different composite          0   list.
-  ...           different composite          1   array.ASSERT array
-  [FAIL]        different composite          1   array.
-  ...           different composite          2   option some.ASSERT option some
-  [FAIL]        different composite          2   option some.
-  ...           different composite          3   result.ASSERT result
-  [FAIL]        different composite          3   result.
-  ...           different composite          4   pair.ASSERT pair
-  [FAIL]        different composite          4   pair.
+ASSERT bool
+  [FAIL]        different basic              0   bool.
+ASSERT int
+  [FAIL]        different basic              1   int.
+ASSERT int32
+  [FAIL]        different basic              2   int32.
+ASSERT int64
+  [FAIL]        different basic              3   int64.
+ASSERT float
+  [FAIL]        different basic              4   float.
+ASSERT char
+  [FAIL]        different basic              5   char.
+ASSERT string
+  [FAIL]        different basic              6   string.
+ASSERT bytes
+  [FAIL]        different basic              7   bytes.
+ASSERT list
+  [FAIL]        different composite          0   list.
+ASSERT array
+  [FAIL]        different composite          1   array.
+ASSERT option some
+  [FAIL]        different composite          2   option some.
+ASSERT result
+  [FAIL]        different composite          3   result.
+ASSERT pair
+  [FAIL]        different composite          4   pair.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        different basic              0   bool.                         │

@@ -1,7 +1,7 @@
 Testing `tail_errors_limit'.
 This run has ID `<uuid>'.
 
-  ...           failing          0   test.> [FAIL]        failing          0   test.
+> [FAIL]        failing          0   test.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        failing          0   test.                                     │

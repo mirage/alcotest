@@ -73,6 +73,8 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
     else if not (Sys.is_directory dir) then
       Fmt.failwith "exists but is not a directory: %S" dir
 
+  let stdout_isatty () = Unix.(isatty stdout)
+
   let with_redirect file fn =
     M.return () >>= fun () ->
     Fmt.(flush stdout) ();
