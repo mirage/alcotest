@@ -74,3 +74,6 @@ val pp_plural : int Fmt.t
       let n = List.length items in
       Fmt.pr "Found %i item%a." n pp_plural n
     ]} *)
+
+val user_error : string -> _
+(** Raise a user error, then fail. *)

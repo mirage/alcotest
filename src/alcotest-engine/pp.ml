@@ -218,3 +218,7 @@ let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
         if not verbose then pp_full_logs ppf log_dir;
         pp_summary ppf r );
       Format.pp_close_box ppf ()
+
+let user_error msg =
+  Fmt.epr "%a: %s\n" Fmt.(styled `Red string) "ERROR" msg;
+  exit 1

@@ -4,6 +4,7 @@
    check_long
    compact
    duplicate_test_names
+   empty_suite_name
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
@@ -18,6 +19,7 @@
    check_long
    compact
    duplicate_test_names
+   empty_suite_name
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
@@ -127,6 +129,31 @@
  (package alcotest)
  (action
    (diff duplicate_test_names.expected duplicate_test_names.processed)))
+
+(rule
+ (target empty_suite_name.actual)
+ (action
+  (with-outputs-to %{target}
+   (run ../../expect_failure.exe %{dep:empty_suite_name.exe})
+  )
+ )
+)
+
+(rule
+ (target empty_suite_name.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:empty_suite_name.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff empty_suite_name.expected empty_suite_name.processed)))
 
 (rule
  (target exception_in_test.actual)

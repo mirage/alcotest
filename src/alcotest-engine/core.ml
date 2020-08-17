@@ -119,7 +119,14 @@ struct
 
   let empty ~suite_name =
     let errors = [] in
-    let suite = Suite.v ~name:suite_name in
+    let suite =
+      match Suite.v ~name:suite_name with
+      | Ok s -> s
+      | Error `Empty_name ->
+          Pp.user_error
+            "Suite name cannot cannot be empty. Please pass a non-empty string \
+             to `run`."
+    in
     let max_label = 0 in
     let verbose = false in
     let compact = false in
@@ -379,7 +386,15 @@ struct
           (path, doc, speed, test))
         ts
     in
-    let suite = List.fold_left Suite.add t.suite test_details in
+    let suite =
+      List.fold_left
+        (fun acc td ->
+          match Suite.add acc td with
+          | Ok acc -> acc
+          | Error (`Duplicate_test_path path) ->
+              Fmt.kstr Pp.user_error "Duplicate test path: `%s'" path)
+        t.suite test_details
+    in
     { t with suite; max_label }
 
   let register_all t cases = List.fold_left register t cases
@@ -403,7 +418,7 @@ struct
     result.failures
 
   let list_tests (type a) (tl : a test list) =
-    let t = register_all (empty ~suite_name:"") tl in
+    let t = register_all (empty ~suite_name:"<not-shown-to-user>") tl in
     list_registered_tests t ();
     M.return ()
 
