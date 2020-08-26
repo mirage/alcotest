@@ -11,6 +11,7 @@
    empty_test_name
    filter_name
    filter_name_regex
+   isatty
    json_output
    list_tests
    only_monadic_effects
@@ -33,6 +34,7 @@
    empty_test_name
    filter_name
    filter_name_regex
+   isatty
    json_output
    list_tests
    only_monadic_effects
@@ -318,6 +320,31 @@
  (package alcotest)
  (action
    (diff filter_name_regex.expected filter_name_regex.processed)))
+
+(rule
+ (target isatty.actual)
+ (action
+  (with-outputs-to %{target}
+   (run %{dep:isatty.exe})
+  )
+ )
+)
+
+(rule
+ (target isatty.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:isatty.actual})
+  )
+ )
+)
+
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff isatty.expected isatty.processed)))
 
 (rule
  (target json_output.actual)

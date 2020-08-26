@@ -1,8 +1,8 @@
 Testing `suite-with-failures'.
 This run has ID `<uuid>'.
 
-  ...           test-a          0   Passing.  [OK]          test-a          0   Passing.
-  ...           test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit.> [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit.
+  [OK]          test-a          0   Passing.
+> [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit.
 
 ┌───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse mollis, orci sed venenatis efficitur, eros est imperdiet purus, sit amet tincidunt massa diam ut elit. │

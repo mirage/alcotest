@@ -1,8 +1,8 @@
 Testing `foo'.
 This run has ID `<uuid>'.
 
-  ...           all          0   one.> [FAIL]        all          0   one.
-  ...           all          1   two.  [OK]          all          1   two.
+> [FAIL]        all          0   one.
+  [OK]          all          1   two.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        all          0   one.                                          │

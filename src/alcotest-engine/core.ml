@@ -207,12 +207,12 @@ struct
     let log_dir = log_dir ~via_symlink:true t |> maybe_collapse_home in
     Pp.suite_results ~verbose ~show_errors ~json ~compact ~log_dir
 
-  let pp_event ~prior_error ~tests_so_far t =
+  let pp_event ~isatty ~prior_error ~tests_so_far t =
     let selector_on_failure =
       (not prior_error) && not (t.verbose || t.show_errors)
     in
     if not t.json then
-      Pp.event ~compact:t.compact ~max_label:t.max_label
+      Pp.event ~isatty ~compact:t.compact ~max_label:t.max_label
         ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
         ~selector_on_failure ~tests_so_far
     else Fmt.nop
@@ -282,9 +282,12 @@ struct
   let perform_test t args { tests_so_far; prior_error } suite =
     let open Suite in
     let test = suite.fn in
-    let pp_event = pp_event t ~prior_error ~tests_so_far in
+    let print_event =
+      pp_event t ~prior_error ~tests_so_far ~isatty:(P.stdout_isatty ())
+        Fmt.stdout
+    in
     M.return () >>= fun () ->
-    pp_event Fmt.stdout (`Start suite.name);
+    print_event (`Start suite.name);
     Fmt.(flush stdout) () (* Show event before any test stderr *);
     test args >|= fun result ->
     (* Store errors *)
@@ -306,7 +309,7 @@ struct
     (* Show any remaining test output before the event *)
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
-    pp_event Fmt.stdout (`Result (suite.name, result));
+    print_event (`Result (suite.name, result));
     let state =
       { tests_so_far = tests_so_far + 1; prior_error = errored || prior_error }
     in

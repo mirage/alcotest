@@ -41,6 +41,7 @@ val event_line :
   [ `Result of Test_name.t * [< Run_result.t ] | `Start of Test_name.t ] Fmt.t
 
 val event :
+  isatty:bool ->
   compact:bool ->
   max_label:int ->
   doc_of_test_name:(Test_name.t -> string) ->

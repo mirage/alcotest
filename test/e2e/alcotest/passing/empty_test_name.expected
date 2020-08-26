@@ -1,7 +1,7 @@
 Testing `<suite-name>'.
 This run has ID `<uuid>'.
 
-  ...                     0   1.  [OK]                    0   1.
+  [OK]                    0   1.
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
 Test Successful in <test-duration>s. 1 test run.

@@ -122,24 +122,25 @@ let event_line ~max_label ~doc_of_test_name ppf = function
       (info ~max_label ~doc_of_test_name) ppf p
   | _ -> assert false
 
-let event ~compact ~max_label ~doc_of_test_name ~selector_on_failure
+let event ~isatty ~compact ~max_label ~doc_of_test_name ~selector_on_failure
     ~tests_so_far ppf event =
-  match (compact, event) with
-  | true, `Start _ -> ()
-  | true, `Result (_, r) ->
-      pp_result_compact ppf r;
-      (* Wrap compact output to terminal width manually *)
-      if (tests_so_far + 1) mod terminal_width () = 0 then
-        Format.pp_force_newline ppf ();
-      ()
-  | false, `Start tname ->
+  match (compact, isatty, event) with
+  | true, _, `Start _ | _, false, `Start _ -> ()
+  | false, true, `Start tname ->
       Fmt.(
         left_padding ~with_selector:false
         ++ const (left left_c yellow_s) "..."
         ++ const (info ~max_label ~doc_of_test_name) tname)
         ppf ()
-  | false, `Result (tname, r) ->
-      Fmt.pf ppf "\r%a@,"
+  | true, _, `Result (_, r) ->
+      pp_result_compact ppf r;
+      (* Wrap compact output to terminal width manually *)
+      if (tests_so_far + 1) mod terminal_width () = 0 then
+        Format.pp_force_newline ppf ();
+      ()
+  | false, _, `Result (tname, r) ->
+      if isatty then Fmt.pf ppf "\r";
+      Fmt.pf ppf "%a@,"
         (pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure)
         (tname, r)
 
