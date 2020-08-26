@@ -25,38 +25,47 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 *)
 
-(* Build with
- * ocamlbuild -pkg alcotest bad.byte *)
+(* Run with [dune exec ./examples/bad/bad.exe] *)
 
 (* A module with functions to test *)
 module To_test = struct
-  let capit letter = Astring.String.Ascii.uppercase letter
+  let capitalise = Astring.String.Ascii.uppercase
 
-  let plus int_list = List.map (fun a -> a + a) int_list
+  let double_all = List.map (fun a -> a + a)
 end
 
-(* The tests *)
-let capit () = Alcotest.(check string) "strings" "A" (To_test.capit "b")
+let test_capitalise () =
+  To_test.capitalise "b" |> Alcotest.(check string) "strings" "A"
 
-let plus () =
-  Alcotest.(check (list int)) "int lists" [ 1 ] (To_test.plus [ 1; 1; 2; 3 ])
+let test_double_all () =
+  To_test.double_all [ 1; 1; 2; 3 ]
+  |> Alcotest.(check (list int)) "int lists" [ 1 ]
 
-let test_one = [ ("Capitalize", `Quick, capit); ("Add entries", `Slow, plus) ]
-
-let test_two =
+let suite1 =
   [
-    ("ok", `Quick, fun () -> ());
-    ("Capitalize", `Quick, capit);
-    ("ok", `Quick, fun () -> ());
+    ( "to_test",
+      [
+        ("capitalise", `Quick, test_capitalise);
+        ("double all", `Slow, test_double_all);
+      ] );
   ]
 
-(* Run it *)
-let one () =
-  try Alcotest.run ~and_exit:false "My first test" [ ("Ωèone", test_one) ]
-  with Alcotest.Test_error -> Printf.printf "Continue!!\n%!"
+let suite2 =
+  [
+    ( "Ωèone",
+      [
+        ("Passing test 1", `Quick, fun () -> ());
+        ( "Failing test",
+          `Quick,
+          fun () -> Alcotest.fail "This was never going to work..." );
+        ("Passing test 2", `Quick, fun () -> ());
+      ] );
+  ]
 
-let two () = Alcotest.run ~and_exit:true "Hoho" [ ("two", test_two) ]
-
+(* Run both suites completely, even if the first contains failures *)
 let () =
-  one ();
-  two ()
+  try Alcotest.run ~and_exit:false "First suite" suite1
+  with Alcotest.Test_error ->
+    Printf.printf "Forging ahead regardless!\n%!";
+    Alcotest.run ~and_exit:false "Second suite" suite2;
+    Printf.printf "Finally done."
