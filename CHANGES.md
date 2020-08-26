@@ -1,4 +1,4 @@
-### Unreleased
+### 1.2.2 (2020-08-26)
 
 - Fail gracefully when the user supplies an empty suite name. (#265, @CraigFe)
 
