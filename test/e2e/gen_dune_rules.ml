@@ -56,8 +56,10 @@ let global_stanza ~libraries filenames =
 let example_rule_stanza ~expect_failure filename =
   let base = chop_extension filename in
   let options = options_of_test_file filename |> List.map (( ^ ) " ") in
-  let expect_failure =
-    if expect_failure then "../../expect_failure.exe " else ""
+  let accepted_exit_codes =
+    Fmt.str "(or %d %d)"
+      (if expect_failure then 1 else 0)
+      Cmdliner.Term.exit_status_internal_error
   in
   (* Run Alcotest to get *.actual, then pass through the strip_randomness
      sanitiser to get *.processed. *)
@@ -67,10 +69,10 @@ let example_rule_stanza ~expect_failure filename =
  (target %s.actual)
  (action
   (with-outputs-to %%{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run %s%%{dep:%s.exe}%a)))))
+   (with-accepted-exit-codes %s
+    (run %%{dep:%s.exe}%a)))))
 |}
-    base expect_failure base
+    base accepted_exit_codes base
     Fmt.(list string)
     options;
 

@@ -34,8 +34,8 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:check_basic.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:check_basic.exe})))))
 
 (rule
  (target check_basic.processed)
@@ -53,8 +53,8 @@
  (target check_long.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:check_long.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:check_long.exe})))))
 
 (rule
  (target check_long.processed)
@@ -72,8 +72,8 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:compact.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:compact.exe})))))
 
 (rule
  (target compact.processed)
@@ -91,8 +91,8 @@
  (target duplicate_test_names.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:duplicate_test_names.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:duplicate_test_names.exe})))))
 
 (rule
  (target duplicate_test_names.processed)
@@ -110,8 +110,8 @@
  (target empty_suite_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:empty_suite_name.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:empty_suite_name.exe})))))
 
 (rule
  (target empty_suite_name.processed)
@@ -129,8 +129,8 @@
  (target exception_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:exception_in_test.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:exception_in_test.exe})))))
 
 (rule
  (target exception_in_test.processed)
@@ -148,8 +148,8 @@
  (target filter_all_tests.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:filter_all_tests.exe} test bar 1)))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:filter_all_tests.exe} test bar 1)))))
 
 (rule
  (target filter_all_tests.processed)
@@ -167,8 +167,8 @@
  (target invalid_arg_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:invalid_arg_in_test.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:invalid_arg_in_test.exe})))))
 
 (rule
  (target invalid_arg_in_test.processed)
@@ -186,8 +186,8 @@
  (target long_test_case_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:long_test_case_name.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:long_test_case_name.exe})))))
 
 (rule
  (target long_test_case_name.processed)
@@ -205,8 +205,8 @@
  (target tail_errors_limit.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:tail_errors_limit.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:tail_errors_limit.exe})))))
 
 (rule
  (target tail_errors_limit.processed)
@@ -224,8 +224,8 @@
  (target tail_errors_unlimited.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:tail_errors_unlimited.exe})))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:tail_errors_unlimited.exe})))))
 
 (rule
  (target tail_errors_unlimited.processed)
@@ -243,8 +243,8 @@
  (target unknown_option.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 0 125)
-    (run ../../expect_failure.exe %{dep:unknown_option.exe} --dry-runn)))))
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:unknown_option.exe} --dry-runn)))))
 
 (rule
  (target unknown_option.processed)
