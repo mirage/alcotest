@@ -14,20 +14,14 @@
  (target async_failure.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:async_failure.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run ../../expect_failure.exe %{dep:async_failure.exe})))))
 
 (rule
  (target async_failure.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:async_failure.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:async_failure.actual}))))
 
 (rule
  (alias runtest)
@@ -39,20 +33,14 @@
  (target fail_with.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:fail_with.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run ../../expect_failure.exe %{dep:fail_with.exe})))))
 
 (rule
  (target fail_with.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:fail_with.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:fail_with.actual}))))
 
 (rule
  (alias runtest)

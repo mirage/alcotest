@@ -67,10 +67,8 @@ let example_rule_stanza ~expect_failure filename =
  (target %s.actual)
  (action
   (with-outputs-to %%{target}
-   (run %s%%{dep:%s.exe}%a)
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %s%%{dep:%s.exe}%a)))))
 |}
     base expect_failure base
     Fmt.(list string)
@@ -82,11 +80,7 @@ let example_rule_stanza ~expect_failure filename =
  (target %s.processed)
  (action
   (with-outputs-to %%{target}
-   (run ../../strip_randomness.exe %%{dep:%s.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %%{dep:%s.actual}))))
 |}
     base base
 

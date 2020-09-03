@@ -50,20 +50,14 @@
  (target and_exit_false.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:and_exit_false.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:and_exit_false.exe})))))
 
 (rule
  (target and_exit_false.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:and_exit_false.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:and_exit_false.actual}))))
 
 (rule
  (alias runtest)
@@ -75,20 +69,14 @@
  (target and_exit_true.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:and_exit_true.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:and_exit_true.exe})))))
 
 (rule
  (target and_exit_true.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:and_exit_true.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:and_exit_true.actual}))))
 
 (rule
  (alias runtest)
@@ -100,20 +88,14 @@
  (target assert_and_verbose.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:assert_and_verbose.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:assert_and_verbose.exe})))))
 
 (rule
  (target assert_and_verbose.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:assert_and_verbose.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:assert_and_verbose.actual}))))
 
 (rule
  (alias runtest)
@@ -125,20 +107,14 @@
  (target assert_not_printed.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:assert_not_printed.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:assert_not_printed.exe})))))
 
 (rule
  (target assert_not_printed.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:assert_not_printed.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:assert_not_printed.actual}))))
 
 (rule
  (alias runtest)
@@ -150,20 +126,14 @@
  (target basic.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:basic.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:basic.exe})))))
 
 (rule
  (target basic.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:basic.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:basic.actual}))))
 
 (rule
  (alias runtest)
@@ -175,20 +145,14 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:check_basic.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:check_basic.exe})))))
 
 (rule
  (target check_basic.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:check_basic.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:check_basic.actual}))))
 
 (rule
  (alias runtest)
@@ -200,20 +164,14 @@
  (target cli_verbose.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:cli_verbose.exe} --verbose)
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:cli_verbose.exe} --verbose)))))
 
 (rule
  (target cli_verbose.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:cli_verbose.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:cli_verbose.actual}))))
 
 (rule
  (alias runtest)
@@ -225,20 +183,14 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:compact.exe} --compact)
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:compact.exe} --compact)))))
 
 (rule
  (target compact.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:compact.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:compact.actual}))))
 
 (rule
  (alias runtest)
@@ -250,20 +202,14 @@
  (target empty_test_name.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:empty_test_name.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:empty_test_name.exe})))))
 
 (rule
  (target empty_test_name.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:empty_test_name.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:empty_test_name.actual}))))
 
 (rule
  (alias runtest)
@@ -275,20 +221,14 @@
  (target filter_name.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:filter_name.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:filter_name.exe})))))
 
 (rule
  (target filter_name.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:filter_name.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:filter_name.actual}))))
 
 (rule
  (alias runtest)
@@ -300,20 +240,14 @@
  (target filter_name_regex.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:filter_name_regex.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:filter_name_regex.exe})))))
 
 (rule
  (target filter_name_regex.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:filter_name_regex.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:filter_name_regex.actual}))))
 
 (rule
  (alias runtest)
@@ -325,20 +259,14 @@
  (target isatty.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:isatty.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:isatty.exe})))))
 
 (rule
  (target isatty.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:isatty.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:isatty.actual}))))
 
 (rule
  (alias runtest)
@@ -350,20 +278,14 @@
  (target json_output.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:json_output.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:json_output.exe})))))
 
 (rule
  (target json_output.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:json_output.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:json_output.actual}))))
 
 (rule
  (alias runtest)
@@ -375,20 +297,14 @@
  (target list_tests.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:list_tests.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:list_tests.exe})))))
 
 (rule
  (target list_tests.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:list_tests.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:list_tests.actual}))))
 
 (rule
  (alias runtest)
@@ -400,20 +316,14 @@
  (target only_monadic_effects.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:only_monadic_effects.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:only_monadic_effects.exe})))))
 
 (rule
  (target only_monadic_effects.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:only_monadic_effects.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:only_monadic_effects.actual}))))
 
 (rule
  (alias runtest)
@@ -425,20 +335,14 @@
  (target quick_only.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:quick_only.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:quick_only.exe})))))
 
 (rule
  (target quick_only.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:quick_only.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:quick_only.actual}))))
 
 (rule
  (alias runtest)
@@ -450,20 +354,14 @@
  (target quick_only_regex.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:quick_only_regex.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:quick_only_regex.exe})))))
 
 (rule
  (target quick_only_regex.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:quick_only_regex.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:quick_only_regex.actual}))))
 
 (rule
  (alias runtest)
@@ -475,20 +373,14 @@
  (target separator_testname.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:separator_testname.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:separator_testname.exe})))))
 
 (rule
  (target separator_testname.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:separator_testname.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:separator_testname.actual}))))
 
 (rule
  (alias runtest)
@@ -500,20 +392,14 @@
  (target unicode_testname.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:unicode_testname.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:unicode_testname.exe})))))
 
 (rule
  (target unicode_testname.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unicode_testname.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:unicode_testname.actual}))))
 
 (rule
  (alias runtest)
@@ -525,20 +411,14 @@
  (target verbose_newlines.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:verbose_newlines.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:verbose_newlines.exe})))))
 
 (rule
  (target verbose_newlines.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:verbose_newlines.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:verbose_newlines.actual}))))
 
 (rule
  (alias runtest)
