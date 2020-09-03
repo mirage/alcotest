@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  run "test_color"
+  run __FILE__
     [
       ( "alpha",
         [

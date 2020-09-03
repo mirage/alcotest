@@ -4,7 +4,7 @@ let id_case typ typ_str v1 v2 =
 
 let () =
   let open Alcotest in
-  run ~verbose:true "check_basic"
+  run ~verbose:true __FILE__
     [
       ( "different basic",
         [

@@ -5,7 +5,7 @@
 let () =
   let open Alcotest in
   let s tc = tc ^ ": SHOULD NOT BE PRINTED" in
-  run "assert-not-printed"
+  run __FILE__
     [
       ( "alpha",
         [

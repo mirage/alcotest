@@ -10,7 +10,7 @@ let test_lwt switch () =
 let () =
   let open Alcotest_lwt in
   Lwt_main.run
-  @@ run "foo"
+  @@ run __FILE__
        [
          ( "all",
            [

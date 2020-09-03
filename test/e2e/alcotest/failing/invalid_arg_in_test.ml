@@ -1,6 +1,6 @@
 let () =
   let open Alcotest in
-  run "suite-with-failures"
+  run __FILE__
     [
       ( "test-a",
         [

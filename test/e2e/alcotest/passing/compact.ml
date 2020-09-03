@@ -3,7 +3,7 @@ open Alcotest_engine.Private.Utils
 let () =
   let open Alcotest in
   let id () = () in
-  run "compact"
+  run __FILE__
     [
       ( "test-a",
         List.init 200 (fun i ->
