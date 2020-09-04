@@ -13,7 +13,7 @@ module Alcotest =
 let () =
   let open Alcotest in
   let id () = () in
-  run "isatty"
+  run __FILE__
     [
       ( "test-a",
         [

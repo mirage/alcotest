@@ -1,4 +1,4 @@
-Testing `check_long'.
+Testing `test/e2e/alcotest/failing/check_long.ml'.
 This run has ID `<uuid>'.
 
 ASSERT list

@@ -28,7 +28,7 @@ module Runner = Alcotest_engine.Core.Make (Alcotest.Unix) (Terminal)
 
 let () =
   let (_ : unit Terminal.t) =
-    Runner.run ~verbose:true "event_ordering"
+    Runner.run ~verbose:true __FILE__
       [
         ( "alpha",
           [

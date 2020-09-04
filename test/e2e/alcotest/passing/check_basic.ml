@@ -41,7 +41,7 @@ let labeled_check () = Alcotest.(check' int) ~msg:"Foo" ~expected:1 ~actual:1
 
 let () =
   let open Alcotest in
-  run "passing testables"
+  run __FILE__
     [
       ( "reflexive basic",
         [

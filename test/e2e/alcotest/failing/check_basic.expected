@@ -1,4 +1,4 @@
-Testing `check_basic'.
+Testing `test/e2e/alcotest/failing/check_basic.ml'.
 This run has ID `<uuid>'.
 
 ASSERT bool

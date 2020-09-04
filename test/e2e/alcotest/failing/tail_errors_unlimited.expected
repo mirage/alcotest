@@ -1,4 +1,4 @@
-Testing `tail_errors_unlimited'.
+Testing `test/e2e/alcotest/failing/tail_errors_unlimited.ml'.
 This run has ID `<uuid>'.
 
 > [FAIL]        failing          0   test.

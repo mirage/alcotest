@@ -1,4 +1,4 @@
-Testing `foo'.
+Testing `test/e2e/alcotest-lwt/failing/fail_with.ml'.
 This run has ID `<uuid>'.
 
 > [FAIL]        all          0   one.

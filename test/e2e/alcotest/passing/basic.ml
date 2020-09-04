@@ -1,7 +1,7 @@
 let () =
   let open Alcotest in
   let id () = () in
-  run "suite-name"
+  run __FILE__
     [
       ( "test-a",
         [

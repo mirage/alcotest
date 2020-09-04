@@ -36,5 +36,5 @@ let test_nested_options =
 
 let () =
   let open Alcotest in
-  run ~verbose:true "check_long"
+  run ~verbose:true __FILE__
     [ ("wrapping", [ test_char_list; test_int64_array; test_nested_options ]) ]

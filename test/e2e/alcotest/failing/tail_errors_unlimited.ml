@@ -6,5 +6,5 @@ let test_error_output () =
 
 let () =
   let open Alcotest in
-  run ~tail_errors:`Unlimited "tail_errors_unlimited"
+  run ~tail_errors:`Unlimited __FILE__
     [ ("failing", [ test_case "test" `Quick test_error_output ]) ]

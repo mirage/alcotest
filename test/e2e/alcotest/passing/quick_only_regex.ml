@@ -3,7 +3,7 @@ let () =
   let id () = () in
   run
     ~argv:[| ""; "test"; "--quick"; ".*-a" |]
-    "suite-name"
+    __FILE__
     [
       ( "test-a",
         [

@@ -3,7 +3,7 @@ let test_lwt _switch () = Lwt.fail_with "should fail"
 let () =
   let open Alcotest_lwt in
   Lwt_main.run
-  @@ run "foo"
+  @@ run __FILE__
        [
          ( "all",
            [
