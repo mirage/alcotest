@@ -12,20 +12,14 @@
  (target cli_options.actual)
  (action
   (with-outputs-to %{target}
-   (run %{dep:cli_options.exe} --json)
-  )
- )
-)
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:cli_options.exe} --json)))))
 
 (rule
  (target cli_options.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:cli_options.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:cli_options.actual}))))
 
 (rule
  (alias runtest)

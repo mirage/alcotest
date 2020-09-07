@@ -34,20 +34,14 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:check_basic.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:check_basic.exe})))))
 
 (rule
  (target check_basic.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:check_basic.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:check_basic.actual}))))
 
 (rule
  (alias runtest)
@@ -59,20 +53,14 @@
  (target check_long.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:check_long.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:check_long.exe})))))
 
 (rule
  (target check_long.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:check_long.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:check_long.actual}))))
 
 (rule
  (alias runtest)
@@ -84,20 +72,14 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:compact.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:compact.exe})))))
 
 (rule
  (target compact.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:compact.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:compact.actual}))))
 
 (rule
  (alias runtest)
@@ -109,20 +91,14 @@
  (target duplicate_test_names.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:duplicate_test_names.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:duplicate_test_names.exe})))))
 
 (rule
  (target duplicate_test_names.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:duplicate_test_names.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:duplicate_test_names.actual}))))
 
 (rule
  (alias runtest)
@@ -134,20 +110,14 @@
  (target empty_suite_name.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:empty_suite_name.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:empty_suite_name.exe})))))
 
 (rule
  (target empty_suite_name.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:empty_suite_name.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:empty_suite_name.actual}))))
 
 (rule
  (alias runtest)
@@ -159,20 +129,14 @@
  (target exception_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:exception_in_test.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:exception_in_test.exe})))))
 
 (rule
  (target exception_in_test.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:exception_in_test.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:exception_in_test.actual}))))
 
 (rule
  (alias runtest)
@@ -184,20 +148,14 @@
  (target filter_all_tests.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:filter_all_tests.exe} test bar 1)
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:filter_all_tests.exe} test bar 1)))))
 
 (rule
  (target filter_all_tests.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:filter_all_tests.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:filter_all_tests.actual}))))
 
 (rule
  (alias runtest)
@@ -209,20 +167,14 @@
  (target invalid_arg_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:invalid_arg_in_test.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:invalid_arg_in_test.exe})))))
 
 (rule
  (target invalid_arg_in_test.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:invalid_arg_in_test.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:invalid_arg_in_test.actual}))))
 
 (rule
  (alias runtest)
@@ -234,20 +186,14 @@
  (target long_test_case_name.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:long_test_case_name.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:long_test_case_name.exe})))))
 
 (rule
  (target long_test_case_name.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:long_test_case_name.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:long_test_case_name.actual}))))
 
 (rule
  (alias runtest)
@@ -259,20 +205,14 @@
  (target tail_errors_limit.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:tail_errors_limit.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:tail_errors_limit.exe})))))
 
 (rule
  (target tail_errors_limit.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:tail_errors_limit.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:tail_errors_limit.actual}))))
 
 (rule
  (alias runtest)
@@ -284,20 +224,14 @@
  (target tail_errors_unlimited.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:tail_errors_unlimited.exe})
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:tail_errors_unlimited.exe})))))
 
 (rule
  (target tail_errors_unlimited.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:tail_errors_unlimited.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:tail_errors_unlimited.actual}))))
 
 (rule
  (alias runtest)
@@ -309,20 +243,14 @@
  (target unknown_option.actual)
  (action
   (with-outputs-to %{target}
-   (run ../../expect_failure.exe %{dep:unknown_option.exe} --dry-runn)
-  )
- )
-)
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:unknown_option.exe} --dry-runn)))))
 
 (rule
  (target unknown_option.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unknown_option.actual})
-  )
- )
-)
-
+   (run ../../strip_randomness.exe %{dep:unknown_option.actual}))))
 
 (rule
  (alias runtest)
