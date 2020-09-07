@@ -1,3 +1,8 @@
+### Unreleased
+
+- Fix a bug in the handling of the `~and_exit:false` option when the test suite
+  fails. (#271, @CraigFe)
+
 ### 1.2.2 (2020-08-26)
 
 - Fail gracefully when the user supplies an empty suite name. (#265, @CraigFe)

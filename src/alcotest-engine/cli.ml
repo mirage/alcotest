@@ -299,9 +299,9 @@ struct
     ( Term.(pure (fun () -> list_tests) $ set_color $ pure tests),
       Term.info "list" ~doc )
 
-  let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?argv name (args : 'a Term.t)
-      (tl : 'a test list) =
+  let run_with_args ?(and_exit = true) ?verbose ?compact ?tail_errors
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?argv name
+      (args : 'a Term.t) (tl : 'a test list) =
     let ( >>= ) = M.bind in
     let runtime_flags =
       { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
@@ -309,24 +309,23 @@ struct
     let choices =
       [
         list_cmd tl;
-        test_cmd ?and_exit runtime_flags ~filter:(`Test_filter filter) args name
+        test_cmd ~and_exit runtime_flags ~filter:(`Test_filter filter) args name
           tl;
       ]
     in
     let exit_or_return result =
-      match and_exit with
-      | Some true -> exit (Term.exit_status_of_result result)
-      | _ -> M.return ()
+      if and_exit then exit (Term.exit_status_of_result result) else M.return ()
     in
     let result =
       Term.eval_choice ?argv
-        (default_cmd ?and_exit runtime_flags args name tl)
+        ~catch:and_exit (* Only log exceptions not raised to the user code *)
+        (default_cmd ~and_exit runtime_flags args name tl)
         choices
     in
     match result with
     | `Ok unit_m -> unit_m >>= fun () -> exit_or_return result
-    | `Help | `Version -> exit_or_return result
-    | `Error _ -> exit (Term.exit_status_of_result result)
+    | `Help | `Version | `Error `Exn -> exit_or_return result
+    | `Error (`Parse | `Term) -> exit (Term.exit_status_of_result result)
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir ?argv name tl =
