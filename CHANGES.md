@@ -1,4 +1,6 @@
-### Unreleased
+### 1.2.3 (2020-09-07)
+
+- Require Dune 2.2. (#274, @CraigFe)
 
 - Fix a bug in the handling of the `~and_exit:false` option when the test suite
   fails. (#271, @CraigFe)
