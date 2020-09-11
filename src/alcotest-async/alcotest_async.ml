@@ -15,7 +15,9 @@ module Promise = struct
   let bind x f = bind x ~f
 
   let catch t on_error =
-    try_with t >>= function Ok a -> return a | Error exn -> on_error exn
+    try_with ~extract_exn:true t >>= function
+    | Ok a -> return a
+    | Error exn -> on_error exn
 end
 
 module V1 = struct
