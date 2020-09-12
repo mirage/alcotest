@@ -14,6 +14,7 @@ depends: [
   "alcotest" {= version}
   "async_unix" {>= "v0.9.0"}
   "core_kernel" {>= "v0.9.0"}
+  "async" {with-test}
 ]
 build: [
   ["dune" "subst"] {pinned}
