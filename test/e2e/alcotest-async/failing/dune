@@ -1,0 +1,35 @@
+; alcotest-async depends on core_unix, which does not support Windows.
+
+(executable
+ (name exceptions)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (libraries alcotest alcotest-async async async_kernel async_unix core))
+
+(rule
+ (target exceptions.actual)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (with-outputs-to
+   %{target}
+   (with-accepted-exit-codes
+    (or 1 125)
+    (run %{dep:exceptions.exe})))))
+
+(rule
+ (target exceptions.processed)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:exceptions.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest-async)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (diff exceptions.expected exceptions.processed)))
