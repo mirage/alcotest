@@ -1,0 +1,21 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR auto))))
+
+(include dune.inc)
+
+(rule
+ (targets dune.gen)
+ (deps
+  (source_tree .))
+ (action
+  (with-stdout-to
+   %{targets}
+   (run ../../gen_dune_rules.exe --expect-failure --package "alcotest-async"
+     --libraries "alcotest-async async async_kernel async_unix core"))))
+
+(rule
+ (alias runtest)
+ (action
+  (diff dune.inc dune.gen)))
