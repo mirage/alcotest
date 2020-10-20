@@ -28,6 +28,7 @@ depends: [
   "re"
   "stdlib-shims"
   "uutf"
+  "terminal_size"
 ]
 build: [
   ["dune" "subst"] {pinned}

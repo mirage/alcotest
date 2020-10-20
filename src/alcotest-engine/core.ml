@@ -65,6 +65,12 @@ module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
 module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
 struct
   module P = P (M)
+
+  module Pp = struct
+    include Pp
+    include Pp.Make (P)
+  end
+
   module M = Monad.Extend (M)
   module Suite = Suite (M)
   include M.Infix

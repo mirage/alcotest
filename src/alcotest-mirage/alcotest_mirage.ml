@@ -8,6 +8,8 @@ module Make (C : Mirage_clock.MCLOCK) = struct
 
     let stdout_isatty () = true
 
+    let stdout_columns () = None
+
     let with_redirect _ fn = fn ()
 
     let setup_std_outputs ?style_renderer:_ ?utf_8:_ () = ()

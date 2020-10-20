@@ -75,6 +75,8 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
 
   let stdout_isatty () = Unix.(isatty stdout)
 
+  let stdout_columns = Terminal_size.get_columns
+
   let with_redirect file fn =
     M.return () >>= fun () ->
     Fmt.(flush stdout) ();

@@ -20,6 +20,10 @@ module type S = sig
   (** Return [true] if standard output refers to a terminal or console window,
       [false] otherwise. *)
 
+  val stdout_columns : unit -> int option
+  (** [stdout_columns ()] is the current width of [stdout] in columns, or [None]
+      if no width can be determined (e.g. [stdout] is not a TTY). *)
+
   val with_redirect : string -> (unit -> 'a promise) -> 'a promise
   (** [with_redirect output_file f] is called for each test. On Unix, it it
       deals with redirection of standard streams to the [output_file]. The
