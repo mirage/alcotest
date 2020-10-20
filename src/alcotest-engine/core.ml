@@ -255,7 +255,9 @@ struct
     in
     Fmt.(
       Pp.with_surrounding_box
-        (const (Pp.event_line ~max_label ~doc_of_test_name) (`Result (path, e)))
+        (const
+           (Pp.event_line ~margins:3 ~max_label ~doc_of_test_name)
+           (`Result (path, e)))
       ++ pp_logs
       ++ Pp.horizontal_rule
       ++ cut)

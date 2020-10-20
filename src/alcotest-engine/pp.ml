@@ -63,7 +63,11 @@ struct
 
   let yellow_s fmt = color `Yellow fmt
 
-  let left_c = 14
+  let left_gutter = 2
+
+  let left_tag = 14
+
+  let left_total = left_gutter + left_tag
 
   let left nb pp ppf a =
     let s = Fmt.to_to_string pp a in
@@ -83,9 +87,20 @@ struct
     in
     Fmt.pf ppf "%a%s%3d" Fmt.(styled `Cyan Test_name.pp) tname padding index
 
-  let info ~max_label ~doc_of_test_name ppf tname =
-    Fmt.pf ppf "%a   %s" (pp_test_name ~max_label) tname
-      (doc_of_test_name tname)
+  let info ?(available_width = Lazy.force terminal_width) ~max_label
+      ~doc_of_test_name ppf tname =
+    let pp_test_name ppf = Fmt.pf ppf "%a   " (pp_test_name ~max_label) tname in
+    let test_doc =
+      let test_doc = doc_of_test_name tname in
+      let available_width =
+        pp_test_name Format.str_formatter;
+        let used_width = String.length_utf8 (Format.flush_str_formatter ()) in
+        available_width - used_width
+      in
+      if String.length_utf8 test_doc <= available_width then test_doc
+      else String.prefix_utf8 (available_width - 3) test_doc ^ "..."
+    in
+    Fmt.pf ppf "%t%s" pp_test_name test_doc
 
   let tag_of_result = function
     | `Ok -> `Ok
@@ -95,7 +110,7 @@ struct
 
   let pp_result ppf result =
     let tag = tag_of_result result in
-    left left_c (pp_tag ~wrapped:true) ppf tag
+    left left_tag (pp_tag ~wrapped:true) ppf tag
 
   let pp_result_compact ppf result =
     let colour = result |> tag_of_result |> colour_of_tag in
@@ -119,13 +134,17 @@ struct
     let with_selector = selector_on_failure && Run_result.is_failure result in
     (left_padding ~with_selector) ppf ();
     pp_result ppf result;
-    (info ~max_label ~doc_of_test_name) ppf path;
+    let available_width = Lazy.force terminal_width - left_total in
+    (info ~available_width ~max_label ~doc_of_test_name) ppf path;
     ()
 
-  let event_line ~max_label ~doc_of_test_name ppf = function
+  let event_line ~margins ~max_label ~doc_of_test_name ppf = function
     | `Result (p, r) ->
         pp_result ppf r;
-        (info ~max_label ~doc_of_test_name) ppf p
+        (info
+           ~available_width:(Lazy.force terminal_width - margins - left_total)
+           ~max_label ~doc_of_test_name)
+          ppf p
     | _ -> assert false
 
   let event ~isatty ~compact ~max_label ~doc_of_test_name ~selector_on_failure
@@ -135,8 +154,12 @@ struct
     | false, true, `Start tname ->
         Fmt.(
           left_padding ~with_selector:false
-          ++ const (left left_c yellow_s) "..."
-          ++ const (info ~max_label ~doc_of_test_name) tname)
+          ++ const (left left_tag yellow_s) "..."
+          ++ const
+               (info
+                  ~available_width:(Lazy.force terminal_width - left_total)
+                  ~max_label ~doc_of_test_name)
+               tname)
           ppf ()
     | true, _, `Result (_, r) ->
         pp_result_compact ppf r;

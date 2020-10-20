@@ -34,6 +34,7 @@ module type S = sig
   type result
 
   val info :
+    ?available_width:int ->
     max_label:int ->
     doc_of_test_name:(Test_name.t -> string) ->
     Test_name.t Fmt.t
@@ -41,6 +42,7 @@ module type S = sig
   val rresult_error : Run_result.t Fmt.t
 
   val event_line :
+    margins:int ->
     max_label:int ->
     doc_of_test_name:(Test_name.t -> string) ->
     [ `Result of Test_name.t * [< Run_result.t ] | `Start of Test_name.t ] Fmt.t
