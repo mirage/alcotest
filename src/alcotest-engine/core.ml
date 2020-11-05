@@ -81,7 +81,7 @@ struct
             let tail =
               String.Sub.to_string (String.sub ~start:(String.length home) path)
             in
-            "~" ^ tail )
+            "~" ^ tail)
 
   (* Types *)
   type return = unit M.t
@@ -267,14 +267,14 @@ struct
    fun args ->
     M.catch
       (fun () -> f args >|= fun () -> `Ok)
-      ( (function
-          | Check_error err ->
-              let err = Fmt.(err ++ const string (bt ())) in
-              `Error (path, err)
-          | Failure s -> exn path "failure" Fmt.(const string s)
-          | Invalid_argument s -> exn path "invalid" Fmt.(const string s)
-          | e -> exn path "exception" Fmt.(const exn e))
-      >> M.return )
+      ((function
+         | Check_error err ->
+             let err = Fmt.(err ++ const string (bt ())) in
+             `Error (path, err)
+         | Failure s -> exn path "failure" Fmt.(const string s)
+         | Invalid_argument s -> exn path "invalid" Fmt.(const string s)
+         | e -> exn path "exception" Fmt.(const exn e))
+      >> M.return)
 
   type running_state = { tests_so_far : int; prior_error : bool }
   (** State that is kept during the test executions. *)
@@ -404,7 +404,7 @@ struct
 
   let run_tests ?filter t () args =
     let suite = Suite.tests t.suite in
-    ( match filter with
+    (match filter with
     | None -> result t suite args
     | Some labels ->
         let is_empty = filter_test_cases ~subst:false labels suite = [] in
@@ -412,10 +412,10 @@ struct
           Fmt.(pf stderr)
             "%a\n" red
             "Invalid request (no tests to run, filter skipped everything)!";
-          exit 1 )
+          exit 1)
         else
           let tests = filter_test_cases ~subst:true labels suite in
-          result t tests args )
+          result t tests args)
     >|= fun result ->
     (pp_suite_results t) Fmt.stdout result;
     result.failures

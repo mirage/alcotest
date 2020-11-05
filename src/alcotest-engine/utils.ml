@@ -17,7 +17,7 @@ module List = struct
       | x :: xs -> (
           match f x with
           | None -> (inner [@tailcall]) acc xs
-          | Some y -> (inner [@tailcall]) (y :: acc) xs )
+          | Some y -> (inner [@tailcall]) (y :: acc) xs)
     in
     inner [] l
 

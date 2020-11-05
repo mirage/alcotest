@@ -46,7 +46,7 @@ let left nb pp ppf a =
   if nb <= 0 then pp ppf a
   else (
     pp ppf a;
-    Fmt.string ppf (String.v ~len:nb (fun _ -> ' ')) )
+    Fmt.string ppf (String.v ~len:nb (fun _ -> ' ')))
 
 let pp_test_name ~max_label ppf tname =
   let name_len = Test_name.length tname in
@@ -104,8 +104,8 @@ let pp_result_compact ppf result =
 
 let left_padding ~with_selector =
   let open Fmt in
-  ( if with_selector then const (styled `Bold (styled `Red char)) '>'
-  else const char ' ' )
+  (if with_selector then const (styled `Bold (styled `Red char)) '>'
+  else const char ' ')
   ++ const char ' '
 
 let pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure ppf
@@ -178,11 +178,11 @@ let with_surrounding_box (type a) (f : a Fmt.t) : a Fmt.t =
 
 let horizontal_rule (type a) ppf (_ : a) =
   let open Fmt in
-  ( const string " "
+  (const string " "
   ++ const
        (styled `Faint string)
        (List.init (terminal_width () - 2) (fun _ -> "─") |> String.concat)
-  ++ cut )
+  ++ cut)
     ppf ()
 
 let pp_full_logs ppf log_dir =
@@ -217,7 +217,7 @@ let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
       (pp_suite_errors ~show_all:(verbose || show_errors) r.errors) ppf ();
       if print_summary then (
         if not verbose then pp_full_logs ppf log_dir;
-        pp_summary ppf r );
+        pp_summary ppf r);
       Format.pp_close_box ppf ()
 
 let user_error msg =

@@ -16,10 +16,10 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
         | [] -> ()
         | name :: names ->
             let path = parent ^ sep ^ name in
-            ( try Unix.mkdir path mode
-              with Unix.Unix_error (Unix.EEXIST, _, _) ->
-                if Sys.is_directory path then () (* the directory exists *)
-                else Fmt.strf "mkdir: %s: is a file" path |> failwith );
+            (try Unix.mkdir path mode
+             with Unix.Unix_error (Unix.EEXIST, _, _) ->
+               if Sys.is_directory path then () (* the directory exists *)
+               else Fmt.strf "mkdir: %s: is a file" path |> failwith);
             mk path names
       in
       match String.cuts ~empty:true ~sep path with
@@ -56,7 +56,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
             retries target
         else (
           unlink_if_exists link_name;
-          inner ~retries:(retries + 1) )
+          inner ~retries:(retries + 1))
     in
     inner ~retries:0
 
@@ -69,7 +69,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
         unlink_if_exists this_exe;
         unlink_if_exists latest;
         symlink ~to_dir:true ~target:dir ~link_name:this_exe;
-        symlink ~to_dir:true ~target:dir ~link_name:latest ) )
+        symlink ~to_dir:true ~target:dir ~link_name:latest))
     else if not (Sys.is_directory dir) then
       Fmt.failwith "exists but is not a directory: %S" dir
 
