@@ -10,6 +10,9 @@ doc: "https://mirage.github.io/alcotest"
 bug-reports: "https://github.com/mirage/alcotest/issues"
 depends: [
   "dune" {>= "2.2"}
+  "re" {with-test}
+  "cmdliner" {with-test}
+  "fmt"
   "ocaml" {>= "4.03.0"}
   "alcotest" {= version}
   "mirage-clock" {>= "2.0.0"}

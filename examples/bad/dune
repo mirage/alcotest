@@ -6,4 +6,5 @@
 
 (alias
  (name runtest)
+ (package alcotest)
  (deps bad.exe))

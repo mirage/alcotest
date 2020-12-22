@@ -39,6 +39,12 @@ tests to run.
  (description "Async-based helpers for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
  (depends
+  (re :with-test)
+  (fmt :with-test)
+  (cmdliner :with-test)
+  core
+  base
+  async_kernel
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
   (async_unix (>= v0.9.0))
@@ -50,6 +56,9 @@ tests to run.
  (description "Lwt-based helpers for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
  (depends
+  (re :with-test)
+  (cmdliner :with-test)
+  fmt
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
   lwt
@@ -61,6 +70,9 @@ tests to run.
  (description "Mirage implementation for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
  (depends
+  (re :with-test)
+  (cmdliner :with-test)
+  fmt
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
   (mirage-clock (>= 2.0.0))
