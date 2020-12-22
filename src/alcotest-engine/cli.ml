@@ -323,9 +323,10 @@ struct
         choices
     in
     match result with
-    | `Ok unit_m -> unit_m >>= fun () -> exit_or_return result
-    | `Help | `Version | `Error `Exn -> exit_or_return result
-    | `Error (`Parse | `Term) -> exit (Term.exit_status_of_result result)
+    | `Ok unit_m -> unit_m >>= fun () -> exit_or_return (`Ok ())
+    | (`Help | `Version | `Error `Exn) as result -> exit_or_return result
+    | `Error (`Parse | `Term) as result ->
+        exit (Term.exit_status_of_result result)
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
       ?json ?filter ?log_dir ?argv name tl =
