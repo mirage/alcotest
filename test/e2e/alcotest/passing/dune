@@ -17,5 +17,6 @@
 
 (rule
  (alias runtest)
+ (package alcotest)
  (action
   (diff dune.inc dune.gen)))

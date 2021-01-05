@@ -1,3 +1,4 @@
 (tests
  (names simple floats)
+ (package alcotest)
  (libraries alcotest))
