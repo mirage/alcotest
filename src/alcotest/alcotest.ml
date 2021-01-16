@@ -75,7 +75,12 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
 
   let stdout_isatty () = Unix.(isatty stdout)
 
-  let stdout_columns = Terminal_size.get_columns
+  let stdout_columns () =
+    if Sys.win32 then None
+    else
+      match Terminal.get_dimensions () with
+      | Some { columns; _ } -> Some columns
+      | None -> None
 
   let with_redirect file fn =
     M.return () >>= fun () ->

@@ -31,8 +31,7 @@ tests to run.
   uuidm
   re
   stdlib-shims
-  uutf
-  terminal_size))
+  uutf))
 
 (package
  (name alcotest-async)
