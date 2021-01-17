@@ -64,7 +64,7 @@ struct
             (* Default to [always] when running inside Dune *)
             let (_ : string) = Sys.getenv "INSIDE_DUNE" in
             Some `Ansi_tty
-          with Not_found -> None )
+          with Not_found -> None)
     in
     P.setup_std_outputs ?style_renderer ()
 
@@ -163,7 +163,7 @@ struct
           if n < 0 then
             Error (`Msg "numeric limit must be nonnegative or 'unlimited'")
           else Ok (`Limit n)
-        with Failure _ -> Error (`Msg "invalid numeric limit") )
+        with Failure _ -> Error (`Msg "invalid numeric limit"))
 
   let limit_printer ppf limit =
     match limit with
