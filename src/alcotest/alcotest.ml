@@ -31,7 +31,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
 
   open M.Infix
 
-  let time = Unix.time
+  let time = Unix.gettimeofday
 
   let getcwd = Sys.getcwd
 
