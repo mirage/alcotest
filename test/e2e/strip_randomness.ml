@@ -1,3 +1,5 @@
+let ( ^^ ) a b = Re.seq [ a; b ]
+
 let standardise_filesep =
   let re = Re.compile (Re.str Filename.dir_sep) in
   Re.replace_string ~all:true re ~by:"/"
@@ -46,27 +48,25 @@ let uuid_replace =
 
 let time_replace =
   let open Re in
+  let float = rep1 digit ^^ char '.' ^^ rep1 digit in
   let t =
-    seq
+    alt
       [
         group
           (alt
              [
-               opt cntrl (* Maybe ANSII escape, depending on [--color] *);
-               str "Test Successful";
-               opt cntrl;
-               str " in ";
-               seq [ rep1 digit; str " error! in " ];
-               seq [ rep1 digit; str " errors! in " ];
-             ]);
-        rep1 digit;
-        char '.';
-        rep1 digit;
-        char 's';
+               (* Maybe ANSII escape, depending on [--color] *)
+               opt cntrl ^^ str "Test Successful" ^^ opt cntrl ^^ str " in ";
+               rep1 digit ^^ str " failure! in ";
+               rep1 digit ^^ str " failures! in ";
+               str "\"time\": ";
+             ])
+        ^^ float
+        ^^ group (opt (char 's'));
       ]
   in
   let re = compile t in
-  replace ~all:true re ~f:(fun g -> Group.get g 1 ^ "<test-duration>s")
+  replace re ~f:(fun g -> Group.get g 1 ^ "<test-duration>" ^ Group.get g 2)
 
 let exception_name_replace =
   let open Re in

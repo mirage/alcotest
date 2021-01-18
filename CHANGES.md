@@ -1,3 +1,8 @@
+### Unreleased
+
+- Correctly report test suite duration with millisecond precision. (#286,
+  @CraigFe)
+
 ### 1.2.3 (2020-09-07)
 
 - Require Dune 2.2. (#274, @CraigFe)
