@@ -2,14 +2,14 @@ Testing `test/e2e/alcotest/failing/check_long.ml'.
 This run has ID `<uuid>'.
 
 ASSERT list
-  [FAIL]        wrapping          0   list.
+  [FAIL]    wrapping › list
 ASSERT array
-  [FAIL]        wrapping          1   array.
+  [FAIL]    wrapping › array
 ASSERT nested options
-  [FAIL]        wrapping          2   nested options.
+  [FAIL]    wrapping › nested options
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        wrapping          0   list.                                    │
+│ [FAIL]    wrapping › list                                                    │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL list
 
@@ -25,7 +25,7 @@ FAIL list
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        wrapping          1   array.                                   │
+│ [FAIL]    wrapping › array                                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL array
 
@@ -51,7 +51,7 @@ FAIL array
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        wrapping          2   nested options.                          │
+│ [FAIL]    wrapping › nested options                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL nested options
 

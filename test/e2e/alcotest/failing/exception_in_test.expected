@@ -1,17 +1,17 @@
 Testing `test/e2e/alcotest/failing/exception_in_test.ml'.
 This run has ID `<uuid>'.
 
-  [OK]          test-a          0   Passing.
-> [FAIL]        test-a          1   Failing.
-  [OK]          test-b          0   Another pass.
+  [PASS]    test-a › Passing
+> [FAIL]    test-a › Failing
+  [PASS]    test-b › Another pass
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        test-a          1   Failing.                                   │
+│ [FAIL]    test-a › Failing                                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 [exception] Dune__exe__Exception_in_test.Foo("message")
             <stacktrace>
             
-Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a/Failing.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.

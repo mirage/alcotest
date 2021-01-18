@@ -20,6 +20,8 @@
     to defined tests. The platform-specific runners for these tests are in
     [alcotest], [alcotest-lwt], [alcotest-async] and [alcotest-mirage]. *)
 
+open! Import
+
 module V1 : sig
   (** Version 1 of the user-facing Alcotest API. *)
 
@@ -41,6 +43,18 @@ module V1 : sig
 
   module Cli = Cli.V1
   (** Wraps {!Core} to provide a command-line interface. *)
+end
+
+module Unstable : sig
+  module Test = Test
+  (** Unstable version of the user-facing Alcotest API. *)
+
+  module Core = Core.Unstable
+  module Cli = Cli.Unstable
+  module Tag = Tag
+  module Filter = Filter
+  module Config = Config
+  module Source_code_position = Source_code_position
 end
 
 module Monad = Monad

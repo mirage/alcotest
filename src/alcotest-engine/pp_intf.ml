@@ -15,13 +15,15 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+open! Import
 open Model
 
 type theta = Format.formatter -> unit
 (** Type corresponding to a [%t] placeholder. *)
 
 module Types = struct
-  type event = [ `Result of Test_name.t * Run_result.t | `Start of Test_name.t ]
+  type event_type = Start | Result of Run_result.t
+  type event = { index : Index.t; type_ : event_type }
 
   type result = {
     success : int;
@@ -29,6 +31,8 @@ module Types = struct
     time : float;
     errors : unit Fmt.t list;
   }
+
+  type tag = [ `Ok | `Fail | `Skip | `Todo | `Assert ]
 end
 
 module type Make_arg = sig
@@ -38,36 +42,27 @@ end
 module type S = sig
   include module type of Types
 
-  val info :
-    ?available_width:int ->
-    max_label:int ->
-    doc_of_test_name:(Test_name.t -> string) ->
-    Test_name.t Fmt.t
-
+  val info : ?available_width:int -> Index.t Fmt.t
   val rresult_error : Run_result.t Fmt.t
+  val event_line : event Fmt.t
 
-  val event_line :
-    margins:int ->
-    max_label:int ->
-    doc_of_test_name:(Test_name.t -> string) ->
-    [ `Result of Test_name.t * [< Run_result.t ] | `Start of Test_name.t ] Fmt.t
+  module Progress_reporter : sig
+    type t
 
-  val event :
-    isatty:bool ->
-    compact:bool ->
-    max_label:int ->
-    doc_of_test_name:(Test_name.t -> string) ->
-    selector_on_failure:bool ->
-    tests_so_far:int ->
-    event Fmt.t
+    val create :
+      ppf:Format.formatter ->
+      isatty:bool ->
+      compact:bool ->
+      selector_on_first_failure:bool ->
+      t
+
+    val event : t -> event -> unit
+  end
 
   val suite_results :
     log_dir:theta ->
     < verbose : bool ; show_errors : bool ; json : bool ; compact : bool ; .. > ->
     result Fmt.t
-
-  val quoted : 'a Fmt.t -> 'a Fmt.t
-  (** Wraps a formatter with `GNU-style quotation marks'. *)
 
   val with_surrounding_box : 'a Fmt.t -> 'a Fmt.t
   (** Wraps a formatter with a Unicode box with width given by
@@ -76,22 +71,30 @@ module type S = sig
   val horizontal_rule : _ Fmt.t
   (** Horizontal rule of length {!X.stdout_columns}. Uses box-drawing characters
       from code page 437. *)
-
-  val user_error : string -> _
-  (** Raise a user error, then fail. *)
 end
 
 module type Pp = sig
-  val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
-  val map_theta : theta -> f:(unit Fmt.t -> unit Fmt.t) -> theta
+  include module type of Types
 
-  val pp_plural : int Fmt.t
+  val tag : tag Fmt.t
+
+  val map_theta : theta -> f:(unit Fmt.t -> unit Fmt.t) -> theta
+  (** Transform a stateless pretty-printer (for use with the [%t] conversion
+      spec) at the level of [unit Fmt.t] values. *)
+
+  val quoted : 'a Fmt.t -> 'a Fmt.t
+  (** Wraps a formatter with GNU-style `quotation marks'. *)
+
+  val plural : int Fmt.t
   (** This is for adding an 's' to words that should be pluralized, e.g.
 
       {[
         let n = List.length items in
         Fmt.pr "Found %i item%a." n pp_plural n
       ]} *)
+
+  val user_error : ('a, Format.formatter, unit, _) format4 -> 'a
+  (** Raise a user error, then fail. *)
 
   module Make (X : Make_arg) : S
 end

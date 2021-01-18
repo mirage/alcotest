@@ -5,7 +5,8 @@
   logs
   lwt
   fmt
-  alcotest.engine
   alcotest
+  alcotest.engine
+  alcotest.stdlib_ext
   (re_export lwt.unix) ;; Unused dependency added for convenience to consumers
   ))

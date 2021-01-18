@@ -31,4 +31,16 @@ module V1 = struct
   let test_case n s f = test_case n s (run_test f)
 end
 
+module Unstable = struct
+  module Tester =
+    Alcotest_engine.Unstable.Cli.Make (Alcotest.Unix_platform) (Lwt)
+
+  include Tester
+
+  let test_sync ?pos ?tags ~name f =
+    test ?pos ?tags ~name (fun x -> Lwt.return (f x))
+
+  let test ?pos ?tags ~name f = test ?pos ?tags ~name (run_test f)
+end
+
 include V1

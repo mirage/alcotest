@@ -25,8 +25,8 @@ type t = { raw : string; escaped : string }
 
 let v raw = { raw; escaped = escape raw }
 let to_string { escaped; _ } = escaped
-let to_unescaped_string { raw; _ } = raw
 let pp = Fmt.using (fun { raw; _ } -> raw) Fmt.string
 let length { raw; _ } = String.length_utf8 raw
+let prefix n { raw; _ } = v (String.prefix_utf8 n raw)
 let equal t t' = String.equal t.escaped t'.escaped
 let compare t t' = String.compare t.escaped t'.escaped

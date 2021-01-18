@@ -63,7 +63,10 @@ module type Cli = sig
     module type S = V1_types.S
     module type MAKER = V1_types.MAKER
 
-    module Make (P : Platform.MAKER) (M : Monad.S) :
-      V1_types.S with type return = unit M.t
+    module Make : MAKER
+  end
+
+  module Unstable : sig
+    module Make : Core.Unstable.MAKER
   end
 end

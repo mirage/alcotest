@@ -4,10 +4,10 @@ This run has ID `<uuid>'.
 ..F...
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        alpha          2   3.                                          │
+│ [FAIL]    alpha › 3                                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] Error
-Logs saved to `<build-context>/_build/_tests/<test-dir>/alpha.002.output'.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/alpha/3.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.

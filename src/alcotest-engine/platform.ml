@@ -1,6 +1,9 @@
 open! Import
 
 module type S = sig
+  val name : string
+  (** The name of the platform, for use in user messages. *)
+
   val time : unit -> float
   (** [time ()] returns the current timestamp, used to measure the duration of a
       testrun. *)
@@ -39,6 +42,7 @@ module type S = sig
 
   val file_exists : string -> bool
   val open_write_only : string -> file_descriptor
+  val mkdir_p : string -> unit
   val close : file_descriptor -> unit
 
   val with_redirect : file_descriptor -> (unit -> 'a promise) -> 'a promise
@@ -49,4 +53,4 @@ module type S = sig
   (** [home_directory ()] is the current user's HOME directory, if it exists. *)
 end
 
-module type MAKER = functor (M : Monad.S) -> S with type 'a promise := 'a M.t
+module type MAKER = functor (M : Monad.S) -> S with type 'a promise = 'a M.t

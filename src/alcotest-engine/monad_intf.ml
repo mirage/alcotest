@@ -22,8 +22,10 @@ module type S = sig
   val catch : (unit -> 'a t) -> (exn -> 'a t) -> 'a t
 end
 
-module type EXTENDED = sig
+module type Extended = sig
   include S
+
+  val map : ('a -> 'b) -> 'a t -> 'b t
 
   module Syntax : sig
     val ( let* ) : 'a t -> ('a -> 'b t) -> 'b t
@@ -40,8 +42,8 @@ end
 
 module type Monad = sig
   module type S = S
-  module type EXTENDED = EXTENDED
+  module type Extended = Extended
 
   module Identity : S with type 'a t = 'a
-  module Extend (M : S) : EXTENDED with type 'a t = 'a M.t
+  module Extend (M : S) : Extended with type 'a t = 'a M.t
 end

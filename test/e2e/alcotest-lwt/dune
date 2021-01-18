@@ -1,4 +1,4 @@
 (env
  (_
   (env-vars
-   (ALCOTEST_COLOR auto))))
+   (ALCOTEST_COLOR never))))
