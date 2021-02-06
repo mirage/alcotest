@@ -96,6 +96,21 @@ let pair a b =
   let eq (a1, b1) (a2, b2) = equal a a1 a2 && equal b b1 b2 in
   testable (Fmt.Dump.pair (pp a) (pp b)) eq
 
+let triple a b c =
+  let eq (a1, b1, c1) (a2, b2, c2) =
+    equal a a1 a2 && equal b b1 b2 && equal c c1 c2
+  in
+  let pp =
+    Fmt.(
+      parens
+        (using (fun (x, _, _) -> x) (box (pp a))
+        ++ comma
+        ++ using (fun (_, x, _) -> x) (box (pp b))
+        ++ comma
+        ++ using (fun (_, _, x) -> x) (box (pp c))))
+  in
+  testable pp eq
+
 let option e =
   let eq x y =
     match (x, y) with

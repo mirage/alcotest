@@ -19,6 +19,7 @@ This run has ID `<uuid>'.
   [OK]          reflexive composite          6   result ok.
   [OK]          reflexive composite          7   result error.
   [OK]          reflexive composite          8   pair.
+  [OK]          reflexive composite          9   triple.
   [OK]          negation                     0   checked exceptions.
   [OK]          negation                     1   negated testables.
   [OK]          fuzzy equality               0   float thresholds.
@@ -26,4 +27,4 @@ This run has ID `<uuid>'.
   [OK]          labeled check                0   passing.
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
-Test Successful in <test-duration>s. 23 tests run.
+Test Successful in <test-duration>s. 24 tests run.

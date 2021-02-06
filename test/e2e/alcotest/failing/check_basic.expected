@@ -27,6 +27,8 @@ ASSERT result
   [FAIL]        different composite          3   result.
 ASSERT pair
   [FAIL]        different composite          4   pair.
+ASSERT triple
+  [FAIL]        different composite          5   triple.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        different basic              0   bool.                         │
@@ -157,4 +159,14 @@ FAIL pair
    Received: `(1, b)'
  ──────────────────────────────────────────────────────────────────────────────
 
-13 failures! in <test-duration>s. 13 tests run.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        different composite          5   triple.                       │
+└──────────────────────────────────────────────────────────────────────────────┘
+FAIL triple
+
+   Expected: `(1, true, a)'
+   Received: `(1, false, a)'
+ ──────────────────────────────────────────────────────────────────────────────
+
+14 failures! in <test-duration>s. 14 tests run.
