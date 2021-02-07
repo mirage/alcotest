@@ -1,5 +1,7 @@
 ### Unreleased
 
+- Add `Alcotest.triple` for testing 3-tuples. (#288, @sheepduke)
+
 - Correctly report test suite duration with millisecond precision. (#286,
   @CraigFe)
 

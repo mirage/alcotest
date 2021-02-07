@@ -28,5 +28,7 @@ let () =
           id_case (option int) "option some" (Some 1) (Some 2);
           id_case (result int unit) "result" (Ok 1) (Error ());
           id_case (pair int char) "pair" (1, 'a') (1, 'b');
+          id_case (triple int bool string) "triple" (1, true, "a")
+            (1, false, "a");
         ] );
     ]

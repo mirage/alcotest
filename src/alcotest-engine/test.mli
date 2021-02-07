@@ -84,6 +84,10 @@ val result : 'a testable -> 'e testable -> ('a, 'e) result testable
 val pair : 'a testable -> 'b testable -> ('a * 'b) testable
 (** [pair a b] tests pairs of [a]s and [b]s. *)
 
+val triple :
+  'a testable -> 'b testable -> 'c testable -> ('a * 'b * 'c) testable
+(** [triple a b c] tests triples of [a]s, [b]s and [c]s. *)
+
 val of_pp : 'a Fmt.t -> 'a testable
 (** [of_pp pp] tests values which can be printed using [pp] and compared using
     {!Pervasives.compare} *)
