@@ -157,7 +157,28 @@ let show_assert msg =
 
 let check_err fmt = raise (Core.Check_error fmt)
 
-let check (type a) (t : a testable) msg (expected : a) (actual : a) =
+module Source_code_position = struct
+  type here = Lexing.position
+
+  type pos = string * int * int * int
+end
+
+type 'a extra_info =
+  ?here:Source_code_position.here -> ?pos:Source_code_position.pos -> 'a
+
+let pp_location =
+  let pp =
+    Fmt.styled `Bold (fun ppf (f, l, c) ->
+        Fmt.pf ppf "File \"%s\", line %d, character %d:@," f l c)
+  in
+  fun ?here ?pos ppf ->
+    match (here, pos) with
+    | Some (here : Source_code_position.here), _ ->
+        pp ppf (here.pos_fname, here.pos_lnum, here.pos_cnum - here.pos_bol)
+    | _, Some (fname, lnum, cnum, _) -> pp ppf (fname, lnum, cnum)
+    | None, None -> ()
+
+let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
   show_assert msg;
   if not (equal t expected actual) then
     let open Fmt in
@@ -173,15 +194,25 @@ let check (type a) (t : a testable) msg (expected : a) (actual : a) =
     in
     raise
       (Core.Check_error
-         Fmt.(vbox (pp_error ++ cut ++ cut ++ pp_expected ++ cut ++ pp_actual)))
+         Fmt.(
+           vbox
+             ((fun ppf () -> pp_location ?here ?pos ppf)
+             ++ pp_error
+             ++ cut
+             ++ cut
+             ++ pp_expected
+             ++ cut
+             ++ pp_actual)))
 
-let check' t ~msg ~expected ~actual = check t msg expected actual
+let check' ?here ?pos t ~msg ~expected ~actual =
+  check ?here ?pos t msg expected actual
 
-let fail msg =
+let fail ?here ?pos msg =
   show_assert msg;
-  check_err (fun ppf () -> Fmt.pf ppf "%a %s" Pp.tag `Fail msg)
+  check_err (fun ppf () ->
+      Fmt.pf ppf "%t%a %s" (pp_location ?here ?pos) Pp.tag `Fail msg)
 
-let failf fmt = Fmt.kstrf fail fmt
+let failf ?here ?pos fmt = Fmt.kstrf (fun msg -> fail ?here ?pos msg) fmt
 
 let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
@@ -191,17 +222,17 @@ let collect_exception f =
     None
   with e -> Some e
 
-let check_raises msg exn f =
+let check_raises ?here ?pos msg exn f =
   show_assert msg;
   match collect_exception f with
   | None ->
       check_err (fun ppf () ->
-          Fmt.pf ppf "%a %s: expecting %s, got nothing." Pp.tag `Fail msg
-            (Printexc.to_string exn))
+          Fmt.pf ppf "%t%a %s: expecting %s, got nothing."
+            (pp_location ?here ?pos) Pp.tag `Fail msg (Printexc.to_string exn))
   | Some e ->
       if e <> exn then
         check_err (fun ppf () ->
-            Fmt.pf ppf "%a %s: expecting %s, got %s." Pp.tag `Fail msg
-              (Printexc.to_string exn) (Printexc.to_string e))
+            Fmt.pf ppf "%t%a %s: expecting %s, got %s." (pp_location ?here ?pos)
+              Pp.tag `Fail msg (Printexc.to_string exn) (Printexc.to_string e))
 
 let () = at_exit (Format.pp_print_flush Format.err_formatter)

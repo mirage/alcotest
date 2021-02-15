@@ -29,8 +29,6 @@
 
 include Alcotest_engine.Cli.S with type return = unit
 
-(** {1 Assert functions} *)
-
 include module type of Alcotest_engine.Test
 (** @inline *)
 
