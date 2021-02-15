@@ -4,6 +4,19 @@ module String = struct
   include Astring.String
 
   let length_utf8 = Uutf.String.fold_utf_8 (fun count _ _ -> count + 1) 0
+
+  let prefix_utf8 uchars string =
+    let exception Found_new_length of int in
+    try
+      let (_ : int) =
+        Uutf.String.fold_utf_8
+          (fun count start_pos _ ->
+            if count = uchars then raise (Found_new_length start_pos)
+            else count + 1)
+          0 string
+      in
+      string
+    with Found_new_length l -> String.sub string 0 l
 end
 
 module List = struct

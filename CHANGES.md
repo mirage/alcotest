@@ -3,6 +3,9 @@
 - Add `Alcotest.triple` for testing 3-tuples. (#288, @sheepduke)
 
 - Correctly report test suite duration with millisecond precision. (#286,
+
+- Improve pretty-printing of results to consider the terminal width, fixing
+  several display issues due to line wrapping in small terminals. (#282,
   @CraigFe)
 
 ### 1.2.3 (2020-09-07)
