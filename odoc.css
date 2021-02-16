@@ -1,7 +1,7 @@
 @charset "UTF-8";
 /* Copyright (c) 2016 The odoc contributors. All rights reserved.
    Distributed under the ISC license, see terms at the end of the file.
-   odoc 1.5.0-341-ge8ea550d */
+   odoc 1.5.0-582-g148f0a12c */
 
 /* Fonts */
 @import url('https://fonts.googleapis.com/css?family=Fira+Mono:400,500');
@@ -10,40 +10,16 @@
 
 :root,
 .light:root {
-  --main-background: #fff;
-  --code-background: f;
-  --line-numbers-background: rgba(0, 0, 0, 0.025);
-  --navbar-background: #eee;
-  --link-color: #2c5cbd;
+  --link-color: #2C94BD;
   --anchor-hover: #555;
   --anchor-color: #d5d5d5;
   --xref-shadow: #cc6666;
   --header-shadow: #ddd;
-  --color: #333;
   --by-name-version-color: #aaa;
   --by-name-nav-link-color: #222;
   --target-background: rgba(187, 239, 253, 0.3);
   --target-shadow: rgba(187, 239, 253, 0.8);
   --pre-border-color: #eee;
-
-  --li-code-background: #f6f8fa;
-  --li-code-color: #0d2b3e;
-  --toc-color: #777;
-  --toc-background: #f6f8fa;
-  --toc-list-border: #ccc;
-  --spec-summary-background: #f6f8fa;
-  --spec-summary-hover-background: #ebeff2;
-  --spec-summary-border-color: #5c9cf5;
-  --spec-details-after-background: rgba(0, 4, 15, 0.05);
-  --spec-details-after-shadow: rgba(204, 204, 204, 0.53);
-
-  --hljs-link: #6a737d;
-  --hljs-keyword: #d73a49;
-  --hljs-regexp: #032f62;
-  --hljs-title: #900;
-  --hljs-type: #6f42c1;
-  --hljs-meta: #22863a;
-  --hljs-variable: #005cc5;
 }
 
 .dark:root {
@@ -129,13 +105,9 @@ html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockq
   margin: 0;
   padding: 0;
   border: 0;
-  font-size: inherit;
   font: inherit;
-  line-height: inherit;
   vertical-align: baseline;
-  text-align: inherit;
-  color: inherit;
-  background: transparent;
+
 }
 
 table {
@@ -152,9 +124,7 @@ html {
 }
 
 body {
-  font-family: "Fira Sans", Helvetica, Arial, sans-serif;
   text-align: left;
-  color: #333;
   background: #FFFFFF;
   color: var(--color);
   background-color: var(--main-background);
@@ -307,7 +277,7 @@ a.anchor {
 }
 
 .xref-unresolved {
-  color: #2C5CBD;
+  color: #2C94BD;
 }
 .xref-unresolved:hover {
   box-shadow: 0 1px 0 0 #CC6666;
@@ -543,10 +513,6 @@ div.def table {
 }
 
 td.def {
-  padding-right: 2ex;
-}
-
-.record td.def {
   padding-left: 2ex;
 }
 
@@ -625,7 +591,7 @@ span.at-tag {
 
 .by-name .version {
   font-size: 10px;
-  color: #AAA
+  color: #AAA;
   color: var(--by-name-version-color);
 }
 
