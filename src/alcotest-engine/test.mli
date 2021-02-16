@@ -118,7 +118,7 @@ module Source_code_position : sig
       a PPX such as {{:https://github.com/janestreet/ppx_here} [ppx_here]}. *)
 
   type pos = string * int * int * int
-  (** Location information passed via a [~pos] arugment, intended for use with
+  (** Location information passed via a [~pos] argument, intended for use with
       the [__POS__] macro provided by the standard library. See the
       documentation of [__POS__] for more information. *)
 end
