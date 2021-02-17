@@ -14,6 +14,11 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+(** {1 Testable values}
+
+    The following combinators represent types that can be used with the {!check}
+    functions below. *)
+
 (** [TESTABLE] provides an abstract description for testable values. *)
 module type TESTABLE = sig
   type t
@@ -98,21 +103,44 @@ val pass : 'a testable
 val reject : 'a testable
 (** [reject] tests values of any type and always fails. *)
 
-val check : 'a testable -> string -> 'a -> 'a -> unit
-(** Check that two values are equal. *)
-
-val check' : 'a testable -> msg:string -> expected:'a -> actual:'a -> unit
-(** Check that two values are equal (labeled variant of {!check}). *)
-
-val fail : string -> 'a
-(** Simply fail. *)
-
-val failf : ('a, Format.formatter, unit, 'b) format4 -> 'a
-(** Simply fail with a formatted message. *)
-
 val neg : 'a testable -> 'a testable
 (** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it is
     [false] when [t] is [true]. *)
 
-val check_raises : string -> exn -> (unit -> unit) -> unit
+(** {1 Assertion functions}
+
+    Functions for asserting various properties within unit-tests. A failing
+    assertion will cause the testcase to fail immediately. *)
+
+module Source_code_position : sig
+  type here = Lexing.position
+  (** Location information passed via a [~here] argument, intended for use with
+      a PPX such as {{:https://github.com/janestreet/ppx_here} [ppx_here]}. *)
+
+  type pos = string * int * int * int
+  (** Location information passed via a [~pos] argument, intended for use with
+      the [__POS__] macro provided by the standard library. See the
+      documentation of [__POS__] for more information. *)
+end
+
+type 'a extra_info =
+  ?here:Source_code_position.here -> ?pos:Source_code_position.pos -> 'a
+(** The assertion functions optionally take information about the {i location}
+    at which they are called in the source code. This is used for giving more
+    descriptive error messages in the case of failure. *)
+
+val check : ('a testable -> string -> 'a -> 'a -> unit) extra_info
+(** Check that two values are equal. *)
+
+val check' :
+  ('a testable -> msg:string -> expected:'a -> actual:'a -> unit) extra_info
+(** Check that two values are equal (labeled variant of {!check}). *)
+
+val fail : (string -> 'a) extra_info
+(** Simply fail. *)
+
+val failf : (('a, Format.formatter, unit, 'b) format4 -> 'a) extra_info
+(** Simply fail with a formatted message. *)
+
+val check_raises : (string -> exn -> (unit -> unit) -> unit) extra_info
 (** Check that an exception is raised. *)

@@ -1,6 +1,7 @@
 (executables
  (names
    check_basic
+   check_located
    check_long
    compact
    duplicate_test_names
@@ -16,6 +17,7 @@
  (libraries alcotest alcotest.engine)
  (modules
    check_basic
+   check_located
    check_long
    compact
    duplicate_test_names
@@ -48,6 +50,25 @@
  (package alcotest)
  (action
    (diff check_basic.expected check_basic.processed)))
+
+(rule
+ (target check_located.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 125)
+    (run %{dep:check_located.exe})))))
+
+(rule
+ (target check_located.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:check_located.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff check_located.expected check_located.processed)))
 
 (rule
  (target check_long.actual)

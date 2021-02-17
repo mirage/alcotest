@@ -9,6 +9,10 @@
   several display issues due to line wrapping in small terminals. (#282,
   @CraigFe)
 
+- Add `?here` and `?pos` arguments to the test assertion functions. These can be
+  used to pass information about the location of the call-site, which is
+  displayed in failing test output. (#291, @CraigFe)
+
 ### 1.2.3 (2020-09-07)
 
 - Require Dune 2.2. (#274, @CraigFe)
