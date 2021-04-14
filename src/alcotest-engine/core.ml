@@ -14,6 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+include Core_intf
 open Model
 open Utils
 
@@ -42,39 +43,6 @@ let () =
   Printexc.register_printer (function
     | Check_error err -> Some (Lazy.force print_error err)
     | _ -> None)
-
-module type S = sig
-  type return
-  type speed_level = [ `Quick | `Slow ]
-  type 'a test_case = string * speed_level * ('a -> return)
-
-  exception Test_error
-
-  val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
-
-  type 'a test = string * 'a test_case list
-
-  val list_tests : 'a test list -> return
-
-  type 'a with_options =
-    ?and_exit:bool ->
-    ?verbose:bool ->
-    ?compact:bool ->
-    ?tail_errors:[ `Unlimited | `Limit of int ] ->
-    ?quick_only:bool ->
-    ?show_errors:bool ->
-    ?json:bool ->
-    ?filter:Re.re option * int list option ->
-    ?log_dir:string ->
-    ?bail:bool ->
-    'a
-
-  val run : (string -> unit test list -> return) with_options
-  val run_with_args : (string -> 'a -> 'a test list -> return) with_options
-end
-
-module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
-  S with type return = unit M.t
 
 module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
 struct
