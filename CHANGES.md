@@ -1,3 +1,13 @@
+### Unreleased
+
+- Add `?here` and `?pos` arguments to the test assertion functions. These can be
+  used to pass information about the location of the call-site, which is
+  displayed in failing test output. (#291, @CraigFe)
+
+- Add a pretty-printer for the exception raised by `Alcotest.check` and related
+  functions. This allows them to be used outside of an Alcotest test runner for
+  making general assertions.  (#296, @CraigFe)
+
 ### 1.3.0 (2021-02-16)
 
 - Add `Alcotest.triple` for testing 3-tuples. (#288, @sheepduke)
@@ -8,10 +18,6 @@
 - Improve pretty-printing of results to consider the terminal width, fixing
   several display issues due to line wrapping in small terminals. (#282,
   @CraigFe)
-
-- Add `?here` and `?pos` arguments to the test assertion functions. These can be
-  used to pass information about the location of the call-site, which is
-  displayed in failing test output. (#291, @CraigFe)
 
 ### 1.2.3 (2020-09-07)
 
