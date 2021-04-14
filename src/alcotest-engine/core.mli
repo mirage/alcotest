@@ -16,8 +16,6 @@
 
 exception Check_error of unit Fmt.t
 
-module IntSet : Set.S with type elt = int
-
 module type S = sig
   type return
   (** The return type of each test case run by Alcotest. For the standard
@@ -56,7 +54,7 @@ module type S = sig
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
-    ?filter:Re.re option * IntSet.t option ->
+    ?filter:Re.re option * int list option ->
     ?log_dir:string ->
     'a
   (** The various options taken by the tests runners {!run} and

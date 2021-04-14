@@ -213,9 +213,9 @@ struct
     Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
       r.success pp_plural r.success
 
-  let suite_results ~verbose ~show_errors ~json ~compact ~log_dir ppf r =
-    let print_summary = (not compact) || r.failures > 0 in
-    match json with
+  let suite_results ~log_dir cfg ppf r =
+    let print_summary = (not cfg#compact) || r.failures > 0 in
+    match cfg#json with
     | true ->
         (* Return the json for the api, dirty out, to avoid new dependencies *)
         Fmt.pf ppf {|{
@@ -228,10 +228,11 @@ struct
     | false ->
         Format.pp_force_newline ppf ();
         Format.pp_open_vbox ppf 0;
-        if compact then Fmt.cut ppf ();
-        (pp_suite_errors ~show_all:(verbose || show_errors) r.errors) ppf ();
+        if cfg#compact then Fmt.cut ppf ();
+        (pp_suite_errors ~show_all:(cfg#verbose || cfg#show_errors) r.errors)
+          ppf ();
         if print_summary then (
-          if not verbose then pp_full_logs ppf log_dir;
+          if not cfg#verbose then pp_full_logs ppf log_dir;
           pp_summary ppf r);
         Format.pp_close_box ppf ()
 

@@ -17,7 +17,12 @@
 
 open Cmdliner
 open Astring
-module IntSet = Core.IntSet
+
+module IntSet = Set.Make (struct
+  type t = int
+
+  let compare = (compare : int -> int -> int)
+end)
 
 module type S = sig
   include Core.S
@@ -218,30 +223,26 @@ struct
 
   exception Invalid_format
 
-  let int_range_list : IntSet.t Cmdliner.Arg.conv =
+  let int_range_list : int list Cmdliner.Arg.conv =
     let parse s =
-      let set = ref IntSet.empty in
-      let acc i = set := IntSet.add i !set in
-      let ranges = String.cuts ~sep:"," s in
-      let process_range s =
-        let bounds = String.cuts ~sep:".." s |> List.map String.to_int in
-        match bounds with
-        | [ Some i ] -> acc i
+      let rec range lower upper acc =
+        if lower > upper then acc else range (succ lower) upper (lower :: acc)
+      in
+      let process_range acc s =
+        String.cuts ~sep:".." s |> List.map String.to_int |> function
+        | [ Some i ] -> i :: acc
         | [ Some lower; Some upper ] when lower <= upper ->
-            for i = lower to upper do
-              acc i
-            done
+            range lower upper acc
         | _ -> raise Invalid_format
       in
-      match List.iter process_range ranges with
-      | () -> Ok !set
+      let ranges = String.cuts ~sep:"," s in
+      match List.fold_left process_range [] ranges with
+      | list -> Ok list
       | exception Invalid_format ->
           Error
             (`Msg "must be a comma-separated list of integers / integer ranges")
     in
-    let print ppf set =
-      Fmt.(braces @@ list ~sep:comma int) ppf (IntSet.elements set)
-    in
+    let print ppf set = Fmt.(braces @@ list ~sep:comma int) ppf set in
     Arg.conv (parse, print)
 
   let test_filter =
