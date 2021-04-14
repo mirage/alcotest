@@ -36,7 +36,7 @@
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:check_basic.exe})))))
 
 (rule
@@ -55,7 +55,7 @@
  (target check_located.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:check_located.exe})))))
 
 (rule
@@ -74,7 +74,7 @@
  (target check_long.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:check_long.exe})))))
 
 (rule
@@ -93,7 +93,7 @@
  (target compact.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:compact.exe})))))
 
 (rule
@@ -112,7 +112,7 @@
  (target duplicate_test_names.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:duplicate_test_names.exe})))))
 
 (rule
@@ -131,7 +131,7 @@
  (target empty_suite_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:empty_suite_name.exe})))))
 
 (rule
@@ -150,7 +150,7 @@
  (target exception_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:exception_in_test.exe})))))
 
 (rule
@@ -169,7 +169,7 @@
  (target filter_all_tests.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:filter_all_tests.exe} test bar 1)))))
 
 (rule
@@ -188,7 +188,7 @@
  (target invalid_arg_in_test.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:invalid_arg_in_test.exe})))))
 
 (rule
@@ -207,7 +207,7 @@
  (target long_test_case_name.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:long_test_case_name.exe})))))
 
 (rule
@@ -226,7 +226,7 @@
  (target tail_errors_limit.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:tail_errors_limit.exe})))))
 
 (rule
@@ -245,7 +245,7 @@
  (target tail_errors_unlimited.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:tail_errors_unlimited.exe})))))
 
 (rule
@@ -264,7 +264,7 @@
  (target unknown_option.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:unknown_option.exe} --dry-runn)))))
 
 (rule
