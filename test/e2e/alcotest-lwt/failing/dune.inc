@@ -14,7 +14,7 @@
  (target async_failure.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:async_failure.exe})))))
 
 (rule
@@ -33,7 +33,7 @@
  (target fail_with.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 125)
+   (with-accepted-exit-codes (or 1 2 125)
     (run %{dep:fail_with.exe})))))
 
 (rule

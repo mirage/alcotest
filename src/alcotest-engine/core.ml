@@ -27,6 +27,24 @@ end)
 
 exception Check_error of unit Fmt.t
 
+let () =
+  let print_error =
+    (* We instantiate the error print buffer lazily, so as to be sensitive to
+       [Fmt_tty.setup_std_outputs]. *)
+    lazy
+      (let buf = Buffer.create 0 in
+       let ppf = Format.formatter_of_buffer buf in
+       Fmt.set_style_renderer ppf Fmt.(style_renderer stderr);
+       fun error ->
+         Fmt.pf ppf "Alcotest assertion failure@.%a@." error ();
+         let contents = Buffer.contents buf in
+         Buffer.clear buf;
+         contents)
+  in
+  Printexc.register_printer (function
+    | Check_error err -> Some (Lazy.force print_error err)
+    | _ -> None)
+
 module type S = sig
   type return
 
