@@ -151,9 +151,11 @@ let reject (type a) =
   end in
   (module M : TESTABLE with type t = M.t)
 
-let show_assert msg =
-  Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
-  Format.eprintf "%a %s\n%!" Pp.tag `Assert msg
+let show_assert = function
+  | "" -> ()
+  | msg ->
+      Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
+      Format.eprintf "%a %s\n%!" Pp.tag `Assert msg
 
 let check_err fmt = raise (Core.Check_error fmt)
 
@@ -183,7 +185,10 @@ let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
   if not (equal t expected actual) then
     let open Fmt in
     let s = const string in
-    let pp_error = const Pp.tag `Fail ++ s (" " ^ msg)
+    let pp_error =
+      match msg with
+      | "" -> nop
+      | _ -> const Pp.tag `Fail ++ s (" " ^ msg) ++ cut
     and pp_expected ppf () =
       Fmt.pf ppf "   Expected: `%a'" (styled `Green (pp t)) expected;
       Format.pp_print_if_newline ppf ();
@@ -198,7 +203,6 @@ let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
            vbox
              ((fun ppf () -> pp_location ?here ?pos ppf)
              ++ pp_error
-             ++ cut
              ++ cut
              ++ pp_expected
              ++ cut
