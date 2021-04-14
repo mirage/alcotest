@@ -1,3 +1,5 @@
+open! Utils
+
 type bound = [ `Unlimited | `Limit of int ]
 
 type 'a with_options =

@@ -60,6 +60,8 @@ module Option = struct
     | Some x -> x
     | None -> invalid_arg "Option.get_exn: None"
 
+  let value ~default = function None -> default | Some x -> x
+
   let ( || ) a b =
     match (a, b) with
     | None, None -> None

@@ -28,5 +28,6 @@ end
 module Option : sig
   val is_some : _ option -> bool
   val get_exn : 'a option -> 'a
+  val value : default:'a -> 'a option -> 'a
   val ( || ) : 'a option -> 'a option -> 'a option
 end
