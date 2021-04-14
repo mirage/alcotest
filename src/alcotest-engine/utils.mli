@@ -17,9 +17,7 @@ module List : sig
   type 'a t = 'a list
 
   val filter_map : ('a -> 'b option) -> 'a list -> 'b list
-
   val lift_result : ('a, 'b) result t -> ('a t, 'b t) result
-
   val init : int -> (int -> 'a) -> 'a list
 end
 

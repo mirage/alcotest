@@ -18,9 +18,7 @@ module type S = sig
   type 'a t
 
   val return : 'a -> 'a t
-
   val bind : 'a t -> ('a -> 'b t) -> 'b t
-
   val catch : (unit -> 'a t) -> (exn -> 'a t) -> 'a t
 end
 
@@ -28,9 +26,7 @@ module Identity = struct
   type 'a t = 'a
 
   let return x = x
-
   let bind x f = f x
-
   let catch f on_error = match f () with x -> x | exception ex -> on_error ex
 end
 
@@ -39,7 +35,6 @@ module type EXTENDED = sig
 
   module Infix : sig
     val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
-
     val ( >|= ) : 'a t -> ('a -> 'b) -> 'b t
   end
 
@@ -54,7 +49,6 @@ module Extend (M : S) = struct
 
   module Infix = struct
     let ( >>= ) = M.bind
-
     let ( >|= ) x f = x >>= fun y -> M.return (f y)
   end
 

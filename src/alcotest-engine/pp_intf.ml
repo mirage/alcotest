@@ -30,7 +30,6 @@ end
 
 module type S = sig
   type event
-
   type result
 
   val info :

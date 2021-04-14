@@ -78,7 +78,6 @@ module type S = sig
         log the output of the tests (if [verbose] is not set). *)
 
   val run : (string -> unit test list -> return) with_options
-
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 

@@ -39,7 +39,6 @@ include module type of Alcotest_engine.Test
     package provides the [Unix] platform implementation. *)
 
 open Alcotest_engine
-
 module Unix : Platform.MAKER
 
 (** {!Core.Make} is [Alcotest_engine.Core.Make (Unix)] *)

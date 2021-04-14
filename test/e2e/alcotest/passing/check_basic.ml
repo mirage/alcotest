@@ -10,9 +10,7 @@ let make_checks () =
   check int32
 
 exception Zero
-
 exception One of int
-
 exception Two of int * char
 
 let checked_exceptions () =

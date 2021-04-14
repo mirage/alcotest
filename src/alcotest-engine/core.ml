@@ -47,9 +47,7 @@ let () =
 
 module type S = sig
   type return
-
   type speed_level = [ `Quick | `Slow ]
-
   type 'a test_case = string * speed_level * ('a -> return)
 
   exception Test_error
@@ -73,7 +71,6 @@ module type S = sig
     'a
 
   val run : (string -> unit test list -> return) with_options
-
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
@@ -109,9 +106,7 @@ struct
 
   (* Types *)
   type return = unit M.t
-
   type 'a run = 'a -> unit M.t
-
   type speed_level = [ `Quick | `Slow ]
 
   exception Test_error
@@ -249,9 +244,7 @@ struct
     Filename.concat (log_dir ~via_symlink:true t) (Test_name.file tname)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
-
   let red_s fmt = color `Red fmt
-
   let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
 
   let pp_error ~verbose ~doc_of_test_name ~output_file ~tail_errors ~max_label
@@ -286,7 +279,6 @@ struct
     | `Skip | `Todo _ -> false
 
   let bt () = match Printexc.get_backtrace () with "" -> "" | s -> "\n" ^ s
-
   let exn path name pp = `Exn (path, name, Fmt.(pp ++ const lines (bt ())))
 
   let protect_test path (f : 'a run) : 'a -> Run_result.t M.t =
@@ -347,7 +339,6 @@ struct
       tests
 
   let skip_fun _ = M.return `Skip
-
   let skip_label test_case = Suite.{ test_case with fn = skip_fun }
 
   let filter_test_case (regexp, cases) test_case =

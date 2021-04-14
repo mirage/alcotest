@@ -1,17 +1,11 @@
 module Make (C : Mirage_clock.MCLOCK) = struct
   module Platform (M : Alcotest_engine.Monad.S) = struct
     let time () = Duration.to_f @@ C.elapsed_ns ()
-
     let getcwd () = ""
-
     let prepare ~base:_ ~dir:_ ~name:_ = ()
-
     let stdout_isatty () = true
-
     let stdout_columns () = None
-
     let with_redirect _ fn = fn ()
-
     let setup_std_outputs ?style_renderer:_ ?utf_8:_ () = ()
 
     let home_directory () =

@@ -31,13 +31,9 @@ exception Library_exception
 
 module To_test = struct
   let lowercase = String.lowercase_ascii
-
   let lowercase_lwt s = Lwt.return (lowercase s)
-
   let exn () = raise Library_exception
-
   let exn_lwt_toplevel () : unit Lwt.t = raise Library_exception
-
   let exn_lwt_internal () : unit Lwt.t = Lwt.return (raise Library_exception)
 end
 
@@ -62,9 +58,7 @@ let lwt_check_raises f =
   | `Error _ -> Alcotest.fail "Incorrect exception was thrown"
 
 let test_exn_lwt_toplevel _ () = lwt_check_raises To_test.exn_lwt_toplevel
-
 let test_exn_lwt_internal _ () = lwt_check_raises To_test.exn_lwt_internal
-
 let switch = ref None
 
 let test_switch_alloc s () =

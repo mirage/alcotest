@@ -47,7 +47,6 @@ let others () =
   Alcotest.(check @@ float e) ".3 is .3" (0.1 +. 0.2) 0.3
 
 let edge_set = [ ("NaN", `Quick, nan); ("∞", `Quick, infinity) ]
-
 let others_set = [ ("others", `Quick, others) ]
 
 let () =

@@ -30,7 +30,6 @@ For more information, please refer to <http://unlicense.org/>
 (* A module with functions to test *)
 module To_test = struct
   let capitalise = Astring.String.Ascii.uppercase
-
   let double_all = List.map (fun a -> a + a)
 end
 

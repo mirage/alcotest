@@ -1,4 +1,6 @@
 version = 0.18.0
 profile = conventional
-break-infix=fit-or-vertical
+
+module-item-spacing = compact
+break-infix = fit-or-vertical
 parse-docstrings
