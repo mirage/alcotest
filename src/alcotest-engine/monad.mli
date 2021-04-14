@@ -34,7 +34,7 @@ module type EXTENDED = sig
 
   module List : sig
     val fold_map_s :
-      ('acc -> 'a -> ('acc * 'b) t) -> 'acc -> 'a list -> 'b list t
+      ('acc -> 'a -> ('acc * 'b) t) -> 'acc -> 'a list -> ('acc * 'b list) t
   end
 end
 

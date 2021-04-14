@@ -24,3 +24,9 @@ end
 module Result : sig
   val map : ('a -> 'b) -> ('a, 'e) result -> ('b, 'e) result
 end
+
+module Option : sig
+  val is_some : _ option -> bool
+  val get_exn : 'a option -> 'a
+  val ( || ) : 'a option -> 'a option -> 'a option
+end

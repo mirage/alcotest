@@ -99,6 +99,7 @@ struct
     quick_only : bool option;
     json : bool option;
     log_dir : string option;
+    bail : bool option;
   }
 
   (* Merge two ['a option]s with a left [Some] taking priority *)
@@ -106,7 +107,7 @@ struct
 
   let v_runtime_flags ~defaults (`Verbose verbose) (`Compact compact)
       (`Tail_errors tail_errors) (`Show_errors show_errors)
-      (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) =
+      (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) (`Bail bail) =
     let verbose = verbose ||* defaults.verbose in
     let compact = compact ||* defaults.compact in
     let show_errors = show_errors ||* defaults.show_errors in
@@ -114,13 +115,31 @@ struct
     let json = json ||* defaults.json in
     let log_dir = Some log_dir in
     let tail_errors = tail_errors ||* defaults.tail_errors in
-    { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
+    let bail = bail ||* defaults.bail in
+    {
+      verbose;
+      compact;
+      tail_errors;
+      show_errors;
+      quick_only;
+      json;
+      log_dir;
+      bail;
+    }
 
   let run_test ?and_exit
-      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
-      (`Test_filter filter) () tests name args =
+      {
+        verbose;
+        compact;
+        tail_errors;
+        show_errors;
+        quick_only;
+        json;
+        log_dir;
+        bail;
+      } (`Test_filter filter) () tests name args =
     run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir name tests args
+      ?show_errors ?json ?filter ?log_dir ?bail name tests args
 
   let fmap f x = Term.(app (const f) x)
 
@@ -154,10 +173,17 @@ struct
 
   let compact =
     let env = Arg.env_var "ALCOTEST_COMPACT" in
-    let doc = "Compact the output of the tests" in
+    let doc = "Compact the output of the tests." in
     Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
     |> to_tristate
     |> fmap (fun x -> `Compact x)
+
+  let bail =
+    let env = Arg.env_var "ALCOTEST_BAIL" in
+    let doc = "Stop running tests after the first failure." in
+    Arg.(value & flag & info ~env [ "bail" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Bail x)
 
   let limit_parser s =
     match s with
@@ -210,7 +236,8 @@ struct
       $ show_errors
       $ quick_only
       $ json
-      $ log_dir)
+      $ log_dir
+      $ bail)
 
   let regex =
     let parse s =
@@ -301,11 +328,20 @@ struct
       Term.info "list" ~doc )
 
   let run_with_args ?(and_exit = true) ?verbose ?compact ?tail_errors
-      ?quick_only ?show_errors ?json ?filter ?log_dir ?argv name
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?argv name
       (args : 'a Term.t) (tl : 'a test list) =
     let ( >>= ) = M.bind in
     let runtime_flags =
-      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
+      {
+        verbose;
+        compact;
+        tail_errors;
+        show_errors;
+        quick_only;
+        json;
+        log_dir;
+        bail;
+      }
     in
     let choices =
       [
@@ -330,7 +366,7 @@ struct
         exit (Term.exit_status_of_result result)
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
-      ?json ?filter ?log_dir ?argv name tl =
+      ?json ?filter ?log_dir ?bail ?argv name tl =
     run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?argv name (Term.pure ()) tl
+      ?show_errors ?json ?filter ?log_dir ?bail ?argv name (Term.pure ()) tl
 end

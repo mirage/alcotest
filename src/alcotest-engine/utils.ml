@@ -52,3 +52,16 @@ end
 module Result = struct
   let map f = function Ok x -> Ok (f x) | Error e -> Error e
 end
+
+module Option = struct
+  let is_some = function Some _ -> true | None -> false
+
+  let get_exn = function
+    | Some x -> x
+    | None -> invalid_arg "Option.get_exn: None"
+
+  let ( || ) a b =
+    match (a, b) with
+    | None, None -> None
+    | (Some _ as x), _ | None, (Some _ as x) -> x
+end

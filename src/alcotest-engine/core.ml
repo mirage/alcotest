@@ -66,6 +66,7 @@ module type S = sig
     ?json:bool ->
     ?filter:Re.re option * int list option ->
     ?log_dir:string ->
+    ?bail:bool ->
     'a
 
   val run : (string -> unit test list -> return) with_options
@@ -267,15 +268,16 @@ struct
          | e -> exn path "exception" Fmt.(const exn e))
       >> M.return)
 
-  type running_state = { tests_so_far : int; prior_error : bool }
+  type running_state = { tests_so_far : int; first_error : int option }
   (** State that is kept during the test executions. *)
 
-  let perform_test t args { tests_so_far; prior_error } suite =
+  let perform_test t args { tests_so_far; first_error } suite =
     let open Suite in
     let test = suite.fn in
     let print_event =
-      pp_event t ~prior_error ~tests_so_far ~isatty:(P.stdout_isatty ())
-        Fmt.stdout
+      pp_event t
+        ~prior_error:(Option.is_some first_error)
+        ~tests_so_far ~isatty:(P.stdout_isatty ()) Fmt.stdout
     in
     M.return () >>= fun () ->
     print_event (`Start suite.name);
@@ -300,15 +302,38 @@ struct
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
     print_event (`Result (suite.name, result));
+    let error = if errored then Some tests_so_far else None in
     let state =
-      { tests_so_far = tests_so_far + 1; prior_error = errored || prior_error }
+      {
+        tests_so_far = tests_so_far + 1;
+        first_error = Option.(first_error || error);
+      }
     in
     (state, result)
 
   let perform_tests t tests args =
-    M.List.fold_map_s (perform_test t args)
-      { tests_so_far = 0; prior_error = false }
+    let currently_bailing acc =
+      Option.is_some acc.first_error && t.config#bail
+    in
+    M.List.fold_map_s
+      (fun acc test ->
+        if currently_bailing acc then
+          M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
+        else perform_test t args acc test)
+      { tests_so_far = 0; first_error = None }
       tests
+    >|= fun (state, test_results) ->
+    let () =
+      if currently_bailing state then
+        match state.tests_so_far - Option.get_exn state.first_error - 1 with
+        | n when n > 0 ->
+            Fmt.pr "@\n  %a@\n"
+              Fmt.(styled `Faint string)
+              (Fmt.str "... with %d subsequent test%a skipped." n Pp.pp_plural n)
+        | 0 -> ()
+        | _ -> assert false
+    in
+    test_results
 
   let skip_fun _ = M.return `Skip
   let skip_label test_case = Suite.{ test_case with fn = skip_fun }
@@ -464,11 +489,11 @@ struct
     f (Config.apply_defaults ~default_log_dir:(default_log_dir ()) cfg)
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir =
+      ?show_errors ?json ?filter ?log_dir ?bail =
     Config.User.kcreate
       (with_defaults run_with_args)
       ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
-      ?filter ?log_dir
+      ?filter ?log_dir ?bail
 
   let run = Config.User.kcreate (with_defaults run)
 end

@@ -56,6 +56,7 @@ module type S = sig
     ?json:bool ->
     ?filter:Re.re option * int list option ->
     ?log_dir:string ->
+    ?bail:bool ->
     'a
   (** The various options taken by the tests runners {!run} and
       {!run_with_args}:
@@ -73,7 +74,9 @@ module type S = sig
       - [json] (default [false]). Print test results in a JSON-compatible
         format.
       - [log_dir] (default ["$PWD/_build/_tests/"]). The directory in which to
-        log the output of the tests (if [verbose] is not set). *)
+        log the output of the tests (if [verbose] is not set).
+      - [bail] (default [false]). If true, stop running the tests after the
+        first failure. *)
 
   val run : (string -> unit test list -> return) with_options
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
