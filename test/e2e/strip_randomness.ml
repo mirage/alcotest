@@ -17,7 +17,8 @@ let build_context_replace =
       [
         lterm;
         rep any;
-        str ("_build" ^ Filename.dir_sep ^ "_tests" ^ Filename.dir_sep);
+        str ("_build" ^ Filename.dir_sep ^ "_tests");
+        opt (str Filename.dir_sep);
         group (rep (diff any (set Filename.dir_sep)))
         (* <test-dir>: May be a UUID or a suite name (symlink), depending on
            whether or not we're running on Windows *);
