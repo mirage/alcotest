@@ -1,4 +1,4 @@
-### Unreleased
+### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be
   used to pass information about the location of the call-site, which is
