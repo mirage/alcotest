@@ -17,12 +17,17 @@ module List : sig
   type 'a t = 'a list
 
   val filter_map : ('a -> 'b option) -> 'a list -> 'b list
-
   val lift_result : ('a, 'b) result t -> ('a t, 'b t) result
-
   val init : int -> (int -> 'a) -> 'a list
 end
 
 module Result : sig
   val map : ('a -> 'b) -> ('a, 'e) result -> ('b, 'e) result
+end
+
+module Option : sig
+  val is_some : _ option -> bool
+  val get_exn : 'a option -> 'a
+  val value : default:'a -> 'a option -> 'a
+  val ( || ) : 'a option -> 'a option -> 'a option
 end

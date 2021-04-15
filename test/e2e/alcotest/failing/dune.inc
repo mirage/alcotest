@@ -1,5 +1,6 @@
 (executables
  (names
+   bail
    check_basic
    check_located
    check_long
@@ -17,6 +18,7 @@
  )
  (libraries alcotest alcotest.engine)
  (modules
+   bail
    check_basic
    check_located
    check_long
@@ -33,6 +35,25 @@
    unknown_option
  )
 )
+
+(rule
+ (target bail.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 125)
+    (run %{dep:bail.exe})))))
+
+(rule
+ (target bail.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:bail.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff bail.expected bail.processed)))
 
 (rule
  (target check_basic.actual)

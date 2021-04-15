@@ -14,15 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+include Core_intf
 open Model
 open Utils
-
-let compare_int : int -> int -> int = compare
 
 module IntSet = Set.Make (struct
   type t = int
 
-  let compare = compare_int
+  let compare = (compare : int -> int -> int)
 end)
 
 exception Check_error of unit Fmt.t
@@ -44,41 +43,6 @@ let () =
   Printexc.register_printer (function
     | Check_error err -> Some (Lazy.force print_error err)
     | _ -> None)
-
-module type S = sig
-  type return
-
-  type speed_level = [ `Quick | `Slow ]
-
-  type 'a test_case = string * speed_level * ('a -> return)
-
-  exception Test_error
-
-  val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
-
-  type 'a test = string * 'a test_case list
-
-  val list_tests : 'a test list -> return
-
-  type 'a with_options =
-    ?and_exit:bool ->
-    ?verbose:bool ->
-    ?compact:bool ->
-    ?tail_errors:[ `Unlimited | `Limit of int ] ->
-    ?quick_only:bool ->
-    ?show_errors:bool ->
-    ?json:bool ->
-    ?filter:Re.re option * IntSet.t option ->
-    ?log_dir:string ->
-    'a
-
-  val run : (string -> unit test list -> return) with_options
-
-  val run_with_args : (string -> 'a -> 'a test list -> return) with_options
-end
-
-module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
-  S with type return = unit M.t
 
 module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
 struct
@@ -109,9 +73,7 @@ struct
 
   (* Types *)
   type return = unit M.t
-
   type 'a run = 'a -> unit M.t
-
   type speed_level = [ `Quick | `Slow ]
 
   exception Test_error
@@ -131,17 +93,11 @@ struct
     (* runtime options. *)
     max_label : int;
         (** Longest test label in the suite, in UTF-8 characters. *)
-    speed_level : speed_level;
-    show_errors : bool;
-    json : bool;
-    verbose : bool;
-    compact : bool;
-    tail_errors : [ `Unlimited | `Limit of int ];
-    log_dir : string;
+    config : Config.t;
     run_id : string;
   }
 
-  let empty ~suite_name =
+  let empty ~config ~suite_name =
     let errors = [] in
     let suite =
       match Suite.v ~name:suite_name with
@@ -152,27 +108,8 @@ struct
              to `run`."
     in
     let max_label = 0 in
-    let verbose = false in
-    let compact = false in
-    let tail_errors = `Unlimited in
-    let speed_level = `Slow in
-    let show_errors = false in
-    let json = false in
-    let log_dir = P.getcwd () in
     let run_id = Uuidm.to_string ~upper:true Uuidm.nil in
-    {
-      errors;
-      suite;
-      max_label;
-      speed_level;
-      show_errors;
-      json;
-      verbose;
-      compact;
-      tail_errors;
-      log_dir;
-      run_id;
-    }
+    { suite; errors; max_label; config; run_id }
 
   let compare_speed_level s1 s2 =
     match (s1, s2) with
@@ -224,19 +161,20 @@ struct
       (* We don't create symlinks on Windows. *)
       via_symlink && not Sys.win32
     in
-    Filename.concat t.log_dir
+    Filename.concat t.config#log_dir
       (if via_symlink then Suite.name t.suite else t.run_id)
 
-  let pp_suite_results ({ verbose; show_errors; json; compact; _ } as t) =
+  let pp_suite_results t =
     let log_dir = log_dir ~via_symlink:true t |> maybe_collapse_home in
-    Pp.suite_results ~verbose ~show_errors ~json ~compact ~log_dir
+    Pp.suite_results ~log_dir t.config
 
   let pp_event ~isatty ~prior_error ~tests_so_far t =
+    let cfg = t.config in
     let selector_on_failure =
-      (not prior_error) && not (t.verbose || t.show_errors)
+      (not prior_error) && not (cfg#verbose || cfg#show_errors)
     in
-    if not t.json then
-      Pp.event ~isatty ~compact:t.compact ~max_label:t.max_label
+    if not cfg#json then
+      Pp.event ~isatty ~compact:cfg#compact ~max_label:t.max_label
         ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
         ~selector_on_failure ~tests_so_far
     else Fmt.nop
@@ -249,23 +187,20 @@ struct
     Filename.concat (log_dir ~via_symlink:true t) (Test_name.file tname)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
-
   let red_s fmt = color `Red fmt
-
   let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
 
-  let pp_error ~verbose ~doc_of_test_name ~output_file ~tail_errors ~max_label
-      ppf e =
+  let pp_error ~doc_of_test_name ~output_file ~max_label cfg ppf e =
     let path, error_fmt =
       match e with `Error (p, f) -> (p, f) | `Exn (p, _, f) -> (p, f)
     in
     let pp_logs ppf () =
       let filename = output_file path in
-      if verbose || not (Sys.file_exists filename) then
+      if cfg#verbose || not (Sys.file_exists filename) then
         Fmt.pf ppf "%a@," error_fmt ()
       else
         let file = open_in filename in
-        let output = read_tail tail_errors file in
+        let output = read_tail cfg#tail_errors file in
         close_in file;
         Fmt.pf ppf "%s@,Logs saved to %a.@," output
           Fmt.(Pp.quoted (styled `Cyan string))
@@ -286,7 +221,6 @@ struct
     | `Skip | `Todo _ -> false
 
   let bt () = match Printexc.get_backtrace () with "" -> "" | s -> "\n" ^ s
-
   let exn path name pp = `Exn (path, name, Fmt.(pp ++ const lines (bt ())))
 
   let protect_test path (f : 'a run) : 'a -> Run_result.t M.t =
@@ -302,15 +236,16 @@ struct
          | e -> exn path "exception" Fmt.(const exn e))
       >> M.return)
 
-  type running_state = { tests_so_far : int; prior_error : bool }
+  type running_state = { tests_so_far : int; first_error : int option }
   (** State that is kept during the test executions. *)
 
-  let perform_test t args { tests_so_far; prior_error } suite =
+  let perform_test t args { tests_so_far; first_error } suite =
     let open Suite in
     let test = suite.fn in
     let print_event =
-      pp_event t ~prior_error ~tests_so_far ~isatty:(P.stdout_isatty ())
-        Fmt.stdout
+      pp_event t
+        ~prior_error:(Option.is_some first_error)
+        ~tests_so_far ~isatty:(P.stdout_isatty ()) Fmt.stdout
     in
     M.return () >>= fun () ->
     print_event (`Start suite.name);
@@ -319,10 +254,9 @@ struct
     (* Store errors *)
     let errored : bool =
       let pp_error =
-        pp_error ~verbose:t.verbose
+        pp_error
           ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
-          ~output_file:(output_file t) ~tail_errors:t.tail_errors
-          ~max_label:t.max_label
+          ~output_file:(output_file t) ~max_label:t.max_label t.config
       in
       let error, errored =
         match result with
@@ -336,33 +270,67 @@ struct
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
     print_event (`Result (suite.name, result));
+    let error = if errored then Some tests_so_far else None in
     let state =
-      { tests_so_far = tests_so_far + 1; prior_error = errored || prior_error }
+      {
+        tests_so_far = tests_so_far + 1;
+        first_error = Option.(first_error || error);
+      }
     in
     (state, result)
 
   let perform_tests t tests args =
-    M.List.fold_map_s (perform_test t args)
-      { tests_so_far = 0; prior_error = false }
+    let currently_bailing acc =
+      Option.is_some acc.first_error && t.config#bail
+    in
+    M.List.fold_map_s
+      (fun acc test ->
+        if currently_bailing acc then
+          M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
+        else perform_test t args acc test)
+      { tests_so_far = 0; first_error = None }
       tests
+    >|= fun (state, test_results) ->
+    let () =
+      if currently_bailing state then
+        match state.tests_so_far - Option.get_exn state.first_error - 1 with
+        | n when n > 0 ->
+            Fmt.pr "@\n  %a@\n"
+              Fmt.(styled `Faint string)
+              (Fmt.str "... with %d subsequent test%a skipped." n Pp.pp_plural n)
+        | 0 -> ()
+        | _ -> assert false
+    in
+    test_results
 
   let skip_fun _ = M.return `Skip
-
   let skip_label test_case = Suite.{ test_case with fn = skip_fun }
 
-  let filter_test_case (regexp, cases) test_case =
-    let n, i =
-      let tn = test_case.Suite.name in
-      Test_name.(name tn, index tn)
+  let filter_test_case (regexp, cases) =
+    let regexp_match =
+      match regexp with
+      | None -> fun _ -> true
+      | Some r -> fun n -> Re.execp r n
     in
-    let regexp_match = function None -> true | Some r -> Re.execp r n in
-    let case_match = function None -> true | Some set -> IntSet.mem i set in
-    regexp_match regexp && case_match cases
+    let index_match =
+      match cases with
+      | None -> fun _ -> true
+      | Some ints ->
+          let set = IntSet.of_list ints in
+          fun i -> IntSet.mem i set
+    in
+    fun test_case ->
+      let name, index =
+        let tn = test_case.Suite.name in
+        Test_name.(name tn, index tn)
+      in
+      regexp_match name && index_match index
 
   let filter_test_cases ~subst path test_cases =
+    let filter_test_case = filter_test_case path in
     test_cases
     |> List.filter_map (fun tc ->
-           if filter_test_case path tc then Some tc
+           if filter_test_case tc then Some tc
            else if subst then Some (skip_label tc)
            else None)
 
@@ -381,14 +349,15 @@ struct
     else Suite.{ test_case with fn = skip_fun }
 
   let result t test args =
-    P.prepare ~base:t.log_dir
+    P.prepare ~base:t.config#log_dir
       ~dir:(log_dir ~via_symlink:false t)
       ~name:(Suite.name t.suite);
     let start_time = P.time () in
     let test =
-      if t.verbose then test else List.map (redirect_test_output t) test
+      if t.config#verbose then test else List.map (redirect_test_output t) test
     in
-    let test = List.map (select_speed t.speed_level) test in
+    let speed_level = if t.config#quick_only then `Quick else `Slow in
+    let test = List.map (select_speed speed_level) test in
     perform_tests t test args >|= fun results ->
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
@@ -428,65 +397,43 @@ struct
 
   let register_all t cases = List.fold_left register t cases
 
-  let run_tests ?filter t () args =
+  let run_tests t () args =
+    let filter = t.config#filter in
     let suite = Suite.tests t.suite in
-    (match filter with
-    | None -> result t suite args
-    | Some labels ->
-        let is_empty = filter_test_cases ~subst:false labels suite = [] in
-        if is_empty then (
-          Fmt.(pf stderr)
-            "%a\n" red
-            "Invalid request (no tests to run, filter skipped everything)!";
-          exit 1)
-        else
-          let tests = filter_test_cases ~subst:true labels suite in
-          result t tests args)
+    let is_empty = filter_test_cases ~subst:false filter suite = [] in
+    (if is_empty && filter <> (None, None) then (
+     Fmt.(pf stderr)
+       "%a\n" red
+       "Invalid request (no tests to run, filter skipped everything)!";
+     exit 1)
+    else
+      let tests = filter_test_cases ~subst:true filter suite in
+      result t tests args)
     >|= fun result ->
     (pp_suite_results t) Fmt.stdout result;
     result.failures
-
-  let list_tests (type a) (tl : a test list) =
-    let t = register_all (empty ~suite_name:"<not-shown-to-user>") tl in
-    list_registered_tests t ();
-    M.return ()
 
   let default_log_dir () =
     let fname_concat l = List.fold_left Filename.concat "" l in
     fname_concat [ P.getcwd (); "_build"; "_tests" ]
 
-  type 'a with_options =
-    ?and_exit:bool ->
-    ?verbose:bool ->
-    ?compact:bool ->
-    ?tail_errors:[ `Unlimited | `Limit of int ] ->
-    ?quick_only:bool ->
-    ?show_errors:bool ->
-    ?json:bool ->
-    ?filter:Re.re option * IntSet.t option ->
-    ?log_dir:string ->
-    'a
+  type 'a with_options = 'a Config.with_options
 
-  let run_with_args ?(and_exit = true) ?(verbose = false) ?(compact = false)
-      ?(tail_errors = `Unlimited) ?(quick_only = false) ?(show_errors = false)
-      ?(json = false) ?filter ?(log_dir = default_log_dir ()) name (type a)
-      (args : a) (tl : a test list) =
-    let speed_level = if quick_only then `Quick else `Slow in
+  let list_tests (type a) (tl : a test list) =
+    (* TODO: refactor [register_all] to not require dummy state *)
+    let config =
+      Config.apply_defaults ~default_log_dir:"<not-shown-to-user>"
+        (Config.User.create ())
+    in
+    let t = register_all (empty ~config ~suite_name:"<not-shown-to-user>") tl in
+    list_registered_tests t ();
+    M.return ()
+
+  let run_with_args (config : Config.t) name (type a) (args : a)
+      (tl : a test list) =
     let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
-    let t =
-      {
-        (empty ~suite_name:name) with
-        run_id;
-        verbose;
-        compact;
-        tail_errors;
-        speed_level;
-        json;
-        show_errors;
-        log_dir;
-      }
-    in
+    let t = { (empty ~config ~suite_name:name) with run_id } in
     let t = register_all t tl in
     ( (* Only print inside the concurrency monad *)
       M.return () >>= fun () ->
@@ -496,16 +443,25 @@ struct
         (styled `Faint (fun ppf () ->
              pf ppf "This run has ID %a.@,@," (Pp.quoted string) run_id))
         ();
-      run_tests ?filter t () args )
+      run_tests t () args )
     >|= fun test_failures ->
-    match (test_failures, and_exit) with
+    match (test_failures, t.config#and_exit) with
     | 0, true -> exit 0
     | 0, false -> ()
     | _, true -> exit 1
     | _, false -> raise Test_error
 
-  let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
-      ?json ?filter ?log_dir name (tl : unit test list) =
-    run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir name () tl
+  let run config name (tl : unit test list) = run_with_args config name () tl
+
+  let with_defaults f cfg =
+    f (Config.apply_defaults ~default_log_dir:(default_log_dir ()) cfg)
+
+  let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?bail =
+    Config.User.kcreate
+      (with_defaults run_with_args)
+      ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
+      ?filter ?log_dir ?bail
+
+  let run = Config.User.kcreate (with_defaults run)
 end

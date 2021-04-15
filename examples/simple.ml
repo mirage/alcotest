@@ -28,11 +28,8 @@ For more information, please refer to <http://unlicense.org/>
 (* A module with functions to test *)
 module To_test = struct
   let lowercase = String.lowercase_ascii
-
   let capitalize = String.capitalize_ascii
-
   let str_concat = String.concat ""
-
   let list_concat = List.append
 end
 

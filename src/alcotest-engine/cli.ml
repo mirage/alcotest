@@ -17,7 +17,12 @@
 
 open Cmdliner
 open Astring
-module IntSet = Core.IntSet
+
+module IntSet = Set.Make (struct
+  type t = int
+
+  let compare = (compare : int -> int -> int)
+end)
 
 module type S = sig
   include Core.S
@@ -94,6 +99,7 @@ struct
     quick_only : bool option;
     json : bool option;
     log_dir : string option;
+    bail : bool option;
   }
 
   (* Merge two ['a option]s with a left [Some] taking priority *)
@@ -101,7 +107,7 @@ struct
 
   let v_runtime_flags ~defaults (`Verbose verbose) (`Compact compact)
       (`Tail_errors tail_errors) (`Show_errors show_errors)
-      (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) =
+      (`Quick_only quick_only) (`Json json) (`Log_dir log_dir) (`Bail bail) =
     let verbose = verbose ||* defaults.verbose in
     let compact = compact ||* defaults.compact in
     let show_errors = show_errors ||* defaults.show_errors in
@@ -109,13 +115,31 @@ struct
     let json = json ||* defaults.json in
     let log_dir = Some log_dir in
     let tail_errors = tail_errors ||* defaults.tail_errors in
-    { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
+    let bail = bail ||* defaults.bail in
+    {
+      verbose;
+      compact;
+      tail_errors;
+      show_errors;
+      quick_only;
+      json;
+      log_dir;
+      bail;
+    }
 
   let run_test ?and_exit
-      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
-      (`Test_filter filter) () tests name args =
+      {
+        verbose;
+        compact;
+        tail_errors;
+        show_errors;
+        quick_only;
+        json;
+        log_dir;
+        bail;
+      } (`Test_filter filter) () tests name args =
     run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir name tests args
+      ?show_errors ?json ?filter ?log_dir ?bail name tests args
 
   let fmap f x = Term.(app (const f) x)
 
@@ -149,10 +173,17 @@ struct
 
   let compact =
     let env = Arg.env_var "ALCOTEST_COMPACT" in
-    let doc = "Compact the output of the tests" in
+    let doc = "Compact the output of the tests." in
     Arg.(value & flag & info ~env [ "c"; "compact" ] ~docv:"" ~doc)
     |> to_tristate
     |> fmap (fun x -> `Compact x)
+
+  let bail =
+    let env = Arg.env_var "ALCOTEST_BAIL" in
+    let doc = "Stop running tests after the first failure." in
+    Arg.(value & flag & info ~env [ "bail" ] ~docv:"" ~doc)
+    |> to_tristate
+    |> fmap (fun x -> `Bail x)
 
   let limit_parser s =
     match s with
@@ -205,7 +236,8 @@ struct
       $ show_errors
       $ quick_only
       $ json
-      $ log_dir)
+      $ log_dir
+      $ bail)
 
   let regex =
     let parse s =
@@ -218,30 +250,26 @@ struct
 
   exception Invalid_format
 
-  let int_range_list : IntSet.t Cmdliner.Arg.conv =
+  let int_range_list : int list Cmdliner.Arg.conv =
     let parse s =
-      let set = ref IntSet.empty in
-      let acc i = set := IntSet.add i !set in
-      let ranges = String.cuts ~sep:"," s in
-      let process_range s =
-        let bounds = String.cuts ~sep:".." s |> List.map String.to_int in
-        match bounds with
-        | [ Some i ] -> acc i
+      let rec range lower upper acc =
+        if lower > upper then acc else range (succ lower) upper (lower :: acc)
+      in
+      let process_range acc s =
+        String.cuts ~sep:".." s |> List.map String.to_int |> function
+        | [ Some i ] -> i :: acc
         | [ Some lower; Some upper ] when lower <= upper ->
-            for i = lower to upper do
-              acc i
-            done
+            range lower upper acc
         | _ -> raise Invalid_format
       in
-      match List.iter process_range ranges with
-      | () -> Ok !set
+      let ranges = String.cuts ~sep:"," s in
+      match List.fold_left process_range [] ranges with
+      | list -> Ok list
       | exception Invalid_format ->
           Error
             (`Msg "must be a comma-separated list of integers / integer ranges")
     in
-    let print ppf set =
-      Fmt.(braces @@ list ~sep:comma int) ppf (IntSet.elements set)
-    in
+    let print ppf set = Fmt.(braces @@ list ~sep:comma int) ppf set in
     Arg.conv (parse, print)
 
   let test_filter =
@@ -300,11 +328,20 @@ struct
       Term.info "list" ~doc )
 
   let run_with_args ?(and_exit = true) ?verbose ?compact ?tail_errors
-      ?quick_only ?show_errors ?json ?filter ?log_dir ?argv name
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?argv name
       (args : 'a Term.t) (tl : 'a test list) =
     let ( >>= ) = M.bind in
     let runtime_flags =
-      { verbose; compact; tail_errors; show_errors; quick_only; json; log_dir }
+      {
+        verbose;
+        compact;
+        tail_errors;
+        show_errors;
+        quick_only;
+        json;
+        log_dir;
+        bail;
+      }
     in
     let choices =
       [
@@ -329,7 +366,7 @@ struct
         exit (Term.exit_status_of_result result)
 
   let run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
-      ?json ?filter ?log_dir ?argv name tl =
+      ?json ?filter ?log_dir ?bail ?argv name tl =
     run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?argv name (Term.pure ()) tl
+      ?show_errors ?json ?filter ?log_dir ?bail ?argv name (Term.pure ()) tl
 end

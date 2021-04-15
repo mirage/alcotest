@@ -18,7 +18,6 @@ module type TESTABLE = sig
   type t
 
   val pp : t Fmt.t
-
   val equal : t -> t -> bool
 end
 
@@ -39,15 +38,12 @@ let testable (type a) (pp : a Fmt.t) (equal : a -> a -> bool) : a testable =
     type t = a
 
     let pp = pp
-
     let equal = equal
   end in
   (module M)
 
 let int32 = testable Fmt.int32 ( = )
-
 let int64 = testable Fmt.int64 ( = )
-
 let int = testable Fmt.int ( = )
 
 let float eps =
@@ -60,14 +56,12 @@ let float eps =
   testable Fmt.float same
 
 let char = testable Fmt.char ( = )
-
 let string = testable Fmt.string ( = )
 
 let bytes =
   testable (fun fmt bytes -> Fmt.fmt "%S" fmt (Bytes.to_string bytes)) ( = )
 
 let bool = testable Fmt.bool ( = )
-
 let unit = testable (Fmt.unit "()") ( = )
 
 let list e =
@@ -136,7 +130,6 @@ let pass (type a) =
     type t = a
 
     let pp fmt _ = Fmt.string fmt "Alcotest.pass"
-
     let equal _ _ = true
   end in
   (module M : TESTABLE with type t = M.t)
@@ -146,7 +139,6 @@ let reject (type a) =
     type t = a
 
     let pp fmt _ = Fmt.string fmt "Alcotest.reject"
-
     let equal _ _ = false
   end in
   (module M : TESTABLE with type t = M.t)
@@ -161,7 +153,6 @@ let check_err fmt = raise (Core.Check_error fmt)
 
 module Source_code_position = struct
   type here = Lexing.position
-
   type pos = string * int * int * int
 end
 
@@ -217,7 +208,6 @@ let fail ?here ?pos msg =
       Fmt.pf ppf "%t%a %s" (pp_location ?here ?pos) Pp.tag `Fail msg)
 
 let failf ?here ?pos fmt = Fmt.kstrf (fun msg -> fail ?here ?pos msg) fmt
-
 let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
 let collect_exception f =

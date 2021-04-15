@@ -8,6 +8,10 @@
   functions. This allows them to be used outside of an Alcotest test runner for
   making general assertions.  (#296, @CraigFe)
 
+- Add `--bail` option (and corresponding `ALCOTEST_BAIL` environment variable),
+  which causes Alcotest to terminate after the first test failure. (#298,
+  @CraigFe)
+
 ### 1.3.0 (2021-02-16)
 
 - Add `Alcotest.triple` for testing 3-tuples. (#288, @sheepduke)

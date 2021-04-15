@@ -32,7 +32,6 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
   open M.Infix
 
   let time = Unix.gettimeofday
-
   let getcwd = Sys.getcwd
 
   let unlink_if_exists file =

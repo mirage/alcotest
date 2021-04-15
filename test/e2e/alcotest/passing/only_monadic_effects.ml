@@ -18,9 +18,7 @@ module Terminal : Alcotest_engine.Monad.S = struct
   type 'a t = unit
 
   let return _ = ()
-
   let bind () _ = ()
-
   let catch f on_error = match f () with x -> x | exception ex -> on_error ex
 end
 

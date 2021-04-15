@@ -12,8 +12,11 @@ COMMANDS
            Run a subset of the tests.
 
 OPTIONS
+       --bail (absent ALCOTEST_BAIL env)
+           Stop running tests after the first failure.
+
        -c, --compact (absent ALCOTEST_COMPACT env)
-           Compact the output of the tests
+           Compact the output of the tests.
 
        --color=WHEN (absent ALCOTEST_COLOR env)
            Colorize the output. WHEN must be one of `auto', `always' or
@@ -31,7 +34,7 @@ OPTIONS
        --json
            Display JSON for the results, to be used by a script.
 
-       -o DIR (absent=<build-context>/_build/_tests)
+       -o DIR (absent=<build-context>/_build/_tests/)
            Where to store the log files of the tests.
 
        -q, --quick-tests (absent ALCOTEST_QUICK_TESTS env)
@@ -46,6 +49,9 @@ OPTIONS
 
 ENVIRONMENT
        These environment variables affect the execution of simple.exe:
+
+       ALCOTEST_BAIL
+           See option --bail.
 
        ALCOTEST_COLOR
            See option --color.

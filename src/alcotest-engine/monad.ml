@@ -14,39 +14,14 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-module type S = sig
-  type 'a t
-
-  val return : 'a -> 'a t
-
-  val bind : 'a t -> ('a -> 'b t) -> 'b t
-
-  val catch : (unit -> 'a t) -> (exn -> 'a t) -> 'a t
-end
+include Monad_intf
 
 module Identity = struct
   type 'a t = 'a
 
   let return x = x
-
   let bind x f = f x
-
   let catch f on_error = match f () with x -> x | exception ex -> on_error ex
-end
-
-module type EXTENDED = sig
-  include S
-
-  module Infix : sig
-    val ( >>= ) : 'a t -> ('a -> 'b t) -> 'b t
-
-    val ( >|= ) : 'a t -> ('a -> 'b) -> 'b t
-  end
-
-  module List : sig
-    val fold_map_s :
-      ('acc -> 'a -> ('acc * 'b) t) -> 'acc -> 'a list -> 'b list t
-  end
 end
 
 module Extend (M : S) = struct
@@ -54,7 +29,6 @@ module Extend (M : S) = struct
 
   module Infix = struct
     let ( >>= ) = M.bind
-
     let ( >|= ) x f = x >>= fun y -> M.return (f y)
   end
 
@@ -63,7 +37,7 @@ module Extend (M : S) = struct
   module List = struct
     let fold_map_s f init l =
       let rec inner acc results = function
-        | [] -> return (List.rev results)
+        | [] -> M.return (acc, List.rev results)
         | hd :: tl ->
             f acc hd >>= fun (acc, r) ->
             (inner [@ocaml.tailcall]) acc (r :: results) tl

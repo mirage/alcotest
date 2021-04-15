@@ -30,7 +30,6 @@ end
 
 module type S = sig
   type event
-
   type result
 
   val info :
@@ -57,11 +56,8 @@ module type S = sig
     event Fmt.t
 
   val suite_results :
-    verbose:bool ->
-    show_errors:bool ->
-    json:bool ->
-    compact:bool ->
     log_dir:string ->
+    < verbose : bool ; show_errors : bool ; json : bool ; compact : bool ; .. > ->
     result Fmt.t
 
   val quoted : 'a Fmt.t -> 'a Fmt.t

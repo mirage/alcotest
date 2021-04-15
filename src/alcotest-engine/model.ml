@@ -28,9 +28,7 @@ module Test_name : sig
   type t
 
   val v : name:string -> index:int -> t
-
   val name : t -> string
-
   val index : t -> int
 
   val pp : t Fmt.t
@@ -57,11 +55,8 @@ end = struct
     { name; file; index }
 
   let pp = Fmt.using (fun { name; _ } -> name) Fmt.string
-
   let name { name; _ } = name
-
   let file { file; _ } = file
-
   let length = name >> Uutf.String.fold_utf_8 (fun a _ _ -> a + 1) 0
 
   let compare t t' =
@@ -109,7 +104,6 @@ module Suite (M : Monad.S) : sig
     ('a t, [ `Duplicate_test_path of string ]) result
 
   val tests : 'a t -> 'a test_case list
-
   val doc_of_test_name : 'a t -> Test_name.t -> string
 end = struct
   module String_set = Set.Make (String)
@@ -141,7 +135,6 @@ end = struct
         Ok { escaped_name; pp_name; tests; filepaths; doc }
 
   let name { escaped_name; _ } = escaped_name
-
   let pp_name ppf { pp_name; _ } = pp_name ppf ()
 
   let check_path_is_unique t tname =
