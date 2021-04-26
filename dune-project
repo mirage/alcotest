@@ -48,7 +48,8 @@ tests to run.
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
   (async_unix (>= v0.9.0))
-  (core_kernel (>= v0.9.0))))
+  (core_kernel (>= v0.9.0))
+  (async :with-test)))
 
 (package
  (name alcotest-lwt)

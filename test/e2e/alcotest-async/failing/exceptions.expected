@@ -1,0 +1,45 @@
+Testing `test/e2e/alcotest-async/failing/exceptions.ml'.
+This run has ID `<uuid>'.
+
+ASSERT 1 = 2
+  [FAIL]        all          0   failed check.
+  [FAIL]        all          1   internal exception.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        all          0   failed check.                                 │
+└──────────────────────────────────────────────────────────────────────────────┘
+(monitor.ml.Error ("Alcotest_engine__Core.Check_error(_)")
+  ("Raised at Alcotest_engine__Test.check in file \"src/alcotest-engine/test.ml\", line 159, characters 4-114"
+    "Called from Dune__exe__Exceptions.test_failed_check in file \"test/e2e/alcotest-async/failing/exceptions.ml\", line 5, characters 2-34"
+    "Called from Alcotest_async.run_test in file \"src/alcotest-async/alcotest_async.ml\", line 22, characters 29-38"
+    "Called from Alcotest_engine__Core.Make.protect_test.(fun) in file \"src/alcotest-engine/core.ml\", line 269, characters 17-23"
+    "Called from Async_kernel__Monitor.Exported_for_scheduler.schedule'.upon_work_fill_i in file \"src/monitor.ml\", line 295, characters 42-51"
+    "Called from Async_kernel__Job_queue.run_jobs in file \"src/job_queue.ml\", line 167, characters 6-47"))
+Raised at Alcotest_engine__Test.check in file "src/alcotest-engine/test.ml", line 159, characters 4-114
+Called from Dune__exe__Exceptions.test_failed_check in file "test/e2e/alcotest-async/failing/exceptions.ml", line 5, characters 2-34
+Called from Alcotest_async.run_test in file "src/alcotest-async/alcotest_async.ml", line 22, characters 29-38
+Called from Alcotest_engine__Core.Make.protect_test.(fun) in file "src/alcotest-engine/core.ml", line 269, characters 17-23
+Called from Async_kernel__Monitor.Exported_for_scheduler.schedule'.upon_work_fill_i in file "src/monitor.ml", line 295, characters 42-51
+Called from Async_kernel__Job_queue.run_jobs in file "src/job_queue.ml", line 167, characters 6-47
+
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        all          1   internal exception.                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+(monitor.ml.Error (Internal)
+  ("Raised at Dune__exe__Exceptions.test_internal_exception in file \"test/e2e/alcotest-async/failing/exceptions.ml\", line 10, characters 2-16"
+    "Called from Alcotest_async.run_test in file \"src/alcotest-async/alcotest_async.ml\", line 22, characters 29-38"
+    "Called from Alcotest_engine__Core.Make.protect_test.(fun) in file \"src/alcotest-engine/core.ml\", line 269, characters 17-23"
+    "Called from Async_kernel__Monitor.Exported_for_scheduler.schedule'.upon_work_fill_i in file \"src/monitor.ml\", line 295, characters 42-51"
+    "Called from Async_kernel__Job_queue.run_jobs in file \"src/job_queue.ml\", line 167, characters 6-47"))
+Raised at Dune__exe__Exceptions.test_internal_exception in file "test/e2e/alcotest-async/failing/exceptions.ml", line 10, characters 2-16
+Called from Alcotest_async.run_test in file "src/alcotest-async/alcotest_async.ml", line 22, characters 29-38
+Called from Alcotest_engine__Core.Make.protect_test.(fun) in file "src/alcotest-engine/core.ml", line 269, characters 17-23
+Called from Async_kernel__Monitor.Exported_for_scheduler.schedule'.upon_work_fill_i in file "src/monitor.ml", line 295, characters 42-51
+Called from Async_kernel__Job_queue.run_jobs in file "src/job_queue.ml", line 167, characters 6-47
+
+ ──────────────────────────────────────────────────────────────────────────────
+
+2 failures! in <test-duration>s. 2 tests run.
