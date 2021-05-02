@@ -67,3 +67,11 @@ module Option = struct
     | None, None -> None
     | (Some _ as x), _ | None, (Some _ as x) -> x
 end
+
+module Cmdliner_syntax = struct
+  open Cmdliner
+
+  let ( let+ ) t f = Term.(const f $ t)
+  let ( and+ ) a b = Term.(const (fun x y -> (x, y)) $ a $ b)
+  let ( >>| ) x f = Term.(app (const f) x)
+end
