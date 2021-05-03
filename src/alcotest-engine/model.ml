@@ -3,7 +3,7 @@ open Utils
 type speed_level = [ `Quick | `Slow ]
 
 (** Given a UTF-8 encoded string, escape any characters not considered
-    "filesystem safe" as their [U+XXXX] notation form. *)
+    "filesystem safe" as their [U+XXXX] notation form (or using [-]). *)
 let escape str =
   let add_codepoint buf uchar =
     Uchar.to_int uchar |> Fmt.str "U+%04X" |> Buffer.add_string buf
@@ -17,6 +17,7 @@ let escape str =
           | ('A' .. 'Z' | 'a' .. 'z' | '0' .. '9' | '_' | '-' | ' ' | '.') as c
             ->
               Buffer.add_char buf c
+          | '/' | '\\' -> Buffer.add_char buf '-'
           | _ -> add_codepoint buf u
         else add_codepoint buf u
     | `Malformed _ -> Uutf.Buffer.add_utf_8 buf Uutf.u_rep
