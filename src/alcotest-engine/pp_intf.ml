@@ -17,6 +17,9 @@
 
 open Model
 
+type theta = Format.formatter -> unit
+(** Type corresponding to a [%t] placeholder. *)
+
 module Types = struct
   type event = [ `Result of Test_name.t * Run_result.t | `Start of Test_name.t ]
 
@@ -56,7 +59,7 @@ module type S = sig
     event Fmt.t
 
   val suite_results :
-    log_dir:string ->
+    log_dir:theta ->
     < verbose : bool ; show_errors : bool ; json : bool ; compact : bool ; .. > ->
     result Fmt.t
 
@@ -71,14 +74,6 @@ module type S = sig
   (** Horizontal rule of length {!terminal_width}. Uses box-drawing characters
       from code page 437. *)
 
-  val pp_plural : int Fmt.t
-  (** This is for adding an 's' to words that should be pluralized, e.g.
-
-      {[
-        let n = List.length items in
-        Fmt.pr "Found %i item%a." n pp_plural n
-      ]} *)
-
   val user_error : string -> _
   (** Raise a user error, then fail. *)
 end
@@ -91,6 +86,15 @@ module type Pp = sig
   include module type of Types
 
   val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
+  val map_theta : theta -> f:(unit Fmt.t -> unit Fmt.t) -> theta
+
+  val pp_plural : int Fmt.t
+  (** This is for adding an 's' to words that should be pluralized, e.g.
+
+      {[
+        let n = List.length items in
+        Fmt.pr "Found %i item%a." n pp_plural n
+      ]} *)
 
   module Make (X : Make_arg) :
     S with type event := event and type result := result

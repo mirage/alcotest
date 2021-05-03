@@ -81,11 +81,12 @@ end
 
 module Suite (M : Monad.S) : sig
   type 'a t
+  type 'a test_fn = [ `Skip | `Run of 'a -> Run_result.t M.t ]
 
   type 'a test_case = {
     name : Test_name.t;
     speed_level : speed_level;
-    fn : 'a -> Run_result.t M.t;
+    fn : 'a test_fn;
   }
 
   val v : name:string -> (_ t, [> `Empty_name ]) result
@@ -100,7 +101,7 @@ module Suite (M : Monad.S) : sig
 
   val add :
     'a t ->
-    Test_name.t * string * speed_level * ('a -> Run_result.t M.t) ->
+    Test_name.t * string * speed_level * 'a test_fn ->
     ('a t, [ `Duplicate_test_path of string ]) result
 
   val tests : 'a t -> 'a test_case list
@@ -108,10 +109,12 @@ module Suite (M : Monad.S) : sig
 end = struct
   module String_set = Set.Make (String)
 
+  type 'a test_fn = [ `Skip | `Run of 'a -> Run_result.t M.t ]
+
   type 'a test_case = {
     name : Test_name.t;
     speed_level : speed_level;
-    fn : 'a -> Run_result.t M.t;
+    fn : 'a test_fn;
   }
 
   type 'a t = {
