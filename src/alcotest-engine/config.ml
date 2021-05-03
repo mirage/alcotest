@@ -219,8 +219,6 @@ module User = struct
     }
 
   let term ~and_exit =
-    let open Cmdliner_syntax in
-    let open Key in
     let+ verbose = Verbose.term
     and+ compact = Compact.term
     and+ tail_errors = Tail_errors.term

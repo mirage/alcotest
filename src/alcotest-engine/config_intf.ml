@@ -32,11 +32,25 @@ module type Config = sig
 
   module User : sig
     type t
+    (** The type of configurations supplied by the user, with defaults not yet
+        supplied. *)
+
+    val create : (unit -> t) with_options
+    (** Build a config object with the supplied options. *)
 
     val kcreate : (t -> 'a) -> 'a with_options
-    val create : (unit -> t) with_options
+    (** Like [create], but passes the constructed config to a continuation
+        rather than returning directly. *)
+
     val term : and_exit:bool -> t Cmdliner.Term.t
+    (** [term] provides a command-line interface for building configs. *)
+
     val ( || ) : t -> t -> t
+    (** Merge two configs, with fields from the left taking priority over those
+        in the right. *)
+
+    (** {2 Accessors} *)
+
     val and_exit : t -> bool
   end
 
