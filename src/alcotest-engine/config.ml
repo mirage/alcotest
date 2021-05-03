@@ -264,18 +264,6 @@ module User = struct
   let and_exit t = Option.value ~default:And_exit.default t.and_exit
 end
 
-type t =
-  < and_exit : bool
-  ; verbose : bool
-  ; compact : bool
-  ; tail_errors : bound
-  ; quick_only : bool
-  ; show_errors : bool
-  ; json : bool
-  ; filter : Re.re option * int list option
-  ; log_dir : string
-  ; bail : bool >
-
 let apply_defaults ~default_log_dir : User.t -> t =
  fun {
        and_exit;
