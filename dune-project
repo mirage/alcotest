@@ -31,7 +31,8 @@ tests to run.
   uuidm
   re
   stdlib-shims
-  uutf))
+  uutf
+  ocaml-syntax-shims))
 
 (package
  (name alcotest-async)

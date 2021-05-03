@@ -31,3 +31,11 @@ module Option : sig
   val value : default:'a -> 'a option -> 'a
   val ( || ) : 'a option -> 'a option -> 'a option
 end
+
+module Cmdliner_syntax : sig
+  open Cmdliner
+
+  val ( let+ ) : 'a Term.t -> ('a -> 'b) -> 'b Term.t
+  val ( and+ ) : 'a Term.t -> 'b Term.t -> ('a * 'b) Term.t
+  val ( >>| ) : 'a Term.t -> ('a -> 'b) -> 'b Term.t
+end

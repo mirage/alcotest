@@ -44,8 +44,7 @@ let () =
     | Check_error err -> Some (Lazy.force print_error err)
     | _ -> None)
 
-module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
-struct
+module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module P = P (M)
 
   module Pp = struct
@@ -429,8 +428,11 @@ struct
     list_registered_tests t ();
     M.return ()
 
-  let run_with_args (config : Config.t) name (type a) (args : a)
+  let run_with_args' (config : Config.User.t) name (type a) (args : a)
       (tl : a test list) =
+    let config =
+      Config.apply_defaults ~default_log_dir:(default_log_dir ()) config
+    in
     let random_state = Random.State.make_self_init () in
     let run_id = Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true in
     let t = { (empty ~config ~suite_name:name) with run_id } in
@@ -451,17 +453,12 @@ struct
     | _, true -> exit 1
     | _, false -> raise Test_error
 
-  let run config name (tl : unit test list) = run_with_args config name () tl
-
-  let with_defaults f cfg =
-    f (Config.apply_defaults ~default_log_dir:(default_log_dir ()) cfg)
+  let run' config name (tl : unit test list) = run_with_args' config name () tl
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
       ?show_errors ?json ?filter ?log_dir ?bail =
-    Config.User.kcreate
-      (with_defaults run_with_args)
-      ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
-      ?filter ?log_dir ?bail
+    Config.User.kcreate run_with_args' ?and_exit ?verbose ?compact ?tail_errors
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail
 
-  let run = Config.User.kcreate (with_defaults run)
+  let run = Config.User.kcreate run'
 end

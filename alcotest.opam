@@ -28,6 +28,7 @@ depends: [
   "re"
   "stdlib-shims"
   "uutf"
+  "ocaml-syntax-shims"
 ]
 build: [
   ["dune" "subst"] {pinned}

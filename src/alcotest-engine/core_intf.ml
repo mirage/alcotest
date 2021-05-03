@@ -81,8 +81,12 @@ module type S = sig
   val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 end
 
-module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
-  S with type return = unit M.t
+module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> sig
+  include S with type return = unit M.t
+
+  val run' : Config.User.t -> string -> unit test list -> return
+  val run_with_args' : Config.User.t -> string -> 'a -> 'a test list -> return
+end
 
 module type Core = sig
   module type S = S
