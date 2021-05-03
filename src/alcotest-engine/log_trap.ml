@@ -7,7 +7,7 @@ module Make
     (Promise : Monad.EXTENDED)
     (Platform : Platform.S with type 'a promise := 'a Promise.t) =
 struct
-  open Promise.Infix
+  open Promise.Syntax
 
   type state = { root : string; uuid : string; suite_name : string }
   type t = Inactive | Active of state
@@ -97,8 +97,8 @@ struct
     | Inactive -> f x
     | Active t ->
         let fd = Platform.open_write_only (output_fpath t tname) in
-        Promise.return () >>= fun () ->
-        Platform.with_redirect fd (fun () -> f x) >|= fun a ->
+        let* () = Promise.return () in
+        let+ a = Platform.with_redirect fd (fun () -> f x) in
         Platform.close fd;
         a
 end

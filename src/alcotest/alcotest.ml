@@ -29,7 +29,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
       | xs -> mk "." xs
   end
 
-  open M.Infix
+  open M.Syntax
 
   let time = Unix.gettimeofday
   let getcwd = Sys.getcwd
@@ -90,7 +90,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
   let close = Unix.close
 
   let with_redirect fd_file fn =
-    M.return () >>= fun () ->
+    let* () = M.return () in
     Fmt.(flush stdout) ();
     Fmt.(flush stderr) ();
     let fd_stdout = Unix.descr_of_out_channel stdout in
@@ -99,7 +99,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
     let fd_old_stderr = Unix.dup fd_stderr in
     Unix.dup2 fd_file fd_stdout;
     Unix.dup2 fd_file fd_stderr;
-    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e) >|= fun r ->
+    let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
     Unix.dup2 fd_old_stdout fd_stdout;

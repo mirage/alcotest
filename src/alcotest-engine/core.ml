@@ -55,7 +55,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module M = Monad.Extend (M)
   module Suite = Suite (M)
   module Log_trap = Log_trap.Make (M) (P)
-  include M.Infix
+  include M.Syntax
 
   (* Types *)
   type return = unit M.t
@@ -196,7 +196,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         (fun () ->
           (* When capturing the logs of a test, also add the result of the test
              at the end. *)
-          fn args >|= fun result ->
+          let+ result = fn args in
           Pp.rresult_error Fmt.stdout result;
           result)
         ()
@@ -209,14 +209,14 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         ~prior_error:(Option.is_some first_error)
         ~tests_so_far ~isatty:(P.stdout_isatty ()) Fmt.stdout
     in
-    M.return () >>= fun () ->
+    let* () = M.return () in
     print_event (`Start test.name);
-    let test_complete =
+    let+ result, errored =
       match test.fn with
       | `Skip -> M.return (`Skip, false)
       | `Run fn ->
           Fmt.(flush stdout) () (* Show event before any test stderr *);
-          with_captured_logs t test.name fn args >|= fun result ->
+          let+ result = with_captured_logs t test.name fn args in
           (* Store errors *)
           let errored : bool =
             let error, errored =
@@ -233,7 +233,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           Fmt.(flush stderr ());
           (result, errored)
     in
-    test_complete >|= fun (result, errored) ->
     print_event (`Result (test.name, result));
     let error = if errored then Some tests_so_far else None in
     let state =
@@ -248,14 +247,15 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let currently_bailing acc =
       Option.is_some acc.first_error && t.config#bail
     in
-    M.List.fold_map_s
-      (fun acc test ->
-        if currently_bailing acc then
-          M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
-        else perform_test t args acc test)
-      { tests_so_far = 0; first_error = None }
-      tests
-    >|= fun (state, test_results) ->
+    let+ state, test_results =
+      M.List.fold_map_s
+        (fun acc test ->
+          if currently_bailing acc then
+            M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
+          else perform_test t args acc test)
+        { tests_so_far = 0; first_error = None }
+        tests
+    in
     let () =
       if currently_bailing state then
         match state.tests_so_far - Option.get_exn state.first_error - 1 with
@@ -306,7 +306,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let start_time = P.time () in
     let speed_level = if t.config#quick_only then `Quick else `Slow in
     let test = List.map (select_speed speed_level) test in
-    perform_tests t test args >|= fun results ->
+    let+ results = perform_tests t test args in
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter Run_result.is_failure results) in
@@ -349,15 +349,16 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let filter = t.config#filter in
     let suite = Suite.tests t.suite in
     let is_empty = filter_test_cases ~subst:false filter suite = [] in
-    (if is_empty && filter <> (None, None) then (
-     Fmt.(pf stderr)
-       "%a\n" red
-       "Invalid request (no tests to run, filter skipped everything)!";
-     exit 1)
-    else
-      let tests = filter_test_cases ~subst:true filter suite in
-      result t tests args)
-    >|= fun result ->
+    let+ result =
+      if is_empty && filter <> (None, None) then (
+        Fmt.(pf stderr)
+          "%a\n" red
+          "Invalid request (no tests to run, filter skipped everything)!";
+        exit 1)
+      else
+        let tests = filter_test_cases ~subst:true filter suite in
+        result t tests args
+    in
     (pp_suite_results t) Fmt.stdout result;
     result.failures
 
@@ -384,16 +385,17 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let t = empty ~config ~suite_name:name in
     let t = register_all t tl in
-    ( (* Only print inside the concurrency monad *)
-      M.return () >>= fun () ->
+    let+ test_failures =
+      (* Only print inside the concurrency monad *)
+      let* () = M.return () in
       let open Fmt in
       pr "Testing %a.@," (Pp.quoted Fmt.(styled `Bold Suite.pp_name)) t.suite;
       pr "@[<v>%a@]"
         (styled `Faint (fun ppf () ->
              pf ppf "This run has ID %a.@,@," (Pp.quoted string) t.run_id))
         ();
-      run_tests t () args )
-    >|= fun test_failures ->
+      run_tests t () args
+    in
     match (test_failures, t.config#and_exit) with
     | 0, true -> exit 0
     | 0, false -> ()
