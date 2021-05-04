@@ -84,7 +84,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     log_trap : Log_trap.t;
   }
 
-  let empty ~config ~suite_name:unescaped_name =
+  let empty ~config ~trap_logs ~suite_name:unescaped_name =
     let errors = [] in
     let suite =
       match Suite.v ~name:unescaped_name with
@@ -100,9 +100,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true
     in
     let log_trap =
-      match config#verbose with
-      | true -> Log_trap.inactive
-      | false ->
+      match trap_logs with
+      | false -> Log_trap.inactive
+      | true ->
           Log_trap.active ~root:config#log_dir ~uuid:run_id
             ~suite_name:(Suite.name suite)
     in
@@ -374,7 +374,11 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       Config.apply_defaults ~default_log_dir:"<not-shown-to-user>"
         (Config.User.create ())
     in
-    let t = register_all (empty ~config ~suite_name:"<not-shown-to-user>") tl in
+    let t =
+      register_all
+        (empty ~config ~trap_logs:false ~suite_name:"<not-shown-to-user>")
+        tl
+    in
     list_registered_tests t ();
     M.return ()
 
@@ -383,7 +387,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let config =
       Config.apply_defaults ~default_log_dir:(default_log_dir ()) config
     in
-    let t = empty ~config ~suite_name:name in
+    let t = empty ~config ~trap_logs:(not config#verbose) ~suite_name:name in
     let t = register_all t tl in
     let+ test_failures =
       (* Only print inside the concurrency monad *)
