@@ -1,3 +1,5 @@
+open! Import
+
 module type S = sig
   val time : unit -> float
   (** [time ()] returns the current timestamp, used to measure the duration of a

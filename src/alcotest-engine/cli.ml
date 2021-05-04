@@ -15,9 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-open Utils
+open! Import
 open Cmdliner
-open Astring
 
 module IntSet = Set.Make (struct
   type t = int
@@ -68,7 +67,7 @@ struct
       let color = Arg.enum enum in
       let enum_alts = Arg.doc_alts_enum enum in
       let doc =
-        strf
+        Fmt.strf
           "Colorize the output. $(docv) must be %s. Defaults to %s when \
            running inside Dune, otherwise defaults to %s."
           enum_alts (Arg.doc_quote "always") (Arg.doc_quote "auto")
