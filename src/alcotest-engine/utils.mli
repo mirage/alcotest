@@ -1,5 +1,9 @@
 val ( >> ) : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
 
+module Fun : sig
+  val id : 'a -> 'a
+end
+
 module String : sig
   include module type of Astring.String
 
@@ -15,6 +19,9 @@ module List : sig
   include module type of List
 
   type 'a t = 'a list
+
+  val rev_head : int -> 'a list -> 'a list
+  (** Reverse a list, taking at most the first n elements of the original list. *)
 
   val filter_map : ('a -> 'b option) -> 'a list -> 'b list
   val lift_result : ('a, 'b) result t -> ('a t, 'b t) result

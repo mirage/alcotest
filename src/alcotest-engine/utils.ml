@@ -1,5 +1,9 @@
 let ( >> ) f g x = x |> f |> g
 
+module Fun = struct
+  let id x = x
+end
+
 module String = struct
   include Astring.String
 
@@ -23,6 +27,15 @@ module List = struct
   include List
 
   type 'a t = 'a list
+
+  let rev_head n l =
+    let rec aux acc n l =
+      match l with
+      | x :: xs ->
+          if n > 0 then (aux [@tailcall]) (x :: acc) (n - 1) xs else acc
+      | [] -> acc
+    in
+    aux [] n l
 
   let filter_map f l =
     let rec inner acc = function

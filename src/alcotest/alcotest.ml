@@ -29,7 +29,7 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
       | xs -> mk "." xs
   end
 
-  open M.Infix
+  open M.Syntax
 
   let time = Unix.gettimeofday
   let getcwd = Sys.getcwd
@@ -59,12 +59,13 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
     in
     inner ~retries:0
 
-  let prepare ~base ~dir ~name =
+  let prepare_log_trap ~root ~uuid ~name =
+    let dir = Filename.concat root uuid in
     if not (Sys.file_exists dir) then (
       Unix.mkdir_p dir 0o770;
       if Sys.unix || Sys.cygwin then (
-        let this_exe = Filename.concat base name
-        and latest = Filename.concat base "latest" in
+        let this_exe = Filename.concat root name
+        and latest = Filename.concat root "latest" in
         unlink_if_exists this_exe;
         unlink_if_exists latest;
         symlink ~to_dir:true ~target:dir ~link_name:this_exe;
@@ -81,19 +82,24 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
       | Some { columns; _ } -> Some columns
       | None -> None
 
-  let with_redirect file fn =
-    M.return () >>= fun () ->
+  type file_descriptor = Unix.file_descr
+
+  let log_trap_supported = true
+  let file_exists = Sys.file_exists
+  let open_write_only x = Unix.(openfile x [ O_WRONLY; O_TRUNC; O_CREAT ] 0o660)
+  let close = Unix.close
+
+  let with_redirect fd_file fn =
+    let* () = M.return () in
     Fmt.(flush stdout) ();
     Fmt.(flush stderr) ();
     let fd_stdout = Unix.descr_of_out_channel stdout in
     let fd_stderr = Unix.descr_of_out_channel stderr in
     let fd_old_stdout = Unix.dup fd_stdout in
     let fd_old_stderr = Unix.dup fd_stderr in
-    let fd_file = Unix.(openfile file [ O_WRONLY; O_TRUNC; O_CREAT ] 0o660) in
     Unix.dup2 fd_file fd_stdout;
     Unix.dup2 fd_file fd_stderr;
-    Unix.close fd_file;
-    (try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e) >|= fun r ->
+    let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
     Unix.dup2 fd_old_stdout fd_stdout;

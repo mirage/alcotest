@@ -3,4 +3,5 @@
  (libraries alcotest.engine astring fmt fmt.tty)
  (foreign_stubs
   (language c)
-  (names alcotest_stubs)))
+  (names alcotest_stubs))
+ (preprocess future_syntax))
