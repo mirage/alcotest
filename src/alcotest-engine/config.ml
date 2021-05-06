@@ -1,6 +1,6 @@
 include Config_intf
 include Config_intf.Types
-open! Utils
+open! Import
 open Cmdliner_syntax
 
 (* Keys are configuration properties, which have defaults and may be

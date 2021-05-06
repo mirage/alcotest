@@ -1,4 +1,4 @@
-open Utils
+open! Import
 
 type speed_level = [ `Quick | `Slow ]
 

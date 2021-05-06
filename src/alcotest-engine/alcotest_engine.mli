@@ -48,6 +48,5 @@ module Platform = Platform
 (** These modules are exposed for use internally by other Alcotest packages.
     They do not provide a stable interface. *)
 module Private : sig
-  module Utils = Utils
   module Pp = Pp
 end

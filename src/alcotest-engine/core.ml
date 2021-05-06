@@ -15,8 +15,8 @@
  *)
 
 include Core_intf
+open! Import
 open Model
-open Utils
 
 module IntSet = Set.Make (struct
   type t = int

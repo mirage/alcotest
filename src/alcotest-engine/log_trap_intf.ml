@@ -1,3 +1,4 @@
+open! Import
 open Model
 
 (** Running tests have their output hidden by default to avoid cluttering the

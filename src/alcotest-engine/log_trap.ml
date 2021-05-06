@@ -1,6 +1,6 @@
 open Astring
 open Model
-open Utils
+open! Import
 include Log_trap_intf
 
 module Make

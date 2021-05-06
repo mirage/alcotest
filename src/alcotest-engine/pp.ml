@@ -17,8 +17,8 @@
 
 include Pp_intf
 include Pp_intf.Types
+open! Import
 open Model
-open Utils
 
 let map_theta t ~f ppf = f (fun ppf () -> t ppf) ppf ()
 let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")

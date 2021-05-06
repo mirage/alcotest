@@ -15,6 +15,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+open! Import
+
 module type S = sig
   type return
   (** The return type of each test case run by Alcotest. For the standard

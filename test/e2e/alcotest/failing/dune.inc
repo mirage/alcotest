@@ -16,7 +16,7 @@
    tail_errors_unlimited
    unknown_option
  )
- (libraries alcotest alcotest.engine)
+ (libraries alcotest alcotest_stdlib_ext alcotest.engine)
  (modules
    bail
    check_basic

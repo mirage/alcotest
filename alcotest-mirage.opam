@@ -9,7 +9,7 @@ homepage: "https://github.com/mirage/alcotest"
 doc: "https://mirage.github.io/alcotest"
 bug-reports: "https://github.com/mirage/alcotest/issues"
 depends: [
-  "dune" {>= "2.2"}
+  "dune" {>= "2.8"}
   "re" {with-test}
   "cmdliner" {with-test}
   "fmt"
@@ -19,9 +19,10 @@ depends: [
   "duration"
   "lwt"
   "logs"
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"

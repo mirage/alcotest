@@ -23,6 +23,8 @@
       the command line;
     - all of the regular options to Alcotest.run can be set via CLI flags. *)
 
+open! Import
+
 module type S = sig
   include Core.S
   (** @inline *)
