@@ -1,3 +1,5 @@
+open Alcotest_stdlib_ext
+
 (** These tests check the wrapping behaviour of [Alcotest.check]'s emitted diff. *)
 
 let id_case typ typ_str v1 v2 =

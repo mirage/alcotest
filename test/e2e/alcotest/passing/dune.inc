@@ -21,7 +21,7 @@
    unicode_testname
    verbose_newlines
  )
- (libraries alcotest alcotest.engine)
+ (libraries alcotest alcotest_stdlib_ext alcotest.engine)
  (modules
    and_exit_false
    and_exit_true

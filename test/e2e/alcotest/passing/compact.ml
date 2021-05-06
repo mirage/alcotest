@@ -1,3 +1,5 @@
+open Alcotest_stdlib_ext
+
 let () =
   let open Alcotest in
   let id () = () in
