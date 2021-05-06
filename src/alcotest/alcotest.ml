@@ -1,6 +1,4 @@
-include Alcotest_engine.Test
-
-module Unix (M : Alcotest_engine.Monad.S) = struct
+module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   module M = Alcotest_engine.Monad.Extend (M)
 
   module Unix = struct
@@ -124,13 +122,13 @@ module Unix (M : Alcotest_engine.Monad.S) = struct
       with Not_found -> env_var_fallback ()
 end
 
-module T = Alcotest_engine.Cli.Make (Unix) (Alcotest_engine.Monad.Identity)
-include T
+module V1 = struct
+  include Alcotest_engine.V1.Test
 
-module Core = struct
-  module Make = Alcotest_engine.Core.Make (Unix)
+  module T =
+    Alcotest_engine.V1.Cli.Make (Unix_platform) (Alcotest_engine.Monad.Identity)
+
+  include T
 end
 
-module Cli = struct
-  module Make = Alcotest_engine.Cli.Make (Unix)
-end
+include V1

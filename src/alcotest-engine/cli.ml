@@ -19,7 +19,7 @@ open! Import
 open Cmdliner
 
 module type S = sig
-  include Core.S
+  include Core.V1.S
 
   val run :
     (?argv:string array -> string -> unit test list -> return) with_options
@@ -49,7 +49,7 @@ struct
       + 4. if the flag/option is passed to [run] directly, use that;
       + 5. otherwise, use the default behaviour set by {!Alcotest.Core}. *)
 
-  module C = Core.Make (P) (M)
+  module C = Core.V1.Make (P) (M)
   include C
   module P = P (M)
   open Cmdliner_syntax
@@ -139,4 +139,11 @@ struct
   let run =
     Config.User.kcreate (fun config ?argv name tl ->
         run_with_args' config ~argv name (Term.pure ()) tl)
+end
+
+module V1 = struct
+  module type S = S
+  module type MAKER = MAKER
+
+  module Make = Make
 end

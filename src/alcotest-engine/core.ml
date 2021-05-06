@@ -406,3 +406,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let run = Config.User.kcreate run'
 end
+
+module V1 = struct
+  include V1_types
+  module Make = Make
+end

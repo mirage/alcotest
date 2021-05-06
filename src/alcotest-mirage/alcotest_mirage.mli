@@ -23,7 +23,7 @@
     test output to the console. *)
 
 module Make (C : Mirage_clock.MCLOCK) : sig
-  include Alcotest_engine.Cli.S with type return = unit Lwt.t
+  include Alcotest_engine.V1.Cli.S with type return = unit Lwt.t
 
   val test_case :
     string -> speed_level -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
