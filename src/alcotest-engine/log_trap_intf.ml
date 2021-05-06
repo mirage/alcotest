@@ -8,8 +8,8 @@ open Model
 
     {[
       <log_capture_root_dir>
-      ├── E0965BF9-.../...
-      ├── 6DDB68D5-.../             ;; UUID for each test run
+      ├── E0965BF9/...
+      ├── 6DDB68D5/                 ;; ID for each test run
       │   │
       │   ├── alpha.000.output      ;; ... containing files for individual tests
       │   ├── alpha.001.output      ;;     with format <test_name>.<index>.output.

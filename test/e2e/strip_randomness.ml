@@ -38,14 +38,11 @@ let build_context_replace =
 
 let uuid_replace =
   let open Re in
-  let hex n = repn (alt [ rg 'A' 'F'; digit ]) n (Some n) in
-  let segmented_hex ns =
-    let segments = List.map (fun n -> [ char '-'; hex n ]) ns in
-    List.flatten segments |> List.tl |> seq
+  let t =
+    seq [ str "ID `"; repn (alt [ rg 'A' 'Z'; digit ]) 8 (Some 8); char '\'' ]
   in
-  let t = segmented_hex [ 8; 4; 4; 4; 12 ] in
   let re = compile t in
-  replace_string ~all:true re ~by:"<uuid>"
+  replace_string ~all:true re ~by:"ID `<uuid>'"
 
 let time_replace =
   let open Re in
