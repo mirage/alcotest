@@ -15,29 +15,12 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
+include Cli_intf
 open! Import
 open Cmdliner
 
-module type S = sig
-  include Core.V1.S
-
-  val run :
-    (?argv:string array -> string -> unit test list -> return) with_options
-
-  val run_with_args :
-    (?argv:string array ->
-    string ->
-    'a Cmdliner.Term.t ->
-    'a test list ->
-    return)
-    with_options
-end
-
-module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
-  S with type return = unit M.t
-
-module Make (P : Platform.MAKER) (M : Monad.S) : S with type return = unit M.t =
-struct
+module Make (P : Platform.MAKER) (M : Monad.S) :
+  V1_types.S with type return = unit M.t = struct
   (**  *)
 
   (** The priority order for determining options should be as follows:
@@ -142,8 +125,6 @@ struct
 end
 
 module V1 = struct
-  module type S = S
-  module type MAKER = MAKER
-
+  include V1_types
   module Make = Make
 end
