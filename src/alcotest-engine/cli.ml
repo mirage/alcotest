@@ -18,12 +18,6 @@
 open! Import
 open Cmdliner
 
-module IntSet = Set.Make (struct
-  type t = int
-
-  let compare = (compare : int -> int -> int)
-end)
-
 module type S = sig
   include Core.S
 

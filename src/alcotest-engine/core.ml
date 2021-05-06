@@ -18,12 +18,6 @@ include Core_intf
 open! Import
 open Model
 
-module IntSet = Set.Make (struct
-  type t = int
-
-  let compare = (compare : int -> int -> int)
-end)
-
 exception Check_error of unit Fmt.t
 
 let () =
@@ -277,25 +271,15 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let skip_label test_case = Suite.{ test_case with fn = `Skip }
 
-  let filter_test_case (regexp, cases) =
-    let regexp_match =
-      match regexp with
-      | None -> fun _ -> true
-      | Some r -> fun n -> Re.execp r n
-    in
-    let index_match =
-      match cases with
-      | None -> fun _ -> true
-      | Some ints ->
-          let set = IntSet.of_list ints in
-          fun i -> IntSet.mem i set
-    in
-    fun test_case ->
-      let name, index =
-        let tn = test_case.Suite.name in
-        Test_name.(name tn, index tn)
-      in
-      regexp_match name && index_match index
+  let filter_test_case p test_case =
+    match p with
+    | None -> true
+    | Some p -> (
+        let name, index =
+          let tn = test_case.Suite.name in
+          Test_name.(name tn, index tn)
+        in
+        match p ~name ~index with `Run -> true | `Skip -> false)
 
   let filter_test_cases ~subst path test_cases =
     let filter_test_case = filter_test_case path in
@@ -357,7 +341,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let suite = Suite.tests t.suite in
     let is_empty = filter_test_cases ~subst:false filter suite = [] in
     let+ result =
-      if is_empty && filter <> (None, None) then (
+      if is_empty && Option.is_some filter then (
         Fmt.(pf stderr)
           "%a\n" red
           "Invalid request (no tests to run, filter skipped everything)!";

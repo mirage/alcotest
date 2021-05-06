@@ -3,6 +3,9 @@
 - Generate shorter unique identifiers for test runs (8-character alphanumeric,
   rather than a full 128-bit UUID). (#304, @CraigFe)
 
+- Change the `~filter` argument to `Alcotest.run` to be a predicate over tests.
+  (#305, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be
