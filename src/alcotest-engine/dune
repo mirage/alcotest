@@ -7,7 +7,6 @@
   astring
   cmdliner
   fmt.cli
-  uuidm
   re
   stdlib-shims
   uutf)

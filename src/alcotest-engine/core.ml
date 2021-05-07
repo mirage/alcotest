@@ -84,6 +84,16 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     log_trap : Log_trap.t;
   }
 
+  let gen_run_id =
+    let random_state = lazy (Random.State.make_self_init ()) in
+    let random_hex _ =
+      let state = Lazy.force random_state in
+      match Random.State.int state 36 with
+      | n when n < 10 -> Char.chr (n + Char.code '0')
+      | n -> Char.chr (n - 10 + Char.code 'A')
+    in
+    fun () -> String.v ~len:8 random_hex
+
   let empty ~config ~trap_logs ~suite_name:unescaped_name =
     let errors = [] in
     let suite =
@@ -95,10 +105,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
              to `run`."
     in
     let max_label = 0 in
-    let run_id =
-      let random_state = Random.State.make_self_init () in
-      Uuidm.v4_gen random_state () |> Uuidm.to_string ~upper:true
-    in
+    let run_id = gen_run_id () in
     let log_trap =
       match trap_logs with
       | false -> Log_trap.inactive

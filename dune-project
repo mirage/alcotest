@@ -28,7 +28,6 @@ tests to run.
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.0.0))
-  uuidm
   re
   stdlib-shims
   uutf
