@@ -4,6 +4,10 @@ module Fun : sig
   val id : 'a -> 'a
 end
 
+module Int : sig
+  module Set : Set.S with type elt = int
+end
+
 module String : sig
   include module type of Astring.String
 
@@ -33,6 +37,7 @@ module Result : sig
 end
 
 module Option : sig
+  val map : ('a -> 'b) -> 'a option -> 'b option
   val is_some : _ option -> bool
   val get_exn : 'a option -> 'a
   val value : default:'a -> 'a option -> 'a

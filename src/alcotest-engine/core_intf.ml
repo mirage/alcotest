@@ -55,7 +55,7 @@ module type S = sig
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
-    ?filter:Re.re option * int list option ->
+    ?filter:(name:string -> index:int -> [ `Run | `Skip ]) ->
     ?log_dir:string ->
     ?bail:bool ->
     'a

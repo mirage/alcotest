@@ -4,6 +4,14 @@ module Fun = struct
   let id x = x
 end
 
+module Int = struct
+  module Set = Set.Make (struct
+    type t = int
+
+    let compare = (compare : int -> int -> int)
+  end)
+end
+
 module String = struct
   include Astring.String
 
@@ -68,6 +76,7 @@ end
 
 module Option = struct
   let is_some = function Some _ -> true | None -> false
+  let map f = function Some x -> Some (f x) | None -> None
 
   let get_exn = function
     | Some x -> x

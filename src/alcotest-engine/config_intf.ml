@@ -1,5 +1,6 @@
 module Types = struct
   type bound = [ `Unlimited | `Limit of int ]
+  type filter = name:string -> index:int -> [ `Run | `Skip ]
 
   type t =
     < and_exit : bool
@@ -9,7 +10,7 @@ module Types = struct
     ; quick_only : bool
     ; show_errors : bool
     ; json : bool
-    ; filter : Re.re option * int list option
+    ; filter : filter option
     ; log_dir : string
     ; bail : bool >
 
@@ -21,7 +22,7 @@ module Types = struct
     ?quick_only:bool ->
     ?show_errors:bool ->
     ?json:bool ->
-    ?filter:Re.re option * int list option ->
+    ?filter:filter ->
     ?log_dir:string ->
     ?bail:bool ->
     'a

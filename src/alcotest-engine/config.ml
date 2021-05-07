@@ -129,9 +129,7 @@ module Key = struct
   end
 
   module Filter = struct
-    type t = Re.re option * int list option
-
-    let default = (None, None)
+    type t = filter
 
     let regex : Re.re Arg.conv =
       let parse s =
@@ -171,7 +169,7 @@ module Key = struct
       let+ name_regex =
         let doc = "A regular expression matching the names of tests to run" in
         Arg.(value & pos 0 (some regex) None & info [] ~doc ~docv:"NAME_REGEX")
-      and+ number_filter =
+      and+ index_cases =
         let doc =
           "A comma-separated list of test case numbers (and ranges of numbers) \
            to run, e.g: '4,6-10,19'"
@@ -181,7 +179,24 @@ module Key = struct
           & pos 1 (some int_range_list) None
           & info [] ~doc ~docv:"TESTCASES")
       in
-      Some (name_regex, number_filter)
+      match (name_regex, index_cases) with
+      | None, None -> None
+      | _, _ ->
+          let name_filter =
+            match name_regex with
+            | None -> fun _ -> true
+            | Some r -> fun n -> Re.execp r n
+          in
+          let index_filter =
+            match index_cases with
+            | None -> fun _ -> true
+            | Some ints ->
+                let set = Int.Set.of_list ints in
+                fun i -> Int.Set.mem i set
+          in
+          Some
+            (fun ~name ~index ->
+              if name_filter name && index_filter index then `Run else `Skip)
   end
 end
 
@@ -286,7 +301,7 @@ let apply_defaults ~default_log_dir : User.t -> t =
     method quick_only = Option.value ~default:Quick_only.default quick_only
     method show_errors = Option.value ~default:Show_errors.default show_errors
     method json = Option.value ~default:Json.default json
-    method filter = Option.value ~default:Filter.default filter
+    method filter = filter
     method log_dir = Option.value ~default:default_log_dir log_dir
     method bail = Option.value ~default:Bail.default bail
   end
