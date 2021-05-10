@@ -16,6 +16,9 @@
     (Alcotest.Unix_platform)` instead.
   (#306, @CraigFe)
 
+- Avoid exporting `list_tests` in the main test APIs (`Alcotest{,_lwt,_async}`).
+  Use `Alcotest_engine` directly if you want this function. (#310, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be

@@ -45,9 +45,6 @@ module V1_types = struct
     (** A test is a UTF-8 encoded name and a list of test cases. The name can be
         used for filtering which tests to run on the CLI. *)
 
-    val list_tests : 'a test list -> return
-    (** Print all of the test cases in a human-readable form *)
-
     type 'a with_options =
       ?and_exit:bool ->
       ?verbose:bool ->
@@ -87,8 +84,14 @@ module V1_types = struct
   module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> sig
     include S with type return = unit M.t
 
+    val list_tests : 'a test list -> return
+    (** Print all of the test cases in a human-readable form *)
+
     val run' : Config.User.t -> string -> unit test list -> return
+    (** Variant of {!run} that consumes a config value. *)
+
     val run_with_args' : Config.User.t -> string -> 'a -> 'a test list -> return
+    (** Variant of {!run_with_args} that consumes a config value. *)
   end
 end
 
