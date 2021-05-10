@@ -6,6 +6,16 @@
 - Change the `~filter` argument to `Alcotest.run` to be a predicate over tests.
   (#305, @CraigFe)
 
+- Introduce an `Alcotest.V1` module that aliases the existing `Alcotest` API and
+  provides a stability guarantee over major version changes. (#306, @CraigFe)
+
+- Renamed / removed some less frequently used modules used by the test backends:
+  - `Alcotest.Unix` -> `Alcotest.Unix_platform`
+  - `Alcotest_engine.{Cli,Core,Test}` -> `Alcotest_engine.V1.{Cli,Core,Test}`
+  - `Alcotest.{Cli,Core}` are now gone. Use `Alcotest_engine.V1.{Cli,Core}.Make
+    (Alcotest.Unix_platform)` instead.
+  (#306, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be

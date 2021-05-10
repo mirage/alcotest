@@ -17,7 +17,7 @@
 (** [Alcotest_async] enables testing functions which return an Async deferred.
     {!run} returns a deferred which will run the tests when scheduled. *)
 
-include Alcotest_engine.Cli.S with type return = unit Async_kernel.Deferred.t
+include Alcotest_engine.V1.Cli.S with type return = unit Async_kernel.Deferred.t
 
 val test_case :
   ?timeout:Core_kernel.Time.Span.t ->
