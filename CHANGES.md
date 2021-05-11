@@ -7,14 +7,16 @@
   (#305, @CraigFe)
 
 - Introduce an `Alcotest.V1` module that aliases the existing `Alcotest` API and
-  provides a stability guarantee over major version changes. (#306, @CraigFe)
+  provides a stability guarantee over major version changes. Similar versioned
+  aliases also exist for the backends: `Alcotest_{async,lwt}.V1`. (#306,
+  @CraigFe)
 
 - Renamed / removed some less frequently used modules used by the test backends:
   - `Alcotest.Unix` -> `Alcotest.Unix_platform`
   - `Alcotest_engine.{Cli,Core,Test}` -> `Alcotest_engine.V1.{Cli,Core,Test}`
   - `Alcotest.{Cli,Core}` are now gone. Use `Alcotest_engine.V1.{Cli,Core}.Make
     (Alcotest.Unix_platform)` instead.
-  (#306, @CraigFe)
+  (#306 #309, @CraigFe)
 
 - Avoid exporting `list_tests` in the main test APIs (`Alcotest{,_lwt,_async}`).
   Use `Alcotest_engine` directly if you want this function. (#310, @CraigFe)
