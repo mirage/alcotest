@@ -277,7 +277,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | Some p -> (
         let name, index =
           let tn = test_case.Suite.name in
-          Test_name.(name tn, index tn)
+          Test_name.(Safe_string.to_unescaped_string (name tn), index tn)
         in
         match p ~name ~index with `Run -> true | `Skip -> false)
 
