@@ -27,6 +27,7 @@ module List : sig
   val rev_head : int -> 'a list -> 'a list
   (** Reverse a list, taking at most the first n elements of the original list. *)
 
+  val concat_map : ('a -> 'b list) -> 'a list -> 'b list
   val filter_map : ('a -> 'b option) -> 'a list -> 'b list
   val lift_result : ('a, 'b) result t -> ('a t, 'b t) result
   val init : int -> (int -> 'a) -> 'a list
