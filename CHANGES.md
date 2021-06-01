@@ -21,6 +21,10 @@
 - Avoid exporting `list_tests` in the main test APIs (`Alcotest{,_lwt,_async}`).
   Use `Alcotest_engine` directly if you want this function. (#310, @CraigFe)
 
+- Fix parsing of test filter ranges to allow '-' separators (e.g. `test alpha
+  1-4`), as advertised in the manpage. The previously-used '..' separator is
+  also supported. (#312, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be

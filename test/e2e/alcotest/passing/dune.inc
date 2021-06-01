@@ -11,6 +11,7 @@
    empty_test_name
    filter_name
    filter_name_regex
+   filter_range
    isatty
    json_output
    list_tests
@@ -34,6 +35,7 @@
    empty_test_name
    filter_name
    filter_name_regex
+   filter_range
    isatty
    json_output
    list_tests
@@ -254,6 +256,25 @@
  (package alcotest)
  (action
    (diff filter_name_regex.expected filter_name_regex.processed)))
+
+(rule
+ (target filter_range.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 125)
+    (run %{dep:filter_range.exe} test main 0..1,1-3,5)))))
+
+(rule
+ (target filter_range.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:filter_range.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff filter_range.expected filter_range.processed)))
 
 (rule
  (target isatty.actual)

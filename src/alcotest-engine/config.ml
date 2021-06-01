@@ -148,7 +148,10 @@ module Key = struct
           if lower > upper then acc else range (succ lower) upper (lower :: acc)
         in
         let process_range acc s =
-          String.cuts ~sep:".." s |> List.map String.to_int |> function
+          String.cuts ~sep:".." s
+          |> List.concat_map (String.cuts ~sep:"-")
+          |> List.map String.to_int
+          |> function
           | [ Some i ] -> i :: acc
           | [ Some lower; Some upper ] when lower <= upper ->
               range lower upper acc
@@ -172,7 +175,8 @@ module Key = struct
       and+ index_cases =
         let doc =
           "A comma-separated list of test case numbers (and ranges of numbers) \
-           to run, e.g: '4,6-10,19'"
+           to run, e.g: '4,6-10,19'. When specifying ranges, both '-' and '..' \
+           are accepted as valid separators."
         in
         Arg.(
           value

@@ -45,6 +45,15 @@ module List = struct
     in
     aux [] n l
 
+  let concat_map f l =
+    let rec aux f acc = function
+      | [] -> rev acc
+      | x :: l ->
+          let xs = f x in
+          (aux [@tailcall]) f (rev_append xs acc) l
+    in
+    aux f [] l
+
   let filter_map f l =
     let rec inner acc = function
       | [] -> rev acc
