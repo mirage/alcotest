@@ -1,3 +1,5 @@
+open Alcotest_stdlib_ext
+
 let () =
   let should_run i =
     (* Corresponds to ranges specified in [filter_range.opts]. *)
