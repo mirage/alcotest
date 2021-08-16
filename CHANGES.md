@@ -25,6 +25,10 @@
   1-4`), as advertised in the manpage. The previously-used '..' separator is
   also supported. (#312, @CraigFe)
 
+- Change `Alcotest.{char,string}` pretty-printers to use OCaml syntax on
+  assertion failures (i.e. wrap with quotes and escape control characters).
+  (#318, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be
