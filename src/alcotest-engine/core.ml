@@ -294,6 +294,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     else Suite.{ test_case with fn = `Skip }
 
   let result t test args =
+    let initial_backtrace_status = Printexc.backtrace_status () in
+    Printexc.record_backtrace true;
     let start_time = P.time () in
     let speed_level = if t.config#quick_only then `Quick else `Slow in
     let test = List.map (select_speed speed_level) test in
@@ -301,6 +303,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter Run_result.is_failure results) in
+    Printexc.record_backtrace initial_backtrace_status;
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
