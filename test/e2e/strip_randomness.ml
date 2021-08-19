@@ -30,14 +30,15 @@ let build_context_replace =
       ]
   in
   let re = compile t in
-  replace ~all:true re ~f:(fun g ->
-      let test_dir_opt = if Group.get g 2 = "" then "" else "<test-dir>" in
-      let test_name = standardise_filesep (Group.get g 3) in
-      Group.get g 1
-      ^ "<build-context>/_build/_tests/"
-      ^ test_dir_opt
-      ^ test_name
-      ^ Group.get g 4)
+  fun s ->
+    replace ~all:true re s ~f:(fun g ->
+        let test_dir_opt = if Group.get g 2 = "" then "" else "<test-dir>" in
+        let test_name = standardise_filesep (Group.get g 3) in
+        Group.get g 1
+        ^ "<build-context>/_build/_tests/"
+        ^ test_dir_opt
+        ^ test_name
+        ^ Group.get g 4)
 
 let uuid_replace =
   let open Re in
@@ -45,7 +46,7 @@ let uuid_replace =
     seq [ str "ID `"; repn (alt [ rg 'A' 'Z'; digit ]) 8 (Some 8); char '\'' ]
   in
   let re = compile t in
-  replace_string ~all:true re ~by:"ID `<uuid>'"
+  fun s -> replace_string ~all:true re ~by:"ID `<uuid>'" s
 
 let time_replace =
   let open Re in
@@ -67,28 +68,35 @@ let time_replace =
       ]
   in
   let re = compile t in
-  replace re ~f:(fun g -> Group.get g 1 ^ "<test-duration>" ^ Group.get g 2)
+  fun s ->
+    replace re s ~f:(fun g -> Group.get g 1 ^ "<test-duration>" ^ Group.get g 2)
 
 let stacktrace_replace =
   let open Re in
-  let t =
-    group (alt [ str "Raised at "; str "Called from " ])
+  let stack_trace_line verb =
+    str verb
+    ^^ opt (rep1 print ^^ str " in ") (* exception name *)
+    ^^ str "file \""
     ^^ rep1 print
-    ^^ str " in file \""
-    ^^ rep1 print
-    ^^ str "\", line "
+    ^^ str "\""
+    ^^ opt (str " (inlined)")
+    ^^ str ", line "
     ^^ rep1 digit
     ^^ str ", characters "
     ^^ rep1 digit
     ^^ str "-"
     ^^ rep1 digit
+    |> compile
   in
-  let re = compile t in
-  replace re ~f:(fun g ->
-      Format.sprintf
-        "%s<exception-name> in file \"<file-name>\", line __-__, characters \
-         __-__"
-        (Group.get g 1))
+  let raised_at = stack_trace_line "Raised at "
+  and called_from = stack_trace_line "Called from " in
+  fun s ->
+    match execp called_from s with
+    | true ->
+        (* The number of "Called from ..." lines is compiler-dependent, so we
+           remove them all. *)
+        None
+    | false -> Some (replace_string ~all:true raised_at s ~by:"<stacktrace>")
 
 let executable_name_normalization =
   let open Re in
@@ -100,17 +108,21 @@ let executable_name_normalization =
    the result to std.out *)
 let () =
   let in_channel = open_in Sys.argv.(1) in
+  let ( >>| ) x f = match x with None -> None | Some x -> Some (f x) in
+  let ( >>= ) x f = match x with None -> None | Some x -> f x in
   try
     let rec loop () =
       let sanitized_line =
-        input_line in_channel
-        |> uuid_replace
-        |> build_context_replace
-        |> time_replace
-        |> executable_name_normalization
-        |> stacktrace_replace
+        Some (input_line in_channel)
+        >>| uuid_replace
+        >>| build_context_replace
+        >>| time_replace
+        >>| executable_name_normalization
+        >>= stacktrace_replace
       in
-      Printf.printf "%s\n" sanitized_line;
+      (match sanitized_line with
+      | Some s -> Printf.printf "%s\n" s
+      | None -> ());
       loop ()
     in
     loop ()

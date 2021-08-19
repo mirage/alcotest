@@ -38,9 +38,7 @@ FAIL bool
    Expected: `true'
    Received: `false'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -53,9 +51,7 @@ FAIL int
    Expected: `1'
    Received: `2'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -68,9 +64,7 @@ FAIL int32
    Expected: `2147483647'
    Received: `-2147483648'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -83,9 +77,7 @@ FAIL int64
    Expected: `9223372036854775807'
    Received: `-9223372036854775808'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -98,9 +90,7 @@ FAIL float
    Expected: `1'
    Received: `2'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -113,9 +103,7 @@ FAIL char
    Expected: `'a''
    Received: `'b''
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -128,9 +116,7 @@ FAIL string
    Expected: `"Lorem ipsum"'
    Received: `"dolor sit amet."'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -143,9 +129,7 @@ FAIL bytes
    Expected: `"\001\002\003"'
    Received: `"\001\000\003"'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -158,9 +142,7 @@ FAIL list
    Expected: `['a'; 'b']'
    Received: `['a'; 'c']'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -173,9 +155,7 @@ FAIL array
    Expected: `[|0; 9223372036854775807|]'
    Received: `[|0; 1; 9223372036854775807|]'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -188,9 +168,7 @@ FAIL option some
    Expected: `Some 1'
    Received: `Some 2'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -203,9 +181,7 @@ FAIL result
    Expected: `Ok 1'
    Received: `Error ()'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -218,9 +194,7 @@ FAIL pair
    Expected: `(1, 'a')'
    Received: `(1, 'b')'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -233,9 +207,7 @@ FAIL triple
    Expected: `(1, true, "a")'
    Received: `(1, false, "a")'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 

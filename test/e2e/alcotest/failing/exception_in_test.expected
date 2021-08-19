@@ -9,9 +9,7 @@ This run has ID `<uuid>'.
 │ [FAIL]        test-a          1   Failing.                                   │
 └──────────────────────────────────────────────────────────────────────────────┘
 [exception] Dune__exe__Exception_in_test.Foo("message")
-            Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-            Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-            Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+            <stacktrace>
             
 Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
  ──────────────────────────────────────────────────────────────────────────────

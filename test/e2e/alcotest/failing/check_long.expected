@@ -21,9 +21,7 @@ FAIL list
                'l'; 'm'; 'n'; 'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u'; 'v'; 
                'w'; 'x'; 'y'; 'z'; 'B']'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -51,9 +49,7 @@ FAIL array
                 86; 87; 88; 89; 90; 91; 92; 93; 94; 95; 96; 97; 98; 99;
                 -9223372036854775808|]'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 
@@ -135,9 +131,7 @@ FAIL nested options
                                                                     Some
                                                                     Some 2'
 
-Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
-Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+<stacktrace>
 
  ──────────────────────────────────────────────────────────────────────────────
 

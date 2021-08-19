@@ -9,8 +9,7 @@ This run has ID `<uuid>'.
 └──────────────────────────────────────────────────────────────────────────────┘
 freeing all resources
 [failure] All is broken
-          Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
-          Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+          <stacktrace>
           
 Logs saved to `<build-context>/_build/_tests/<test-dir>/all.000.output'.
  ──────────────────────────────────────────────────────────────────────────────
