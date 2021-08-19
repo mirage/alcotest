@@ -22,6 +22,11 @@ FAIL Expected failure
 
    Expected: `true'
    Received: `false'
+
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -33,6 +38,11 @@ FAIL Expected failure
 
    Expected: `true'
    Received: `false'
+
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -41,6 +51,10 @@ FAIL Expected failure
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
 FAIL Expected failure: expecting Failure(""), got nothing.
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -49,6 +63,10 @@ FAIL Expected failure: expecting Failure(""), got nothing.
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
 FAIL Expected failure: expecting Failure(""), got nothing.
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -57,6 +75,10 @@ FAIL Expected failure: expecting Failure(""), got nothing.
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 2, character 30:
 FAIL Expected failure
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -65,6 +87,10 @@ FAIL Expected failure
 └──────────────────────────────────────────────────────────────────────────────┘
 File "test/e2e/alcotest/failing/check_located.ml", line 4, character 10:
 FAIL Expected failure
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 6 failures! in <test-duration>s. 6 tests run.

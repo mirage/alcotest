@@ -41,6 +41,12 @@ module Key = struct
     let default = true
   end
 
+  module Record_backtrace = struct
+    type t = bool
+
+    let default = true
+  end
+
   module Verbose = Flag (struct
     let term =
       let env = Arg.env_var "ALCOTEST_VERBOSE" in
@@ -220,6 +226,7 @@ module User = struct
     (* TODO: set Log_dir default internally *)
     log_dir : Log_dir.t;
     bail : Bail.t option;
+    record_backtrace : Record_backtrace.t option;
   }
 
   let ( || ) a b =
@@ -235,9 +242,10 @@ module User = struct
       filter = merge_on (fun t -> t.filter);
       log_dir = merge_on (fun t -> t.log_dir);
       bail = merge_on (fun t -> t.bail);
+      record_backtrace = merge_on (fun t -> t.record_backtrace);
     }
 
-  let term ~and_exit =
+  let term ~and_exit ~record_backtrace =
     let+ verbose = Verbose.term
     and+ compact = Compact.term
     and+ tail_errors = Tail_errors.term
@@ -258,13 +266,14 @@ module User = struct
       filter;
       log_dir;
       bail;
+      record_backtrace = Some record_backtrace;
     }
 
   (* Lift a config-sensitive function to one that consumes optional arguments that
      override config defaults. *)
   let kcreate : 'a. (t -> 'a) -> 'a with_options =
    fun f ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
-       ?filter ?log_dir ?bail ->
+       ?filter ?log_dir ?bail ?record_backtrace ->
     f
       {
         and_exit;
@@ -277,10 +286,14 @@ module User = struct
         filter;
         log_dir;
         bail;
+        record_backtrace;
       }
 
   let create : (unit -> t) with_options = kcreate (fun t () -> t)
   let and_exit t = Option.value ~default:And_exit.default t.and_exit
+
+  let record_backtrace t =
+    Option.value ~default:Record_backtrace.default t.record_backtrace
 end
 
 let apply_defaults ~default_log_dir : User.t -> t =
@@ -295,6 +308,7 @@ let apply_defaults ~default_log_dir : User.t -> t =
        filter;
        log_dir;
        bail;
+       record_backtrace;
      } ->
   let open Key in
   object
@@ -308,4 +322,7 @@ let apply_defaults ~default_log_dir : User.t -> t =
     method filter = filter
     method log_dir = Option.value ~default:default_log_dir log_dir
     method bail = Option.value ~default:Bail.default bail
+
+    method record_backtrace =
+      Option.value ~default:Record_backtrace.default record_backtrace
   end

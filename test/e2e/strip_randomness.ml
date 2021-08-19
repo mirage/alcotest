@@ -69,11 +69,26 @@ let time_replace =
   let re = compile t in
   replace re ~f:(fun g -> Group.get g 1 ^ "<test-duration>" ^ Group.get g 2)
 
-let exception_name_replace =
+let stacktrace_replace =
   let open Re in
-  let t = str "Alcotest_engine__Model.Registration_error" in
+  let t =
+    group (alt [ str "Raised at "; str "Called from " ])
+    ^^ rep1 print
+    ^^ str " in file \""
+    ^^ rep1 print
+    ^^ str "\", line "
+    ^^ rep1 digit
+    ^^ str ", characters "
+    ^^ rep1 digit
+    ^^ str "-"
+    ^^ rep1 digit
+  in
   let re = compile t in
-  replace_string ~all:true re ~by:"Alcotest_engine.Model.Registration_error"
+  replace re ~f:(fun g ->
+      Format.sprintf
+        "%s<exception-name> in file \"<file-name>\", line __-__, characters \
+         __-__"
+        (Group.get g 1))
 
 let executable_name_normalization =
   let open Re in
@@ -92,8 +107,8 @@ let () =
         |> uuid_replace
         |> build_context_replace
         |> time_replace
-        |> exception_name_replace
         |> executable_name_normalization
+        |> stacktrace_replace
       in
       Printf.printf "%s\n" sanitized_line;
       loop ()

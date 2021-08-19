@@ -108,6 +108,9 @@ output line 99
 output line 100
 ASSERT Logs above should be 101 lines long.
 FAIL Logs above should be 101 lines long.
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
 
 Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
  ──────────────────────────────────────────────────────────────────────────────

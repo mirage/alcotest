@@ -12,7 +12,8 @@ module Types = struct
     ; json : bool
     ; filter : filter option
     ; log_dir : string
-    ; bail : bool >
+    ; bail : bool
+    ; record_backtrace : bool >
 
   type 'a with_options =
     ?and_exit:bool ->
@@ -25,6 +26,7 @@ module Types = struct
     ?filter:filter ->
     ?log_dir:string ->
     ?bail:bool ->
+    ?record_backtrace:bool ->
     'a
 end
 
@@ -43,7 +45,7 @@ module type Config = sig
     (** Like [create], but passes the constructed config to a continuation
         rather than returning directly. *)
 
-    val term : and_exit:bool -> t Cmdliner.Term.t
+    val term : and_exit:bool -> record_backtrace:bool -> t Cmdliner.Term.t
     (** [term] provides a command-line interface for building configs. *)
 
     val ( || ) : t -> t -> t
@@ -53,6 +55,7 @@ module type Config = sig
     (** {2 Accessors} *)
 
     val and_exit : t -> bool
+    val record_backtrace : t -> bool
   end
 
   val apply_defaults : default_log_dir:string -> User.t -> t

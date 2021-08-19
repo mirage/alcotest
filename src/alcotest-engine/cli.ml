@@ -65,12 +65,14 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     in
     P.setup_std_outputs ?style_renderer ()
 
-  let default_cmd ~and_exit config args library_name tests =
+  let default_cmd config args library_name tests =
+    let and_exit = Config.User.and_exit config
+    and record_backtrace = Config.User.record_backtrace config in
     let exec_name = Filename.basename Sys.argv.(0) in
     let doc = "Run all the tests." in
     let term =
       let+ () = set_color
-      and+ cli_config = Config.User.term ~and_exit
+      and+ cli_config = Config.User.term ~and_exit ~record_backtrace
       and+ args = args in
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
@@ -81,7 +83,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     let doc = "Run a subset of the tests." in
     let term =
       let+ () = set_color
-      and+ cli_config = Config.User.term ~and_exit:true
+      and+ cli_config = Config.User.term ~and_exit:true ~record_backtrace:true
       and+ args = args in
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
@@ -96,16 +98,16 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
 
   let run_with_args' (type a) ~argv config name (args : a Term.t)
       (tl : a test list) =
-    let and_exit = Config.User.and_exit config in
     let ( >>= ) = M.bind in
     let choices = [ list_cmd tl; test_cmd config args name tl ] in
+    let and_exit = Config.User.and_exit config in
     let exit_or_return result =
       if and_exit then exit (Term.exit_status_of_result result) else M.return ()
     in
     let result =
       Term.eval_choice ?argv
         ~catch:and_exit (* Only log exceptions not raised to the user code *)
-        (default_cmd ~and_exit config args name tl)
+        (default_cmd config args name tl)
         choices
     in
     match result with
@@ -115,9 +117,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
         exit (Term.exit_status_of_result result)
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail ?argv =
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?argv =
     Config.User.kcreate (run_with_args' ~argv) ?and_exit ?verbose ?compact
       ?tail_errors ?quick_only ?show_errors ?json ?filter ?log_dir ?bail
+      ?record_backtrace
 
   let run =
     Config.User.kcreate (fun config ?argv name tl ->

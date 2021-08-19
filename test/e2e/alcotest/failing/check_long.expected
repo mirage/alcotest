@@ -20,6 +20,11 @@ FAIL list
    Received: `['a'; 'b'; 'c'; 'd'; 'e'; 'f'; 'g'; 'h'; 'i'; 'j'; 'k'; 
                'l'; 'm'; 'n'; 'o'; 'p'; 'q'; 'r'; 's'; 't'; 'u'; 'v'; 
                'w'; 'x'; 'y'; 'z'; 'B']'
+
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -45,6 +50,11 @@ FAIL array
                 72; 73; 74; 75; 76; 77; 78; 79; 80; 81; 82; 83; 84; 85; 
                 86; 87; 88; 89; 90; 91; 92; 93; 94; 95; 96; 97; 98; 99;
                 -9223372036854775808|]'
+
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 
@@ -124,6 +134,11 @@ FAIL nested options
                                                                     Some
                                                                     Some
                                                                     Some 2'
+
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+
  ──────────────────────────────────────────────────────────────────────────────
 
 3 failures! in <test-duration>s. 3 tests run.

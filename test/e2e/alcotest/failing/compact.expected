@@ -7,7 +7,10 @@ This run has ID `<uuid>'.
 │ [FAIL]        alpha          2   3.                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
 [failure] Error
-
+          Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+          Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+          Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+          
 Logs saved to `<build-context>/_build/_tests/<test-dir>/alpha.002.output'.
  ──────────────────────────────────────────────────────────────────────────────
 

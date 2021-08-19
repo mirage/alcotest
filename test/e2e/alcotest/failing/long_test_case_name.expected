@@ -9,6 +9,9 @@ This run has ID `<uuid>'.
 └──────────────────────────────────────────────────────────────────────────────┘
 ASSERT Failed
 FAIL Failed
+Raised at <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
+Called from <exception-name> in file "<file-name>", line __-__, characters __-__
 
 Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
  ──────────────────────────────────────────────────────────────────────────────
