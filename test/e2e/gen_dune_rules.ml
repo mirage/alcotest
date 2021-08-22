@@ -29,7 +29,7 @@ let read_file filename =
     List.rev !lines
 
 (* A test executable [foo.ml] may require certain options to be passed as
-  specified in a [foo.opts] file. *)
+   specified in a [foo.opts] file. *)
 let options_of_test_file file =
   let options_file = chop_extension file ^ ".opts" in
   if not (Sys.file_exists options_file) then [] else read_file options_file
