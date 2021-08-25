@@ -55,8 +55,13 @@ let float eps =
   in
   testable Fmt.float same
 
-let char = testable Fmt.char ( = )
-let string = testable Fmt.string ( = )
+let char =
+  let pp_char ppf x = Fmt.pf ppf "%C" x in
+  testable pp_char ( = )
+
+let string =
+  let pp_string ppf x = Fmt.pf ppf "%S" x in
+  testable pp_string ( = )
 
 let bytes =
   testable (fun fmt bytes -> Fmt.fmt "%S" fmt (Bytes.to_string bytes)) ( = )
