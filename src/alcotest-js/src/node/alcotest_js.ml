@@ -57,8 +57,7 @@ module Node_platform (M : Alcotest_engine.Monad.S) = struct
     let* () = M.return () in
     Fmt.(flush stdout) ();
     Fmt.(flush stderr) ();
-    let fd_write_stream = Node.Fs.create_write_stream fd_file "a" in
-    let write_bound = Node.Fs.bind_write fd_write_stream in
+    let write_bound chunk = Node.Fs.write fd_file chunk in
     let _, reset_stdout = Node.Process.set_stdout_write write_bound in
     let _, reset_stderr = Node.Process.set_stderr_write write_bound in
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in

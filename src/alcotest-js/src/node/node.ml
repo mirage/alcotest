@@ -16,6 +16,8 @@ module Jv = struct
     let v = Js.Unsafe.get (Js.Unsafe.coerce elt) s in
     if v == Js.undefined || v == Js.null then None else Some v
 
+  external cast : 'a -> t = "%identity"
+
   let to_float (v : t) = Js.float_of_number (Js.Unsafe.coerce v)
   let to_int (v : t) = to_float v |> int_of_float
   let of_int i : t = Js.number_of_float (float_of_int i) |> Js.Unsafe.coerce
@@ -36,6 +38,7 @@ let node_to_unix_error err =
   match code err with
   | "ENOENT" -> Unix.Unix_error (Unix.ENOENT, "", "Reraised from node")
   | "EINTR" -> Unix.Unix_error (Unix.EINTR, "", "Reraised from node")
+  | "EEXIST" -> Unix.Unix_error (Unix.EEXIST, "", "Reraised from node")
   | _ -> Node_error (Js.string_of_error err)
 
 external pure_js_expr : string -> 'a = "caml_pure_js_expr"
@@ -61,7 +64,8 @@ module Process = struct
   let set_stdout_write v =
     let stdout = Jv.get process "stdout" in
     let old_write = Jv.get stdout "write" in
-    (Jv.set stdout "write" v, fun () -> Jv.set stdout "write" old_write)
+    ( Jv.set stdout "write" (Jv.cast v),
+      fun () -> Jv.set stdout "write" old_write )
 
   let stdout_columns () =
     let stdout = Jv.get process "stdout" in
@@ -71,7 +75,8 @@ module Process = struct
   let set_stderr_write v =
     let stderr = Jv.get process "stderr" in
     let old_write = Jv.get stderr "write" in
-    (Jv.set stderr "write" v, fun () -> Jv.set stderr "write" old_write)
+    ( Jv.set stderr "write" (Jv.cast v),
+      fun () -> Jv.set stderr "write" old_write )
 
   let home () =
     let ( >>= ) f v = Option.bind f v in
@@ -108,7 +113,7 @@ module Fs = struct
           [| Jv.of_string v1; Jv.of_string v2; Jv.of_string "file" |]
       | None -> [| Jv.of_string v1; Jv.of_string v2 |]
     in
-    raise_or_ignore @@ fun () -> Jv.call fs "symlinkSync" args |> ignore
+    raise_or_ignore @@ fun () -> Jv.call fs "symlinkSync" args
 
   (* TODO: Convert Unix open flags to int *)
   let openfile_for_writing path mode =
@@ -122,9 +127,13 @@ module Fs = struct
   let close fd =
     raise_or_ignore @@ fun () -> Jv.call fs "closeSync" [| Jv.of_int fd |]
 
+  let write fd s =
+    raise_or_ignore @@ fun () -> Jv.call fs "writeSync" [| Jv.of_int fd; s |]
+
   let exists path =
     try
-      (raise_or_ignore @@ fun () -> Jv.call fs "access" [| Jv.of_string path |]);
+      ( raise_or_ignore @@ fun () ->
+        Jv.call fs "accessSync" [| Jv.of_string path |] );
       true
     with _ -> false
 
@@ -151,7 +160,7 @@ let mkdir_p path mode =
     | name :: names ->
         let path = parent ^ sep ^ name in
         (try Fs.mkdir path mode
-         with Node_error _ ->
+         with Unix.(Unix_error (EEXIST, _, _)) ->
            if Fs.is_directory path then () (* the directory exists *)
            else Fmt.strf "mkdir: %s: is a file" path |> failwith);
         mk path names

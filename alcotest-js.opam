@@ -2,7 +2,7 @@
 opam-version: "2.0"
 synopsis: "Javascript implementation for Alcotest"
 description:
-  "Javascript implementation for Alcotest -- two virtual libraries, one for node the other for the browser"
+  "Javascript implementation for Alcotest with two backends, one for node the other for the browser"
 maintainer: ["thomas@gazagnaire.org"]
 authors: ["Thomas Gazagnaire"]
 license: "ISC"
