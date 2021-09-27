@@ -87,4 +87,8 @@ tests to run.
  (description "Javascript implementation for Alcotest with two backends, one for node the other for the browser")
  (depends
   (alcotest (>= 1.4.0))
-  js_of_ocaml))
+  js_of_ocaml
+  brr
+  astring
+  current_ansi
+  fmt))

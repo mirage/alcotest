@@ -12,6 +12,10 @@ depends: [
   "dune" {>= "2.8"}
   "alcotest" {>= "1.4.0"}
   "js_of_ocaml"
+  "brr"
+  "astring"
+  "current_ansi"
+  "fmt"
   "odoc" {with-doc}
 ]
 build: [
