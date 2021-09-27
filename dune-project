@@ -79,3 +79,12 @@ tests to run.
   duration
   lwt
   logs))
+
+
+(package
+ (name alcotest-js)
+ (synopsis "Javascript implementation for Alcotest")
+ (description "Javascript implementation for Alcotest with two backends, one for node the other for the browser")
+ (depends
+  (alcotest (>= 1.4.0))
+  js_of_ocaml))

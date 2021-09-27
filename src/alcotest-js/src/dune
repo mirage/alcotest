@@ -1,0 +1,6 @@
+(library
+ (name alcotest_js)
+ (public_name alcotest-js)
+ (virtual_modules alcotest_js)
+ (default_implementation alcotest-js.node)
+ (libraries alcotest alcotest.engine))

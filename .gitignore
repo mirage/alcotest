@@ -8,3 +8,4 @@ _build
 .merlin
 _tests/
 _opam
+node_modules

@@ -1,0 +1,5 @@
+(library
+ (name alcotest_node)
+ (public_name alcotest-js.node)
+ (libraries js_of_ocaml alcotest.engine fmt fmt.tty astring)
+ (implements alcotest_js))

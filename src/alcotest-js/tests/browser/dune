@@ -1,0 +1,11 @@
+(executable
+ (name simple)
+ (modes js)
+ (libraries alcotest-js.browser))
+
+(rule
+ (alias browsertest)
+ (deps index.html simple.bc.js)
+ (target simple.js)
+ (action
+  (copy simple.bc.js simple.js)))

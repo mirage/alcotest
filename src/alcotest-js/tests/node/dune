@@ -1,0 +1,10 @@
+(executable
+ (name simple)
+ (modes js)
+ (libraries alcotest-js))
+
+(rule
+ (alias nodetest)
+ (deps simple.bc.js)
+ (action
+  (run node %{deps})))

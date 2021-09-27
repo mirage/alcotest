@@ -1,0 +1,9 @@
+(library
+ (name alcotest_browser)
+ (public_name alcotest-js.browser)
+ (libraries brr current_ansi js_of_ocaml alcotest.engine fmt fmt.tty astring)
+ (js_of_ocaml
+  (javascript_files redirect.js))
+ (implements alcotest_js)
+ (preprocess
+  (pps js_of_ocaml-ppx)))
