@@ -80,30 +80,29 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
       | Some { columns; _ } -> Some columns
       | None -> None
 
-  type file_descriptor = Unix.file_descr
+  external before_test :
+    output:out_channel -> stdout:out_channel -> stderr:out_channel -> unit
+    = "alcotest_before_test"
+
+  external after_test : stdout:out_channel -> stderr:out_channel -> unit
+    = "alcotest_after_test"
+
+  type file_descriptor = out_channel
 
   let log_trap_supported = true
   let file_exists = Sys.file_exists
-  let open_write_only x = Unix.(openfile x [ O_WRONLY; O_TRUNC; O_CREAT ] 0o660)
-  let close = Unix.close
+  let open_write_only x = open_out x
+  let close = close_out
 
   let with_redirect fd_file fn =
     let* () = M.return () in
     Fmt.(flush stdout) ();
     Fmt.(flush stderr) ();
-    let fd_stdout = Unix.descr_of_out_channel stdout in
-    let fd_stderr = Unix.descr_of_out_channel stderr in
-    let fd_old_stdout = Unix.dup fd_stdout in
-    let fd_old_stderr = Unix.dup fd_stderr in
-    Unix.dup2 fd_file fd_stdout;
-    Unix.dup2 fd_file fd_stderr;
+    before_test ~output:fd_file ~stdout ~stderr;
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
     Fmt.(flush stdout ());
     Fmt.(flush stderr ());
-    Unix.dup2 fd_old_stdout fd_stdout;
-    Unix.dup2 fd_old_stderr fd_stderr;
-    Unix.close fd_old_stdout;
-    Unix.close fd_old_stderr;
+    after_test ~stdout ~stderr;
     match r with `Ok x -> x | `Error e -> raise e
 
   let setup_std_outputs = Fmt_tty.setup_std_outputs
