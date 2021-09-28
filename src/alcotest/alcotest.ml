@@ -61,7 +61,7 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     let dir = Filename.concat root uuid in
     if not (Sys.file_exists dir) then (
       Unix.mkdir_p dir 0o770;
-      if Sys.unix || Sys.cygwin then (
+      if (Sys.unix || Sys.cygwin) && Unix.has_symlink () then (
         let this_exe = Filename.concat root name
         and latest = Filename.concat root "latest" in
         unlink_if_exists this_exe;
