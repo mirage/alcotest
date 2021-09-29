@@ -24,7 +24,6 @@ function alcotest_after_test (vstdout, vstderr){
   return 0;
 }
 
-
 //Provides: ocaml_alcotest_get_terminal_dimensions
 function ocaml_alcotest_get_terminal_dimensions(unit) {
   var p = joo_global_object.process

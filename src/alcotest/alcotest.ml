@@ -91,7 +91,7 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
 
   let log_trap_supported = true
   let file_exists = Sys.file_exists
-  let open_write_only x = open_out x
+  let open_write_only = open_out
   let close = close_out
 
   let with_redirect fd_file fn =
