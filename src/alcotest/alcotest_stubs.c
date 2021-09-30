@@ -1,12 +1,12 @@
 #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
+#include <unistd.h>
 
 // Detect platform
 #if defined(_WIN32)
 #define OCAML_ALCOTEST_WINDOWS
 #elif defined(__unix__) || defined(__unix)
-#include <unistd.h>
 #if defined(_POSIX_VERSION)
 #define OCAML_ALCOTEST_POSIX
 #endif
