@@ -66,7 +66,7 @@ jobs:
           opam-depext-flags: --with-test
           opam-local-packages: alcotest
 
-      - run: opam pin js_of_ocaml-compiler https://github.com/ocsigen/js_of_ocaml.git#uncaught-exn
+      - run: opam pin js_of_ocaml-compiler https://github.com/ocsigen/js_of_ocaml.git
 
       - run: opam install . --with-test --deps-only --best-effort
 
