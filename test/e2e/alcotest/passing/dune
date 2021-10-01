@@ -17,7 +17,8 @@
     --package
     "alcotest"
     --libraries
-    "alcotest.engine"))))
+    "alcotest.engine"
+    --js))))
 
 (rule
  (alias runtest)
