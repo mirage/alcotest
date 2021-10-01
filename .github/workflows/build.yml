@@ -1,0 +1,82 @@
+name: build
+
+on:
+  pull_request:
+  push:
+  schedule:
+    # Prime the caches every Monday
+    - cron: 0 1 * * MON
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+        ocaml-compiler:
+          - 4.08.x
+          - 4.09.x
+          - 4.10.x
+          - 4.11.x
+          - 4.12.x
+        base-pkg-only:
+          - false
+        include:
+          - os: ubuntu-latest
+            ocaml-compiler: 4.13.x
+            base-pkg-only: false
+          - os: macos-latest
+            ocaml-compiler: 4.13.x
+            base-pkg-only: false
+          - os: windows-latest
+            ocaml-compiler: 4.13.x
+            base-pkg-only: true
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Set git to use LF
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16.x
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        if: ${{ !matrix.base-pkg-only }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+          opam-depext-flags: --with-test
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        if: ${{ matrix.base-pkg-only }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          dune-cache: true
+          opam-depext-flags: --with-test
+          opam-local-packages: alcotest
+
+      - run: opam pin js_of_ocaml-compiler https://github.com/ocsigen/js_of_ocaml.git#uncaught-exn
+
+      - run: opam install . --with-test --deps-only --best-effort
+
+      - run: opam exec -- make all
+        if: ${{ !matrix.base-pkg-only }}
+
+      - run: opam exec -- make test test-js
+        if: ${{ !matrix.base-pkg-only }}
+
+      - run: opam exec -- dune build -p alcotest @default @runtest @runtest-js
+        if: ${{ matrix.base-pkg-only }}
+
+      - run: opam exec -- git diff --exit-code
