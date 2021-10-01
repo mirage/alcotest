@@ -342,6 +342,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let is_empty = filter_test_cases ~subst:false filter suite = [] in
     let+ result =
       if is_empty && Option.is_some filter then (
+        flush_all ();
         Fmt.(pf stderr)
           "%a\n" red
           "Invalid request (no tests to run, filter skipped everything)!";

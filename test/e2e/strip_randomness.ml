@@ -72,6 +72,12 @@ let exception_name_replace =
   let re = compile t in
   replace_string ~all:true re ~by:"Alcotest_engine.Model.Registration_error"
 
+let executable_name_normalization =
+  let open Re in
+  let t = alt [ str ".exe"; str ".bc.js" ] in
+  let re = compile t in
+  replace_string ~all:true re ~by:""
+
 (* Remove all non-deterministic output in a given Alcotest log and write
    the result to std.out *)
 let () =
@@ -84,6 +90,7 @@ let () =
         |> build_context_replace
         |> time_replace
         |> exception_name_replace
+        |> executable_name_normalization
       in
       Printf.printf "%s\n" sanitized_line;
       loop ()
