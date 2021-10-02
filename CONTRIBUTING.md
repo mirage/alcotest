@@ -12,13 +12,16 @@ opam switch create ./ ocaml-base-compiler.4.10.0    # OPTIONAL: install a projec
 opam install -t --deps-only .                       # Install regular and test dependencies
 ```
 
+Optionally, [install nodejs](https://nodejs.org/en/download/package-manager/) to be able
+run the testsuite using `js_of_ocaml`.
+
 Now you can work on the project using the standard Dune commands:
 
 ```sh
-dune build    # Build all libraries, executables and tests
-dune test     # Run the test-suite
-dune test-js  # Run the test-suite on nodejs (using js_of_ocaml)
-dune clean    # Delete all artefacts
+dune build              # Build all libraries, executables and tests
+dune test               # Run the test-suite
+dune build @runtest-js  # Run the test-suite on nodejs (using js_of_ocaml)
+dune clean              # Delete all artefacts
 ```
 
 ## Project structure
