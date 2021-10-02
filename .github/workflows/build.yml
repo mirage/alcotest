@@ -54,7 +54,6 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
           opam-depext-flags: --with-test
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
@@ -62,7 +61,6 @@ jobs:
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          dune-cache: true
           opam-depext-flags: --with-test
           opam-local-packages: alcotest
 
