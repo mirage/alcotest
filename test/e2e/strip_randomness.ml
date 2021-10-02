@@ -12,17 +12,20 @@ let build_context_replace =
     ( group (alt [ char '`'; str "(absent=" ]),
       group (alt [ char '\''; char ')' ]) )
   in
+  let dir_sep = alt [ str Filename.dir_sep; char '/' ] in
   let t =
     seq
       [
         lterm;
         rep any;
-        str ("_build" ^ Filename.dir_sep ^ "_tests");
-        opt (str Filename.dir_sep);
-        group (rep (diff any (set Filename.dir_sep)))
+        str "_build";
+        dir_sep;
+        str "_tests";
+        opt dir_sep;
+        group (rep (diff any (set "\\/")))
         (* <test-dir>: May be a UUID or a suite name (symlink), depending on
            whether or not we're running on Windows *);
-        group (opt (seq [ str Filename.dir_sep; rep any ]));
+        group (opt (seq [ dir_sep; rep any ]));
         rterm;
       ]
   in
