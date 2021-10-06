@@ -29,7 +29,7 @@
   assertion failures (i.e. wrap with quotes and escape control characters).
   (#318, @CraigFe)
 
-- Make alcotest compatible with js_of_ocaml
+- Make alcotest compatible with js_of_ocaml 3.11.0 (#326, @hhugo)
 
 ### 1.4.0 (2021-04-15)
 
