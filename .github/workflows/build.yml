@@ -62,7 +62,7 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           opam-depext-flags: --with-test
-          opam-local-packages: alcotest
+          opam-local-packages: alcotest.opam
 
       - run: opam pin js_of_ocaml-compiler https://github.com/ocsigen/js_of_ocaml.git
 
