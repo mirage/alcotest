@@ -79,7 +79,7 @@ let executable_name_normalization =
   let open Re in
   let t = alt [ str ".exe"; str ".bc.js" ] in
   let re = compile t in
-  replace_string ~all:true re ~by:""
+  replace_string ~all:true re ~by:".<ext>"
 
 (* Remove all non-deterministic output in a given Alcotest log and write
    the result to std.out *)
