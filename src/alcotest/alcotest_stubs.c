@@ -85,7 +85,7 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 CAMLextern value caml_channel_descriptor(value vchannel);
 #define NO_ARG Val_int(0)
 CAMLextern void caml_sys_error (value);
-/* End of code duplicatio */
+/* End of code duplication */
 
 static int alcotest_saved_stdout;
 static int alcotest_saved_stderr;
