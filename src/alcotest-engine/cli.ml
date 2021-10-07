@@ -44,7 +44,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
       let color = Arg.enum enum in
       let enum_alts = Arg.doc_alts_enum enum in
       let doc =
-        Fmt.strf
+        Fmt.str
           "Colorize the output. $(docv) must be %s. Defaults to %s when \
            running inside Dune, otherwise defaults to %s."
           enum_alts (Arg.doc_quote "always") (Arg.doc_quote "auto")

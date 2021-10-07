@@ -67,7 +67,7 @@ let bytes =
   testable (fun fmt bytes -> Fmt.fmt "%S" fmt (Bytes.to_string bytes)) ( = )
 
 let bool = testable Fmt.bool ( = )
-let unit = testable (Fmt.unit "()") ( = )
+let unit = testable (Fmt.any "()") ( = )
 
 let list e =
   let rec eq l1 l2 =
@@ -212,7 +212,7 @@ let fail ?here ?pos msg =
   check_err (fun ppf () ->
       Fmt.pf ppf "%t%a %s" (pp_location ?here ?pos) Pp.tag `Fail msg)
 
-let failf ?here ?pos fmt = Fmt.kstrf (fun msg -> fail ?here ?pos msg) fmt
+let failf ?here ?pos fmt = Fmt.kstr (fun msg -> fail ?here ?pos msg) fmt
 let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
 let collect_exception f =

@@ -58,7 +58,7 @@ struct
   (* Colours *)
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
   let red_s fmt = color `Red fmt
-  let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
+  let red ppf fmt = Fmt.kstr (fun str -> red_s ppf str) fmt
   let green_s fmt = color `Green fmt
   let yellow_s fmt = color `Yellow fmt
   let left_gutter = 2

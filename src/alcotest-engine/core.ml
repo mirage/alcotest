@@ -136,7 +136,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
   let red_s fmt = color `Red fmt
-  let red ppf fmt = Fmt.kstrf (fun str -> red_s ppf str) fmt
+  let red ppf fmt = Fmt.kstr (fun str -> red_s ppf str) fmt
 
   let pp_error t ppf e =
     let path, error_fmt =

@@ -57,7 +57,7 @@ struct
         let display_lines =
           if omitted_count = 0 then selected_lines
           else
-            Fmt.strf "... (omitting %i line%a)" omitted_count Pp.pp_plural
+            Fmt.str "... (omitting %i line%a)" omitted_count Pp.pp_plural
               omitted_count
             :: selected_lines
         in
