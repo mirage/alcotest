@@ -17,7 +17,7 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
             (try Unix.mkdir path mode
              with Unix.Unix_error (Unix.EEXIST, _, _) ->
                if Sys.is_directory path then () (* the directory exists *)
-               else Fmt.strf "mkdir: %s: is a file" path |> failwith);
+               else Fmt.str "mkdir: %s: is a file" path |> failwith);
             mk path names
       in
       match String.cuts ~empty:true ~sep path with
