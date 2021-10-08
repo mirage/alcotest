@@ -6,7 +6,7 @@
 // Detect platform
 #if defined(_WIN32)
 #define OCAML_ALCOTEST_WINDOWS
-#elif defined(__unix__) || defined(__unix)
+#elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
 #if defined(_POSIX_VERSION)
 #define OCAML_ALCOTEST_POSIX
 #endif
