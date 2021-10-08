@@ -12,17 +12,20 @@ let build_context_replace =
     ( group (alt [ char '`'; str "(absent=" ]),
       group (alt [ char '\''; char ')' ]) )
   in
+  let dir_sep = alt [ str Filename.dir_sep; char '/' ] in
   let t =
     seq
       [
         lterm;
         rep any;
-        str ("_build" ^ Filename.dir_sep ^ "_tests");
-        opt (str Filename.dir_sep);
-        group (rep (diff any (set Filename.dir_sep)))
+        str "_build";
+        dir_sep;
+        str "_tests";
+        opt dir_sep;
+        group (rep (diff any (set "\\/")))
         (* <test-dir>: May be a UUID or a suite name (symlink), depending on
            whether or not we're running on Windows *);
-        group (opt (seq [ str Filename.dir_sep; rep any ]));
+        group (opt (seq [ dir_sep; rep any ]));
         rterm;
       ]
   in
@@ -72,6 +75,12 @@ let exception_name_replace =
   let re = compile t in
   replace_string ~all:true re ~by:"Alcotest_engine.Model.Registration_error"
 
+let executable_name_normalization =
+  let open Re in
+  let t = alt [ str ".exe"; str ".bc.js" ] in
+  let re = compile t in
+  replace_string ~all:true re ~by:".<ext>"
+
 (* Remove all non-deterministic output in a given Alcotest log and write
    the result to std.out *)
 let () =
@@ -84,6 +93,7 @@ let () =
         |> build_context_replace
         |> time_replace
         |> exception_name_replace
+        |> executable_name_normalization
       in
       Printf.printf "%s\n" sanitized_line;
       loop ()
