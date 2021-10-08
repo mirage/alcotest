@@ -35,7 +35,7 @@ module type Make_arg = sig
   val stdout_columns : unit -> int option
 end
 
-module type Make_S = functor (X : Make_arg) -> sig
+module type S = sig
   include module type of Types
 
   val info :
@@ -82,8 +82,6 @@ module type Make_S = functor (X : Make_arg) -> sig
 end
 
 module type Pp = sig
-  include module type of Types
-
   val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
   val map_theta : theta -> f:(unit Fmt.t -> unit Fmt.t) -> theta
 
@@ -95,5 +93,5 @@ module type Pp = sig
         Fmt.pr "Found %i item%a." n pp_plural n
       ]} *)
 
-  module Make : Make_S
+  module Make (X : Make_arg) : S
 end
