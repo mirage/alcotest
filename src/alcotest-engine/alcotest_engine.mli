@@ -44,7 +44,7 @@ module V1 : sig
 end
 
 module Monad = Monad
-(** Monad signatures for use with {!Core} and {!Cli}. *)
+(** Monad signatures for use with {!V1.Core} and {!V1.Cli}. *)
 
 module Platform = Platform
 (** Defines platform-dependent functions. *)
