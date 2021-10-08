@@ -64,7 +64,7 @@ jobs:
           opam-depext-flags: --with-test
           opam-local-packages: alcotest.opam
 
-      - run: opam install js_of_ocaml-compiler">=3.11"
+      - run: opam depext --install "js_of_ocaml-compiler>=3.11"
 
       - run: opam install . --with-test --deps-only --best-effort
 
