@@ -38,6 +38,9 @@
   can be disabled by passing `~record_backtrace:false` to `Alcotest.run`. (#317,
   @CraigFe)
 
+- Add a virtual `alcotest-js` package containing the necessary JavaScript
+  dependencies for using `js_of_ocaml` with Alcotest. (#328, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be
