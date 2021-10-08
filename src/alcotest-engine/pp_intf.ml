@@ -31,9 +31,12 @@ module Types = struct
   }
 end
 
-module type S = sig
-  type event
-  type result
+module type Make_arg = sig
+  val stdout_columns : unit -> int option
+end
+
+module type Make_S = functor (X : Make_arg) -> sig
+  include module type of Types
 
   val info :
     ?available_width:int ->
@@ -68,18 +71,14 @@ module type S = sig
 
   val with_surrounding_box : 'a Fmt.t -> 'a Fmt.t
   (** Wraps a formatter with a Unicode box with width given by
-      {!terminal_width}. Uses box-drawing characters from code page 437. *)
+      {!X.stdout_columns}. Uses box-drawing characters from code page 437. *)
 
   val horizontal_rule : _ Fmt.t
-  (** Horizontal rule of length {!terminal_width}. Uses box-drawing characters
+  (** Horizontal rule of length {!X.stdout_columns}. Uses box-drawing characters
       from code page 437. *)
 
   val user_error : string -> _
   (** Raise a user error, then fail. *)
-end
-
-module type Make_arg = sig
-  val stdout_columns : unit -> int option
 end
 
 module type Pp = sig
@@ -96,6 +95,5 @@ module type Pp = sig
         Fmt.pr "Found %i item%a." n pp_plural n
       ]} *)
 
-  module Make (X : Make_arg) :
-    S with type event := event and type result := result
+  module Make : Make_S
 end

@@ -47,6 +47,8 @@ module Make (P : sig
   val stdout_columns : unit -> int option
 end) =
 struct
+  include Types
+
   let terminal_width =
     lazy (match P.stdout_columns () with Some w -> w | None -> 80)
 
