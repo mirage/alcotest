@@ -69,7 +69,7 @@ module V1_types = struct
         - [tail_errors] (default unlimited). Show only the last N lines of
           output of failed tests.
         - [quick_only] (default [false]). Don't run tests with the
-          {{!Core.speed_level} [`Slow] speed level}.
+          {{!speed_level} [`Slow] speed level}.
         - [show_errors] (default [false]). Display the test errors.
         - [json] (default [false]). Print test results in a JSON-compatible
           format.
