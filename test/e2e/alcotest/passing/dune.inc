@@ -85,7 +85,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff and_exit_false.expected and_exit_false-js.processed)))
+   (diff and_exit_false-js.expected and_exit_false-js.processed)))
 
 (rule
  (target and_exit_true.actual)
@@ -123,7 +123,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff and_exit_true.expected and_exit_true-js.processed)))
+   (diff and_exit_true-js.expected and_exit_true-js.processed)))
 
 (rule
  (target assert_and_verbose.actual)
@@ -161,7 +161,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff assert_and_verbose.expected assert_and_verbose-js.processed)))
+   (diff assert_and_verbose-js.expected assert_and_verbose-js.processed)))
 
 (rule
  (target assert_not_printed.actual)
@@ -199,7 +199,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff assert_not_printed.expected assert_not_printed-js.processed)))
+   (diff assert_not_printed-js.expected assert_not_printed-js.processed)))
 
 (rule
  (target basic.actual)
@@ -237,7 +237,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff basic.expected basic-js.processed)))
+   (diff basic-js.expected basic-js.processed)))
 
 (rule
  (target check_basic.actual)
@@ -275,7 +275,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff check_basic.expected check_basic-js.processed)))
+   (diff check_basic-js.expected check_basic-js.processed)))
 
 (rule
  (target cli_verbose.actual)
@@ -313,7 +313,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff cli_verbose.expected cli_verbose-js.processed)))
+   (diff cli_verbose-js.expected cli_verbose-js.processed)))
 
 (rule
  (target compact.actual)
@@ -351,7 +351,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff compact.expected compact-js.processed)))
+   (diff compact-js.expected compact-js.processed)))
 
 (rule
  (target empty_test_name.actual)
@@ -389,7 +389,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff empty_test_name.expected empty_test_name-js.processed)))
+   (diff empty_test_name-js.expected empty_test_name-js.processed)))
 
 (rule
  (target filter_name.actual)
@@ -427,7 +427,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff filter_name.expected filter_name-js.processed)))
+   (diff filter_name-js.expected filter_name-js.processed)))
 
 (rule
  (target filter_name_regex.actual)
@@ -465,7 +465,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff filter_name_regex.expected filter_name_regex-js.processed)))
+   (diff filter_name_regex-js.expected filter_name_regex-js.processed)))
 
 (rule
  (target filter_range.actual)
@@ -503,7 +503,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff filter_range.expected filter_range-js.processed)))
+   (diff filter_range-js.expected filter_range-js.processed)))
 
 (rule
  (target isatty.actual)
@@ -541,7 +541,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff isatty.expected isatty-js.processed)))
+   (diff isatty-js.expected isatty-js.processed)))
 
 (rule
  (target json_output.actual)
@@ -579,7 +579,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff json_output.expected json_output-js.processed)))
+   (diff json_output-js.expected json_output-js.processed)))
 
 (rule
  (target list_tests.actual)
@@ -617,7 +617,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff list_tests.expected list_tests-js.processed)))
+   (diff list_tests-js.expected list_tests-js.processed)))
 
 (rule
  (target only_monadic_effects.actual)
@@ -655,7 +655,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff only_monadic_effects.expected only_monadic_effects-js.processed)))
+   (diff only_monadic_effects-js.expected only_monadic_effects-js.processed)))
 
 (rule
  (target quick_only.actual)
@@ -693,7 +693,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff quick_only.expected quick_only-js.processed)))
+   (diff quick_only-js.expected quick_only-js.processed)))
 
 (rule
  (target quick_only_regex.actual)
@@ -731,7 +731,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff quick_only_regex.expected quick_only_regex-js.processed)))
+   (diff quick_only_regex-js.expected quick_only_regex-js.processed)))
 
 (rule
  (target separator_testname.actual)
@@ -769,7 +769,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff separator_testname.expected separator_testname-js.processed)))
+   (diff separator_testname-js.expected separator_testname-js.processed)))
 
 (rule
  (target unicode_testname.actual)
@@ -807,7 +807,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff unicode_testname.expected unicode_testname-js.processed)))
+   (diff unicode_testname-js.expected unicode_testname-js.processed)))
 
 (rule
  (target verbose_newlines.actual)
@@ -845,4 +845,4 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff verbose_newlines.expected verbose_newlines-js.processed)))
+   (diff verbose_newlines-js.expected verbose_newlines-js.processed)))

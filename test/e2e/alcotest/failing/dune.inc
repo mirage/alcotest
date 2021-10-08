@@ -73,7 +73,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff bail.expected bail-js.processed)))
+   (diff bail-js.expected bail-js.processed)))
 
 (rule
  (target check_basic.actual)
@@ -111,7 +111,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff check_basic.expected check_basic-js.processed)))
+   (diff check_basic-js.expected check_basic-js.processed)))
 
 (rule
  (target check_located.actual)
@@ -149,7 +149,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff check_located.expected check_located-js.processed)))
+   (diff check_located-js.expected check_located-js.processed)))
 
 (rule
  (target check_long.actual)
@@ -187,7 +187,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff check_long.expected check_long-js.processed)))
+   (diff check_long-js.expected check_long-js.processed)))
 
 (rule
  (target compact.actual)
@@ -225,7 +225,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff compact.expected compact-js.processed)))
+   (diff compact-js.expected compact-js.processed)))
 
 (rule
  (target duplicate_test_names.actual)
@@ -263,7 +263,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff duplicate_test_names.expected duplicate_test_names-js.processed)))
+   (diff duplicate_test_names-js.expected duplicate_test_names-js.processed)))
 
 (rule
  (target empty_suite_name.actual)
@@ -301,7 +301,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff empty_suite_name.expected empty_suite_name-js.processed)))
+   (diff empty_suite_name-js.expected empty_suite_name-js.processed)))
 
 (rule
  (target exception_in_test.actual)
@@ -339,7 +339,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff exception_in_test.expected exception_in_test-js.processed)))
+   (diff exception_in_test-js.expected exception_in_test-js.processed)))
 
 (rule
  (target filter_all_tests.actual)
@@ -377,7 +377,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff filter_all_tests.expected filter_all_tests-js.processed)))
+   (diff filter_all_tests-js.expected filter_all_tests-js.processed)))
 
 (rule
  (target invalid_arg_in_test.actual)
@@ -415,7 +415,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff invalid_arg_in_test.expected invalid_arg_in_test-js.processed)))
+   (diff invalid_arg_in_test-js.expected invalid_arg_in_test-js.processed)))
 
 (rule
  (target long_test_case_name.actual)
@@ -453,7 +453,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff long_test_case_name.expected long_test_case_name-js.processed)))
+   (diff long_test_case_name-js.expected long_test_case_name-js.processed)))
 
 (rule
  (target outside_runner.actual)
@@ -491,7 +491,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff outside_runner.expected outside_runner-js.processed)))
+   (diff outside_runner-js.expected outside_runner-js.processed)))
 
 (rule
  (target tail_errors_limit.actual)
@@ -529,7 +529,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff tail_errors_limit.expected tail_errors_limit-js.processed)))
+   (diff tail_errors_limit-js.expected tail_errors_limit-js.processed)))
 
 (rule
  (target tail_errors_unlimited.actual)
@@ -567,7 +567,7 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff tail_errors_unlimited.expected tail_errors_unlimited-js.processed)))
+   (diff tail_errors_unlimited-js.expected tail_errors_unlimited-js.processed)))
 
 (rule
  (target unknown_option.actual)
@@ -605,4 +605,4 @@
  (alias runtest-js)
  (package alcotest)
  (action
-   (diff unknown_option.expected unknown_option-js.processed)))
+   (diff unknown_option-js.expected unknown_option-js.processed)))
