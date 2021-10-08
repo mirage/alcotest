@@ -56,6 +56,7 @@ module V1_types = struct
       ?filter:(name:string -> index:int -> [ `Run | `Skip ]) ->
       ?log_dir:string ->
       ?bail:bool ->
+      ?record_backtrace:bool ->
       'a
     (** The various options taken by the tests runners {!run} and
         {!run_with_args}:
@@ -75,7 +76,9 @@ module V1_types = struct
         - [log_dir] (default ["$PWD/_build/_tests/"]). The directory in which to
           log the output of the tests (if [verbose] is not set).
         - [bail] (default [false]). If true, stop running the tests after the
-          first failure. *)
+          first failure.
+        - [record_backtrace] (defualt [true]). Enable backtrace recording before
+          beginning testing. *)
 
     val run : (string -> unit test list -> return) with_options
     val run_with_args : (string -> 'a -> 'a test list -> return) with_options

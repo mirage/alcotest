@@ -154,7 +154,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
               ~f:(fun s -> Pp.quoted (Fmt.styled `Cyan s))
               (Log_trap.pp_log_location t.log_trap path)
           in
-          Fmt.pf ppf "%t@,Logs saved to %t.@," pp_logs pp_log_dir
+          Fmt.pf ppf "%tLogs saved to %t.@," pp_logs pp_log_dir
     in
     Fmt.(
       Pp.with_surrounding_box
@@ -294,6 +294,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     else Suite.{ test_case with fn = `Skip }
 
   let result t test args =
+    let initial_backtrace_status = Printexc.backtrace_status () in
+    if t.config#record_backtrace then Printexc.record_backtrace true;
     let start_time = P.time () in
     let speed_level = if t.config#quick_only then `Quick else `Slow in
     let test = List.map (select_speed speed_level) test in
@@ -301,6 +303,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let time = P.time () -. start_time in
     let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter Run_result.is_failure results) in
+    if t.config#record_backtrace then
+      Printexc.record_backtrace initial_backtrace_status;
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
   let list_registered_tests t () =
@@ -401,9 +405,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   let run' config name (tl : unit test list) = run_with_args' config name () tl
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail =
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace =
     Config.User.kcreate run_with_args' ?and_exit ?verbose ?compact ?tail_errors
-      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
 
   let run = Config.User.kcreate run'
 end

@@ -34,6 +34,10 @@
 - Fix process for getting the width of attached terminals on MacOS.
   Previously, a terminal width of 80 columns was assumed. (#325, @CraigFe)
 
+- Record exception backtraces during test suite runs by default. This behaviour
+  can be disabled by passing `~record_backtrace:false` to `Alcotest.run`. (#317,
+  @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be

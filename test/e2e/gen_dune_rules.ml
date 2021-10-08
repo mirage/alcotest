@@ -106,7 +106,7 @@ let example_alias_stanza ~js ~package filename =
  (action
    (diff %s.expected %s.processed)))
 |}
-    (with_suffix "runtest") package base (with_suffix base)
+    (with_suffix "runtest") package (with_suffix base) (with_suffix base)
 
 let is_example filename = Filename.check_suffix filename ".ml"
 

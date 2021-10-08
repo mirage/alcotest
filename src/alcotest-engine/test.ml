@@ -202,7 +202,8 @@ let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
              ++ cut
              ++ pp_expected
              ++ cut
-             ++ pp_actual)))
+             ++ pp_actual)
+           ++ cut))
 
 let check' ?here ?pos t ~msg ~expected ~actual =
   check ?here ?pos t msg expected actual

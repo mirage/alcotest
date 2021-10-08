@@ -1,18 +1,14 @@
-Testing `test/e2e/alcotest-lwt/failing/async_failure.ml'.
+Testing `test/e2e/alcotest/failing/compact.ml'.
 This run has ID `<uuid>'.
 
-> [FAIL]        all          0   one.
-  [OK]          all          1   two.
+..F...
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        all          0   one.                                          │
+│ [FAIL]        alpha          2   3.                                          │
 └──────────────────────────────────────────────────────────────────────────────┘
-freeing all resources
-[failure] All is broken
-          <stacktrace>
-          
-Logs saved to `<build-context>/_build/_tests/<test-dir>/all.000.output'.
+[failure] Error
+Logs saved to `<build-context>/_build/_tests/<test-dir>/alpha.002.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
-1 failure! in <test-duration>s. 2 tests run.
+1 failure! in <test-duration>s. 6 tests run.
