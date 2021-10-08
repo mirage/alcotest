@@ -31,6 +31,9 @@
 
 - Make alcotest compatible with js_of_ocaml 3.11.0 (#326, @hhugo)
 
+- Fix process for getting the width of attached terminals on MacOS.
+  Previously, a terminal width of 80 columns was assumed. (#325, @CraigFe)
+
 ### 1.4.0 (2021-04-15)
 
 - Add `?here` and `?pos` arguments to the test assertion functions. These can be
