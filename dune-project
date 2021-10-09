@@ -31,7 +31,10 @@ tests to run.
   re
   stdlib-shims
   uutf
-  ocaml-syntax-shims))
+  ocaml-syntax-shims)
+ (conflicts
+  (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
+  ))
 
 (package
  (name alcotest-async)
