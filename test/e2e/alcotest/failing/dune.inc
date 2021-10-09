@@ -16,7 +16,7 @@
    tail_errors_unlimited
    unknown_option
  )
- (libraries alcotest alcotest_stdlib_ext alcotest.engine)
+ (libraries alcotest alcotest.stdlib_ext alcotest.engine)
  (modes native js)
  (modules
    bail
