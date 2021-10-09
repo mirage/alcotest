@@ -28,7 +28,7 @@ tests to run.
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.0.0))
-  re
+  (re (>= 1.7.2))
   stdlib-shims
   uutf
   ocaml-syntax-shims)
