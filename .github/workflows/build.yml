@@ -14,24 +14,23 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+        packages: [ '.' ]
         ocaml-compiler:
           - 4.08.x
           - 4.09.x
           - 4.10.x
           - 4.11.x
           - 4.12.x
-        base-pkg-only:
-          - false
+          - 4.13.x
         include:
-          - os: ubuntu-latest
-            ocaml-compiler: 4.13.x
-            base-pkg-only: false
           - os: macos-latest
             ocaml-compiler: 4.13.x
-            base-pkg-only: false
+            packages: '.'
+
           - os: windows-latest
             ocaml-compiler: 4.13.x
-            base-pkg-only: true
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
 
     runs-on: ${{ matrix.os }}
 
@@ -50,31 +49,18 @@ jobs:
           node-version: 16.x
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        if: ${{ !matrix.base-pkg-only }}
         uses: ocaml/setup-ocaml@v2
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          opam-local-packages: $${ matrix.opam-local-packages }}
           opam-depext-flags: --with-test
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler }}
-        if: ${{ matrix.base-pkg-only }}
-        uses: ocaml/setup-ocaml@v2
-        with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          opam-depext-flags: --with-test
-          opam-local-packages: alcotest.opam
+      - run: |
+          opam pin add alcotest-async.dev ./ -n
+          opam pin add alcotest-js.dev ./ -n
+          opam pin add alcotest-lwt.dev ./ -n
+          opam pin add alcotest-mirage.dev ./ -n
+          opam pin add alcotest.dev ./ -n
 
-      - run: opam depext --install "js_of_ocaml-compiler>=3.11"
-
-      - run: opam install . --with-test --deps-only --best-effort
-
-      - run: opam exec -- make all
-        if: ${{ !matrix.base-pkg-only }}
-
-      - run: opam exec -- make test test-js
-        if: ${{ !matrix.base-pkg-only }}
-
-      - run: opam exec -- dune build -p alcotest @default @runtest @runtest-js
-        if: ${{ matrix.base-pkg-only }}
-
-      - run: opam exec -- git diff --exit-code
+      - run: opam install ${{ matrix.packages }} --with-test --deps-only
+      - run: opam exec -- dune build @install @check @runtest @runtest-js
