@@ -30,7 +30,7 @@ tests to run.
   (cmdliner (>= 1.0.0))
   (re (>= 1.7.2))
   stdlib-shims
-  uutf
+  (uutf (>= 1.0.1))
   ocaml-syntax-shims)
  (conflicts
   (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
