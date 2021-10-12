@@ -22,7 +22,7 @@
    unicode_testname
    verbose_newlines
  )
- (libraries alcotest alcotest_stdlib_ext alcotest.engine)
+ (libraries alcotest alcotest.stdlib_ext alcotest.engine)
  (modes native js)
  (modules
    and_exit_false

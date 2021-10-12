@@ -28,10 +28,13 @@ tests to run.
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.0.0))
-  re
+  (re (>= 1.7.2))
   stdlib-shims
-  uutf
-  ocaml-syntax-shims))
+  (uutf (>= 1.0.1))
+  ocaml-syntax-shims)
+ (conflicts
+  (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
+  ))
 
 (package
  (name alcotest-async)

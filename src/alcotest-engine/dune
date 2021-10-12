@@ -2,7 +2,7 @@
  (name alcotest_engine)
  (public_name alcotest.engine)
  (libraries
-  alcotest_stdlib_ext
+  alcotest.stdlib_ext
   fmt
   astring
   cmdliner

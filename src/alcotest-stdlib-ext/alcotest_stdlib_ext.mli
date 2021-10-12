@@ -1,3 +1,6 @@
+(** This module exists for internal Alcotest use only. It provides no stability
+    guarantee. *)
+
 val ( >> ) : ('a -> 'b) -> ('b -> 'c) -> 'a -> 'c
 
 module Fun : sig
