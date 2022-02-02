@@ -197,8 +197,7 @@ struct
   let horizontal_rule (type a) ppf (_ : a) =
     let open Fmt in
     (const string " "
-    ++ const
-         (styled `Faint string)
+    ++ const (styled `Faint string)
          (List.init (Lazy.force terminal_width - 2) (fun _ -> "─")
          |> String.concat)
     ++ cut)
