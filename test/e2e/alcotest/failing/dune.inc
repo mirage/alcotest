@@ -573,7 +573,7 @@
  (target unknown_option.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124)
     (run %{dep:unknown_option.exe} --dry-runn)))))
 
 (rule
@@ -592,7 +592,7 @@
  (target unknown_option-js.actual)
  (action
   (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 125)
+   (with-accepted-exit-codes (or 1 2 124)
     (run node %{dep:unknown_option.bc.js} --dry-runn)))))
 
 (rule
