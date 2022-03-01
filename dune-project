@@ -27,7 +27,7 @@ tests to run.
   (ocaml (>= 4.03.0))
   (fmt (>= 0.8.7))
   astring
-  (cmdliner (>= 1.0.0))
+  (cmdliner (and (>= 1.0.0) (< 1.1.0)))
   (re (>= 1.7.2))
   stdlib-shims
   (uutf (>= 1.0.1))
@@ -44,7 +44,7 @@ tests to run.
  (depends
   (re :with-test)
   (fmt :with-test)
-  (cmdliner :with-test)
+  (cmdliner (and :with-test (< 1.1.0)))
   core
   base
   async_kernel
@@ -60,7 +60,7 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner :with-test)
+  (cmdliner (and :with-test (< 1.1.0)))
   fmt
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
@@ -74,7 +74,7 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner :with-test)
+  (cmdliner (and :with-test (< 1.1.0)))
   fmt
   (ocaml (>= 4.03.0))
   (alcotest (= :version))
@@ -92,4 +92,4 @@ tests to run.
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 1.0.0)))))
+  (cmdliner (and :with-test (>= 1.0.0) (< 1.1.0)))))
