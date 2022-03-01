@@ -30,3 +30,16 @@ module V1 = struct
 end
 
 include V1
+
+module Unstable = struct
+  module Tester =
+    Alcotest_engine.Unstable.Cli.Make (Alcotest.Unix_platform) (Promise)
+
+  include Tester
+
+  let test_sync ?pos ?tags ~name fn =
+    test ?pos ?tags ~name (fun x -> Deferred.return (fn x))
+
+  let test ?(timeout = sec 2.) ?pos ?tags ~name fn =
+    test ?pos ?tags ~name (run_test timeout name fn)
+end

@@ -21,50 +21,73 @@ open! Import
 open Model
 
 let map_theta t ~f ppf = f (fun ppf () -> t ppf) ppf ()
-let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
+let quoted f = Fmt.(const char '`' ++ f ++ const char '\'')
+let plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
 
-let colour_of_tag = function
-  | `Ok -> `Green
-  | `Fail -> `Red
-  | `Skip | `Todo | `Assert -> `Yellow
+module Tag : sig
+  val pp : wrapped:bool -> tag Fmt.t
+  val colour : tag -> Fmt.style
+  val of_run_result : Run_result.t -> tag
+end = struct
+  let colour = function
+    | `Ok -> `Green
+    | `Fail -> `Red
+    | `Skip | `Todo | `Assert -> `Yellow
 
-let string_of_tag = function
-  | `Ok -> "OK"
-  | `Fail -> "FAIL"
-  | `Skip -> "SKIP"
-  | `Todo -> "TODO"
-  | `Assert -> "ASSERT"
+  let string_of_tag : tag -> string = function
+    | `Ok -> "PASS"
+    | `Fail -> "FAIL"
+    | `Skip -> "SKIP"
+    | `Todo -> " —— "
+    | `Assert -> "ASSERT"
 
-let pp_tag ~wrapped ppf typ =
-  let colour = colour_of_tag typ in
-  let tag = string_of_tag typ in
-  let tag = if wrapped then "[" ^ tag ^ "]" else tag in
-  Fmt.(styled colour string) ppf tag
+  let of_run_result : Run_result.t -> tag = function
+    | Ok -> `Ok
+    | Exn _ | Error _ -> `Fail
+    | Skip -> `Skip
+    | Todo _ -> `Todo
 
-let tag = pp_tag ~wrapped:false
+  let pp ~wrapped ppf typ =
+    let colour = colour typ in
+    let tag = string_of_tag typ in
+    let tag = if wrapped then "[" ^ tag ^ "]" else tag in
+    Fmt.(styled colour string) ppf tag
+end
 
-module Make (P : sig
-  val stdout_columns : unit -> int option
-end) =
-struct
+let left_padding ~with_selector =
+  let open Fmt in
+  (if with_selector then const (styled `Bold (styled `Red char)) '>'
+  else const char ' ')
+  ++ const char ' '
+
+let user_error fmt =
+  Fmt.kstr
+    (fun s ->
+      Fmt.epr "%a: %s@." Fmt.(styled `Red string) "ERROR" s;
+      exit 1)
+    fmt
+
+let tag = Tag.pp ~wrapped:false
+
+module Make (P : Make_arg) = struct
   include Types
 
   let terminal_width =
     lazy (match P.stdout_columns () with Some w -> w | None -> 80)
 
-  let rresult_error ppf = function
-    | `Error (_, e) -> Fmt.pf ppf "%a@," e ()
-    | `Exn (_, n, e) -> Fmt.pf ppf "[%s] @[<v>%a@]" n e ()
-    | `Ok | `Todo _ | `Skip -> ()
+  let rresult_error : Run_result.t Fmt.t =
+   fun ppf -> function
+    | Error (_, e) -> Fmt.pf ppf "%a@," e ()
+    | Exn (_, n, e) -> Fmt.pf ppf "[%s] @[<v>%a@]" n e ()
+    | Ok | Todo _ | Skip -> ()
 
   (* Colours *)
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
   let red_s fmt = color `Red fmt
   let red ppf fmt = Fmt.kstr (fun str -> red_s ppf str) fmt
   let green_s fmt = color `Green fmt
-  let yellow_s fmt = color `Yellow fmt
   let left_gutter = 2
-  let left_tag = 14
+  let left_tag = 10
   let left_total = left_gutter + left_tag
 
   let left nb pp ppf a =
@@ -75,101 +98,103 @@ struct
       pp ppf a;
       Fmt.string ppf (String.v ~len:nb (fun _ -> ' ')))
 
-  let pp_test_name ~max_label ppf tname =
-    let name_len = Test_name.length tname in
-    let index = Test_name.index tname in
-    let padding =
-      match max_label + 8 - name_len with
-      | n when n <= 0 -> ""
-      | n -> String.v ~len:n (fun _ -> ' ')
+  let info ?(available_width = Lazy.force terminal_width) ppf index =
+    let name = Index.leaf_name index in
+    let sep = Fmt.(const (styled `Faint string) " › ") in
+    let sep_length = 3 in
+    let rec aux available_width = function
+      | [] ->
+          if available_width < Safe_string.length name then (
+            Safe_string.pp ppf
+              (Safe_string.prefix (available_width - sep_length) name);
+            Fmt.string ppf "...")
+          else Safe_string.pp ppf name
+      | x :: xs ->
+          let len = Safe_string.length x in
+          if available_width < len then (
+            Safe_string.pp ppf (Safe_string.prefix (available_width - 3) x);
+            Fmt.string ppf "...")
+          else (
+            Fmt.styled `Faint Safe_string.pp ppf x;
+            sep ppf ();
+            aux (available_width - len - sep_length) xs)
     in
-    Fmt.pf ppf "%a%s%3d" Fmt.(styled `Cyan Test_name.pp) tname padding index
-
-  let info ?(available_width = Lazy.force terminal_width) ~max_label
-      ~doc_of_test_name ppf tname =
-    let pp_test_name ppf = Fmt.pf ppf "%a   " (pp_test_name ~max_label) tname in
-    let test_doc =
-      let test_doc = doc_of_test_name tname in
-      let available_width =
-        pp_test_name Format.str_formatter;
-        let used_width = String.length_utf8 (Format.flush_str_formatter ()) in
-        available_width - used_width
-      in
-      if String.length_utf8 test_doc <= available_width then test_doc
-      else String.prefix_utf8 (available_width - 3) test_doc ^ "..."
-    in
-    Fmt.pf ppf "%t%s" pp_test_name test_doc
-
-  let tag_of_result = function
-    | `Ok -> `Ok
-    | `Exn _ | `Error _ -> `Fail
-    | `Skip -> `Skip
-    | `Todo _ -> `Todo
+    aux available_width (Index.parent_path index)
 
   let pp_result ppf result =
-    let tag = tag_of_result result in
-    left left_tag (pp_tag ~wrapped:true) ppf tag
+    let tag = Tag.of_run_result result in
+    left left_tag (Tag.pp ~wrapped:true) ppf tag
 
-  let pp_result_compact ppf result =
-    let colour = result |> tag_of_result |> colour_of_tag in
+  let pp_result_compact : Run_result.t Fmt.t =
+   fun ppf result ->
+    let colour = result |> Tag.of_run_result |> Tag.colour in
     let char =
       match result with
-      | `Ok -> '.'
-      | `Exn _ | `Error _ -> 'F'
-      | `Skip -> 'S'
-      | `Todo _ -> 'T'
+      | Ok -> '.'
+      | Exn _ | Error _ -> 'F'
+      | Skip -> 'S'
+      | Todo _ -> 'T'
     in
     Fmt.(styled colour char) ppf char
 
-  let left_padding ~with_selector =
-    let open Fmt in
-    (if with_selector then const (styled `Bold (styled `Red char)) '>'
-    else const char ' ')
-    ++ const char ' '
-
-  let pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure ppf
-      (path, result) =
+  let pp_result_full ~selector_on_failure ppf (path, result) =
     let with_selector = selector_on_failure && Run_result.is_failure result in
+    let available_width = Lazy.force terminal_width - left_total in
     (left_padding ~with_selector) ppf ();
     pp_result ppf result;
-    let available_width = Lazy.force terminal_width - left_total in
-    (info ~available_width ~max_label ~doc_of_test_name) ppf path;
-    ()
+    info ~available_width ppf path
 
-  let event_line ~margins ~max_label ~doc_of_test_name ppf = function
-    | `Result (p, r) ->
+  let event_line ppf = function
+    | { index; type_ = Result r } ->
         pp_result ppf r;
-        (info
-           ~available_width:(Lazy.force terminal_width - margins - left_total)
-           ~max_label ~doc_of_test_name)
-          ppf p
+        info ppf index
     | _ -> assert false
 
-  let event ~isatty ~compact ~max_label ~doc_of_test_name ~selector_on_failure
-      ~tests_so_far ppf event =
-    match (compact, isatty, event) with
-    | true, _, `Start _ | _, false, `Start _ -> ()
-    | false, true, `Start tname ->
-        Fmt.(
-          left_padding ~with_selector:false
-          ++ const (left left_tag yellow_s) "..."
-          ++ const
-               (info
-                  ~available_width:(Lazy.force terminal_width - left_total)
-                  ~max_label ~doc_of_test_name)
-               tname)
-          ppf ()
-    | true, _, `Result (_, r) ->
-        pp_result_compact ppf r;
-        (* Wrap compact output to terminal width manually *)
-        if (tests_so_far + 1) mod Lazy.force terminal_width = 0 then
-          Format.pp_force_newline ppf ();
-        ()
-    | false, _, `Result (tname, r) ->
-        if isatty then Fmt.pf ppf "\r";
-        Fmt.pf ppf "%a@,"
-          (pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure)
-          (tname, r)
+  module Progress_reporter = struct
+    type t = {
+      ppf : Format.formatter;
+      isatty : bool;
+      compact : bool;
+      selector_on_first_failure : bool;
+      mutable prior_failure : bool;
+      mutable tests_so_far : int;
+    }
+
+    let create ~ppf ~isatty ~compact ~selector_on_first_failure =
+      {
+        ppf;
+        isatty;
+        compact;
+        selector_on_first_failure;
+        prior_failure = false;
+        tests_so_far = 0;
+      }
+
+    let event t event =
+      match (t.compact, t.isatty, event.type_) with
+      | true, _, Start | _, false, Start -> ()
+      | false, true, Start ->
+          left_padding ~with_selector:false t.ppf ();
+          (left left_tag (Tag.pp ~wrapped:true)) t.ppf `Todo;
+          info
+            ~available_width:(Lazy.force terminal_width - left_total)
+            t.ppf event.index
+      | true, _, Result r ->
+          t.tests_so_far <- succ t.tests_so_far;
+          pp_result_compact t.ppf r;
+          (* Wrap compact output to terminal width manually *)
+          if t.tests_so_far mod Lazy.force terminal_width = 0 then
+            Format.pp_force_newline t.ppf ();
+          ()
+      | false, _, Result r ->
+          if t.isatty then Fmt.char t.ppf '\r';
+          pp_result_full
+            ~selector_on_failure:
+              (t.selector_on_first_failure && not t.prior_failure)
+            t.ppf (event.index, r);
+          if Run_result.is_failure r then t.prior_failure <- true;
+          Format.pp_force_newline t.ppf ()
+  end
 
   let pp_suite_errors ~show_all = function
     | [] -> Fmt.nop
@@ -211,10 +236,10 @@ struct
   let pp_summary ppf r =
     let pp_failures ppf = function
       | 0 -> green_s ppf "Test Successful"
-      | n -> red ppf "%d failure%a!" n pp_plural n
+      | n -> red ppf "%d failure%a!" n plural n
     in
     Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
-      r.success pp_plural r.success
+      r.success plural r.success
 
   let suite_results ~log_dir cfg ppf r =
     let print_summary = (not cfg#compact) || r.failures > 0 in
@@ -238,8 +263,4 @@ struct
           if not cfg#verbose then pp_full_logs ppf log_dir;
           pp_summary ppf r);
         Format.pp_close_box ppf ()
-
-  let user_error msg =
-    Fmt.epr "%a: %s\n" Fmt.(styled `Red string) "ERROR" msg;
-    exit 1
 end

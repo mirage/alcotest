@@ -30,3 +30,20 @@ module Make (C : Mirage_clock.MCLOCK) : sig
 
   val test_case_sync : string -> speed_level -> ('a -> unit) -> 'a test_case
 end
+
+module Unstable : sig
+  open Alcotest_engine.Unstable
+
+  module Make (C : Mirage_clock.MCLOCK) : sig
+    include
+      Core.S
+        with type 'a m := 'a Lwt.t
+         and type 'a test_args := Lwt_switch.t -> 'a
+         and type config := Config.User.t
+         and type source_code_position := Source_code_position.pos
+         and type tag_set := Tag.Set.t
+
+    val test_sync :
+      (('a -> unit) -> 'a test) Alcotest_engine.Unstable.Core.identified
+  end
+end

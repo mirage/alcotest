@@ -1,4 +1,11 @@
 (library
  (public_name alcotest-mirage)
  (name alcotest_mirage)
- (libraries alcotest.engine duration mirage-clock logs fmt lwt))
+ (libraries
+  alcotest.engine
+  alcotest.stdlib_ext
+  duration
+  mirage-clock
+  logs
+  fmt
+  lwt))

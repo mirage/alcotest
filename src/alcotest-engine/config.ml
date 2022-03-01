@@ -135,78 +135,122 @@ module Key = struct
   end
 
   module Filter = struct
-    type t = filter
+    module V1 = struct
+      type t = filter_v1
 
-    let regex : Re.re Arg.conv =
-      let parse s =
-        try Ok Re.(compile @@ Pcre.re s) with
-        | Re.Perl.Parse_error ->
-            Error (`Msg "Perl-compatible regexp parse error")
-        | Re.Perl.Not_supported -> Error (`Msg "unsupported regexp feature")
-      in
-      let print = Re.pp_re in
-      Arg.conv (parse, print)
+      let regex : Re.re Arg.conv =
+        let parse s =
+          try Ok Re.(compile @@ Pcre.re s) with
+          | Re.Perl.Parse_error ->
+              Error (`Msg "Perl-compatible regexp parse error")
+          | Re.Perl.Not_supported -> Error (`Msg "unsupported regexp feature")
+        in
+        let print = Re.pp_re in
+        Arg.conv (parse, print)
 
-    let int_range_list : int list Arg.conv =
-      let exception Invalid_format in
-      let parse s =
-        let rec range lower upper acc =
-          if lower > upper then acc else range (succ lower) upper (lower :: acc)
-        in
-        let process_range acc s =
-          String.cuts ~sep:".." s
-          |> List.concat_map (String.cuts ~sep:"-")
-          |> List.map String.to_int
-          |> function
-          | [ Some i ] -> i :: acc
-          | [ Some lower; Some upper ] when lower <= upper ->
-              range lower upper acc
-          | _ -> raise Invalid_format
-        in
-        let ranges = String.cuts ~sep:"," s in
-        match List.fold_left process_range [] ranges with
-        | list -> Ok list
-        | exception Invalid_format ->
-            Error
-              (`Msg
-                "must be a comma-separated list of integers / integer ranges")
-      in
-      let print ppf set = Fmt.(braces @@ list ~sep:comma int) ppf set in
-      Arg.conv (parse, print)
-
-    let term =
-      let+ name_regex =
-        let doc = "A regular expression matching the names of tests to run" in
-        Arg.(value & pos 0 (some regex) None & info [] ~doc ~docv:"NAME_REGEX")
-      and+ index_cases =
-        let doc =
-          "A comma-separated list of test case numbers (and ranges of numbers) \
-           to run, e.g: '4,6-10,19'. When specifying ranges, both '-' and '..' \
-           are accepted as valid separators."
-        in
-        Arg.(
-          value
-          & pos 1 (some int_range_list) None
-          & info [] ~doc ~docv:"TESTCASES")
-      in
-      match (name_regex, index_cases) with
-      | None, None -> None
-      | _, _ ->
-          let name_filter =
-            match name_regex with
-            | None -> fun _ -> true
-            | Some r -> fun n -> Re.execp r n
+      let int_range_list : int list Arg.conv =
+        let exception Invalid_format in
+        let parse s =
+          let rec range lower upper acc =
+            if lower > upper then acc
+            else range (succ lower) upper (lower :: acc)
           in
-          let index_filter =
-            match index_cases with
-            | None -> fun _ -> true
-            | Some ints ->
-                let set = Int.Set.of_list ints in
-                fun i -> Int.Set.mem i set
+          let process_range acc s =
+            String.cuts ~sep:".." s
+            |> List.concat_map (String.cuts ~sep:"-")
+            |> List.map String.to_int
+            |> function
+            | [ Some i ] -> i :: acc
+            | [ Some lower; Some upper ] when lower <= upper ->
+                range lower upper acc
+            | _ -> raise Invalid_format
           in
-          Some
-            (fun ~name ~index ->
-              if name_filter name && index_filter index then `Run else `Skip)
+          let ranges = String.cuts ~sep:"," s in
+          match List.fold_left process_range [] ranges with
+          | list -> Ok list
+          | exception Invalid_format ->
+              Error
+                (`Msg
+                  "must be a comma-separated list of integers / integer ranges")
+        in
+        let print ppf set = Fmt.(braces @@ list ~sep:comma int) ppf set in
+        Arg.conv (parse, print)
+
+      let term =
+        let+ name_regex =
+          let doc = "A regular expression matching the names of tests to run" in
+          Arg.(
+            value & pos 0 (some regex) None & info [] ~doc ~docv:"NAME_REGEX")
+        and+ index_cases =
+          let doc =
+            "A comma-separated list of test case numbers (and ranges of \
+             numbers) to run, e.g: '4,6-10,19'. When specifying ranges, both \
+             '-' and '..' are accepted as valid separators."
+          in
+          Arg.(
+            value
+            & pos 1 (some int_range_list) None
+            & info [] ~doc ~docv:"TESTCASES")
+        in
+        match (name_regex, index_cases) with
+        | None, None -> None
+        | _, _ ->
+            let name_filter =
+              match name_regex with
+              | None -> fun _ -> true
+              | Some r -> fun n -> Re.execp r n
+            in
+            let index_filter =
+              match index_cases with
+              | None -> fun _ -> true
+              | Some ints ->
+                  let set = Int.Set.of_list ints in
+                  fun i -> Int.Set.mem i set
+            in
+            Some
+              (fun ~name ~index ->
+                if name_filter name && index_filter index then `Run else `Skip)
+    end
+
+    module V2 = struct
+      type t = filter_v2
+
+      let of_v1 ~quick_only position_filter _ tags =
+        let speed_level =
+          match Tag.Set.find Tag.Speed_level.tag tags with
+          | Some `Slow -> if quick_only then `Skip else `Run
+          | Some `Quick | None -> `Run
+        in
+        let position =
+          match Tag.Set.find Tag.Position.tag tags with
+          | None -> `Run
+          | Some (name, index) -> position_filter ~name ~index
+        in
+        match (speed_level, position) with
+        | `Run, `Run -> `Run
+        | `Skip, _ | _, `Skip -> `Skip
+    end
+
+    type t = [ `V1 of V1.t | `V2 of V2.t ]
+
+    let default =
+      (* TODO: duplicated *)
+      let only_if _ s =
+        match Tag.Set.find Tag.Predicate.tag s with
+        | Some p -> p ()
+        | None -> `Run
+      in
+
+      let quick_only_config c s =
+        match Tag.Set.find Tag.Speed_level.tag s with
+        | Some `Slow when c#quick_only -> `Skip
+        | _ -> `Run
+      in
+
+      let ( ++ ) f g a b =
+        match (f a b, g a b) with `Run, `Run -> `Run | _, _ -> `Skip
+      in
+      only_if ++ quick_only_config
   end
 end
 
@@ -252,7 +296,7 @@ module User = struct
     and+ show_errors = Show_errors.term
     and+ quick_only = Quick_only.term
     and+ json = Json.term
-    and+ filter = Filter.term
+    and+ filter = Filter.V1.term
     and+ log_dir = Log_dir.term
     and+ bail = Bail.term in
     {
@@ -263,7 +307,7 @@ module User = struct
       show_errors;
       quick_only;
       json;
-      filter;
+      filter = Option.map (fun x -> `V1 x) filter;
       log_dir;
       bail;
       record_backtrace = Some record_backtrace;
@@ -290,6 +334,7 @@ module User = struct
       }
 
   let create : (unit -> t) with_options = kcreate (fun t () -> t)
+  let quick_only t = Option.value ~default:Quick_only.default t.quick_only
   let and_exit t = Option.value ~default:And_exit.default t.and_exit
 
   let record_backtrace t =
@@ -302,8 +347,8 @@ let apply_defaults ~default_log_dir : User.t -> t =
        verbose;
        compact;
        tail_errors;
-       quick_only;
        show_errors;
+       quick_only;
        json;
        filter;
        log_dir;
@@ -311,16 +356,23 @@ let apply_defaults ~default_log_dir : User.t -> t =
        record_backtrace;
      } ->
   let open Key in
+  let quick_only = Option.value ~default:Quick_only.default quick_only in
+  let filter =
+    match filter with
+    | None -> Filter.default
+    | Some (`V2 f) -> f
+    | Some (`V1 f) -> Filter.V2.of_v1 ~quick_only f
+  in
   object
     method and_exit = Option.value ~default:And_exit.default and_exit
     method verbose = Option.value ~default:Verbose.default verbose
     method compact = Option.value ~default:Compact.default compact
     method tail_errors = Option.value ~default:Tail_errors.default tail_errors
-    method quick_only = Option.value ~default:Quick_only.default quick_only
+    method quick_only = quick_only
     method show_errors = Option.value ~default:Show_errors.default show_errors
     method json = Option.value ~default:Json.default json
     method filter = filter
-    method log_dir = Option.value ~default:default_log_dir log_dir
+    method log_dir = Option.value ~default:(Lazy.force default_log_dir) log_dir
     method bail = Option.value ~default:Bail.default bail
 
     method record_backtrace =

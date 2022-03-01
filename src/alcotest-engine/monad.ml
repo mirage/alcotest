@@ -27,6 +27,8 @@ end
 module Extend (M : S) = struct
   include M
 
+  let map f x = M.bind x (fun y -> M.return (f y))
+
   module Syntax = struct
     let ( >>= ) = M.bind
     let ( >|= ) x f = x >>= fun y -> M.return (f y)

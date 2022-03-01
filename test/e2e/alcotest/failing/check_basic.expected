@@ -2,36 +2,36 @@ Testing `test/e2e/alcotest/failing/check_basic.ml'.
 This run has ID `<uuid>'.
 
 ASSERT bool
-  [FAIL]        different basic              0   bool.
+  [FAIL]    different basic › bool
 ASSERT int
-  [FAIL]        different basic              1   int.
+  [FAIL]    different basic › int
 ASSERT int32
-  [FAIL]        different basic              2   int32.
+  [FAIL]    different basic › int32
 ASSERT int64
-  [FAIL]        different basic              3   int64.
+  [FAIL]    different basic › int64
 ASSERT float
-  [FAIL]        different basic              4   float.
+  [FAIL]    different basic › float
 ASSERT char
-  [FAIL]        different basic              5   char.
+  [FAIL]    different basic › char
 ASSERT string
-  [FAIL]        different basic              6   string.
+  [FAIL]    different basic › string
 ASSERT bytes
-  [FAIL]        different basic              7   bytes.
+  [FAIL]    different basic › bytes
 ASSERT list
-  [FAIL]        different composite          0   list.
+  [FAIL]    different composite › list
 ASSERT array
-  [FAIL]        different composite          1   array.
+  [FAIL]    different composite › array
 ASSERT option some
-  [FAIL]        different composite          2   option some.
+  [FAIL]    different composite › option some
 ASSERT result
-  [FAIL]        different composite          3   result.
+  [FAIL]    different composite › result
 ASSERT pair
-  [FAIL]        different composite          4   pair.
+  [FAIL]    different composite › pair
 ASSERT triple
-  [FAIL]        different composite          5   triple.
+  [FAIL]    different composite › triple
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              0   bool.                         │
+│ [FAIL]    different basic › bool                                             │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL bool
 
@@ -44,7 +44,7 @@ FAIL bool
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              1   int.                          │
+│ [FAIL]    different basic › int                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL int
 
@@ -57,7 +57,7 @@ FAIL int
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              2   int32.                        │
+│ [FAIL]    different basic › int32                                            │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL int32
 
@@ -70,7 +70,7 @@ FAIL int32
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              3   int64.                        │
+│ [FAIL]    different basic › int64                                            │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL int64
 
@@ -83,7 +83,7 @@ FAIL int64
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              4   float.                        │
+│ [FAIL]    different basic › float                                            │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL float
 
@@ -96,7 +96,7 @@ FAIL float
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              5   char.                         │
+│ [FAIL]    different basic › char                                             │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL char
 
@@ -109,7 +109,7 @@ FAIL char
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              6   string.                       │
+│ [FAIL]    different basic › string                                           │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL string
 
@@ -122,7 +122,7 @@ FAIL string
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different basic              7   bytes.                        │
+│ [FAIL]    different basic › bytes                                            │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL bytes
 
@@ -135,7 +135,7 @@ FAIL bytes
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different composite          0   list.                         │
+│ [FAIL]    different composite › list                                         │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL list
 
@@ -148,7 +148,7 @@ FAIL list
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different composite          1   array.                        │
+│ [FAIL]    different composite › array                                        │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL array
 
@@ -161,7 +161,7 @@ FAIL array
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different composite          2   option some.                  │
+│ [FAIL]    different composite › option some                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL option some
 
@@ -174,7 +174,7 @@ FAIL option some
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different composite          3   result.                       │
+│ [FAIL]    different composite › result                                       │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL result
 
@@ -187,7 +187,7 @@ FAIL result
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different composite          4   pair.                         │
+│ [FAIL]    different composite › pair                                         │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL pair
 
@@ -200,7 +200,7 @@ FAIL pair
 
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        different composite          5   triple.                       │
+│ [FAIL]    different composite › triple                                       │
 └──────────────────────────────────────────────────────────────────────────────┘
 FAIL triple
 

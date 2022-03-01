@@ -1,15 +1,21 @@
 let ( >> ) f g x = x |> f |> g
 
+type ('a, 'b) continue_or_stop = Continue of 'a | Stop of 'b
+
 module Fun = struct
   let id x = x
+  let flip f b a = f a b
 end
 
 module Int = struct
-  module Set = Set.Make (struct
+  module T = struct
     type t = int
 
     let compare = (compare : int -> int -> int)
-  end)
+  end
+
+  include T
+  module Set = Set.Make (T)
 end
 
 module String = struct
@@ -36,7 +42,7 @@ module List = struct
 
   type 'a t = 'a list
 
-  let rev_head n l =
+  let rev_take n l =
     let rec aux acc n l =
       match l with
       | x :: xs ->
@@ -74,13 +80,35 @@ module List = struct
         | Error e, Ok _ -> Error [ e ])
       l (Ok [])
 
+  let fold_result t ~init ~f =
+    let rec aux acc = function
+      | [] -> Ok acc
+      | x :: xs -> ( match f acc x with Ok x -> aux x xs | Error _ as e -> e)
+    in
+    aux init t
+
   let init n f =
     let rec aux acc i = if i >= n then rev acc else aux (f i :: acc) (i + 1) in
     aux [] 0
+
+  let find_duplicate ~compare l =
+    let sorted = sort compare l in
+    let rec aux l =
+      match l with
+      | [] | [ _ ] -> None
+      | hd1 :: (hd2 :: _ as tl) ->
+          if compare hd1 hd2 = 0 then Some hd1 else aux tl
+    in
+    aux sorted
 end
 
 module Result = struct
   let map f = function Ok x -> Ok (f x) | Error e -> Error e
+
+  module Syntax = struct
+    let ( let+ ) x f = map f x
+    let ( let* ) x f = match x with Error _ as e -> e | Ok x -> f x
+  end
 end
 
 module Option = struct
@@ -92,11 +120,44 @@ module Option = struct
     | None -> invalid_arg "Option.get_exn: None"
 
   let value ~default = function None -> default | Some x -> x
+  let value_lazy ~default = function None -> Lazy.force default | Some x -> x
 
   let ( || ) a b =
     match (a, b) with
     | None, None -> None
     | (Some _ as x), _ | None, (Some _ as x) -> x
+end
+
+module Type_id = struct
+  type (_, _) equal = Refl : ('a, 'a) equal
+  type _ equality = ..
+
+  module type Inst = sig
+    type t
+    type _ equality += Eq : t equality
+  end
+
+  type 'a t = (module Inst with type t = 'a)
+
+  let create : type a. unit -> a t =
+   fun () ->
+    let module Inst = struct
+      type t = a
+      type _ equality += Eq : t equality
+    end in
+    (module Inst)
+
+  let equal : type a b. a t -> b t -> (a, b) equal option =
+   fun (module A) (module B) -> match A.Eq with B.Eq -> Some Refl | _ -> None
+
+  let cast : type a b. a t -> b t -> a -> b option =
+   fun awit bwit a ->
+    match equal awit bwit with Some Refl -> Some a | None -> None
+end
+
+module Source_code_position = struct
+  type here = Lexing.position
+  type pos = string * int * int * int
 end
 
 module Cmdliner_syntax = struct

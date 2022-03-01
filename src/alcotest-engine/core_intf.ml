@@ -89,7 +89,7 @@ module V1_types = struct
   module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) -> sig
     include S with type return = unit M.t
 
-    val list_tests : 'a test list -> return
+    val list_tests : string -> 'a test list -> return
     (** Print all of the test cases in a human-readable form *)
 
     val run' : Config.User.t -> string -> unit test list -> return
@@ -100,8 +100,117 @@ module V1_types = struct
   end
 end
 
-module type Core = sig
+module Types = struct
   exception Check_error of unit Fmt.t
+
+  (* TODO(4.08): replace with local type substitution *)
+  type 'a identified =
+    ?pos:Source_code_position.pos -> ?tags:Tag.Set.t -> name:string -> 'a
+  (** A test suite is a tree of named test cases, with named internal nodes.
+      This type defines the metadata associated with each node in the tree: *)
+end
+
+module Unstable_types = struct
+  module type Test_constructors = sig
+    (* These types are intended to be destructively-substituted by various
+       backends. *)
+
+    type 'a m
+    type 'a test_args
+    type tag_set
+    type source_code_position
+
+    type 'a test
+    (** The type of unit tests. *)
+
+    val test :
+      ?pos:source_code_position ->
+      ?tags:tag_set ->
+      name:string ->
+      ('a -> unit m) test_args ->
+      'a test
+    (** [test ~name f] is a named test that runs the function [f]. If [f] makes
+        a failing assertion (e.g. via [Alcotest.check]) or raises an exception,
+        then the test case will fail. Otherwise, the test case passes. *)
+
+    val group :
+      ?pos:source_code_position ->
+      ?tags:tag_set ->
+      name:string ->
+      'a test list ->
+      'a test
+    (** [group ~name tests] is a group of tests with the given name.*)
+  end
+
+  module type Test_runners = sig
+    type 'a m
+    type 'a test
+    type config
+    type source_code_position
+
+    val run :
+      ?pos:source_code_position ->
+      ?config:config ->
+      ?name:string ->
+      ?__FILE__:string ->
+      unit test list ->
+      unit m
+
+    val run_with_args :
+      ?pos:source_code_position ->
+      ?config:config ->
+      ?name:string ->
+      ?__FILE__:string ->
+      'a ->
+      'a test list ->
+      unit m
+
+    (** {2 Log capturing}
+
+        Whenever a test is executed, its standard output / error streams are
+        redirected to a log file on disk. If the test fails, this log file is
+        printed to the *)
+
+    (** {2 Command-line interface}
+
+        The test suite runners can be configured at run-time via an
+        auto-generated command line interface, in addition to the [~config]
+        argument.
+
+        Run the binary with the [--help] option to see the full list of
+        supported command-line options (e.g. using
+        [dune exec ./path/to/text.exe -- --help]). *)
+  end
+
+  (** Extensions to {!S} for use by backends. *)
+  module type S = sig
+    include Test_constructors
+
+    include
+      Test_runners
+        with type 'a m := 'a m
+         and type 'a test := 'a test
+         and type source_code_position := source_code_position
+
+    val list_tests :
+      ?pos:source_code_position ->
+      ?config:config ->
+      name:string option ->
+      _ test list ->
+      unit m
+  end
+
+  module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
+    S
+      with type 'a m := 'a M.t
+       and type 'a test_args := 'a
+       and type config := Config.User.t
+       and type source_code_position := Source_code_position.pos
+       and type tag_set := Tag.Set.t
+end
+
+module type Core = sig
+  include module type of Types
 
   module V1 : sig
     module type S = V1_types.S
@@ -112,5 +221,12 @@ module type Core = sig
         [('a -> unit M.t)] within a given concurrency monad [M.t]. The [run] and
         [run_with_args] functions must be scheduled in a global event loop.
         Intended for use by the {!Alcotest_lwt} and {!Alcotest_async} backends. *)
+  end
+
+  module Unstable : sig
+    type nonrec 'a identified = 'a identified
+
+    include module type of Unstable_types
+    module Make : MAKER
   end
 end

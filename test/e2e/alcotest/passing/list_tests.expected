@@ -1,3 +1,8 @@
-test-a          0   alpha.
-test-a          1   beta.
-test-b          0   lorem ipsum dolor sit amet consectutor adipiscing elit.
+test/e2e/alcotest/passing/list_tests.ml
+├─ test-a
+│  ├─ alpha  < speed_level = Quick; index = 0 >
+│  └─ beta  < speed_level = Quick; index = 1 >
+│  
+└─ test-b
+   └─ lorem ipsum dolor sit amet consectutor adipiscing elit  < speed_level = Quick; index = 0 >
+

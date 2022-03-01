@@ -14,10 +14,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  *)
 
-(** {1 Testable values}
-
-    The following combinators represent types that can be used with the {!check}
-    functions below. *)
+open! Import
 
 (** [TESTABLE] provides an abstract description for testable values. *)
 module type TESTABLE = sig
@@ -111,17 +108,6 @@ val neg : 'a testable -> 'a testable
 
     Functions for asserting various properties within unit-tests. A failing
     assertion will cause the testcase to fail immediately. *)
-
-module Source_code_position : sig
-  type here = Lexing.position
-  (** Location information passed via a [~here] argument, intended for use with
-      a PPX such as {{:https://github.com/janestreet/ppx_here} [ppx_here]}. *)
-
-  type pos = string * int * int * int
-  (** Location information passed via a [~pos] argument, intended for use with
-      the [__POS__] macro provided by the standard library. See the
-      documentation of [__POS__] for more information. *)
-end
 
 type 'a extra_info =
   ?here:Source_code_position.here -> ?pos:Source_code_position.pos -> 'a

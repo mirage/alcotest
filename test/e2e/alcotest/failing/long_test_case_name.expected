@@ -1,17 +1,17 @@
 Testing `test/e2e/alcotest/failing/long_test_case_name.ml'.
 This run has ID `<uuid>'.
 
-  [OK]          test-a          0   Passing.
-> [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetur a...
+  [PASS]    test-a › Passing
+> [FAIL]    test-a › Lorem ipsum dolor sit amet, consectetur adipiscing elit....
 
-┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetu...  │
-└──────────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]    test-a › Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse... │
+└────────────────────────────────────────────────────────────────────────────────────────────┘
 ASSERT Failed
 FAIL Failed
 <stacktrace>
 
-Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a/Lorem ipsum dolor sit ametU+002C consectetur adipiscing elit. Suspendisse mollisU+002C orci sed venenatis efficiturU+002C eros est imperdiet purusU+002C sit amet tincidunt massa diam ut elit..output'.
  ──────────────────────────────────────────────────────────────────────────────
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.

@@ -1,10 +1,10 @@
 Testing `test/e2e/alcotest/failing/tail_errors_unlimited.ml'.
 This run has ID `<uuid>'.
 
-> [FAIL]        failing          0   test.
+> [FAIL]    failing › test
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ [FAIL]        failing          0   test.                                     │
+│ [FAIL]    failing › test                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
 output line 1
 output line 2
@@ -108,7 +108,7 @@ output line 99
 output line 100
 ASSERT Logs above should be 101 lines long.
 FAIL Logs above should be 101 lines long.
-Logs saved to `<build-context>/_build/_tests/<test-dir>/failing.000.output'.
+Logs saved to `<build-context>/_build/_tests/<test-dir>/failing/test.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
