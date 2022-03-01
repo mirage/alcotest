@@ -3,6 +3,8 @@
 - Fix a bug when running test concurently. Alcotest could fail to
   output the content of the log file. (#353, @hhugo)
 
+- Require Cmdliner.1.1.0. (#339, @MisterDA)
+
 ### 1.5.0 (2021-10-09)
 
 - Make Alcotest compatible with `js_of_ocaml.3.11.0`. Users can depend on the
@@ -90,7 +92,7 @@
 
 - Surround pretty-printed diffs with quotes to make trailing whitespace more
   obvious. (#261, @CraigFe)
-  
+
 - Allow `.` characters to appear unescaped in symlinks and test directories.
   (#259, @CraigFe)
 
