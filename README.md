@@ -16,7 +16,9 @@ The API documentation can be found [here][docs]. For information on contributing
 [CONTRIBUTING.md](./CONTRIBUTING.md).
 
 [![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Fmirage%2Falcotest%2Fmain&logo=ocaml)](https://ci.ocamllabs.io/github/mirage/alcotest)
-[![docs](https://img.shields.io/badge/doc-online-blue.svg)](https://mirage.github.io/alcotest/alcotest/Alcotest/index.html)
+[![Alcotest Documentation](https://img.shields.io/badge/doc-online-blue.svg)][docs]
+
+[docs]: https://mirage.github.io/alcotest/alcotest/Alcotest/index.html
 
 <hr/>
 
