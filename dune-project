@@ -24,7 +24,7 @@ inspect), with a simple (yet expressive) query language to select the
 tests to run.
 ")
  (depends
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (fmt (>= 0.8.7))
   astring
   (cmdliner (and (>= 1.0.0) (< 1.1.0)))
@@ -48,7 +48,7 @@ tests to run.
   core
   base
   async_kernel
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (alcotest (= :version))
   (async_unix (>= v0.9.0))
   (core_kernel (>= v0.9.0))))
@@ -62,7 +62,7 @@ tests to run.
   (re :with-test)
   (cmdliner (and :with-test (< 1.1.0)))
   fmt
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (alcotest (= :version))
   lwt
   logs))
@@ -76,7 +76,7 @@ tests to run.
   (re :with-test)
   (cmdliner (and :with-test (< 1.1.0)))
   fmt
-  (ocaml (>= 4.03.0))
+  (ocaml (>= 4.05.0))
   (alcotest (= :version))
   (mirage-clock (>= 2.0.0))
   duration
