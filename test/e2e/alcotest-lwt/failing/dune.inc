@@ -3,8 +3,8 @@
    async_failure
    fail_with
  )
- (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt lwt.unix)
- (modes exe)
+ (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt alcotest_test_helper)
+ (modes exe js)
  (modules
    async_failure
    fail_with
@@ -31,6 +31,25 @@
    (diff async_failure.expected async_failure.processed)))
 
 (rule
+ (target async_failure-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:async_failure.bc.js})))))
+
+(rule
+ (target async_failure-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:async_failure-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest-lwt)
+ (action
+   (diff async_failure-js.expected async_failure-js.processed)))
+
+(rule
  (target fail_with.actual)
  (action
   (with-outputs-to %{target}
@@ -48,3 +67,22 @@
  (package alcotest-lwt)
  (action
    (diff fail_with.expected fail_with.processed)))
+
+(rule
+ (target fail_with-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:fail_with.bc.js})))))
+
+(rule
+ (target fail_with-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:fail_with-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest-lwt)
+ (action
+   (diff fail_with-js.expected fail_with-js.processed)))

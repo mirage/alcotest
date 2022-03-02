@@ -18,7 +18,8 @@
     --package
     "alcotest-lwt"
     --libraries
-    "alcotest-lwt lwt lwt.unix"))))
+    "alcotest-lwt lwt alcotest_test_helper"
+    --js))))
 
 (rule
  (alias runtest)
