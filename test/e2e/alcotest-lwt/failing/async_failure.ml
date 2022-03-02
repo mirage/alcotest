@@ -5,11 +5,11 @@ let free () =
 let test_lwt switch () =
   Lwt_switch.add_hook (Some switch) free;
   Lwt.async (fun () -> failwith "All is broken");
-  Lwt_unix.sleep 10.
+  Lwt.pause ()
 
 let () =
   let open Alcotest_lwt in
-  Lwt_main.run
+  Alcotest_test_helper.wakeup_until_resolved
   @@ run __FILE__
        [
          ( "all",

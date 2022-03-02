@@ -7,5 +7,4 @@
   fmt
   alcotest.engine
   alcotest
-  (re_export lwt.unix) ;; Unused dependency added for convenience to consumers
   ))

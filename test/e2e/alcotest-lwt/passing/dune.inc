@@ -2,8 +2,8 @@
  (names
    cli_options
  )
- (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt lwt.unix)
- (modes native)
+ (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt alcotest_test_helper)
+ (modes native js)
  (modules
    cli_options
  )
@@ -27,3 +27,22 @@
  (package alcotest-lwt)
  (action
    (diff cli_options.expected cli_options.processed)))
+
+(rule
+ (target cli_options-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 125)
+    (run node %{dep:cli_options.bc.js} --json)))))
+
+(rule
+ (target cli_options-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:cli_options-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest-lwt)
+ (action
+   (diff cli_options-js.expected cli_options-js.processed)))
