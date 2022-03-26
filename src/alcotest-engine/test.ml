@@ -218,7 +218,7 @@ let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
 let collect_exception f =
   try
-    f ();
+    ignore (f ());
     None
   with e -> Some e
 

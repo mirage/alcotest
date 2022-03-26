@@ -142,5 +142,5 @@ val fail : (string -> 'a) extra_info
 val failf : (('a, Format.formatter, unit, 'b) format4 -> 'a) extra_info
 (** Simply fail with a formatted message. *)
 
-val check_raises : (string -> exn -> (unit -> unit) -> unit) extra_info
+val check_raises : (string -> exn -> (unit -> 'a) -> unit) extra_info
 (** Check that an exception is raised. *)
