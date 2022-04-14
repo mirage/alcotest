@@ -15,7 +15,7 @@ depends: [
   "alcotest" {= version}
   "js_of_ocaml-compiler" {>= "3.11.0"}
   "fmt" {with-test & >= "0.8.7"}
-  "cmdliner" {with-test & >= "1.0.0" & < "1.1.0"}
+  "cmdliner" {with-test & >= "1.1.0"}
   "odoc" {with-doc}
 ]
 build: [
