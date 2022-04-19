@@ -45,13 +45,14 @@ tests to run.
   (re :with-test)
   (fmt :with-test)
   (cmdliner (and :with-test (>= 1.1.0)))
-  core
+  (core (>= v0.15.0))
+  (core_unix (>= v0.15.0))
   base
   async_kernel
-  (ocaml (>= 4.05.0))
+  (ocaml (>= 4.11.0))
   (alcotest (= :version))
-  (async_unix (>= v0.9.0))
-  (core_kernel (>= v0.9.0))))
+  (async (>= v0.15.0))
+  (async_unix (>= v0.15.0))))
 
 (package
  (name alcotest-lwt)
