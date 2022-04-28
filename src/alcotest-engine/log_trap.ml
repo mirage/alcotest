@@ -63,12 +63,13 @@ struct
         in
         ListLabels.iter display_lines ~f:(Fmt.pf ppf "%s@\n")
 
-  let log_dir { suite_name; uuid; root } =
+  let log_dir ~via_symlink { suite_name; uuid; root } =
     (* We don't create symlinks on Windows. *)
-    let via_symlink = not Sys.win32 in
+    let via_symlink = via_symlink && not Sys.win32 in
     Filename.concat root (if via_symlink then suite_name else uuid)
 
-  let output_fpath t tname = Filename.concat (log_dir t) (Test_name.file tname)
+  let output_fpath ~via_symlink t tname =
+    Filename.concat (log_dir ~via_symlink t) (Test_name.file tname)
 
   let active_or_exn = function
     | Active t -> t
@@ -76,18 +77,18 @@ struct
 
   let pp_current_run_dir t ppf =
     let t = active_or_exn t in
-    pp_path ppf (log_dir t)
+    pp_path ppf (log_dir ~via_symlink:true t)
 
   let pp_log_location t tname ppf =
     let t = active_or_exn t in
-    let path = output_fpath t tname in
+    let path = output_fpath ~via_symlink:true t tname in
     pp_path ppf path
 
   let recover_logs t ~tail tname =
     match t with
     | Inactive -> None
     | Active t -> (
-        let fpath = output_fpath t tname in
+        let fpath = output_fpath ~via_symlink:false t tname in
         match Platform.file_exists fpath with
         | false -> None
         | true -> Some (fun ppf -> pp_tail tail fpath ppf))
@@ -96,7 +97,9 @@ struct
     match t with
     | Inactive -> f x
     | Active t ->
-        let fd = Platform.open_write_only (output_fpath t tname) in
+        let fd =
+          Platform.open_write_only (output_fpath ~via_symlink:false t tname)
+        in
         let* () = Promise.return () in
         let+ a = Platform.with_redirect fd (fun () -> f x) in
         Platform.close fd;
