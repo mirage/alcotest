@@ -1,3 +1,8 @@
+### dev
+
+- Fix a bug when running test concurently. Alcotest could fail to
+  output the content of the log file. (#353, @hhugo)
+
 ### 1.5.0 (2021-10-09)
 
 - Make Alcotest compatible with `js_of_ocaml.3.11.0`. Users can depend on the
