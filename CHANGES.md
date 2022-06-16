@@ -5,6 +5,8 @@
 
 - Require Cmdliner.1.1.0. (#339, @MisterDA)
 
+- Upgrade to `async>=v0.15.0` (#352, @crackcomm)
+
 ### 1.5.0 (2021-10-09)
 
 - Make Alcotest compatible with `js_of_ocaml.3.11.0`. Users can depend on the

@@ -15,10 +15,9 @@ jobs:
         os:
           - ubuntu-latest
         packages: [ '.' ]
+        runtest: 
+          - true
         ocaml-compiler:
-          - 4.08.x
-          - 4.09.x
-          - 4.10.x
           - 4.11.x
           - 4.12.x
           - 4.13.x
@@ -26,11 +25,31 @@ jobs:
           - os: macos-latest
             ocaml-compiler: 4.13.x
             packages: '.'
+            runtest: true
 
           - os: windows-latest
             ocaml-compiler: 4.13.x
             packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
             opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
+
+          - os: ubuntu-latest
+            ocaml-compiler: 4.08.x
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
+          
+          - os: ubuntu-latest
+            ocaml-compiler: 4.09.x
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
+          
+          - os: ubuntu-latest
+            ocaml-compiler: 4.10.x
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
 
     runs-on: ${{ matrix.os }}
 
@@ -63,4 +82,5 @@ jobs:
           opam pin add alcotest.dev ./ -n
 
       - run: opam install ${{ matrix.packages }} --with-test --deps-only
-      - run: opam exec -- dune build @install @check @runtest @runtest-js
+      - if: ${{ matrix.runtest }}
+        run: opam exec -- dune build @install @check @runtest @runtest-js
