@@ -7,15 +7,15 @@ a simple `TESTABLE` module type, a `check` function to assert test
 predicates and a `run` function to perform a list of `unit -> unit`
 test callbacks.
 
-Alcotest provides a quiet and colorful output where only faulty runs are fully
-displayed at the end of the run (with the full logs ready to inspect), with a
-simple (yet expressive) query language to select the tests to run. See [the
-manpage](./alcotest-help.txt) for details.
+Alcotest provides a quiet and colorful output where only faulty runs
+are fully displayed at the end of the run (with the full logs ready to
+inspect), with a simple (yet expressive) query language to select the
+tests to run. See [the manpage](./alcotest-help.txt) for details.
 
-The API documentation can be found [here][docs]. For information on contributing to Alcotest, see
-[CONTRIBUTING.md](./CONTRIBUTING.md).
+The API documentation can be found [here][docs]. For information on
+contributing to Alcotest, see [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fci.ocamllabs.io%2Fbadge%2Fmirage%2Falcotest%2Fmain&logo=ocaml)](https://ci.ocamllabs.io/github/mirage/alcotest)
+[![OCaml-CI Build Status](https://img.shields.io/endpoint?url=https://ci.ocamllabs.io/badge/mirage/alcotest/main&logo=ocaml)](https://ci.ocamllabs.io/github/mirage/alcotest)
 [![Alcotest Documentation](https://img.shields.io/badge/doc-online-blue.svg)][docs]
 
 [docs]: https://mirage.github.io/alcotest/alcotest/Alcotest/index.html
@@ -67,22 +67,25 @@ let () =
     ]
 ```
 
-The result is a self-contained binary which displays the test results. Use `dune
-exec examples/simple.exe -- --help` to see the runtime options.
+The result is a self-contained binary which displays the test
+results. Use `dune exec examples/simple.exe -- --help` to see the
+runtime options.
 
 Here's an example of a of failing test suite:
 
 <p align="center"><img src="./.meta/error.png" width="85%"></p>
 
-By default, only the first failing test log is printed to the console (and all
-test logs are captured on disk). Pass `--show-errors` to print all error
-messages.
+By default, only the first failing test log is printed to the console
+(and all test logs are captured on disk). Pass `--show-errors` to
+print all error messages.
 
 ### Selecting tests to execute
 
-You can filter which tests to run by supplying a regular expression matching the names
-of the tests to execute, or by passing a regular expression _and_ a comma-separated list
-of test numbers (or ranges of test numbers, e.g. `2,4..9`):
+You can filter which tests to run by supplying a regular expression
+matching the names of the tests to execute, or by passing a regular
+expression _and_ a comma-separated list of test numbers (or ranges of
+test numbers, e.g. `2,4..9`):
+
 ```shell
 $ ./simple.native test '.*concat*'
 Testing Utils.
@@ -103,19 +106,20 @@ The full test results are available in `_build/_tests`.
 Test Successful in 0.000s. 1 test run.
 ```
 
-Note that you cannot filter by test case name (i.e. `Lower case` or `Capitalization`), you must
-filter by test name & number instead.
+Note that you cannot filter by test case name (i.e. `Lower case` or
+`Capitalization`), you must filter by test name & number instead.
 
-See the [examples](https://github.com/mirage/alcotest/tree/main/examples)
-folder for more examples.
+See the [examples][] directory for more examples.
+
+[examples]: https://github.com/mirage/alcotest/tree/main/examples
 
 ### Quick and Slow tests
 
 In general you should use `` `Quick`` tests: tests that are ran on any
-invocations of the test suite. You should only use `` `Slow`` tests for stress
-tests that are ran only on occasion (typically before a release or after a major
-change). These slow tests can be suppressed by passing the `-q` flag on the
-command line, e.g.:
+invocations of the test suite. You should only use `` `Slow`` tests
+for stress tests that are ran only on occasion (typically before a
+release or after a major change). These slow tests can be suppressed
+by passing the `-q` flag on the command line, e.g.:
 
 ```shell
 $ ./test.exe -q # run only the quick tests
@@ -129,11 +133,12 @@ it is also possible to pass an extra option to all the test functions
 by using `'a -> unit`, where `'a` is the type of the extra parameter.
 
 In order to do this, you need to specify how this extra parameter is
-read on the command-line, by providing a [Cmdliner term for
-command-line
-arguments](http://erratique.ch/software/cmdliner/doc/Cmdliner.Term.html)
-which explains how to parse and serialize values of type `'a` (*note:* do not
-use positional arguments, only optional arguments are supported).
+read on the command-line, by providing a [Cmdliner term][] for
+command-line arguments which explains how to parse and serialize
+values of type `'a` (*note:* do not use positional arguments, only
+optional arguments are supported).
+
+[Cmdliner term]: https://erratique.ch/software/cmdliner/doc/Cmdliner/Term/index.html
 
 For instance:
 
@@ -141,7 +146,7 @@ For instance:
 let test_nice i = Alcotest.(check int) "Is it a nice integer?" i 42
 
 let int =
-  let doc = "What is your prefered number?" in
+  let doc = "What is your preferred number?" in
   Cmdliner.Arg.(required & opt (some int) None & info ["n"] ~doc ~docv:"NUM")
 
 let () =
@@ -214,25 +219,30 @@ The README is pretty clear about that:
 
 Alcotest is the only testing framework using colors!
 
-More seriously, Alcotest is similar to [ounit](http://ounit.forge.ocamlcore.org/)
-but it fixes a few of the problems found in that library:
+More seriously, Alcotest is similar to [ounit][] but it fixes a few of
+the problems found in that library:
 
-- Alcotest has a nicer output, it is easier to see what failed and what
-  succeeded and to read the log outputs of the failed tests;
+- Alcotest has a nicer output, it is easier to see what failed and
+  what succeeded and to read the log outputs of the failed tests;
 
-- Alcotest uses combinators to define pretty-printers and
-  comparators between the things to test.
+- Alcotest uses combinators to define pretty-printers and comparators
+  between the things to test.
 
 Other nice tools doing different kind of testing also exist:
 
-- [qcheck](https://github.com/c-cube/qcheck) qcheck does random
-  generation and property testing (e.g. Quick Check)
+- [qcheck][] does random generation and property testing (e.g. Quick
+  Check);
 
-- [crowbar](https://github.com/stedolan/crowbar)
-  and [bun](https://github.com/yomimono/ocaml-bun)
-  are similar to qcheck, but use compiler-directed randomness,
-  e.g. it takes advantage of the AFL support  the OCaml compiler.
+- [crowbar][] and [bun][] are similar to qcheck, but use
+  compiler-directed randomness, i.e. they take advantage of the AFL
+  support the OCaml compiler;
 
-- [`ppx_inline_tests`](https://github.com/janestreet/ppx_inline_test)
-  allows to write tests in the same file as your source-code; they
-  will be run only in a special mode of compilation.
+- [ppx_inline_tests][] allows to write tests in the same file as
+  your source-code; they will be run only in a special mode of
+  compilation.
+
+[ounit]: https://github.com/gildor478/ounit
+[qcheck]: https://github.com/c-cube/qcheck
+[crowbar]: https://github.com/stedolan/crowbar
+[bun]: https://github.com/yomimono/ocaml-bun
+[ppx_inline_tests]: https://github.com/janestreet/ppx_inline_test
