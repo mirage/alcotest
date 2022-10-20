@@ -54,7 +54,7 @@ module V1_types = struct
         using the CLI. *)
   end
 
-  module type MAKER = functor (P : Platform.MAKER) (M : Monad.S) ->
+  module type MAKER = functor (_ : Platform.MAKER) (M : Monad.S) ->
     S with type return = unit M.t
 end
 
@@ -63,7 +63,7 @@ module type Cli = sig
     module type S = V1_types.S
     module type MAKER = V1_types.MAKER
 
-    module Make (P : Platform.MAKER) (M : Monad.S) :
+    module Make (_ : Platform.MAKER) (M : Monad.S) :
       V1_types.S with type return = unit M.t
   end
 end

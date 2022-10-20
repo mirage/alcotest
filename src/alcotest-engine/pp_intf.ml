@@ -71,10 +71,10 @@ module type S = sig
 
   val with_surrounding_box : 'a Fmt.t -> 'a Fmt.t
   (** Wraps a formatter with a Unicode box with width given by
-      {!X.stdout_columns}. Uses box-drawing characters from code page 437. *)
+      {!_.stdout_columns}. Uses box-drawing characters from code page 437. *)
 
   val horizontal_rule : _ Fmt.t
-  (** Horizontal rule of length {!X.stdout_columns}. Uses box-drawing characters
+  (** Horizontal rule of length {!_.stdout_columns}. Uses box-drawing characters
       from code page 437. *)
 
   val user_error : string -> _
@@ -93,5 +93,5 @@ module type Pp = sig
         Fmt.pr "Found %i item%a." n pp_plural n
       ]} *)
 
-  module Make (X : Make_arg) : S
+  module Make (_ : Make_arg) : S
 end

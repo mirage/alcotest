@@ -22,7 +22,7 @@
     streams into files (MirageOS does not have a file system). It writes all
     test output to the console. *)
 
-module Make (C : Mirage_clock.MCLOCK) : sig
+module Make (_ : Mirage_clock.MCLOCK) : sig
   include Alcotest_engine.V1.Cli.S with type return = unit Lwt.t
 
   val test_case :
