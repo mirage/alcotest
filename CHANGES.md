@@ -1,5 +1,7 @@
 ### dev
 
+- Upgrade to `dune >= 3.0`. (#360, @MisterDA)
+
 ### 1.6.0 (2022-06-24)
 
 - Fix a bug when running test concurently. Alcotest could fail to

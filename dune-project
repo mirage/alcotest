@@ -1,4 +1,4 @@
-(lang dune 2.8)
+(lang dune 3.0)
 (implicit_transitive_deps false)
 (generate_opam_files true)
 
@@ -89,6 +89,7 @@ tests to run.
  (synopsis "Virtual package containing optional JavaScript dependencies for Alcotest")
  (description "Virtual package containing optional JavaScript dependencies for Alcotest")
  (documentation "https://mirage.github.io/alcotest")
+ (allow_empty)
  (depends
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
