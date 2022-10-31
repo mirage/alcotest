@@ -57,7 +57,7 @@ let time_replace =
         group
           (alt
              [
-               (* Maybe ANSII escape, depending on [--color] *)
+               (* Maybe ANSI escape, depending on [--color] *)
                opt cntrl ^^ str "Test Successful" ^^ opt cntrl ^^ str " in ";
                rep1 digit ^^ str " failure! in ";
                rep1 digit ^^ str " failures! in ";
