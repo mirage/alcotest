@@ -15,20 +15,20 @@ jobs:
         os:
           - ubuntu-latest
         packages: [ '.' ]
-        runtest: 
+        runtest:
           - true
         ocaml-compiler:
-          - 4.11.x
           - 4.12.x
           - 4.13.x
+          - 4.14.x
         include:
           - os: macos-latest
-            ocaml-compiler: 4.13.x
+            ocaml-compiler: 4.14.x
             packages: '.'
             runtest: true
 
           - os: windows-latest
-            ocaml-compiler: 4.13.x
+            ocaml-compiler: 4.14.x
             packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
             opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
             runtest: false
@@ -38,18 +38,25 @@ jobs:
             packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
             opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
             runtest: false
-          
+
           - os: ubuntu-latest
             ocaml-compiler: 4.09.x
             packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
             opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
             runtest: false
-          
+
           - os: ubuntu-latest
             ocaml-compiler: 4.10.x
             packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
             opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
             runtest: false
+
+          - os: ubuntu-latest
+            ocaml-compiler: 4.11.x
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
+
 
     runs-on: ${{ matrix.os }}
 
@@ -60,10 +67,10 @@ jobs:
           git config --global core.eol lf
 
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Use Node.js 16.x
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: 16.x
 

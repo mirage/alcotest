@@ -52,6 +52,6 @@ module type Log_trap = sig
 
   module Make
       (Promise : Monad.EXTENDED)
-      (Platform : Platform.S with type 'a promise := 'a Promise.t) :
+      (_ : Platform.S with type 'a promise := 'a Promise.t) :
     S with type 'a promise := 'a Promise.t
 end

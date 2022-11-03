@@ -2,13 +2,6 @@
 let id_case typ typ_str v =
   Alcotest.test_case typ_str `Quick (fun () -> Alcotest.check typ typ_str v v)
 
-let make_checks () =
-  let open Alcotest in
-  check unit "unit" () ();
-  check bool "bool" true true;
-  check int "int " 0 0;
-  check int32
-
 exception Zero
 exception One of int
 exception Two of int * char
