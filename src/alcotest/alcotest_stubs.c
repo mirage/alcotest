@@ -1,7 +1,21 @@
+#include <caml/version.h>
 #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
 #include <unistd.h>
+
+#if OCAML_VERSION < 41200
+#define Val_none Val_int(0)
+#define Tag_some 0
+
+static value caml_alloc_some(value v)
+{
+	CAMLparam1(v);
+	value some = caml_alloc_small(1, Tag_some);
+	Field(some, 0) = v;
+	CAMLreturn(some);
+}
+#endif
 
 // Detect platform
 #if defined(_WIN32)
@@ -27,15 +41,14 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 	int success = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 	if (success)
 	{
-		result = caml_alloc(1, 0);
-		pair = caml_alloc(2, 0);
-		Store_field(result, 0, pair);
+		pair = caml_alloc_tuple(2);
 		Store_field(pair, 0, Val_int((int)(csbi.dwSize.Y)));
 		Store_field(pair, 1, Val_int((int)(csbi.dwSize.X)));
+		result = caml_alloc_some(pair);
 	}
 	else
 	{
-		result = Val_int(0);
+		result = Val_none;
 	}
 
 	CAMLreturn(result);
@@ -53,15 +66,14 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 	int z = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
 	if (z == 0)
 	{
-		result = caml_alloc(1, 0);
-		pair = caml_alloc(2, 0);
-		Store_field(result, 0, pair);
+		pair = caml_alloc_tuple(2);
 		Store_field(pair, 0, Val_int(ws.ws_row));
 		Store_field(pair, 1, Val_int(ws.ws_col));
+		result = caml_alloc_some(pair);
 	}
 	else
 	{
-		result = Val_int(0);
+		result = Val_none;
 	}
 
 	CAMLreturn(result);
@@ -73,9 +85,9 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 {
 	CAMLparam1(unit);
-	CAMLlocal2(result, pair);
+	CAMLlocal1(result);
 
-	result = Val_int(0);
+	result = Val_none;
 	CAMLreturn(result);
 }
 
