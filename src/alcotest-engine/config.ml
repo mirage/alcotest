@@ -343,13 +343,19 @@ let apply_defaults ~default_log_dir : User.t -> t =
        ci;
      } ->
   let open Key in
-  object
+  object (self)
     method and_exit = Option.value ~default:And_exit.default and_exit
     method verbose = Option.value ~default:Verbose.default verbose
     method compact = Option.value ~default:Compact.default compact
     method tail_errors = Option.value ~default:Tail_errors.default tail_errors
     method quick_only = Option.value ~default:Quick_only.default quick_only
-    method show_errors = Option.value ~default:Show_errors.default show_errors
+
+    method show_errors =
+      match (show_errors, self#ci) with
+      | Some show_errors, _ -> show_errors
+      | None, `Disabled -> Show_errors.default
+      | None, _ -> true
+
     method json = Option.value ~default:Json.default json
     method filter = filter
     method log_dir = Option.value ~default:default_log_dir log_dir

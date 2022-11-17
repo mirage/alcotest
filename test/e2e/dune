@@ -1,3 +1,9 @@
+(env
+ (_
+  (env-vars
+   ; Don't run tests as if Alcotest was run in CI
+   (CI false))))
+
 (executable
  (name gen_dune_rules)
  (libraries cmdliner fmt)
