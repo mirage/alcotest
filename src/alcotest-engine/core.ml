@@ -405,9 +405,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   let run' config name (tl : unit test list) = run_with_args' config name () tl
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace =
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci =
     Config.User.kcreate run_with_args' ?and_exit ?verbose ?compact ?tail_errors
       ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
+      ?ci
 
   let run = Config.User.kcreate run'
 end

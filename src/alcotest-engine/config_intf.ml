@@ -2,6 +2,9 @@ module Types = struct
   type bound = [ `Unlimited | `Limit of int ]
   type filter = name:string -> index:int -> [ `Run | `Skip ]
 
+  type ci = [ `Github_actions | `OCamlci | `Unknown | `Disabled ]
+  (** All supported Continuous Integration (CI) systems. *)
+
   type t =
     < and_exit : bool
     ; verbose : bool
@@ -13,7 +16,8 @@ module Types = struct
     ; filter : filter option
     ; log_dir : string
     ; bail : bool
-    ; record_backtrace : bool >
+    ; record_backtrace : bool
+    ; ci : ci >
 
   type 'a with_options =
     ?and_exit:bool ->
@@ -27,6 +31,7 @@ module Types = struct
     ?log_dir:string ->
     ?bail:bool ->
     ?record_backtrace:bool ->
+    ?ci:ci ->
     'a
 end
 
@@ -45,7 +50,8 @@ module type Config = sig
     (** Like [create], but passes the constructed config to a continuation
         rather than returning directly. *)
 
-    val term : and_exit:bool -> record_backtrace:bool -> t Cmdliner.Term.t
+    val term :
+      and_exit:bool -> record_backtrace:bool -> ci:ci -> t Cmdliner.Term.t
     (** [term] provides a command-line interface for building configs. *)
 
     val ( || ) : t -> t -> t
@@ -56,6 +62,7 @@ module type Config = sig
 
     val and_exit : t -> bool
     val record_backtrace : t -> bool
+    val ci : t -> ci
   end
 
   val apply_defaults : default_log_dir:string -> User.t -> t
