@@ -120,12 +120,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     Pp.suite_results ~log_dir t.config
 
   let pp_event ~isatty ~prior_error ~tests_so_far t =
-    let cfg = t.config in
+    let config = t.config in
     let selector_on_failure =
-      (not prior_error) && not (cfg#verbose || cfg#show_errors)
+      (not prior_error) && not (config#verbose || config#show_errors)
     in
-    if not cfg#json then
-      Pp.event ~isatty ~compact:cfg#compact ~max_label:t.max_label
+    if not config#json then
+      Pp.event ~isatty ~compact:config#compact ~max_label:t.max_label
         ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
         ~selector_on_failure ~tests_so_far
     else Fmt.nop
