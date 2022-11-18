@@ -48,6 +48,30 @@ module Key = struct
     let default = true
   end
 
+  module CI = struct
+    type t = ci
+
+    let default =
+      let ci =
+        match Sys.getenv "CI" with
+        | "true" -> true
+        | _ | (exception Not_found) -> false
+      and github_actions =
+        match Sys.getenv "GITHUB_ACTIONS" with
+        | "true" -> true
+        | _ | (exception Not_found) -> false
+      and ocamlci =
+        match Sys.getenv "OCAMLCI" with
+        | "true" -> true
+        | _ | (exception Not_found) -> false
+      in
+      match (ci, github_actions, ocamlci) with
+      | true, true, false -> `Github_actions
+      | true, false, true -> `OCamlci
+      | true, false, false -> `Unknown
+      | _ -> `Disabled
+  end
+
   module Verbose = Flag (struct
     let term =
       let env = Cmd.Env.info "ALCOTEST_VERBOSE" in
@@ -228,6 +252,7 @@ module User = struct
     log_dir : Log_dir.t;
     bail : Bail.t option;
     record_backtrace : Record_backtrace.t option;
+    ci : CI.t option;
   }
 
   let ( || ) a b =
@@ -244,9 +269,10 @@ module User = struct
       log_dir = merge_on (fun t -> t.log_dir);
       bail = merge_on (fun t -> t.bail);
       record_backtrace = merge_on (fun t -> t.record_backtrace);
+      ci = merge_on (fun t -> t.ci);
     }
 
-  let term ~and_exit ~record_backtrace =
+  let term ~and_exit ~record_backtrace ~ci =
     let+ verbose = Verbose.term
     and+ compact = Compact.term
     and+ tail_errors = Tail_errors.term
@@ -268,13 +294,14 @@ module User = struct
       log_dir;
       bail;
       record_backtrace = Some record_backtrace;
+      ci = Some ci;
     }
 
   (* Lift a config-sensitive function to one that consumes optional arguments that
      override config defaults. *)
   let kcreate : 'a. (t -> 'a) -> 'a with_options =
    fun f ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
-       ?filter ?log_dir ?bail ?record_backtrace ->
+       ?filter ?log_dir ?bail ?record_backtrace ?ci ->
     f
       {
         and_exit;
@@ -288,6 +315,7 @@ module User = struct
         log_dir;
         bail;
         record_backtrace;
+        ci;
       }
 
   let create : (unit -> t) with_options = kcreate (fun t () -> t)
@@ -295,6 +323,8 @@ module User = struct
 
   let record_backtrace t =
     Option.value ~default:Record_backtrace.default t.record_backtrace
+
+  let ci t = Option.value ~default:CI.default t.ci
 end
 
 let apply_defaults ~default_log_dir : User.t -> t =
@@ -310,15 +340,22 @@ let apply_defaults ~default_log_dir : User.t -> t =
        log_dir;
        bail;
        record_backtrace;
+       ci;
      } ->
   let open Key in
-  object
+  object (self)
     method and_exit = Option.value ~default:And_exit.default and_exit
     method verbose = Option.value ~default:Verbose.default verbose
     method compact = Option.value ~default:Compact.default compact
     method tail_errors = Option.value ~default:Tail_errors.default tail_errors
     method quick_only = Option.value ~default:Quick_only.default quick_only
-    method show_errors = Option.value ~default:Show_errors.default show_errors
+
+    method show_errors =
+      match (show_errors, self#ci) with
+      | Some show_errors, _ -> show_errors
+      | None, `Disabled -> Show_errors.default
+      | None, _ -> true
+
     method json = Option.value ~default:Json.default json
     method filter = filter
     method log_dir = Option.value ~default:default_log_dir log_dir
@@ -326,4 +363,6 @@ let apply_defaults ~default_log_dir : User.t -> t =
 
     method record_backtrace =
       Option.value ~default:Record_backtrace.default record_backtrace
+
+    method ci = Option.value ~default:CI.default ci
   end

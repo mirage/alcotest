@@ -37,6 +37,33 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
   module P = P (M)
   open Cmdliner_syntax
 
+  let ci_env =
+    let doc =
+      Printf.sprintf "Whether Alcotest is running in a CI system, if set to %s."
+        (Arg.doc_quote "true")
+    in
+    Cmdliner.Cmd.Env.info "CI" ~doc
+
+  let github_action_env =
+    let doc =
+      Printf.sprintf
+        "Whether Alcotest is running in GitHub Actions, if set to %s. Display \
+         tests errors and outputs GitHub Actions annotations."
+        (Arg.doc_quote "true")
+    in
+    Cmdliner.Cmd.Env.info "GITHUB_ACTIONS" ~doc
+
+  let ocamlci_env =
+    let doc =
+      Printf.sprintf
+        "Whether Alcotest is running in OCaml-CI, if set to %s. Display tests \
+         errors."
+        (Arg.doc_quote "true")
+    in
+    Cmdliner.Cmd.Env.info "OCAMLCI" ~doc
+
+  let envs = [ ci_env; github_action_env; ocamlci_env ]
+
   let set_color =
     let env = Cmd.Env.info "ALCOTEST_COLOR" in
     let+ color_flag =
@@ -67,28 +94,31 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
 
   let default_cmd config args library_name tests =
     let and_exit = Config.User.and_exit config
-    and record_backtrace = Config.User.record_backtrace config in
+    and record_backtrace = Config.User.record_backtrace config
+    and ci = Config.User.ci config in
     let exec_name = Filename.basename Sys.argv.(0) in
     let doc = "Run all the tests." in
     let term =
       let+ () = set_color
-      and+ cli_config = Config.User.term ~and_exit ~record_backtrace
+      and+ cli_config = Config.User.term ~and_exit ~record_backtrace ~ci
       and+ args = args in
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
     in
-    (term, Cmd.info exec_name ~doc)
+    (term, Cmd.info exec_name ~doc ~envs)
 
   let test_cmd config args library_name tests =
+    let ci = Config.User.ci config in
     let doc = "Run a subset of the tests." in
     let term =
       let+ () = set_color
-      and+ cli_config = Config.User.term ~and_exit:true ~record_backtrace:true
+      and+ cli_config =
+        Config.User.term ~and_exit:true ~record_backtrace:true ~ci
       and+ args = args in
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
     in
-    (term, Cmd.info "test" ~doc)
+    (term, Cmd.info "test" ~doc ~envs)
 
   let list_cmd tests =
     let doc = "List all available tests." in
@@ -121,10 +151,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     | Error `Exn -> exit Cmd.Exit.internal_error
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?argv =
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci ?argv =
     Config.User.kcreate (run_with_args' ~argv) ?and_exit ?verbose ?compact
       ?tail_errors ?quick_only ?show_errors ?json ?filter ?log_dir ?bail
-      ?record_backtrace
+      ?record_backtrace ?ci
 
   let run =
     Config.User.kcreate (fun config ?argv name tl ->

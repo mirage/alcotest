@@ -57,6 +57,7 @@ module V1_types = struct
       ?log_dir:string ->
       ?bail:bool ->
       ?record_backtrace:bool ->
+      ?ci:Config.ci ->
       'a
     (** The various options taken by the tests runners {!run} and
         {!run_with_args}:
@@ -80,7 +81,9 @@ module V1_types = struct
         - [bail] (default [false]). If true, stop running the tests after the
           first failure.
         - [record_backtrace] (default [true]). Enable backtrace recording before
-          beginning testing. *)
+          beginning testing.
+        - [ci] (default auto-detected). Whether to enable specific logging for a
+          CI system. *)
 
     val run : (string -> unit test list -> return) with_options
     val run_with_args : (string -> 'a -> 'a test list -> return) with_options

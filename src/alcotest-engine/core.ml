@@ -389,12 +389,16 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       (* Only print inside the concurrency monad *)
       let* () = M.return () in
       let open Fmt in
+      if config#ci = `Github_actions then
+        pr "::group::{%a}\n" Suite.pp_name t.suite;
       pr "Testing %a.@," (Pp.quoted Fmt.(styled `Bold Suite.pp_name)) t.suite;
       pr "@[<v>%a@]"
         (styled `Faint (fun ppf () ->
              pf ppf "This run has ID %a.@,@," (Pp.quoted string) t.run_id))
         ();
-      run_tests t () args
+      let r = run_tests t () args in
+      if config#ci = `Github_actions then pr "::endgroup::\n";
+      r
     in
     match (test_failures, t.config#and_exit) with
     | 0, true -> exit 0
@@ -405,9 +409,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   let run' config name (tl : unit test list) = run_with_args' config name () tl
 
   let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace =
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci =
     Config.User.kcreate run_with_args' ?and_exit ?verbose ?compact ?tail_errors
       ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
+      ?ci
 
   let run = Config.User.kcreate run'
 end

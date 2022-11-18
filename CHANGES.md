@@ -1,5 +1,8 @@
 ### dev
 
+- Detect that Alcotest is running in CI and change output accordingly.
+  (#364, @MisterDA)
+
 - Upgrade to `dune >= 3.0`. (#360, @MisterDA)
 
 ### 1.6.0 (2022-06-24)
