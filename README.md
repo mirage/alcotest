@@ -79,6 +79,27 @@ By default, only the first failing test log is printed to the console
 (and all test logs are captured on disk). Pass `--show-errors` to
 print all error messages.
 
+### Using Alcotest with opam and Dune
+
+Add `(alcotest :with-test)` to the `depends` stanza of your
+`dune-project` file, or `"alcotest" {with-test}` to your opam file.
+Use the `with-test` [package variable][with-test] to declare your
+tests opam dependencies. Call opam to install them:
+
+``` shell
+$ opam install --deps-only --with-test .
+```
+
+You can then [declare your test][tests] and link with Alcotest: `(test
+(libraries alcotest …) …)`, and run your tests:
+
+``` shell
+$ dune runtest
+```
+
+[with-test]: https://opam.ocaml.org/doc/Manual.html#pkgvar-with-test
+[tests]: https://dune.readthedocs.io/en/stable/tests.html#custom-tests
+
 ### Selecting tests to execute
 
 You can filter which tests to run by supplying a regular expression
