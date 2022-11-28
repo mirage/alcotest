@@ -2,7 +2,9 @@
  (_
   (env-vars
    ; Don't run tests as if Alcotest was run in CI
-   (CI false))))
+   (CI false)
+   ; Don't guess source code position for compat with < 4.12.
+   (ALCOTEST_SOURCE_CODE_POSITION false))))
 
 (executable
  (name gen_dune_rules)

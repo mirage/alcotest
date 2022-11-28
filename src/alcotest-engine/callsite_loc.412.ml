@@ -57,3 +57,12 @@ let get ?(__FUNCTION__ = "Alcotest_engine__Test.check") () =
         | None -> None)
     | _ -> None
   else None
+
+let get ?__FUNCTION__ () =
+  let guess =
+    match Sys.getenv "ALCOTEST_SOURCE_CODE_POSITION" with
+    | "" | "false" | "no" | "n" | "0" -> false
+    | "true" | "yes" | "y" | "1" -> true
+    | _ | (exception _) -> true
+  in
+  if guess then get ?__FUNCTION__ () else None
