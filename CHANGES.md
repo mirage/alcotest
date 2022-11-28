@@ -1,5 +1,8 @@
 ### dev
 
+- Try automatically reporting the location of calls to Alcotest.check.
+  (#366, @MisterDA, review by @TheLortex)
+
 - Detect that Alcotest is running in CI and change output accordingly.
   (#364, @MisterDA)
 
