@@ -4,7 +4,7 @@
    fail_with
  )
  (libraries alcotest alcotest.stdlib_ext alcotest-lwt lwt lwt.unix)
- (modes native)
+ (modes exe)
  (modules
    async_failure
    fail_with

@@ -1,6 +1,6 @@
 (executables
  (names simple floats)
- (modes native js)
+ (modes exe js)
  (libraries alcotest))
 
 (rule

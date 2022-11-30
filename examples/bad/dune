@@ -1,6 +1,6 @@
 (executable
  (name bad)
- (modes native js)
+ (modes exe js)
  (libraries alcotest astring))
 
 ; This fails at runtime, so just build the executable

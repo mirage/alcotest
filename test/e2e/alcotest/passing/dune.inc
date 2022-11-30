@@ -23,7 +23,7 @@
    verbose_newlines
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
- (modes native js)
+ (modes exe js)
  (modules
    and_exit_false
    and_exit_true
