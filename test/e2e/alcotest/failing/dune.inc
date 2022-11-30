@@ -17,7 +17,7 @@
    unknown_option
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
- (modes native js)
+ (modes exe js)
  (modules
    bail
    check_basic
