@@ -2,7 +2,7 @@ let test_lwt _switch () = Lwt.fail_with "should fail"
 
 let () =
   let open Alcotest_lwt in
-  Lwt_main.run
+  Alcotest_test_helper.wakeup_until_resolved
   @@ run ~record_backtrace:false __FILE__
        [
          ( "all",

@@ -1,0 +1,3 @@
+(library
+  (name alcotest_test_helper)
+  (libraries lwt))
