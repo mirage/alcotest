@@ -62,7 +62,15 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     in
     Cmdliner.Cmd.Env.info "OCAMLCI" ~doc
 
-  let envs = [ ci_env; github_action_env; ocamlci_env ]
+  let alcotest_source_code_position =
+    let doc =
+      "Whether Alcotest should guess the source code position of test \
+       failures, if any. Defaults to true, set to a falsy value to disable."
+    in
+    Cmdliner.Cmd.Env.info "ALCOTEST_SOURCE_CODE_POSITION" ~doc
+
+  let envs =
+    [ ci_env; github_action_env; ocamlci_env; alcotest_source_code_position ]
 
   let set_color =
     let env = Cmd.Env.info "ALCOTEST_COLOR" in
