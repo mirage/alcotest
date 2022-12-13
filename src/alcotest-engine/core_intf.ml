@@ -106,6 +106,8 @@ end
 module type Core = sig
   exception Check_error of unit Fmt.t
 
+  exception Skip
+
   module V1 : sig
     module type S = V1_types.S
     module type MAKER = V1_types.MAKER

@@ -147,3 +147,6 @@ val failf : (('a, Format.formatter, unit, 'b) format4 -> 'a) extra_info
 
 val check_raises : (string -> exn -> (unit -> unit) -> unit) extra_info
 (** Check that an exception is raised. *)
+
+val skip : unit -> 'a
+(** Skip the current test case. *)

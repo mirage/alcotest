@@ -20,6 +20,8 @@ open Model
 
 exception Check_error of unit Fmt.t
 
+exception Skip
+
 let () =
   let print_error =
     (* We instantiate the error print buffer lazily, so as to be sensitive to
@@ -182,6 +184,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
          | Check_error err ->
              let err = Fmt.(err ++ const string (bt ())) in
              `Error (path, err)
+         | Skip -> `Skip
          | Failure s -> exn path "failure" Fmt.(const string s)
          | Invalid_argument s -> exn path "invalid" Fmt.(const string s)
          | e -> exn path "exception" Fmt.(const exn e))
