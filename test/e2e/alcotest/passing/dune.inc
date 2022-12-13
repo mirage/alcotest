@@ -19,6 +19,7 @@
    quick_only
    quick_only_regex
    separator_testname
+   skip_in_test
    unicode_testname
    verbose_newlines
  )
@@ -44,6 +45,7 @@
    quick_only
    quick_only_regex
    separator_testname
+   skip_in_test
    unicode_testname
    verbose_newlines
  )
@@ -770,6 +772,44 @@
  (package alcotest)
  (action
    (diff separator_testname-js.expected separator_testname-js.processed)))
+
+(rule
+ (target skip_in_test.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:skip_in_test.exe})))))
+
+(rule
+ (target skip_in_test.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:skip_in_test.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff skip_in_test.expected skip_in_test.processed)))
+
+(rule
+ (target skip_in_test-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:skip_in_test.bc.js})))))
+
+(rule
+ (target skip_in_test-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:skip_in_test-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff skip_in_test-js.expected skip_in_test-js.processed)))
 
 (rule
  (target unicode_testname.actual)
