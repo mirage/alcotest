@@ -105,7 +105,6 @@ end
 
 module type Core = sig
   exception Check_error of unit Fmt.t
-
   exception Skip
 
   module V1 : sig

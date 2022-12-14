@@ -239,6 +239,5 @@ let check_raises ?here ?pos msg exn f =
             Fmt.pf ppf "%t%a %s: expecting %s, got %s." (pp_location ?here ?pos)
               Pp.tag `Fail msg (Printexc.to_string exn) (Printexc.to_string e))
 
-let skip () = raise (Core.Skip)
-
+let skip () = raise Core.Skip
 let () = at_exit (Format.pp_print_flush Format.err_formatter)

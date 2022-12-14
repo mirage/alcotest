@@ -19,7 +19,6 @@ open! Import
 open Model
 
 exception Check_error of unit Fmt.t
-
 exception Skip
 
 let () =
