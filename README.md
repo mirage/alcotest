@@ -86,14 +86,14 @@ Add `(alcotest :with-test)` to the `depends` stanza of your
 Use the `with-test` [package variable][with-test] to declare your
 tests opam dependencies. Call opam to install them:
 
-``` shell
+```sh-session
 $ opam install --deps-only --with-test .
 ```
 
 You can then [declare your test][tests] and link with Alcotest: `(test
 (libraries alcotest …) …)`, and run your tests:
 
-``` shell
+```sh-session
 $ dune runtest
 ```
 
@@ -107,7 +107,7 @@ matching the names of the tests to execute, or by passing a regular
 expression _and_ a comma-separated list of test numbers (or ranges of
 test numbers, e.g. `2,4..9`):
 
-```shell
+```sh-session
 $ ./simple.native test '.*concat*'
 Testing Utils.
 [SKIP]     string-case            0   Lower case.
@@ -142,7 +142,7 @@ for stress tests that are ran only on occasion (typically before a
 release or after a major change). These slow tests can be suppressed
 by passing the `-q` flag on the command line, e.g.:
 
-```shell
+```sh-session
 $ ./test.exe -q # run only the quick tests
 $ ./test.exe    # run quick and slow tests
 ```
@@ -178,7 +178,7 @@ let () =
 
 Will generate `test.exe` such that:
 
-```shell
+```sh-session
 $ test.exe test
 test.exe: required option -n is missing
 
@@ -222,7 +222,7 @@ let () =
 
 Will generate:
 
-```shell
+```sh-session
 $ test.exe
 Testing foo.
 [ERROR]             all          0   one.
