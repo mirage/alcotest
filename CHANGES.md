@@ -1,5 +1,7 @@
 ### dev
 
+- Get `alcotest_stubs.c` to compile with MSVC (#369, @jonahbeckford)
+
 - Try automatically reporting the location of calls to Alcotest.check.
   (#366, @MisterDA, review by @TheLortex)
 

@@ -2,7 +2,9 @@
 #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
+#ifndef _MSC_VER
 #include <unistd.h>
+#endif
 
 #if OCAML_VERSION < 41200
 #define Val_none Val_int(0)
