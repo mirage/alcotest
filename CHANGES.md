@@ -1,4 +1,11 @@
-### dev
+### 1.7.0 (2023-02-24)
+
+- compile with MSVC (#369, @jonahbeckfordm review by @TheLortex
+  and @MisterDA)
+
+- Allow skipping a test case from inside the test case (#368, @apeschar)
+
+- Fix compilation on bytecode architectures (#335, @glondu)
 
 - Get `alcotest_stubs.c` to compile with MSVC (#369, @jonahbeckford)
 
