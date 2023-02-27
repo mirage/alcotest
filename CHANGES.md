@@ -1,13 +1,13 @@
-### 1.7.0 (2023-02-24)
+### unreleased
 
-- compile with MSVC (#369, @jonahbeckfordm review by @TheLortex
-  and @MisterDA)
+### 1.7.0 (2023-02-24)
 
 - Allow skipping a test case from inside the test case (#368, @apeschar)
 
 - Fix compilation on bytecode architectures (#335, @glondu)
 
-- Get `alcotest_stubs.c` to compile with MSVC (#369, @jonahbeckford)
+- Get `alcotest_stubs.c` to compile with MSVC (#369, @jonahbeckford,
+  review by @TheLortex and @MisterDA)
 
 - Try automatically reporting the location of calls to Alcotest.check.
   (#366, @MisterDA, review by @TheLortex)
