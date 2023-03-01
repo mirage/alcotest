@@ -149,4 +149,6 @@ val check_raises : (string -> exn -> (unit -> unit) -> unit) extra_info
 (** Check that an exception is raised. *)
 
 val skip : unit -> 'a
-(** Skip the current test case. *)
+(** Skip the current test case.
+
+    @since 1.7.0 *)
