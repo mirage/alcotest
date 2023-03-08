@@ -15,6 +15,29 @@
    %{target}
    "let get ?__FUNCTION__ () =\n  ignore __FUNCTION__;\n  None\n")))
 
+
+(rule
+ (target safe.ml)
+ (enabled_if
+  (< ${ocaml_version} 5.0.0))
+ (action
+   (write-file
+     %{target}
+     "let safe_stdout () = Fmt.stdout
+      let safe_stderr () = Fmt.stderr")))
+
+(rule
+ (target safe.ml)
+ (enabled_if
+  (>= ${ocaml_version} 5.0.0))
+ (action
+   (write-file
+     %{target}
+     "let stdout_key = Format.synchronized_formatter_of_out_channel stdout\n
+      let stderr_key = Format.synchronized_formatter_of_out_channel stderr\n
+      let safe_stdout () = Domain.DLS.get stdout_key\n
+      let safe_stderr () = Domain.DLS.get stderr_key\n")))
+
 (library
  (name alcotest_engine)
  (public_name alcotest.engine)

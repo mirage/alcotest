@@ -10,3 +10,5 @@ module Platform = Platform
 module Private = struct
   module Pp = Pp
 end
+
+module Safe = Safe

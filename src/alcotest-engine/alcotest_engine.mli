@@ -54,3 +54,5 @@ module Platform = Platform
 module Private : sig
   module Pp = Pp
 end
+
+module Safe = Safe
