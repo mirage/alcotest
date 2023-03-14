@@ -76,10 +76,22 @@ jobs:
 
       - name: Use OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
+        if: runner.os != 'Windows'
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
           opam-local-packages: $${ matrix.opam-local-packages }}
           opam-depext-flags: --with-test
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        if: runner.os == 'Windows'
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          opam-local-packages: $${ matrix.opam-local-packages }}
+          opam-depext-flags: --with-test
+          opam-repositories: |
+            opam-repository-mingw: https://github.com/ocaml-opam/opam-repository-mingw.git#sunset
+            default: https://github.com/ocaml/opam-repository.git
 
       - run: |
           opam pin add alcotest-async.dev ./ -n
