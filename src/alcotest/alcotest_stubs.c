@@ -69,7 +69,7 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 	}
 	int z = ioctl(fd, TIOCGWINSZ, &ws);
         close(fd);
-	if (z == 0)
+	if (z != -1)
 	{
 		pair = caml_alloc_tuple(2);
 		Store_field(pair, 0, Val_int(ws.ws_row));
