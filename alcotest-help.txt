@@ -86,6 +86,11 @@ ENVIRONMENT
        ALCOTEST_SHOW_ERRORS
            See option --show-errors.
 
+       ALCOTEST_SOURCE_CODE_POSITION
+           Whether Alcotest should guess the source code position of test
+           failures, if any. Defaults to true, set to a falsy value to
+           disable.
+
        ALCOTEST_TAIL_ERRORS
            See option --tail-errors.
 

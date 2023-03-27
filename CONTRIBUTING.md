@@ -8,8 +8,8 @@ To clone the project's sources and install its various dependencies, run:
 git clone https://github.com/mirage/alcotest.git    # Get the repository
 cd alcotest
 
-opam switch create ./ ocaml-base-compiler.4.10.0    # OPTIONAL: install a project-local Opam switch
-opam install -t --deps-only .                       # Install regular and test dependencies
+opam switch create ./ ocaml-base-compiler.5.0.0    # OPTIONAL: install a project-local Opam switch
+opam install -t --deps-only .                      # Install regular and test dependencies
 ```
 
 Optionally, install `js_of_ocaml-compiler` and [nodejs](https://nodejs.org/en/download/package-manager/) to be able
