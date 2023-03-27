@@ -42,6 +42,7 @@ end
 
 module Option : sig
   val map : ('a -> 'b) -> 'a option -> 'b option
+  val bind : 'a option -> ('a -> 'b option) -> 'b option
   val is_some : _ option -> bool
   val get_exn : 'a option -> 'a
   val value : default:'a -> 'a option -> 'a

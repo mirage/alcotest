@@ -2,7 +2,18 @@
 
 - Add `match_raises`, a generalized version of `check_raises`
   (#88, #386, @JoanThibault)
-- Update JaneStreet core and async to v0.16 (#390 @tmcgilchrist)  
+
+- Update JaneStreet core and async to v0.16 (#390 @tmcgilchrist)
+
+- Fix division by zero when size of the terminal is incorrectly
+  reported as zero. (fix #356, #381, @MisterDA)
+
+- Enable terminal size reporting on macOS and Windows. Also report the
+  terminal size even when the test is run buffered by Dune.
+  (#381, @MisterDA)
+
+- Allow overriding the number of columns with `ALCOTEST_COLUMNS` env
+  var. (#322, #381, @MisterDA)
 
 ### 1.7.0 (2023-02-24)
 

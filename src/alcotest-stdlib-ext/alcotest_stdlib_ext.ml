@@ -86,6 +86,7 @@ end
 module Option = struct
   let is_some = function Some _ -> true | None -> false
   let map f = function Some x -> Some (f x) | None -> None
+  let bind o f = match o with Some o -> f o | None -> None
 
   let get_exn = function
     | Some x -> x
