@@ -55,13 +55,20 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 #elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
 #include <unistd.h>
 #include <sys/ioctl.h>
+#include <fcntl.h>
 
 CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 {
 	CAMLparam1(unit);
 	CAMLlocal2(result, pair);
 	struct winsize ws;
-	int z = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
+	int fd = open("/dev/tty", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (fd < 0) {
+		result = Val_none;
+		CAMLreturn(result);
+	}
+	int z = ioctl(fd, TIOCGWINSZ, &ws);
+        close(fd);
 	if (z == 0)
 	{
 		pair = caml_alloc_tuple(2);
