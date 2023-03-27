@@ -124,7 +124,7 @@ struct
   let left_padding ~with_selector =
     let open Fmt in
     (if with_selector then const (styled `Bold (styled `Red char)) '>'
-    else const char ' ')
+     else const char ' ')
     ++ const char ' '
 
   let pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure ppf

@@ -63,9 +63,9 @@ let example_rule_stanza ~js ~expect_failure filename =
   let accepted_exit_codes =
     Fmt.str "(or %s %d %d)"
       (if expect_failure then
-       (* 1 = failing test, 2 = failed assertion outside runner *)
-       "1 2"
-      else "0")
+         (* 1 = failing test, 2 = failed assertion outside runner *)
+         "1 2"
+       else "0")
       Cmdliner.Cmd.Exit.cli_error Cmdliner.Cmd.Exit.internal_error
   in
   (* Run Alcotest to get *.actual, then pass through the strip_randomness
@@ -81,7 +81,7 @@ let example_rule_stanza ~js ~expect_failure filename =
 |}
     (with_suffix base) accepted_exit_codes
     (if js then Printf.sprintf "node %%{dep:%s.bc.js}" base
-    else Printf.sprintf "%%{dep:%s.exe}" base)
+     else Printf.sprintf "%%{dep:%s.exe}" base)
     Fmt.(list string)
     options;
 
