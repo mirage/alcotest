@@ -74,11 +74,9 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   let stdout_isatty () = Unix.(isatty stdout)
 
   let stdout_columns () =
-    if Sys.win32 then None
-    else
-      match Terminal.get_dimensions () with
-      | Some { columns; _ } when columns > 0 -> Some columns
-      | _ -> None
+    match Terminal.get_dimensions () with
+    | Some { columns; _ } when columns > 0 -> Some columns
+    | _ -> None
 
   external before_test :
     output:out_channel -> stdout:out_channel -> stderr:out_channel -> unit
