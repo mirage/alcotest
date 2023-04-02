@@ -1,3 +1,6 @@
+let safe_stdout = Alcotest_engine.Safe.safe_stdout
+let safe_stderr = Alcotest_engine.Safe.safe_stderr
+
 module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   module M = Alcotest_engine.Monad.Extend (M)
 
@@ -96,12 +99,12 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
 
   let with_redirect fd_file fn =
     let* () = M.return () in
-    Fmt.(flush stdout) ();
-    Fmt.(flush stderr) ();
+    Fmt.(flush (safe_stdout ())) ();
+    Fmt.(flush (safe_stderr ())) ();
     before_test ~output:fd_file ~stdout ~stderr;
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
-    Fmt.(flush stdout ());
-    Fmt.(flush stderr ());
+    Fmt.(flush (safe_stdout ()) ());
+    Fmt.(flush (safe_stderr ()) ());
     after_test ~stdout ~stderr;
     match r with `Ok x -> x | `Error e -> raise e
 

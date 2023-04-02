@@ -18,6 +18,9 @@ include Core_intf
 open! Import
 open Model
 
+let safe_stdout = Safe.safe_stdout
+let safe_stderr = Safe.safe_stderr
+
 exception Check_error of unit Fmt.t
 exception Skip
 
@@ -28,7 +31,7 @@ let () =
     lazy
       (let buf = Buffer.create 0 in
        let ppf = Format.formatter_of_buffer buf in
-       Fmt.set_style_renderer ppf Fmt.(style_renderer stderr);
+       Fmt.set_style_renderer ppf Fmt.(style_renderer (safe_stderr ()));
        fun error ->
          Fmt.pf ppf "Alcotest assertion failure@.%a@." error ();
          let contents = Buffer.contents buf in
@@ -200,7 +203,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           (* When capturing the logs of a test, also add the result of the test
              at the end. *)
           let+ result = fn args in
-          Pp.rresult_error Fmt.stdout result;
+          Pp.rresult_error (safe_stdout ()) result;
           result)
         ()
 
@@ -210,7 +213,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let print_event =
       pp_event t
         ~prior_error:(Option.is_some first_error)
-        ~tests_so_far ~isatty:(P.stdout_isatty ()) Fmt.stdout
+        ~tests_so_far ~isatty:(P.stdout_isatty ()) (safe_stdout ())
     in
     let* () = M.return () in
     print_event (`Start test.name);
@@ -218,7 +221,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       match test.fn with
       | `Skip -> M.return (`Skip, false)
       | `Run fn ->
-          Fmt.(flush stdout) () (* Show event before any test stderr *);
+          Fmt.(flush (safe_stdout ())) () (* Show event before any test stderr *);
           let+ result = with_captured_logs t test.name fn args in
           (* Store errors *)
           let errored : bool =
@@ -232,8 +235,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
             errored
           in
           (* Show any remaining test output before the event *)
-          Fmt.(flush stdout ());
-          Fmt.(flush stderr ());
+          Fmt.(flush (safe_stdout ()) ());
+          Fmt.(flush (safe_stderr ()) ());
           (result, errored)
     in
     print_event (`Result (test.name, result));
@@ -349,7 +352,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let+ result =
       if is_empty && Option.is_some filter then (
         flush_all ();
-        Fmt.(pf stderr)
+        Fmt.(pf (safe_stderr ()))
           "%a\n" red
           "Invalid request (no tests to run, filter skipped everything)!";
         exit 1)
@@ -357,7 +360,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         let tests = filter_test_cases ~subst:true filter suite in
         result t tests args
     in
-    (pp_suite_results t) Fmt.stdout result;
+    (pp_suite_results t) (safe_stdout ()) result;
     result.failures
 
   let default_log_dir () =

@@ -1,5 +1,8 @@
 ### unreleased
 
+- Fix crash on multicore by using per-domain Formatters. (#375,
+  @haesbaert, review by @MisterDA and @samoht)
+
 ### 1.7.0 (2023-02-24)
 
 - Allow skipping a test case from inside the test case (#368, @apeschar)
