@@ -231,13 +231,13 @@ let check_raises ?here ?pos msg exn f =
   match collect_exception f with
   | None ->
       check_err (fun ppf () ->
-          Fmt.pf ppf "%t%a %s: expecting %s, got nothing."
-            (pp_location ?here ?pos) Pp.tag `Fail msg (Printexc.to_string exn))
+          Fmt.pf ppf "%t%a %s: expecting %a, got nothing."
+            (pp_location ?here ?pos) Pp.tag `Fail msg Fmt.exn exn)
   | Some e ->
       if e <> exn then
         check_err (fun ppf () ->
-            Fmt.pf ppf "%t%a %s: expecting %s, got %s." (pp_location ?here ?pos)
-              Pp.tag `Fail msg (Printexc.to_string exn) (Printexc.to_string e))
+            Fmt.pf ppf "%t%a %s: expecting %a, got %a." (pp_location ?here ?pos)
+              Pp.tag `Fail msg Fmt.exn exn Fmt.exn e)
 
 let match_raises ?here ?pos msg exnp f =
   show_assert msg;
@@ -249,8 +249,8 @@ let match_raises ?here ?pos msg exnp f =
   | Some e ->
       if exnp e then
         check_err (fun ppf () ->
-            Fmt.pf ppf "%t%a %s: got %s." (pp_location ?here ?pos) Pp.tag `Fail
-              msg (Printexc.to_string e))
+            Fmt.pf ppf "%t%a %s: got %a." (pp_location ?here ?pos) Pp.tag `Fail
+              msg Fmt.exn e)
 
 let skip () = raise Core.Skip
 let () = at_exit (Format.pp_print_flush Format.err_formatter)
