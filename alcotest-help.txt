@@ -58,7 +58,7 @@ COMMON OPTIONS
            whenever the TERM env var is dumb or undefined.
 
 EXIT STATUS
-       test.exe exits with the following status:
+       test.exe exits with:
 
        0   on success.
 
