@@ -1,5 +1,8 @@
 ### unreleased
 
+- Add `match_raises`, a generalized version of `check_raises`
+  (#88, #386, @JoanThibault)
+
 ### 1.7.0 (2023-02-24)
 
 - Allow skipping a test case from inside the test case (#368, @apeschar)
