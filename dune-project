@@ -24,10 +24,10 @@ inspect), with a simple (yet expressive) query language to select the
 tests to run.
 ")
  (depends
-  (ocaml (>= 4.05.0))
+  (ocaml (>= 4.08))
   (fmt (>= 0.8.7))
   astring
-  (cmdliner (>= 1.1.1))
+  (cmdliner (>= 1.2.0))
   (re (>= 1.7.2))
   stdlib-shims
   (uutf (>= 1.0.1))
@@ -44,7 +44,7 @@ tests to run.
  (depends
   (re :with-test)
   (fmt :with-test)
-  (cmdliner (and :with-test (>= 1.1.1)))
+  (cmdliner (and :with-test (>= 1.2.0)))
   (core (>= v0.15.0))
   (core_unix (>= v0.15.0))
   base
@@ -61,9 +61,9 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner (and :with-test (>= 1.1.1)))
+  (cmdliner (and :with-test (>= 1.2.0)))
   fmt
-  (ocaml (>= 4.05.0))
+  (ocaml (>= 4.08.0))
   (alcotest (= :version))
   lwt
   logs))
@@ -75,9 +75,9 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner (and :with-test (>= 1.1.1)))
+  (cmdliner (and :with-test (>= 1.2.0)))
   fmt
-  (ocaml (>= 4.05.0))
+  (ocaml (>= 4.08.0))
   (alcotest (= :version))
   (mirage-clock (>= 2.0.0))
   duration
@@ -94,4 +94,4 @@ tests to run.
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 1.1.1)))))
+  (cmdliner (and :with-test (>= 1.2.0)))))

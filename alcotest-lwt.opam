@@ -11,9 +11,9 @@ bug-reports: "https://github.com/mirage/alcotest/issues"
 depends: [
   "dune" {>= "3.0"}
   "re" {with-test}
-  "cmdliner" {with-test & >= "1.1.1"}
+  "cmdliner" {with-test & >= "1.2.0"}
   "fmt"
-  "ocaml" {>= "4.05.0"}
+  "ocaml" {>= "4.08.0"}
   "alcotest" {= version}
   "lwt"
   "logs"
