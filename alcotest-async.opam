@@ -13,14 +13,14 @@ depends: [
   "re" {with-test}
   "fmt" {with-test}
   "cmdliner" {with-test & >= "1.2.0"}
-  "core" {>= "v0.15.0"}
-  "core_unix" {>= "v0.15.0"}
+  "core" {>= "v0.16.0"}
+  "core_unix" {>= "v0.16.0"}
   "base"
   "async_kernel"
-  "ocaml" {>= "4.11.0"}
+  "ocaml" {>= "4.14.0"}
   "alcotest" {= version}
-  "async" {>= "v0.15.0"}
-  "async_unix" {>= "v0.15.0"}
+  "async" {>= "v0.16.0"}
+  "async_unix" {>= "v0.16.0"}
   "odoc" {with-doc}
 ]
 build: [
