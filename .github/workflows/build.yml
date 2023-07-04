@@ -18,9 +18,8 @@ jobs:
         runtest:
           - true
         ocaml-compiler:
-          - 4.12.x
-          - 4.13.x
           - 4.14.x
+          - 5.0.x
         include:
           - os: macos-latest
             ocaml-compiler: 4.14.x
@@ -56,6 +55,19 @@ jobs:
             packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
             opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
             runtest: false
+ 
+          - os: ubuntu-latest
+            ocaml-compiler: 4.12.x
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
+ 
+          - os: ubuntu-latest
+            ocaml-compiler: 4.13.x
+            packages: 'alcotest alcotest-js alcotest-lwt alcotest-mirage'
+            opam-local-packages: 'alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam'
+            runtest: false
+
 
 
     runs-on: ${{ matrix.os }}
