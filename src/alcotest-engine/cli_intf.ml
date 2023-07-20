@@ -37,9 +37,9 @@ module V1_types = struct
         be treated like a regular [Sys.argv], so the array must have at least
         one element, and the first element will be treated as if it was the
         command name and thus ignored for the purposes of option processing. So
-        [~argv:\[||\]] is an error, [~argv:\[| "--verbose" |\]] will have no
-        effect, and [~argv:\[| "ignored"; "--verbose" |\]] will successfully
-        pass the verbose option. *)
+        [~argv:[||]] is an error, [~argv:[| "--verbose" |]] will have no effect,
+        and [~argv:[| "ignored"; "--verbose" |]] will successfully pass the
+        verbose option. *)
 
     val run_with_args :
       (?argv:string array ->
