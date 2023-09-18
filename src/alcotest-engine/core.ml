@@ -65,6 +65,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   type 'a test = string * 'a test_case list
 
+  type 'a case = ?speed:speed_level -> string -> 'a run -> unit
+  type 'a group = string -> ('a case -> unit) -> unit
+
   (* global state *)
   type 'a t = {
     (* library values. *)
@@ -417,6 +420,34 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       ?ci
 
   let run = Config.User.kcreate run'
+
+  let suite ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
+    ?json ?filter ?log_dir ?bail ?record_backtrace ?ci name register =
+    let groups = ref [] in
+    let each_group name register =
+      let cases = ref [] in
+      let each_case ?(speed=`Quick) name func =
+        cases := (test_case name speed func) :: !cases
+      in
+      register each_case;
+      groups := (name, !cases) :: !groups
+    in
+    register each_group;
+    run
+      ?and_exit
+      ?verbose
+      ?compact
+      ?tail_errors
+      ?quick_only
+      ?show_errors
+      ?json
+      ?filter
+      ?log_dir
+      ?bail
+      ?record_backtrace
+      ?ci
+      name
+      !groups
 end
 
 module V1 = struct
