@@ -33,7 +33,7 @@ module To_test = struct
   let list_concat = List.append
 end
 
-(* Run the tests *)
+(* The tests *)
 let () =
   Alcotest.suite "Utils" begin fun group ->
     group "string-case" begin fun case ->

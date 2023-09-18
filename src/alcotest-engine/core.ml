@@ -433,21 +433,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       groups := (name, !cases) :: !groups
     in
     register each_group;
-    run
-      ?and_exit
-      ?verbose
-      ?compact
-      ?tail_errors
-      ?quick_only
-      ?show_errors
-      ?json
-      ?filter
-      ?log_dir
-      ?bail
-      ?record_backtrace
-      ?ci
-      name
-      !groups
+    run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
+      ?filter ?log_dir ?bail ?record_backtrace ?ci name !groups
 end
 
 module V1 = struct
