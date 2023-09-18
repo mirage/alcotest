@@ -421,8 +421,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let run = Config.User.kcreate run'
 
-  let suite ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors
-    ?json ?filter ?log_dir ?bail ?record_backtrace ?ci name register =
+  let suite config name register =
     let groups = ref [] in
     let each_group name register =
       let cases = ref [] in
@@ -433,8 +432,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       groups := (name, !cases) :: !groups
     in
     register each_group;
-    run ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
-      ?filter ?log_dir ?bail ?record_backtrace ?ci name !groups
+    run' config name !groups
+
+  let suite = Config.User.kcreate suite
 end
 
 module V1 = struct
