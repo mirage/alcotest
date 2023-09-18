@@ -41,6 +41,13 @@ module V1_types = struct
         effect, and [~argv:\[| "ignored"; "--verbose" |\]] will successfully
         pass the verbose option. *)
 
+    val suite :
+      (?argv:string array -> string -> (unit group -> unit) -> return) with_options
+    (** [suite n register] runs the test suite registered by the registration
+        function [register]. [n] is the name of the tested library.
+
+        Other parameters are the same as they are in [run]. *)
+
     val run_with_args :
       (?argv:string array ->
       string ->

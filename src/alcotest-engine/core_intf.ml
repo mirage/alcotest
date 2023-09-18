@@ -91,8 +91,9 @@ module V1_types = struct
     val run : (string -> unit test list -> return) with_options
     val run_with_args : (string -> 'a -> 'a test list -> return) with_options
 
+    val suite_testlist : (unit group -> unit) -> unit test list
+
     val suite : (string -> (unit group -> unit) -> return) with_options
-    (** Single entry-point into Alcotest. *)
   end
 
   module type MAKER = functor (_ : Platform.MAKER) (M : Monad.S) -> sig

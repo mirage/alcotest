@@ -421,7 +421,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let run = Config.User.kcreate run'
 
-  let suite config name register =
+  let suite_testlist register =
     let groups = ref [] in
     let each_group name register =
       let cases = ref [] in
@@ -429,11 +429,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         cases := (test_case name speed func) :: !cases
       in
       register each_case;
-      groups := (name, !cases) :: !groups
+      groups := (name, List.rev !cases) :: !groups
     in
     register each_group;
-    run' config name !groups
+    List.rev !groups
 
+  let suite config name register = run' config name (suite_testlist register)
   let suite = Config.User.kcreate suite
 end
 

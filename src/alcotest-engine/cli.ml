@@ -166,7 +166,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
 
   let run =
     Config.User.kcreate (fun config ?argv name tl ->
-        run_with_args' config ~argv name (Term.const ()) tl)
+    run_with_args' config ~argv name (Term.const ()) tl)
+
+  let suite = Config.User.kcreate (fun config ?argv name register ->
+    run_with_args' config ~argv name (Term.const ()) (suite_testlist register))
 end
 
 module V1 = struct
