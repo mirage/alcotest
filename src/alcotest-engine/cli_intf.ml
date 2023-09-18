@@ -42,7 +42,8 @@ module V1_types = struct
         pass the verbose option. *)
 
     val suite :
-      (?argv:string array -> string -> (unit group -> unit) -> return) with_options
+      (?argv:string array -> string -> (unit group -> unit) -> return)
+      with_options
     (** [suite n register] runs the test suite registered by the registration
         function [register]. [n] is the name of the tested library.
 

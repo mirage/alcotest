@@ -64,7 +64,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   let test_case n s f = (n, s, f)
 
   type 'a test = string * 'a test_case list
-
   type 'a case = ?speed:speed_level -> string -> 'a run -> unit
   type 'a group = string -> ('a case -> unit) -> unit
 
@@ -425,8 +424,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let groups = ref [] in
     let each_group name register =
       let cases = ref [] in
-      let each_case ?(speed=`Quick) name func =
-        cases := (test_case name speed func) :: !cases
+      let each_case ?(speed = `Quick) name func =
+        cases := test_case name speed func :: !cases
       in
       register each_case;
       groups := (name, List.rev !cases) :: !groups
