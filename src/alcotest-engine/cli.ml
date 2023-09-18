@@ -62,6 +62,15 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     in
     Cmdliner.Cmd.Env.info "OCAMLCI" ~doc
 
+  let opam_repo_ci_env =
+    let doc =
+      Printf.sprintf
+        "Whether Alcotest is running in opam-repo-ci, if set to %s. Display \
+         tests errors."
+        (Arg.doc_quote "true")
+    in
+    Cmdliner.Cmd.Env.info "OPAM_REPO_CI" ~doc
+
   let alcotest_source_code_position =
     let doc =
       "Whether Alcotest should guess the source code position of test \
@@ -70,7 +79,13 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     Cmdliner.Cmd.Env.info "ALCOTEST_SOURCE_CODE_POSITION" ~doc
 
   let envs =
-    [ ci_env; github_action_env; ocamlci_env; alcotest_source_code_position ]
+    [
+      ci_env;
+      github_action_env;
+      ocamlci_env;
+      opam_repo_ci_env;
+      alcotest_source_code_position;
+    ]
 
   let set_color =
     let env = Cmd.Env.info "ALCOTEST_COLOR" in

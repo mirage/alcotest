@@ -107,3 +107,7 @@ ENVIRONMENT
            Whether Alcotest is running in OCaml-CI, if set to 'true'. Display
            tests errors.
 
+       OPAM_REPO_CI
+           Whether Alcotest is running in opam-repo-ci, if set to 'true'.
+           Display tests errors.
+

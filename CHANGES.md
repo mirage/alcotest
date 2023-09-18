@@ -2,7 +2,8 @@
 
 - Add `match_raises`, a generalized version of `check_raises`
   (#88, #386, @JoanThibault)
-- Update JaneStreet core and async to v0.16 (#390 @tmcgilchrist)  
+- Update JaneStreet core and async to v0.16 (#390 @tmcgilchrist)
+- Recognize opam-repo-ci. (#394, @MisterDA)
 
 ### 1.7.0 (2023-02-24)
 

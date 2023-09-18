@@ -52,24 +52,29 @@ module Key = struct
     type t = ci
 
     let default =
-      let ci =
-        match Sys.getenv "CI" with
-        | "true" -> true
-        | _ | (exception Not_found) -> false
-      and github_actions =
-        match Sys.getenv "GITHUB_ACTIONS" with
-        | "true" -> true
-        | _ | (exception Not_found) -> false
-      and ocamlci =
-        match Sys.getenv "OCAMLCI" with
+      let getenv var =
+        match Sys.getenv var with
         | "true" -> true
         | _ | (exception Not_found) -> false
       in
-      match (ci, github_actions, ocamlci) with
-      | true, true, false -> `Github_actions
-      | true, false, true -> `OCamlci
-      | true, false, false -> `Unknown
-      | _ -> `Disabled
+      let ci = getenv "CI"
+      and github_actions = getenv "GITHUB_ACTIONS"
+      and ocamlci = getenv "OCAMLCI"
+      and opam_repo_ci = getenv "OPAM_REPO_CI" in
+      if ci then
+        let rec aux ci = function
+          | [] -> Option.value ~default:`Unknown ci
+          | (false, _) :: tl -> aux ci tl
+          | (true, ci') :: tl -> (
+              match ci with None -> aux (Some ci') tl | Some _ -> `Disabled)
+        in
+        aux None
+          [
+            (github_actions, `Github_actions);
+            (ocamlci, `OCamlci);
+            (opam_repo_ci, `Opam_repo_ci);
+          ]
+      else `Disabled
   end
 
   module Verbose = Flag (struct
