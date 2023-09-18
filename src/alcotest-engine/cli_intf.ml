@@ -47,7 +47,31 @@ module V1_types = struct
     (** [suite n register] runs the test suite registered by the registration
         function [register]. [n] is the name of the tested library.
 
-        Other parameters are the same as they are in [run]. *)
+        Other parameters are the same as they are in [run].
+
+        Example usage:
+
+        {[
+        let () =
+          Alcotest.suite "Int" begin fun group ->
+            group "( + )" begin fun case ->
+              case "positive + positive" begin fun () ->
+                Alcotest.(check int) "1 + 1" 2 (1 + 1)
+              end;
+
+              case "positive + negative" begin fun () ->
+                Alcotest.(check int) "1 + -1" 0 (1 + -1)
+              end;
+            end;
+
+            group "( - )" begin fun case ->
+              (* Not actually slow, just for demonstration purposes *)
+              case ~speed:`Slow "positive - positive" begin fun () ->
+                Alcotest.(check int) "1 - 1" 0 (1 - 1)
+              end;
+            end;
+          end
+        ]} *)
 
     val run_with_args :
       (?argv:string array ->
