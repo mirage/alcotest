@@ -4,5 +4,4 @@ ocaml-version = 4.05.0
 
 module-item-spacing = compact
 break-infix = fit-or-vertical
-exp-grouping = preserve
 parse-docstrings
