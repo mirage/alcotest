@@ -69,8 +69,22 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     in
     Cmdliner.Cmd.Env.info "ALCOTEST_SOURCE_CODE_POSITION" ~doc
 
+  let alcotest_columns =
+    let doc =
+      "Number of columns after which Alcotest truncates or splits written \
+       lines. Default is to auto-detect using the terminal's dimensions, or \
+       fallback to 80 columns."
+    in
+    Cmdliner.Cmd.Env.info "ALCOTEST_COLUMNS" ~doc
+
   let envs =
-    [ ci_env; github_action_env; ocamlci_env; alcotest_source_code_position ]
+    [
+      ci_env;
+      github_action_env;
+      ocamlci_env;
+      alcotest_source_code_position;
+      alcotest_columns;
+    ]
 
   let set_color =
     let env = Cmd.Env.info "ALCOTEST_COLOR" in

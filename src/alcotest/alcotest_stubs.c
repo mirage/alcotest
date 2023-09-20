@@ -1,10 +1,12 @@
 #include <caml/version.h>
+
+#if OCAML_VERSION < 50000
+#define CAML_NAME_SPACE
+#endif
+
 #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
-#ifndef _MSC_VER
-#include <unistd.h>
-#endif
 
 #if OCAML_VERSION < 41200
 #define Val_none Val_int(0)
@@ -19,20 +21,14 @@ static value caml_alloc_some(value v)
 }
 #endif
 
-// Detect platform
-#if defined(_WIN32)
-#define OCAML_ALCOTEST_WINDOWS
-#elif defined(__unix__) || defined(__unix) || (defined(__APPLE__) && defined(__MACH__))
-#if defined(_POSIX_VERSION)
-#define OCAML_ALCOTEST_POSIX
-#endif
-#endif
-
 // Windows support
-#if defined(OCAML_ALCOTEST_WINDOWS)
+#if defined(_WIN32)
 #define WIN32_LEAN_AND_MEAN
 #define VC_EXTRALEAN
 #include <windows.h>
+#if !defined(_MSC_VER)
+#include <unistd.h>
+#endif
 
 CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 {
@@ -56,17 +52,24 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 	CAMLreturn(result);
 }
 
-// POSIX support
-#elif defined(OCAML_ALCOTEST_POSIX)
+#elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+#include <unistd.h>
 #include <sys/ioctl.h>
+#include <fcntl.h>
 
 CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 {
 	CAMLparam1(unit);
 	CAMLlocal2(result, pair);
 	struct winsize ws;
-	int z = ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws);
-	if (z == 0)
+	int fd = open("/dev/tty", O_RDONLY | O_NONBLOCK | O_CLOEXEC);
+	if (fd < 0) {
+		result = Val_none;
+		CAMLreturn(result);
+	}
+	int z = ioctl(fd, TIOCGWINSZ, &ws);
+        close(fd);
+	if (z != -1)
 	{
 		pair = caml_alloc_tuple(2);
 		Store_field(pair, 0, Val_int(ws.ws_row));

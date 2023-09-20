@@ -77,6 +77,11 @@ ENVIRONMENT
        ALCOTEST_COLOR
            See option --color.
 
+       ALCOTEST_COLUMNS
+           Number of columns after which Alcotest truncates or splits written
+           lines. Default is to auto-detect using the terminal's dimensions,
+           or fallback to 80 columns.
+
        ALCOTEST_COMPACT
            See option --compact.
 

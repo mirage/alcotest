@@ -4,7 +4,9 @@
    ; Don't run tests as if Alcotest was run in CI
    (CI false)
    ; Don't guess source code position for compat with < 4.12.
-   (ALCOTEST_SOURCE_CODE_POSITION false))))
+   (ALCOTEST_SOURCE_CODE_POSITION false)
+   ; Set to 80 columns for output reproducibility
+   (ALCOTEST_COLUMNS 80))))
 
 (executable
  (name gen_dune_rules)
