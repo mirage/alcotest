@@ -433,8 +433,17 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     register each_group;
     List.rev !groups
 
-  let suite config name register = run' config name (suite_testlist register)
-  let suite = Config.User.kcreate suite
+  let suite_with_args' config name args register =
+    run_with_args' config name args (suite_testlist register)
+
+  let suite_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci =
+    Config.User.kcreate suite_with_args' ?and_exit ?verbose ?compact ?tail_errors
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
+      ?ci
+
+  let suite' config name = suite_with_args' config name ()
+  let suite = Config.User.kcreate suite'
 end
 
 module V1 = struct

@@ -41,6 +41,18 @@ module V1_types = struct
         effect, and [~argv:\[| "ignored"; "--verbose" |\]] will successfully
         pass the verbose option. *)
 
+    val run_with_args :
+      (?argv:string array ->
+      string ->
+      'a Cmdliner.Term.t ->
+      'a test list ->
+      return)
+      with_options
+    (** [run_with_args n a t] Similar to [run a t] but take an extra argument
+        [a]. Every test function will receive as argument the evaluation of the
+        [Cmdliner] term [a]: this is useful to configure the test behaviors
+        using the CLI. *)
+
     val suite :
       (?argv:string array -> string -> (unit group -> unit) -> return)
       with_options
@@ -73,17 +85,13 @@ module V1_types = struct
           end
         ]} *)
 
-    val run_with_args :
+    val suite_with_args :
       (?argv:string array ->
       string ->
       'a Cmdliner.Term.t ->
-      'a test list ->
+      ('a group -> unit) ->
       return)
       with_options
-    (** [run_with_args n a t] Similar to [run a t] but take an extra argument
-        [a]. Every test function will receive as argument the evaluation of the
-        [Cmdliner] term [a]: this is useful to configure the test behaviors
-        using the CLI. *)
   end
 
   module type MAKER = functor (_ : Platform.MAKER) (M : Monad.S) ->
