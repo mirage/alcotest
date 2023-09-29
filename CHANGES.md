@@ -16,7 +16,8 @@
   var. (#322, #381, @MisterDA)
 
 - Stop detecting ocamlci specifically, since there's nothing specific
-  about it. Simply use the `CI` env var to detect CIs.
+  about it. Simply use the `CI` env var to detect CIs. Improve CI
+  detection.
   (#397, @MisterDA)
 
 ### 1.7.0 (2023-02-24)

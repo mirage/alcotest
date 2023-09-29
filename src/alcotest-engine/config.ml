@@ -54,7 +54,7 @@ module Key = struct
     let default =
       let getenv var =
         match Sys.getenv var with
-        | "true" -> true
+        | "true" | "True" -> true
         | _ | (exception Not_found) -> false
       in
       let ci = getenv "CI" and github_actions = getenv "GITHUB_ACTIONS" in
