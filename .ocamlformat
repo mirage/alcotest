@@ -1,6 +1,6 @@
-version = 0.26.0
+version = 0.26.1
 profile = conventional
-ocaml-version = 4.05.0
+ocaml-version = 4.08.0
 
 module-item-spacing = compact
 break-infix = fit-or-vertical
