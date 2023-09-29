@@ -15,6 +15,10 @@
 - Allow overriding the number of columns with `ALCOTEST_COLUMNS` env
   var. (#322, #381, @MisterDA)
 
+- Stop detecting ocamlci specifically, since there's nothing specific
+  about it. Simply use the `CI` env var to detect CIs.
+  (#397, @MisterDA)
+
 ### 1.7.0 (2023-02-24)
 
 - Allow skipping a test case from inside the test case (#368, @apeschar)
