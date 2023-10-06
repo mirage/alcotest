@@ -10,7 +10,7 @@
 
 - Enable terminal size reporting on macOS and Windows. Also report the
   terminal size even when the test is run buffered by Dune.
-  (#381, @MisterDA)
+  (#381, #396, @MisterDA)
 
 - Allow overriding the number of columns with `ALCOTEST_COLUMNS` env
   var. (#322, #381, @MisterDA)

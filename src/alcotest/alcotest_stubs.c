@@ -35,8 +35,16 @@ CAMLprim value ocaml_alcotest_get_terminal_dimensions(value unit)
 	CAMLparam1(unit);
 	CAMLlocal2(result, pair);
 
+	HANDLE console = CreateFileW(L"CONOUT$", GENERIC_READ|GENERIC_WRITE,
+		FILE_SHARE_READ | FILE_SHARE_WRITE, NULL,
+		OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	HANDLE handle = console == INVALID_HANDLE_VALUE ?
+		GetStdHandle(STD_OUTPUT_HANDLE) : console;
 	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	int success = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
+	int success = GetConsoleScreenBufferInfo(handle, &csbi);
+	if (console != INVALID_HANDLE_VALUE)
+		CloseHandle(console);
+
 	if (success)
 	{
 		pair = caml_alloc_tuple(2);
