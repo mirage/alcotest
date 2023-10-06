@@ -2,7 +2,7 @@ module Types = struct
   type bound = [ `Unlimited | `Limit of int ]
   type filter = name:string -> index:int -> [ `Run | `Skip ]
 
-  type ci = [ `Github_actions | `OCamlci | `Unknown | `Disabled ]
+  type ci = [ `Github_actions | `Unknown | `Disabled ]
   (** All supported Continuous Integration (CI) systems. *)
 
   type t =

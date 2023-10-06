@@ -44,7 +44,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     in
     Cmdliner.Cmd.Env.info "CI" ~doc
 
-  let github_action_env =
+  let github_actions_env =
     let doc =
       Printf.sprintf
         "Whether Alcotest is running in GitHub Actions, if set to %s. Display \
@@ -52,15 +52,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
         (Arg.doc_quote "true")
     in
     Cmdliner.Cmd.Env.info "GITHUB_ACTIONS" ~doc
-
-  let ocamlci_env =
-    let doc =
-      Printf.sprintf
-        "Whether Alcotest is running in OCaml-CI, if set to %s. Display tests \
-         errors."
-        (Arg.doc_quote "true")
-    in
-    Cmdliner.Cmd.Env.info "OCAMLCI" ~doc
 
   let alcotest_source_code_position =
     let doc =
@@ -80,8 +71,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
   let envs =
     [
       ci_env;
-      github_action_env;
-      ocamlci_env;
+      github_actions_env;
       alcotest_source_code_position;
       alcotest_columns;
     ]

@@ -52,23 +52,15 @@ module Key = struct
     type t = ci
 
     let default =
-      let ci =
-        match Sys.getenv "CI" with
-        | "true" -> true
-        | _ | (exception Not_found) -> false
-      and github_actions =
-        match Sys.getenv "GITHUB_ACTIONS" with
-        | "true" -> true
-        | _ | (exception Not_found) -> false
-      and ocamlci =
-        match Sys.getenv "OCAMLCI" with
-        | "true" -> true
+      let getenv var =
+        match Sys.getenv var with
+        | "true" | "True" -> true
         | _ | (exception Not_found) -> false
       in
-      match (ci, github_actions, ocamlci) with
-      | true, true, false -> `Github_actions
-      | true, false, true -> `OCamlci
-      | true, false, false -> `Unknown
+      let ci = getenv "CI" and github_actions = getenv "GITHUB_ACTIONS" in
+      match (ci, github_actions) with
+      | true, true -> `Github_actions
+      | true, false -> `Unknown
       | _ -> `Disabled
   end
 
