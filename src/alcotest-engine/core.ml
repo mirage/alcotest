@@ -363,9 +363,11 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
            too. We don't need to register a channel even if the user specify its own
            [Format.formatter] for [stdout] and/or [stderr]. *)
         flush_all ();
-        Fmt.(pf (t.stderr :> Format.formatter))
-          "%a\n" red
-          "Invalid request (no tests to run, filter skipped everything)!";
+        Fmt.(
+          pf
+            (Global.get_stderr () :> Format.formatter)
+            "%a\n%!" red
+            "Invalid request (no tests to run, filter skipped everything)!");
         exit 1)
       else
         let tests = filter_test_cases ~subst:true filter suite in

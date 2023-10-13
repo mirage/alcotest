@@ -212,7 +212,7 @@ struct
       | 0 -> green_s ppf "Test Successful"
       | n -> red ppf "%d failure%a!" n pp_plural n
     in
-    Fmt.pf ppf "%a in %.3fs. %d test%a run.@\n" pp_failures r.failures r.time
+    Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
       r.success pp_plural r.success
 
   let suite_results ~log_dir config ppf r =
