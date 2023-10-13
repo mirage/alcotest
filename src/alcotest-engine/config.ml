@@ -253,10 +253,22 @@ module User = struct
     bail : Bail.t option;
     record_backtrace : Record_backtrace.t option;
     ci : CI.t option;
+    stdout : Global.stdout;
+    stderr : Global.stderr;
   }
 
   let ( || ) a b =
     let merge_on f = Option.(f a || f b) in
+    let stdout =
+      merge_on @@ fun t ->
+      if t.stdout == Global.ocaml_stdout then None else Some t.stdout
+    in
+    let stderr =
+      merge_on @@ fun t ->
+      if t.stderr == Global.ocaml_stderr then None else Some t.stderr
+    in
+    let stdout = Option.value ~default:Global.ocaml_stdout stdout in
+    let stderr = Option.value ~default:Global.ocaml_stderr stderr in
     {
       and_exit = merge_on (fun t -> t.and_exit);
       verbose = merge_on (fun t -> t.verbose);
@@ -270,9 +282,11 @@ module User = struct
       bail = merge_on (fun t -> t.bail);
       record_backtrace = merge_on (fun t -> t.record_backtrace);
       ci = merge_on (fun t -> t.ci);
+      stdout;
+      stderr;
     }
 
-  let term ~and_exit ~record_backtrace ~ci =
+  let term ~stdout ~stderr ~and_exit ~record_backtrace ~ci =
     let+ verbose = Verbose.term
     and+ compact = Compact.term
     and+ tail_errors = Tail_errors.term
@@ -295,12 +309,15 @@ module User = struct
       bail;
       record_backtrace = Some record_backtrace;
       ci = Some ci;
+      stdout;
+      stderr;
     }
 
   (* Lift a config-sensitive function to one that consumes optional arguments that
      override config defaults. *)
   let kcreate : 'a. (t -> 'a) -> 'a with_options =
-   fun f ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
+   fun f ?(stdout = Global.ocaml_stdout) ?(stderr = Global.ocaml_stderr)
+       ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
        ?filter ?log_dir ?bail ?record_backtrace ?ci ->
     f
       {
@@ -316,6 +333,8 @@ module User = struct
         bail;
         record_backtrace;
         ci;
+        stdout;
+        stderr;
       }
 
   let create : (unit -> t) with_options = kcreate (fun t () -> t)
@@ -325,6 +344,8 @@ module User = struct
     Option.value ~default:Record_backtrace.default t.record_backtrace
 
   let ci t = Option.value ~default:CI.default t.ci
+  let stdout t = t.stdout
+  let stderr t = t.stderr
 end
 
 let apply_defaults ~default_log_dir : User.t -> t =
@@ -341,6 +362,8 @@ let apply_defaults ~default_log_dir : User.t -> t =
        bail;
        record_backtrace;
        ci;
+       stdout;
+       stderr;
      } ->
   let open Key in
   object (self)
@@ -365,4 +388,6 @@ let apply_defaults ~default_log_dir : User.t -> t =
       Option.value ~default:Record_backtrace.default record_backtrace
 
     method ci = Option.value ~default:CI.default ci
+    method stdout = stdout
+    method stderr = stderr
   end

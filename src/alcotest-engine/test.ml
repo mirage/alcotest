@@ -151,8 +151,11 @@ let reject (type a) =
 let show_assert = function
   | "" -> ()
   | msg ->
-      Fmt.(flush stdout) () (* Flush any test stdout preceding the assert *);
-      Format.eprintf "%a %s\n%!" Pp.tag `Assert msg
+      Fmt.(flush (Global.get_stdout () :> Format.formatter))
+        () (* Flush any test stdout preceding the assert *);
+      Format.fprintf
+        (Global.get_stderr () :> Format.formatter)
+        "%a %s\n%!" Pp.tag `Assert msg
 
 let check_err fmt = raise (Core.Check_error fmt)
 
@@ -253,4 +256,3 @@ let match_raises ?here ?pos msg exnp f =
               msg Fmt.exn e)
 
 let skip () = raise Core.Skip
-let () = at_exit (Format.pp_print_flush Format.err_formatter)

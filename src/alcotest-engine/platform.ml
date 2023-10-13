@@ -20,9 +20,13 @@ module type S = sig
       if no width can be determined (e.g. [stdout] is not a TTY). *)
 
   val setup_std_outputs :
-    ?style_renderer:Fmt.style_renderer -> ?utf_8:bool -> unit -> unit
-  (** [setup_std_outputs ~style_renderer ~utf_8 ()] is called at startup of
-      alcotest and sets up the standard streams for colored output. *)
+    ?style_renderer:Fmt.style_renderer ->
+    ?utf_8:bool ->
+    Global.stdout ->
+    Global.stderr ->
+    unit
+  (** [setup_std_outputs ~style_renderer ~utf_8 stdout stderr] is called at
+      startup of alcotest and sets up the standard streams for colored output. *)
 
   val log_trap_supported : bool
   (** Whether or not the test runner should trap test logs. The following
