@@ -22,8 +22,8 @@ module type S = sig
   val setup_std_outputs :
     ?style_renderer:Fmt.style_renderer ->
     ?utf_8:bool ->
-    Global.stdout ->
-    Global.stderr ->
+    Formatters.stdout ->
+    Formatters.stderr ->
     unit
   (** [setup_std_outputs ~style_renderer ~utf_8 stdout stderr] is called at
       startup of alcotest and sets up the standard streams for colored output. *)

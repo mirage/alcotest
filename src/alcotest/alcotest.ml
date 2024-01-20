@@ -97,12 +97,12 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
 
   let with_redirect fd_file fn =
     let* () = M.return () in
-    Fmt.flush (Alcotest_engine.Global.get_stdout () :> Format.formatter) ();
-    Fmt.flush (Alcotest_engine.Global.get_stderr () :> Format.formatter) ();
+    Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
+    Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
     before_test ~output:fd_file ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
-    Fmt.flush (Alcotest_engine.Global.get_stdout () :> Format.formatter) ();
-    Fmt.flush (Alcotest_engine.Global.get_stderr () :> Format.formatter) ();
+    Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
+    Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
     after_test ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
     match r with `Ok x -> x | `Error e -> raise e
 
@@ -117,8 +117,8 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     with Found -> true
 
   let setup_std_outputs ?style_renderer ?utf_8
-      (stdout : Alcotest_engine.Global.stdout)
-      (stderr : Alcotest_engine.Global.stderr) =
+      (stdout : Alcotest_engine.Formatters.stdout)
+      (stderr : Alcotest_engine.Formatters.stderr) =
     let style_renderer oc =
       match style_renderer with
       | Some value -> value

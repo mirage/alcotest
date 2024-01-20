@@ -46,8 +46,8 @@ module V1_types = struct
         used for filtering which tests to run on the CLI. *)
 
     type 'a with_options =
-      ?stdout:Global.stdout ->
-      ?stderr:Global.stderr ->
+      ?stdout:Formatters.stdout ->
+      ?stderr:Formatters.stderr ->
       ?and_exit:bool ->
       ?verbose:bool ->
       ?compact:bool ->

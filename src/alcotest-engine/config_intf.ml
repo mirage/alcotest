@@ -1,6 +1,6 @@
 module Types = struct
-  type stdout = Global.stdout
-  type stderr = Global.stderr
+  type stdout = Formatters.stdout
+  type stderr = Formatters.stderr
   type bound = [ `Unlimited | `Limit of int ]
   type filter = name:string -> index:int -> [ `Run | `Skip ]
 
@@ -57,8 +57,8 @@ module type Config = sig
         rather than returning directly. *)
 
     val term :
-      stdout:Global.stdout ->
-      stderr:Global.stderr ->
+      stdout:Formatters.stdout ->
+      stderr:Formatters.stderr ->
       and_exit:bool ->
       record_backtrace:bool ->
       ci:ci ->
@@ -74,8 +74,8 @@ module type Config = sig
     val and_exit : t -> bool
     val record_backtrace : t -> bool
     val ci : t -> ci
-    val stdout : t -> Global.stdout
-    val stderr : t -> Global.stderr
+    val stdout : t -> Formatters.stdout
+    val stderr : t -> Formatters.stderr
   end
 
   val apply_defaults : default_log_dir:string -> User.t -> t

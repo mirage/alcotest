@@ -253,22 +253,22 @@ module User = struct
     bail : Bail.t option;
     record_backtrace : Record_backtrace.t option;
     ci : CI.t option;
-    stdout : Global.stdout;
-    stderr : Global.stderr;
+    stdout : Formatters.stdout;
+    stderr : Formatters.stderr;
   }
 
   let ( || ) a b =
     let merge_on f = Option.(f a || f b) in
     let stdout =
       merge_on @@ fun t ->
-      if t.stdout == Global.ocaml_stdout then None else Some t.stdout
+      if t.stdout == Formatters.ocaml_stdout then None else Some t.stdout
     in
     let stderr =
       merge_on @@ fun t ->
-      if t.stderr == Global.ocaml_stderr then None else Some t.stderr
+      if t.stderr == Formatters.ocaml_stderr then None else Some t.stderr
     in
-    let stdout = Option.value ~default:Global.ocaml_stdout stdout in
-    let stderr = Option.value ~default:Global.ocaml_stderr stderr in
+    let stdout = Option.value ~default:Formatters.ocaml_stdout stdout in
+    let stderr = Option.value ~default:Formatters.ocaml_stderr stderr in
     {
       and_exit = merge_on (fun t -> t.and_exit);
       verbose = merge_on (fun t -> t.verbose);
@@ -316,7 +316,7 @@ module User = struct
   (* Lift a config-sensitive function to one that consumes optional arguments that
      override config defaults. *)
   let kcreate : 'a. (t -> 'a) -> 'a with_options =
-   fun f ?(stdout = Global.ocaml_stdout) ?(stderr = Global.ocaml_stderr)
+   fun f ?(stdout = Formatters.ocaml_stdout) ?(stderr = Formatters.ocaml_stderr)
        ?and_exit ?verbose ?compact ?tail_errors ?quick_only ?show_errors ?json
        ?filter ?log_dir ?bail ?record_backtrace ?ci ->
     f

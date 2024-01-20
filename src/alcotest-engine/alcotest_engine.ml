@@ -11,4 +11,4 @@ module Private = struct
   module Pp = Pp
 end
 
-module Global = Global
+module Formatters = Formatters

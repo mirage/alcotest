@@ -29,7 +29,7 @@ let () =
       (let buf = Buffer.create 0 in
        let ppf = Format.formatter_of_buffer buf in
        Fmt.set_style_renderer ppf
-         Fmt.(style_renderer (Global.get_stderr () :> Format.formatter));
+         Fmt.(style_renderer (Formatters.get_stderr () :> Format.formatter));
        fun error ->
          Fmt.pf ppf "Alcotest assertion failure@.%a@." error ();
          let contents = Buffer.contents buf in
@@ -78,8 +78,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     config : Config.t;
     run_id : string;
     log_trap : Log_trap.t;
-    stdout : Global.stdout;
-    stderr : Global.stderr;
+    stdout : Formatters.stdout;
+    stderr : Formatters.stderr;
   }
 
   let gen_run_id =
@@ -270,7 +270,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       if currently_bailing state then
         match state.tests_so_far - Option.get_exn state.first_error - 1 with
         | n when n > 0 ->
-            Global.pr "@\n  %a@\n"
+            Formatters.pr "@\n  %a@\n"
               Fmt.(styled `Faint string)
               (Fmt.str "... with %d subsequent test%a skipped." n Pp.pp_plural n)
         | 0 -> ()
@@ -365,7 +365,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         flush_all ();
         Fmt.(
           pf
-            (Global.get_stderr () :> Format.formatter)
+            (Formatters.get_stderr () :> Format.formatter)
             "%a\n%!" red
             "Invalid request (no tests to run, filter skipped everything)!");
         exit 1)
@@ -403,30 +403,31 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let t = empty ~config ~trap_logs:(not config#verbose) ~suite_name:name in
     let t = register_all t tl in
-    let stdout' = Global.get_stdout () in
-    let stderr' = Global.get_stderr () in
-    Global.set_stdout t.stdout;
-    Global.set_stderr t.stderr;
+    let stdout' = Formatters.get_stdout () in
+    let stderr' = Formatters.get_stderr () in
+    Formatters.set_stdout t.stdout;
+    Formatters.set_stderr t.stderr;
     let+ test_failures =
       (* Only print inside the concurrency monad *)
       let* () = M.return () in
       let open Fmt in
       if config#ci = `Github_actions then
-        Global.pr "::group::{%a}\n" Suite.pp_name t.suite;
-      Global.pr "Testing %a.@,"
+        Formatters.pr "::group::{%a}\n" Suite.pp_name t.suite;
+      Formatters.pr "Testing %a.@,"
         (Pp.quoted Fmt.(styled `Bold Suite.pp_name))
         t.suite;
-      Global.pr "@[<v>%a@]"
+      Formatters.pr "@[<v>%a@]"
         (styled `Faint (fun ppf () ->
              pf ppf "This run has ID %a.@,@," (Pp.quoted string) t.run_id))
         ();
       let r = run_tests t () args in
-      if config#ci = `Github_actions then Global.pr "::endgroup::\n";
+      if config#ci = `Github_actions then Formatters.pr "::endgroup::\n";
       r
     in
-    at_exit (Format.pp_print_flush (Global.get_stderr () :> Format.formatter));
-    Global.set_stdout stdout';
-    Global.set_stderr stderr';
+    at_exit
+      (Format.pp_print_flush (Formatters.get_stderr () :> Format.formatter));
+    Formatters.set_stdout stdout';
+    Formatters.set_stderr stderr';
     match (test_failures, t.config#and_exit) with
     | 0, true -> exit 0
     | 0, false -> ()

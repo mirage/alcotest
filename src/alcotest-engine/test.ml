@@ -151,10 +151,10 @@ let reject (type a) =
 let show_assert = function
   | "" -> ()
   | msg ->
-      Fmt.(flush (Global.get_stdout () :> Format.formatter))
+      Fmt.(flush (Formatters.get_stdout () :> Format.formatter))
         () (* Flush any test stdout preceding the assert *);
       Format.fprintf
-        (Global.get_stderr () :> Format.formatter)
+        (Formatters.get_stderr () :> Format.formatter)
         "%a %s\n%!" Pp.tag `Assert msg
 
 let check_err fmt = raise (Core.Check_error fmt)

@@ -55,4 +55,4 @@ module Private : sig
   module Pp = Pp
 end
 
-module Global = Global
+module Formatters = Formatters
