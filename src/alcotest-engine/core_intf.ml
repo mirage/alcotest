@@ -46,6 +46,8 @@ module V1_types = struct
         used for filtering which tests to run on the CLI. *)
 
     type 'a with_options =
+      ?stdout:Formatters.stdout ->
+      ?stderr:Formatters.stderr ->
       ?and_exit:bool ->
       ?verbose:bool ->
       ?compact:bool ->
@@ -62,6 +64,10 @@ module V1_types = struct
     (** The various options taken by the tests runners {!run} and
         {!run_with_args}:
 
+        - [stdout] (default to [Fmt.stdout]). The formatter used to print on the
+          standard output.
+        - [stderr] (default to [Fmt.stderr]). The formatter used to print ont
+          the standard error output.
         - [and_exit] (default [true]). Once the tests have completed, exit with
           return code [0] if all tests passed, otherwise [1].
         - [verbose] (default [false]). Display the test std.out and std.err

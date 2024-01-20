@@ -4,7 +4,7 @@ module Make (C : Mirage_clock.MCLOCK) = struct
     let getcwd () = ""
     let stdout_isatty () = true
     let stdout_columns () = None
-    let setup_std_outputs ?style_renderer:_ ?utf_8:_ () = ()
+    let setup_std_outputs ?style_renderer:_ ?utf_8:_ _stdout _stderr = ()
 
     (* Pre-4.07 doesn't support empty variant types. *)
     type file_descriptor = { empty : 'a. 'a }

@@ -1,4 +1,6 @@
 module Types = struct
+  type stdout = Formatters.stdout
+  type stderr = Formatters.stderr
   type bound = [ `Unlimited | `Limit of int ]
   type filter = name:string -> index:int -> [ `Run | `Skip ]
 
@@ -6,7 +8,9 @@ module Types = struct
   (** All supported Continuous Integration (CI) systems. *)
 
   type t =
-    < and_exit : bool
+    < stdout : stdout
+    ; stderr : stderr
+    ; and_exit : bool
     ; verbose : bool
     ; compact : bool
     ; tail_errors : bound
@@ -20,6 +24,8 @@ module Types = struct
     ; ci : ci >
 
   type 'a with_options =
+    ?stdout:stdout ->
+    ?stderr:stderr ->
     ?and_exit:bool ->
     ?verbose:bool ->
     ?compact:bool ->
@@ -51,7 +57,12 @@ module type Config = sig
         rather than returning directly. *)
 
     val term :
-      and_exit:bool -> record_backtrace:bool -> ci:ci -> t Cmdliner.Term.t
+      stdout:Formatters.stdout ->
+      stderr:Formatters.stderr ->
+      and_exit:bool ->
+      record_backtrace:bool ->
+      ci:ci ->
+      t Cmdliner.Term.t
     (** [term] provides a command-line interface for building configs. *)
 
     val ( || ) : t -> t -> t
@@ -63,6 +74,8 @@ module type Config = sig
     val and_exit : t -> bool
     val record_backtrace : t -> bool
     val ci : t -> ci
+    val stdout : t -> Formatters.stdout
+    val stderr : t -> Formatters.stderr
   end
 
   val apply_defaults : default_log_dir:string -> User.t -> t

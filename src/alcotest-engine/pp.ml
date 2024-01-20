@@ -241,6 +241,6 @@ struct
         Format.pp_close_box ppf ()
 
   let user_error msg =
-    Fmt.epr "%a: %s\n" Fmt.(styled `Red string) "ERROR" msg;
+    Formatters.epr "%a: %s\n" Fmt.(styled `Red string) "ERROR" msg;
     exit 1
 end
