@@ -80,8 +80,11 @@ let stacktrace_replace =
     ^^ rep1 print
     ^^ str "\""
     ^^ opt (str " (inlined)")
-    ^^ str ", line "
-    ^^ rep1 digit
+    ^^ alt
+         [
+           seq [str ", line "; rep1 digit];
+           seq [str ", lines "; rep1 digit; char '-'; rep1 digit];
+         ]
     ^^ str ", characters "
     ^^ rep1 digit
     ^^ str "-"
