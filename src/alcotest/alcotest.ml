@@ -21,7 +21,7 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
             mk path names
       in
       match String.cuts ~empty:true ~sep path with
-      | "" :: xs -> mk sep xs
+      | "" :: xs -> mk "" xs
       (* check for Windows drive letter *)
       | dl :: xs when is_win_drive_letter dl -> mk dl xs
       | xs -> mk "." xs
