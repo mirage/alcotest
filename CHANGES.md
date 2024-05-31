@@ -10,10 +10,13 @@
 
 - Enable terminal size reporting on macOS and Windows. Also report the
   terminal size even when the test is run buffered by Dune.
-  (#381, @MisterDA)
+  (#381, #396, @MisterDA)
 
 - Allow overriding the number of columns with `ALCOTEST_COLUMNS` env
   var. (#322, #381, @MisterDA)
+
+- Be able to allocate and use user's formatters for stdout/stderr
+  (#399, @dinosaure)
 
 - Stop detecting ocamlci specifically, since there's nothing specific
   about it. Simply use the `CI` env var to detect CIs. Improve CI

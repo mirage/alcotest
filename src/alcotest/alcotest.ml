@@ -97,16 +97,62 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
 
   let with_redirect fd_file fn =
     let* () = M.return () in
-    Fmt.(flush stdout) ();
-    Fmt.(flush stderr) ();
-    before_test ~output:fd_file ~stdout ~stderr;
+    Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
+    Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
+    before_test ~output:fd_file ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
-    Fmt.(flush stdout ());
-    Fmt.(flush stderr ());
-    after_test ~stdout ~stderr;
+    Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
+    Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
+    after_test ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
     match r with `Ok x -> x | `Error e -> raise e
 
-  let setup_std_outputs = Fmt_tty.setup_std_outputs
+  let contains s1 s2 =
+    let exception Found in
+    try
+      let len = String.length s2 in
+      for i = 0 to String.length s1 - len do
+        if String.sub s1 i len = s2 then raise_notrace Found
+      done;
+      false
+    with Found -> true
+
+  let setup_std_outputs ?style_renderer ?utf_8
+      (stdout : Alcotest_engine.Formatters.stdout)
+      (stderr : Alcotest_engine.Formatters.stderr) =
+    let style_renderer oc =
+      match style_renderer with
+      | Some value -> value
+      | None ->
+          let dumb =
+            match Sys.getenv "TERM" with
+            | "dumb" | "" -> true
+            | _ -> false
+            | exception _ -> true
+          in
+          let is_a_tty =
+            try Unix.(isatty (descr_of_out_channel oc))
+            with Unix.Unix_error _ -> false
+          in
+          if (not dumb) && is_a_tty then `Ansi_tty else `None
+    in
+    let utf_8 =
+      match utf_8 with
+      | Some value -> value
+      | None ->
+          let has_utf_8 var =
+            try contains "UTF-8" (String.uppercase_ascii (Sys.getenv var))
+            with Not_found -> false
+          in
+          has_utf_8 "LANG" || has_utf_8 "LC_ALL" || has_utf_8 "LC_CTYPE"
+    in
+    Fmt.set_style_renderer
+      (stdout :> Format.formatter)
+      (style_renderer Stdlib.stdout);
+    Fmt.set_utf_8 (stdout :> Format.formatter) utf_8;
+    Fmt.set_style_renderer
+      (stderr :> Format.formatter)
+      (style_renderer Stdlib.stderr);
+    Fmt.set_utf_8 (stderr :> Format.formatter) utf_8
 
   (* Implementation similar to that of [Bos.Os.Dir]. *)
   let home_directory () =
