@@ -28,7 +28,8 @@ let () =
     lazy
       (let buf = Buffer.create 0 in
        let ppf = Format.formatter_of_buffer buf in
-       Fmt.set_style_renderer ppf Fmt.(style_renderer stderr);
+       Fmt.set_style_renderer ppf
+         Fmt.(style_renderer (Formatters.get_stderr () :> Format.formatter));
        fun error ->
          Fmt.pf ppf "Alcotest assertion failure@.%a@." error ();
          let contents = Buffer.contents buf in
@@ -77,6 +78,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     config : Config.t;
     run_id : string;
     log_trap : Log_trap.t;
+    stdout : Formatters.stdout;
+    stderr : Formatters.stderr;
   }
 
   let gen_run_id =
@@ -108,7 +111,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           Log_trap.active ~root:config#log_dir ~uuid:run_id
             ~suite_name:(Suite.name suite)
     in
-    { suite; errors; max_label; config; run_id; log_trap }
+    let stdout = config#stdout in
+    let stderr = config#stderr in
+    { suite; errors; max_label; config; run_id; log_trap; stdout; stderr }
 
   let compare_speed_level s1 s2 =
     match (s1, s2) with
@@ -200,7 +205,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           (* When capturing the logs of a test, also add the result of the test
              at the end. *)
           let+ result = fn args in
-          Pp.rresult_error Fmt.stdout result;
+          Pp.rresult_error (t.stdout :> Format.formatter) result;
           result)
         ()
 
@@ -210,7 +215,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let print_event =
       pp_event t
         ~prior_error:(Option.is_some first_error)
-        ~tests_so_far ~isatty:(P.stdout_isatty ()) Fmt.stdout
+        ~tests_so_far ~isatty:(P.stdout_isatty ())
+        (t.stdout :> Format.formatter)
     in
     let* () = M.return () in
     print_event (`Start test.name);
@@ -218,7 +224,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       match test.fn with
       | `Skip -> M.return (`Skip, false)
       | `Run fn ->
-          Fmt.(flush stdout) () (* Show event before any test stderr *);
+          Fmt.(flush (t.stdout :> Format.formatter))
+            () (* Show event before any test stderr *);
           let+ result = with_captured_logs t test.name fn args in
           (* Store errors *)
           let errored : bool =
@@ -232,8 +239,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
             errored
           in
           (* Show any remaining test output before the event *)
-          Fmt.(flush stdout ());
-          Fmt.(flush stderr ());
+          Fmt.(flush (t.stdout :> Format.formatter) ());
+          Fmt.(flush (t.stderr :> Format.formatter) ());
           (result, errored)
     in
     print_event (`Result (test.name, result));
@@ -263,7 +270,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       if currently_bailing state then
         match state.tests_so_far - Option.get_exn state.first_error - 1 with
         | n when n > 0 ->
-            Fmt.pr "@\n  %a@\n"
+            Formatters.pr "@\n  %a@\n"
               Fmt.(styled `Faint string)
               (Fmt.str "... with %d subsequent test%a skipped." n Pp.pp_plural n)
         | 0 -> ()
@@ -313,7 +320,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     Suite.tests t.suite
     |> List.map (fun t -> t.Suite.name)
     |> List.sort Test_name.compare
-    |> Fmt.(list ~sep:(const string "\n") (pp_info t) stdout)
+    |> Fmt.(
+         list ~sep:(const string "\n") (pp_info t)
+           (t.stdout :> Format.formatter))
 
   let register (type a) (t : a t) (name, (ts : a test_case list)) : a t =
     let max_label = max t.max_label (String.length_utf8 name) in
@@ -348,16 +357,23 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let is_empty = filter_test_cases ~subst:false filter suite = [] in
     let+ result =
       if is_empty && Option.is_some filter then (
+        (* NOTE(dinosaure): [Stdlib.flush_all] is really deep in OCaml and try to flush
+           all opened file descriptors (including [1] and [2]). Even if the user create
+           its own [Format.formatter], if it uses a file-descriptor, it will be flushed
+           too. We don't need to register a channel even if the user specify its own
+           [Format.formatter] for [stdout] and/or [stderr]. *)
         flush_all ();
-        Fmt.(pf stderr)
-          "%a\n" red
-          "Invalid request (no tests to run, filter skipped everything)!";
+        Fmt.(
+          pf
+            (Formatters.get_stderr () :> Format.formatter)
+            "%a\n%!" red
+            "Invalid request (no tests to run, filter skipped everything)!");
         exit 1)
       else
         let tests = filter_test_cases ~subst:true filter suite in
         result t tests args
     in
-    (pp_suite_results t) Fmt.stdout result;
+    (pp_suite_results t) (t.stdout :> Format.formatter) result;
     result.failures
 
   let default_log_dir () =
@@ -387,21 +403,31 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let t = empty ~config ~trap_logs:(not config#verbose) ~suite_name:name in
     let t = register_all t tl in
+    let stdout' = Formatters.get_stdout () in
+    let stderr' = Formatters.get_stderr () in
+    Formatters.set_stdout t.stdout;
+    Formatters.set_stderr t.stderr;
     let+ test_failures =
       (* Only print inside the concurrency monad *)
       let* () = M.return () in
       let open Fmt in
       if config#ci = `Github_actions then
-        pr "::group::{%a}\n" Suite.pp_name t.suite;
-      pr "Testing %a.@," (Pp.quoted Fmt.(styled `Bold Suite.pp_name)) t.suite;
-      pr "@[<v>%a@]"
+        Formatters.pr "::group::{%a}\n" Suite.pp_name t.suite;
+      Formatters.pr "Testing %a.@,"
+        (Pp.quoted Fmt.(styled `Bold Suite.pp_name))
+        t.suite;
+      Formatters.pr "@[<v>%a@]"
         (styled `Faint (fun ppf () ->
              pf ppf "This run has ID %a.@,@," (Pp.quoted string) t.run_id))
         ();
       let r = run_tests t () args in
-      if config#ci = `Github_actions then pr "::endgroup::\n";
+      if config#ci = `Github_actions then Formatters.pr "::endgroup::\n";
       r
     in
+    at_exit
+      (Format.pp_print_flush (Formatters.get_stderr () :> Format.formatter));
+    Formatters.set_stdout stdout';
+    Formatters.set_stderr stderr';
     match (test_failures, t.config#and_exit) with
     | 0, true -> exit 0
     | 0, false -> ()
@@ -410,11 +436,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let run' config name (tl : unit test list) = run_with_args' config name () tl
 
-  let run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
-      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci =
-    Config.User.kcreate run_with_args' ?and_exit ?verbose ?compact ?tail_errors
+  let run_with_args ?stdout ?stderr ?and_exit ?verbose ?compact ?tail_errors
       ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
-      ?ci
+      ?ci =
+    Config.User.kcreate run_with_args' ?stdout ?stderr ?and_exit ?verbose
+      ?compact ?tail_errors ?quick_only ?show_errors ?json ?filter ?log_dir
+      ?bail ?record_backtrace ?ci
 
   let run = Config.User.kcreate run'
 end

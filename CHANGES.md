@@ -15,6 +15,9 @@
 - Allow overriding the number of columns with `ALCOTEST_COLUMNS` env
   var. (#322, #381, @MisterDA)
 
+- Be able to allocate and use user's formatters for stdout/stderr
+  (#399, @dinosaure)
+
 ### 1.7.0 (2023-02-24)
 
 - Allow skipping a test case from inside the test case (#368, @apeschar)
