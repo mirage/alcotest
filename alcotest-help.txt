@@ -108,7 +108,3 @@ ENVIRONMENT
            Whether Alcotest is running in GitHub Actions, if set to 'true'.
            Display tests errors and outputs GitHub Actions annotations.
 
-       OCAMLCI
-           Whether Alcotest is running in OCaml-CI, if set to 'true'. Display
-           tests errors.
-
