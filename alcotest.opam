@@ -32,6 +32,7 @@ depends: [
 ]
 conflicts: [
   "result" {< "1.5"}
+  "js_of_ocaml-compiler" {< "5.8"}
 ]
 build: [
   ["dune" "subst"] {dev}

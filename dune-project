@@ -34,6 +34,7 @@ tests to run.
   ocaml-syntax-shims)
  (conflicts
   (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
+  (js_of_ocaml-compiler (< 5.8)) ;; requirement for the js stubs
   ))
 
 (package
