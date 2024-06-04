@@ -46,7 +46,7 @@ let get ?(__FUNCTION__ = "Alcotest_engine__Test.check") () =
             None
         | Some _ ->
             Option.map
-              (fun { filename; line_number; start_char; end_char = _ } ->
+              (fun { filename; line_number; start_char; _ } ->
                 {
                   Lexing.pos_fname = filename;
                   pos_lnum = line_number;
