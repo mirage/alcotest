@@ -19,7 +19,7 @@ jobs:
         runtest:
           - true
         ocaml-compiler:
-          - "5.0"
+          - "5.x"
           - "4.14"
         include:
           - os: macos-latest
