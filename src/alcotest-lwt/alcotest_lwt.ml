@@ -27,8 +27,38 @@ module V1 = struct
   module Tester = Alcotest_engine.V1.Cli.Make (Alcotest.Unix_platform) (Lwt)
   include Tester
 
+  type 'a case = ?speed:speed_level -> string -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> unit
+  type 'a group = string -> ('a case -> unit) -> unit
+
   let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
   let test_case n s f = test_case n s (run_test f)
+
+  let suite_testlist register =
+    let groups = ref [] in
+    let each_group name register =
+      let cases = ref [] in
+      let each_case ?(speed = `Quick) name func =
+        cases := test_case name speed func :: !cases
+      in
+      register each_case;
+      groups := (name, List.rev !cases) :: !groups
+    in
+    register each_group;
+    List.rev !groups
+
+  let suite ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+    ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci ?argv name
+    register =
+    run ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci ?argv name
+      (suite_testlist register)
+
+  let suite_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+    ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci ?argv name
+    term register =
+    run_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci ?argv name
+      term (suite_testlist register)
 end
 
 include V1
