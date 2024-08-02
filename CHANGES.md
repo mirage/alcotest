@@ -1,4 +1,4 @@
-### unreleased
+### 1.8.0 (2024-07-25)
 
 - Add `match_raises`, a generalized version of `check_raises`
   (#88, #386, @JoanThibault)
