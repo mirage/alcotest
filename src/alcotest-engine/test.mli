@@ -107,6 +107,10 @@ val neg : 'a testable -> 'a testable
 (** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it is
     [false] when [t] is [true]. *)
 
+val contramap : ('b -> 'a) -> 'a testable -> 'b testable
+(** [contramap f t] lift a ['a testable] to a ['b testable],
+    converting ['b] to ['a]. *)
+
 (** {1 Assertion functions}
 
     Functions for asserting various properties within unit-tests. A failing
