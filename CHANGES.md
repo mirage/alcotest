@@ -1,3 +1,7 @@
+### unreleased
+
+- Add `seq`, a testable for `Seq.t` and `contramap` (#412 @xvw)
+
 ### 1.8.0 (2024-07-25)
 
 - Add `match_raises`, a generalized version of `check_raises`
