@@ -43,8 +43,7 @@ let testable (type a) (pp : a Fmt.t) (equal : a -> a -> bool) : a testable =
   (module M)
 
 let contramap f t =
-  let pp ppf = (Fmt.using f (pp t)) ppf
-  and equal a b = (equal t (f a) (f b)) in
+  let pp ppf = (Fmt.using f (pp t)) ppf and equal a b = equal t (f a) (f b) in
   testable pp equal
 
 let int32 = testable Fmt.int32 ( = )
@@ -82,6 +81,15 @@ let list e =
     | _ -> false
   in
   testable (Fmt.Dump.list (pp e)) eq
+
+let seq e =
+  let rec eq s1 s2 =
+    match (Seq.uncons s1, Seq.uncons s2) with
+    | Some (x, xs), Some (y, ys) -> equal e x y && eq xs ys
+    | None, None -> true
+    | _ -> false
+  in
+  testable (Fmt.Dump.seq (pp e)) eq
 
 let slist (type a) (a : a testable) compare =
   let l = list a in

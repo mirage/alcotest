@@ -74,6 +74,9 @@ val unit : unit testable
 val list : 'a testable -> 'a list testable
 (** [list t] tests lists of [t]s. *)
 
+val seq : 'a testable -> 'a Seq.t testable
+(** [seq t] tests sequence of [t]s. *)
+
 val slist : 'a testable -> ('a -> 'a -> int) -> 'a list testable
 (** [slist t comp] tests sorted lists of [t]s. The list are sorted using [comp]. *)
 
