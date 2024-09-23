@@ -74,6 +74,9 @@ val unit : unit testable
 val list : 'a testable -> 'a list testable
 (** [list t] tests lists of [t]s. *)
 
+val seq : 'a testable -> 'a Seq.t testable
+(** [seq t] tests sequence of [t]s. *)
+
 val slist : 'a testable -> ('a -> 'a -> int) -> 'a list testable
 (** [slist t comp] tests sorted lists of [t]s. The list are sorted using [comp]. *)
 
@@ -106,6 +109,9 @@ val reject : 'a testable
 val neg : 'a testable -> 'a testable
 (** [neg t] is [t]'s negation: it is [true] when [t] is [false] and it is
     [false] when [t] is [true]. *)
+
+val map : ('b -> 'a) -> 'a testable -> 'b testable
+(** [map f t] lift a ['a testable] to a ['b testable], converting ['b] to ['a]. *)
 
 (** {1 Assertion functions}
 
