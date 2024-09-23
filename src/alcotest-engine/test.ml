@@ -42,7 +42,7 @@ let testable (type a) (pp : a Fmt.t) (equal : a -> a -> bool) : a testable =
   end in
   (module M)
 
-let contramap f t =
+let map f t =
   let pp ppf = (Fmt.using f (pp t)) ppf and equal a b = equal t (f a) (f b) in
   testable pp equal
 
