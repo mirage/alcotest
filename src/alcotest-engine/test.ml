@@ -84,9 +84,9 @@ let list e =
 
 let seq e =
   let rec eq s1 s2 =
-    match (Seq.uncons s1, Seq.uncons s2) with
-    | Some (x, xs), Some (y, ys) -> equal e x y && eq xs ys
-    | None, None -> true
+    match (s1 (), s2 ()) with
+    | Seq.Cons (x, xs), Seq.Cons (y, ys) -> equal e x y && eq xs ys
+    | Nil, Nil -> true
     | _ -> false
   in
   testable (Fmt.Dump.seq (pp e)) eq
