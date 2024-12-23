@@ -111,7 +111,6 @@ end
 
 module type Core = sig
   exception Check_error of unit Fmt.t
-  exception Skip
 
   module V1 : sig
     module type S = V1_types.S
@@ -122,5 +121,7 @@ module type Core = sig
         [('a -> unit M.t)] within a given concurrency monad [M.t]. The [run] and
         [run_with_args] functions must be scheduled in a global event loop.
         Intended for use by the {!Alcotest_lwt} and {!Alcotest_async} backends. *)
+
+    exception Skip
   end
 end

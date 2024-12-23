@@ -268,4 +268,4 @@ let match_raises ?here ?pos msg exnp f =
             Fmt.pf ppf "%t%a %s: got %a." (pp_location ?here ?pos) Pp.tag `Fail
               msg Fmt.exn e)
 
-let skip () = raise Core.Skip
+let skip () = raise Core.V1.Skip
