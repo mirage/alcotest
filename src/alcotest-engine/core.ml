@@ -449,4 +449,6 @@ end
 module V1 = struct
   include V1_types
   module Make = Make
+
+  exception Skip = Skip
 end
