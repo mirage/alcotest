@@ -1,5 +1,5 @@
 let to_test () = raise (Failure "")
-let expect_failure = function Failure _ -> false | _ -> true
+let expect_failure = function Failure _ -> true | _ -> false
 let test () = Alcotest.match_raises "Generates Failure" expect_failure to_test
 
 let () =
@@ -7,6 +7,6 @@ let () =
     [
       ( "matches_raises",
         [
-          Alcotest.test_case "False means the exception is expected" `Quick test;
+          Alcotest.test_case "True means the exception is expected" `Quick test;
         ] );
     ]

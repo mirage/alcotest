@@ -158,9 +158,9 @@ val check_raises : (string -> exn -> (unit -> unit) -> unit) extra_info
 
 val match_raises :
   (string -> (exn -> bool) -> (unit -> unit) -> unit) extra_info
-(** [match_raises msg exception_is_unexpected f] Runs [f ()], and passes the
-    raised exception to [exception_is_unexpected]. The check fails when no
-    exception is raised, or [exception_is_unexpected] returns true. *)
+(** [match_raises msg exception_is_expected f] Runs [f ()], and passes the
+    raised exception to [exception_is_expected]. The check fails when no
+    exception is raised, or [exception_is_expected] returns false. *)
 
 val skip : unit -> 'a
 (** Skip the current test case.
