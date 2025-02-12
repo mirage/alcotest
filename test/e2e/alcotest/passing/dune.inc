@@ -15,6 +15,7 @@
    isatty
    json_output
    list_tests
+   match_raises
    only_monadic_effects
    quick_only
    quick_only_regex
@@ -41,6 +42,7 @@
    isatty
    json_output
    list_tests
+   match_raises
    only_monadic_effects
    quick_only
    quick_only_regex
@@ -620,6 +622,44 @@
  (package alcotest)
  (action
    (diff list_tests-js.expected list_tests-js.processed)))
+
+(rule
+ (target match_raises.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:match_raises.exe})))))
+
+(rule
+ (target match_raises.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:match_raises.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff match_raises.expected match_raises.processed)))
+
+(rule
+ (target match_raises-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:match_raises.bc.js})))))
+
+(rule
+ (target match_raises-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:match_raises-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff match_raises-js.expected match_raises-js.processed)))
 
 (rule
  (target only_monadic_effects.actual)

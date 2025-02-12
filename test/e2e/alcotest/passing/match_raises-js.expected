@@ -1,0 +1,7 @@
+Testing `Exceptions'.
+This run has ID `<uuid>'.
+
+  [OK]          matches_raises          0   False means the exception is expe...
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 1 test run.
