@@ -263,7 +263,7 @@ let match_raises ?here ?pos msg exnp f =
           Fmt.pf ppf "%t%a %s: got nothing." (pp_location ?here ?pos) Pp.tag
             `Fail msg)
   | Some e ->
-      if exnp e then
+      if not (exnp e) then
         check_err (fun ppf () ->
             Fmt.pf ppf "%t%a %s: got %a." (pp_location ?here ?pos) Pp.tag `Fail
               msg Fmt.exn e)

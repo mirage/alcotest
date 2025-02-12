@@ -1,6 +1,9 @@
 ### unreleased
 
 - Add `seq`, a testable for `Seq.t` and `contramap` (#412 @xvw)
+- BREAKING: `match_raises` now expects the user-defined function to return
+  true for expected exceptions. Previously false was interpreted as an
+  expected exception. (#418, #419, @psafont)
 
 ### 1.8.0 (2024-07-25)
 
