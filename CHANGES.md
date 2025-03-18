@@ -1,10 +1,10 @@
-### unreleased
+### 1.9.0 (2025-03-13)
 
 - Add `seq`, a testable for `Seq.t` and `contramap` (#412 @xvw)
-- BREAKING: `match_raises` now expects the user-defined function to return
+- Expose the `V1.Skip` exception (#415, #416, @Khady)
+- BREAKING FIX: `match_raises` now expects the user-defined function to return
   true for expected exceptions. Previously false was interpreted as an
   expected exception. (#418, #419, @psafont)
-- Expose the `V1.Skip` exception (#415, #416, @Khady)
 
 ### 1.8.0 (2024-07-25)
 
