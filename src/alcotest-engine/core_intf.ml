@@ -91,8 +91,14 @@ module V1_types = struct
         - [ci] (default auto-detected). Whether to enable specific logging for a
           CI system. *)
 
+    type 'a case = ?speed:speed_level -> string -> ('a -> return) -> unit
+    type 'a group = string -> ('a case -> unit) -> unit
+
     val run : (string -> unit test list -> return) with_options
     val run_with_args : (string -> 'a -> 'a test list -> return) with_options
+    val suite_testlist : ('a group -> unit) -> 'a test list
+    val suite_with_args : (string -> 'a -> ('a group -> unit) -> return) with_options
+    val suite : (string -> (unit group -> unit) -> return) with_options
   end
 
   module type MAKER = functor (_ : Platform.MAKER) (M : Monad.S) -> sig

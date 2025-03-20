@@ -1,0 +1,4 @@
+examples/bad/bad.ml
+examples/lwt/test.ml
+examples/floats.ml
+examples/simple.ml
