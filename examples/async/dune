@@ -1,0 +1,13 @@
+(test
+ (name test)
+ (modes exe)
+ (preprocess
+  (pps ppx_jane))
+ (libraries
+  alcotest
+  alcotest-async
+  async
+  async_kernel
+  async_unix
+  core
+  core_unix.time_float_unix))
