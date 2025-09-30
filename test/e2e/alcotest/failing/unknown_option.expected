@@ -1,3 +1,2 @@
-unknown_option.<ext>: unknown option '--dry-runn'.
-Usage: unknown_option.<ext> [COMMAND] …
-Try 'unknown_option.<ext> --help' for more information.
+Usage: [01munknown_option.<ext>[m [[01m--help[m] [[04mCOMMAND[m] …
+unknown_option.<ext>: [31munknown[m option [01m--dry-runn[m
