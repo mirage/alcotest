@@ -45,7 +45,7 @@ tests to run.
  (depends
   (re :with-test)
   (fmt :with-test)
-  (cmdliner (and :with-test (>= 2.0.0)))
+  (cmdliner (and :with-test (>= 1.2.0)))
   (core (>= v0.16.0))
   (core_unix (>= v0.16.0))
   base
@@ -62,7 +62,7 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner (and :with-test (>= 2.0.0)))
+  (cmdliner (and :with-test (>= 1.2.0)))
   fmt
   (ocaml (>= 4.08.0))
   (alcotest (= :version))
@@ -76,7 +76,7 @@ tests to run.
  (documentation "https://mirage.github.io/alcotest")
  (depends
   (re :with-test)
-  (cmdliner (and :with-test (>= 2.0.0)))
+  (cmdliner (and :with-test (>= 1.2.0)))
   fmt
   (ocaml (>= 4.08.0))
   (alcotest (= :version))
@@ -95,4 +95,4 @@ tests to run.
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 2.0.0)))))
+  (cmdliner (and :with-test (>= 1.2.0)))))
