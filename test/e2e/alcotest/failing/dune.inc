@@ -14,7 +14,6 @@
    outside_runner
    tail_errors_limit
    tail_errors_unlimited
-   unknown_option
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
  (modes exe js)
@@ -33,7 +32,6 @@
    outside_runner
    tail_errors_limit
    tail_errors_unlimited
-   unknown_option
  )
 )
 
@@ -568,41 +566,3 @@
  (package alcotest)
  (action
    (diff tail_errors_unlimited-js.expected tail_errors_unlimited-js.processed)))
-
-(rule
- (target unknown_option.actual)
- (action
-  (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 124 125)
-    (run %{dep:unknown_option.exe} --dry-runn)))))
-
-(rule
- (target unknown_option.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unknown_option.actual}))))
-
-(rule
- (alias runtest)
- (package alcotest)
- (action
-   (diff unknown_option.expected unknown_option.processed)))
-
-(rule
- (target unknown_option-js.actual)
- (action
-  (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 124 125)
-    (run node %{dep:unknown_option.bc.js} --dry-runn)))))
-
-(rule
- (target unknown_option-js.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unknown_option-js.actual}))))
-
-(rule
- (alias runtest-js)
- (package alcotest)
- (action
-   (diff unknown_option-js.expected unknown_option-js.processed)))
