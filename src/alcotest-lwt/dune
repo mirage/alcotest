@@ -2,6 +2,7 @@
  (name alcotest_lwt)
  (public_name alcotest-lwt)
  (libraries
+  cmdliner
   logs
   lwt
   fmt

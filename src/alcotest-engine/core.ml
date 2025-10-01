@@ -65,6 +65,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   let test_case n s f = (n, s, f)
 
   type 'a test = string * 'a test_case list
+  type 'a case = ?speed:speed_level -> string -> 'a run -> unit
+  type 'a group = string -> ('a case -> unit) -> unit
 
   (* global state *)
   type 'a t = {
@@ -444,6 +446,31 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       ?bail ?record_backtrace ?ci
 
   let run = Config.User.kcreate run'
+
+  let suite_testlist register =
+    let groups = ref [] in
+    let each_group name register =
+      let cases = ref [] in
+      let each_case ?(speed = `Quick) name func =
+        cases := test_case name speed func :: !cases
+      in
+      register each_case;
+      groups := (name, List.rev !cases) :: !groups
+    in
+    register each_group;
+    List.rev !groups
+
+  let suite_with_args' config name args register =
+    run_with_args' config name args (suite_testlist register)
+
+  let suite_with_args ?and_exit ?verbose ?compact ?tail_errors ?quick_only
+      ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace ?ci =
+    Config.User.kcreate suite_with_args' ?and_exit ?verbose ?compact ?tail_errors
+      ?quick_only ?show_errors ?json ?filter ?log_dir ?bail ?record_backtrace
+      ?ci
+
+  let suite' config name = suite_with_args' config name ()
+  let suite = Config.User.kcreate suite'
 end
 
 module V1 = struct

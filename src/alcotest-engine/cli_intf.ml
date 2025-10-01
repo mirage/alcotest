@@ -52,6 +52,46 @@ module V1_types = struct
         [a]. Every test function will receive as argument the evaluation of the
         [Cmdliner] term [a]: this is useful to configure the test behaviors
         using the CLI. *)
+
+    val suite :
+      (?argv:string array -> string -> (unit group -> unit) -> return)
+      with_options
+    (** [suite n register] runs the test suite registered by the registration
+        function [register]. [n] is the name of the tested library.
+
+        Other parameters are the same as they are in [run].
+
+        Example usage:
+
+        {[
+        let () =
+          Alcotest.suite "Int" begin fun group ->
+            group "( + )" begin fun case ->
+              case "positive + positive" begin fun () ->
+                Alcotest.(check int) "1 + 1" 2 (1 + 1)
+              end;
+
+              case "positive + negative" begin fun () ->
+                Alcotest.(check int) "1 + -1" 0 (1 + -1)
+              end;
+            end;
+
+            group "( - )" begin fun case ->
+              (* Not actually slow, just for demonstration purposes *)
+              case ~speed:`Slow "positive - positive" begin fun () ->
+                Alcotest.(check int) "1 - 1" 0 (1 - 1)
+              end;
+            end;
+          end
+        ]} *)
+
+    val suite_with_args :
+      (?argv:string array ->
+      string ->
+      'a Cmdliner.Term.t ->
+      ('a group -> unit) ->
+      return)
+      with_options
   end
 
   module type MAKER = functor (_ : Platform.MAKER) (M : Monad.S) ->
