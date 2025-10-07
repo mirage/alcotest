@@ -95,4 +95,5 @@ tests to run.
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 1.2.0)))))
+  (cmdliner (and :with-test (>= 1.2.0)))
+  (conf-npm :with-test)))
