@@ -33,38 +33,32 @@ module To_test = struct
   let double_all = List.map (fun a -> a + a)
 end
 
-let test_capitalise () =
-  To_test.capitalise "b" |> Alcotest.(check string) "strings" "A"
-
-let test_double_all () =
-  To_test.double_all [ 1; 1; 2; 3 ]
-  |> Alcotest.(check (list int)) "int lists" [ 1 ]
-
-let suite1 =
-  [
-    ( "to_test",
-      [
-        ("capitalise", `Quick, test_capitalise);
-        ("double all", `Slow, test_double_all);
-      ] );
-  ]
-
-let suite2 =
-  [
-    ( "Ωèone",
-      [
-        ("Passing test 1", `Quick, fun () -> ());
-        ( "Failing test",
-          `Quick,
-          fun () -> Alcotest.fail "This was never going to work..." );
-        ("Passing test 2", `Quick, fun () -> ());
-      ] );
-  ]
-
 (* Run both suites completely, even if the first contains failures *)
 let () =
-  try Alcotest.run ~and_exit:false "First suite" suite1
+  try
+    Alcotest.suite ~and_exit:false "First suite" begin fun group ->
+      group "to_test" begin fun case ->
+        case "capitalise" begin fun () ->
+          To_test.capitalise "b" |> Alcotest.(check string) "strings" "A"
+        end;
+
+        case ~speed:`Slow "double all" begin fun () ->
+          To_test.double_all [ 1; 1; 2; 3 ]
+          |> Alcotest.(check (list int)) "int lists" [ 1 ]
+        end;
+      end;
+    end
   with Alcotest.Test_error ->
     Printf.printf "Forging ahead regardless!\n%!";
-    Alcotest.run ~and_exit:false "Second suite" suite2;
+    Alcotest.suite ~and_exit:false "Second suite" begin fun group ->
+      group "Ωèone" begin fun case ->
+        case "Passing test 1" ignore;
+
+        case "Failing test" begin fun () ->
+          Alcotest.fail "This was never going to work..."
+        end;
+
+        case "Passing test 2" ignore;
+      end;
+    end;
     Printf.printf "Finally done."

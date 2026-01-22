@@ -25,7 +25,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 For more information, please refer to <http://unlicense.org/>
 *)
 
-open Lwt.Infix
+open Lwt.Syntax
 
 exception Library_exception
 
@@ -34,67 +34,68 @@ module To_test = struct
   let lowercase_lwt s = Lwt.return (lowercase s)
   let exn () = raise Library_exception
   let exn_lwt_toplevel () : unit Lwt.t = raise Library_exception
-  let exn_lwt_internal () : unit Lwt.t = Lwt.return (raise Library_exception)
+  let exn_lwt_internal () : unit Lwt.t = Lwt.fail Library_exception
 end
 
-(* The tests *)
-let test_lowercase () =
-  Alcotest.(check string) "same string" "hello!" (To_test.lowercase "hELLO!")
-
-let test_lowercase_lwt _ () =
-  To_test.lowercase_lwt "hELLO!"
-  >|= Alcotest.(check string) "same string" "hello!"
-
-let test_exn () =
-  Alcotest.check_raises "custom exception" Library_exception To_test.exn
+(* Helper *)
 
 let lwt_check_raises f =
-  Lwt.catch
-    (fun () -> f () >|= fun () -> `Ok)
-    (function e -> Lwt.return @@ `Error e)
-  >|= function
-  | `Ok -> Alcotest.fail "No exception was thrown"
-  | `Error Library_exception -> Alcotest.(check pass) "Correct exception" () ()
-  | `Error _ -> Alcotest.fail "Incorrect exception was thrown"
+  let+ res = Lwt.catch
+    (fun () -> Lwt.map (fun () -> Ok ()) @@ f ())
+    (function e -> Lwt.return @@ Error e)
+  in
+  match res with
+  | Ok () -> Alcotest.fail "No exception was thrown"
+  | Error Library_exception -> Alcotest.(check pass) "Correct exception" () ()
+  | Error _ -> Alcotest.fail "Incorrect exception was thrown"
 
-let test_exn_lwt_toplevel _ () = lwt_check_raises To_test.exn_lwt_toplevel
-let test_exn_lwt_internal _ () = lwt_check_raises To_test.exn_lwt_internal
 let switch = ref None
 
-let test_switch_alloc s () =
-  Lwt.return_unit >|= fun () ->
-  switch := Some s;
-  Alcotest.(check bool)
-    "Passed switch is initially on" (Lwt_switch.is_on s) true
+(* The tests *)
 
-let test_switch_dealloc _ () =
-  Lwt.return_unit >|= fun () ->
-  match !switch with
-  | None -> Alcotest.fail "No switch left by `test_switch_alloc` test"
-  | Some s ->
-      Alcotest.(check bool)
-        "Switch is disabled after test" (Lwt_switch.is_on s) false
-
-(* Run it *)
 let () =
-  let open Alcotest_lwt in
   Lwt_main.run
-  @@ run "LwtUtils"
-       [
-         ( "basic",
-           [
-             test_case_sync "Plain" `Quick test_lowercase;
-             test_case "Lwt" `Quick test_lowercase_lwt;
-           ] );
-         ( "exceptions",
-           [
-             test_case_sync "Plain" `Quick test_exn;
-             test_case "Lwt toplevel" `Quick test_exn_lwt_toplevel;
-             test_case "Lwt internal" `Quick test_exn_lwt_internal;
-           ] );
-         ( "switches",
-           [
-             test_case "Allocate resource" `Quick test_switch_alloc;
-             test_case "Check resource deallocated" `Quick test_switch_dealloc;
-           ] );
-       ]
+  @@ Alcotest_lwt.suite "LwtUtils" begin fun group ->
+    group "basic" begin fun case ->
+      case "Plain" begin fun _ () ->
+        Lwt.return (Alcotest.(check string) "same string" "hello!" (To_test.lowercase "hELLO!"))
+      end;
+
+      case "Lwt" begin fun _ () ->
+        To_test.lowercase_lwt "hELLO!"
+        |> Lwt.map (Alcotest.(check string) "same string" "hello!")
+      end;
+    end;
+
+    group "exceptions" begin fun case ->
+      case "Plain" begin fun _ () ->
+        Lwt.return (Alcotest.check_raises "custom exception" Library_exception To_test.exn)
+      end;
+
+      case "Lwt toplevel" begin fun _ () ->
+        lwt_check_raises To_test.exn_lwt_toplevel
+      end;
+
+      case "Lwt internal" begin fun _ () ->
+        lwt_check_raises To_test.exn_lwt_internal
+      end;
+    end;
+
+    group "switches" begin fun case ->
+      case "Allocate resource" begin fun s () ->
+        let+ () = Lwt.return_unit in
+        switch := Some s;
+        Alcotest.(check bool)
+          "Passed switch is initially on" (Lwt_switch.is_on s) true
+      end;
+
+      case "Check resource deallocated" begin fun _ () ->
+        let+ () = Lwt.return_unit in
+        match !switch with
+        | None -> Alcotest.fail "No switch left by `test_switch_alloc` test"
+        | Some s ->
+            Alcotest.(check bool)
+              "Switch is disabled after test" (Lwt_switch.is_on s) false
+      end;
+    end;
+  end
