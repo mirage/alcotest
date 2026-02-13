@@ -10,6 +10,7 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   json_output_with_failed
    long_test_case_name
    outside_runner
    tail_errors_limit
@@ -28,6 +29,7 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   json_output_with_failed
    long_test_case_name
    outside_runner
    tail_errors_limit
@@ -414,6 +416,44 @@
  (package alcotest)
  (action
    (diff invalid_arg_in_test-js.expected invalid_arg_in_test-js.processed)))
+
+(rule
+ (target json_output_with_failed.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run %{dep:json_output_with_failed.exe})))))
+
+(rule
+ (target json_output_with_failed.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:json_output_with_failed.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff json_output_with_failed.expected json_output_with_failed.processed)))
+
+(rule
+ (target json_output_with_failed-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:json_output_with_failed.bc.js})))))
+
+(rule
+ (target json_output_with_failed-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:json_output_with_failed-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff json_output_with_failed-js.expected json_output_with_failed-js.processed)))
 
 (rule
  (target long_test_case_name.actual)

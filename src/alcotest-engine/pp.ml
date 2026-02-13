@@ -213,7 +213,7 @@ struct
       | n -> red ppf "%d failure%a!" n pp_plural n
     in
     Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
-      r.success pp_plural r.success
+      (r.success + r.failures) pp_plural (r.success + r.failures)
 
   let suite_results ~log_dir config ppf r =
     let print_summary = (not config#compact) || r.failures > 0 in
