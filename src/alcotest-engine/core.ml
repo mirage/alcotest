@@ -310,8 +310,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let test = List.map (select_speed speed_level) test in
     let+ results = perform_tests t test args in
     let time = P.time () -. start_time in
-    let success = List.length (List.filter has_run results) in
     let failures = List.length (List.filter Run_result.is_failure results) in
+    let success = List.length (List.filter has_run results) - failures in
     if t.config#record_backtrace then
       Printexc.record_backtrace initial_backtrace_status;
     Pp.{ time; success; failures; errors = List.rev t.errors }
