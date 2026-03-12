@@ -1,0 +1,17 @@
+Testing `test/e2e/alcotest/stubs/nullexception.ml'.
+This run has ID `<uuid>'.
+
+> [FAIL]        segfault          0   nullexcept.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        segfault          0   nullexcept.                              │
+└──────────────────────────────────────────────────────────────────────────────┘
+ASSERT Got segfault
+FAIL Got segfault
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/segfault.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 1 test run.

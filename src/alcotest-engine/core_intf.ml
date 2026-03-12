@@ -36,6 +36,8 @@ module V1_types = struct
 
     exception Test_error
     (** The exception return by {!run} in case of errors. *)
+    
+    exception SegFault of string
 
     val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
     (** [test_case n s f] is the test case [n] running at speed [s] using the
@@ -111,6 +113,7 @@ end
 
 module type Core = sig
   exception Check_error of unit Fmt.t
+  exception SegFault of string
 
   module V1 : sig
     module type S = V1_types.S
@@ -123,5 +126,6 @@ module type Core = sig
         Intended for use by the {!Alcotest_lwt} and {!Alcotest_async} backends. *)
 
     exception Skip
+    exception SegFault of string
   end
 end

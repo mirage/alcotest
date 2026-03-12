@@ -20,6 +20,9 @@ open Model
 
 exception Check_error of unit Fmt.t
 exception Skip
+exception SegFault of string
+
+let _ = Callback.register_exception "segfault exception" (SegFault "Caught segfault")
 
 let () =
   let print_error =
@@ -59,6 +62,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   type speed_level = [ `Quick | `Slow ]
 
   exception Test_error
+  exception SegFault = SegFault
 
   type 'a test_case = string * speed_level * 'a run
 
@@ -81,6 +85,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     stdout : Formatters.stdout;
     stderr : Formatters.stderr;
   }
+
+  external setup_stub_exception_handler: unit -> unit = "caml_setup_stub_exception_handler"
 
   let gen_run_id =
     let random_state = lazy (Random.State.make_self_init ()) in
@@ -443,7 +449,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       ?compact ?tail_errors ?quick_only ?show_errors ?json ?filter ?log_dir
       ?bail ?record_backtrace ?ci
 
-  let run = Config.User.kcreate run'
+  let run = 
+    setup_stub_exception_handler ();
+    Config.User.kcreate run'
 end
 
 module V1 = struct
@@ -451,4 +459,5 @@ module V1 = struct
   module Make = Make
 
   exception Skip = Skip
+  exception SegFault = SegFault
 end
