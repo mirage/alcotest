@@ -63,6 +63,10 @@ let char =
   let pp_char ppf x = Fmt.pf ppf "%C" x in
   testable pp_char ( = )
 
+let uchar =
+  let pp_uchar ppf x = Fmt.Dump.uchar ppf x in
+  testable pp_uchar ( = )
+
 let string =
   let pp_string ppf x = Fmt.pf ppf "%S" x in
   testable pp_string ( = )
