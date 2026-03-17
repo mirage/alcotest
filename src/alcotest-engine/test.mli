@@ -62,6 +62,9 @@ val float : float -> float testable
 val char : char testable
 (** [char] tests characters. *)
 
+val uchar : Uchar.t testable
+(** [uchar] tests Unicode characters. *)
+
 val string : string testable
 (** [string] tests OCaml strings. *)
 
