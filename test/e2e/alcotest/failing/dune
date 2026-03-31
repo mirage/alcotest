@@ -1,7 +1,10 @@
 (env
  (_
   (env-vars
-   (ALCOTEST_COLOR auto))))
+   (ALCOTEST_COLOR auto))
+  (wasm_of_ocaml
+   (enabled_if %{env:WASM_OF_OCAML=false})
+   (runtest_alias runtest-wasm))))
 
 (include dune.inc)
 
