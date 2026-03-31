@@ -17,10 +17,17 @@ let options_of_test_file file =
   let options_file = Filename.chop_extension file ^ ".opts" in
   if not (Sys.file_exists options_file) then [] else read_file options_file
 
-let global_stanza ~libraries ~js filenames =
+let global_stanza ~libraries ~js ~wasm filenames =
   let bases = List.map Filename.chop_extension filenames in
   let libraries = List.map (( ^ ) " ") libraries in
   let pp_sexp_list = Fmt.(list ~sep:(const string "\n   ")) in
+  let modes =
+    match js, wasm with
+    | false, false -> "(modes exe)"
+    | true, false -> "(modes exe js)"
+    | false, true -> "(modes exe wasm)"
+    | true, true -> "(modes exe js wasm)"
+  in
   Fmt.pr
     {|(executables
  (names
@@ -35,12 +42,15 @@ let global_stanza ~libraries ~js filenames =
 |}
     (pp_sexp_list Fmt.string) bases
     Fmt.(list string)
-    libraries
-    (if js then "(modes exe js)" else "(modes exe)")
+    libraries modes
     (pp_sexp_list Fmt.string) bases
 
-let example_rule_stanza ~js ~expect_failure filename =
-  let with_suffix x = if js then x ^ "-js" else x in
+type mode = Native | Js | Wasm
+
+let suffix_of_mode = function Native -> "" | Js -> "-js" | Wasm -> "-wasm"
+
+let example_rule_stanza ~mode ~expect_failure filename =
+  let with_suffix x = x ^ suffix_of_mode mode in
   let base = Filename.chop_extension filename in
   let options = options_of_test_file filename |> List.map (( ^ ) " ") in
   let accepted_exit_codes =
@@ -50,6 +60,12 @@ let example_rule_stanza ~js ~expect_failure filename =
          "1 2"
        else "0")
       Cmdliner.Cmd.Exit.cli_error Cmdliner.Cmd.Exit.internal_error
+  in
+  let run_cmd =
+    match mode with
+    | Native -> Printf.sprintf "%%{dep:%s.exe}" base
+    | Js -> Printf.sprintf "node %%{dep:%s.bc.js}" base
+    | Wasm -> Printf.sprintf "node %%{dep:%s.bc.wasm.js}" base
   in
   (* Run Alcotest to get *.actual, then pass through the strip_randomness
      sanitiser to get *.processed. *)
@@ -62,9 +78,7 @@ let example_rule_stanza ~js ~expect_failure filename =
    (with-accepted-exit-codes %s
     (run %s%a)))))
 |}
-    (with_suffix base) accepted_exit_codes
-    (if js then Printf.sprintf "node %%{dep:%s.bc.js}" base
-     else Printf.sprintf "%%{dep:%s.exe}" base)
+    (with_suffix base) accepted_exit_codes run_cmd
     Fmt.(list string)
     options;
 
@@ -78,8 +92,8 @@ let example_rule_stanza ~js ~expect_failure filename =
 |}
     (with_suffix base) (with_suffix base)
 
-let example_alias_stanza ~js ~package filename =
-  let with_suffix x = if js then x ^ "-js" else x in
+let example_alias_stanza ~mode ~package filename =
+  let with_suffix x = x ^ suffix_of_mode mode in
   let base = Filename.chop_extension filename in
   Fmt.pr
     {|
@@ -93,7 +107,7 @@ let example_alias_stanza ~js ~package filename =
 
 let is_example filename = Filename.check_suffix filename ".ml"
 
-let main package expect_failure libraries js =
+let main package expect_failure libraries js wasm =
   Sys.readdir "."
   |> Array.to_list
   |> List.sort String.compare
@@ -101,14 +115,17 @@ let main package expect_failure libraries js =
   |> function
   | [] -> () (* no tests to execute *)
   | tests ->
-      global_stanza ~libraries ~js tests;
+      global_stanza ~libraries ~js ~wasm tests;
       List.iter
         (fun test ->
-          example_rule_stanza ~js:false ~expect_failure test;
-          example_alias_stanza ~js:false ~package test;
+          example_rule_stanza ~mode:Native ~expect_failure test;
+          example_alias_stanza ~mode:Native ~package test;
           if js then (
-            example_rule_stanza ~js:true ~expect_failure test;
-            example_alias_stanza ~js:true ~package test))
+            example_rule_stanza ~mode:Js ~expect_failure test;
+            example_alias_stanza ~mode:Js ~package test);
+          if wasm then (
+            example_rule_stanza ~mode:Wasm ~expect_failure test;
+            example_alias_stanza ~mode:Wasm ~package test))
         tests
 
 open Cmdliner
@@ -131,6 +148,10 @@ let js =
   let doc = Arg.info ~doc:"Test in javascript" [ "js" ] in
   Arg.(value & flag doc)
 
+let wasm =
+  let doc = Arg.info ~doc:"Test in wasm" [ "wasm" ] in
+  Arg.(value & flag doc)
+
 let expect_failure =
   let doc =
     Arg.info ~doc:"Negate the return status of the tests" [ "expect-failure" ]
@@ -139,6 +160,7 @@ let expect_failure =
 
 let cmd =
   let info = Cmd.info ~version:"%%VERSION%%" "gen_dune_rules" in
-  Cmd.v info Term.(const main $ package $ expect_failure $ libraries $ js)
+  Cmd.v info
+    Term.(const main $ package $ expect_failure $ libraries $ js $ wasm)
 
 let () = exit @@ Cmd.eval cmd

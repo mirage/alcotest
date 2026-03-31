@@ -10,14 +10,13 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
-   json_output_with_failed
    long_test_case_name
    outside_runner
    tail_errors_limit
    tail_errors_unlimited
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
- (modes exe js)
+ (modes exe js wasm)
  (modules
    bail
    check_basic
@@ -29,7 +28,6 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
-   json_output_with_failed
    long_test_case_name
    outside_runner
    tail_errors_limit
@@ -76,6 +74,25 @@
    (diff bail-js.expected bail-js.processed)))
 
 (rule
+ (target bail-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:bail.bc.wasm.js})))))
+
+(rule
+ (target bail-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:bail-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff bail-wasm.expected bail-wasm.processed)))
+
+(rule
  (target check_basic.actual)
  (action
   (with-outputs-to %{target}
@@ -112,6 +129,25 @@
  (package alcotest)
  (action
    (diff check_basic-js.expected check_basic-js.processed)))
+
+(rule
+ (target check_basic-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:check_basic.bc.wasm.js})))))
+
+(rule
+ (target check_basic-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:check_basic-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff check_basic-wasm.expected check_basic-wasm.processed)))
 
 (rule
  (target check_located.actual)
@@ -152,6 +188,25 @@
    (diff check_located-js.expected check_located-js.processed)))
 
 (rule
+ (target check_located-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:check_located.bc.wasm.js})))))
+
+(rule
+ (target check_located-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:check_located-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff check_located-wasm.expected check_located-wasm.processed)))
+
+(rule
  (target check_long.actual)
  (action
   (with-outputs-to %{target}
@@ -188,6 +243,25 @@
  (package alcotest)
  (action
    (diff check_long-js.expected check_long-js.processed)))
+
+(rule
+ (target check_long-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:check_long.bc.wasm.js})))))
+
+(rule
+ (target check_long-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:check_long-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff check_long-wasm.expected check_long-wasm.processed)))
 
 (rule
  (target compact.actual)
@@ -228,6 +302,25 @@
    (diff compact-js.expected compact-js.processed)))
 
 (rule
+ (target compact-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:compact.bc.wasm.js})))))
+
+(rule
+ (target compact-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:compact-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff compact-wasm.expected compact-wasm.processed)))
+
+(rule
  (target duplicate_test_names.actual)
  (action
   (with-outputs-to %{target}
@@ -264,6 +357,25 @@
  (package alcotest)
  (action
    (diff duplicate_test_names-js.expected duplicate_test_names-js.processed)))
+
+(rule
+ (target duplicate_test_names-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:duplicate_test_names.bc.wasm.js})))))
+
+(rule
+ (target duplicate_test_names-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:duplicate_test_names-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff duplicate_test_names-wasm.expected duplicate_test_names-wasm.processed)))
 
 (rule
  (target empty_suite_name.actual)
@@ -304,6 +416,25 @@
    (diff empty_suite_name-js.expected empty_suite_name-js.processed)))
 
 (rule
+ (target empty_suite_name-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:empty_suite_name.bc.wasm.js})))))
+
+(rule
+ (target empty_suite_name-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:empty_suite_name-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff empty_suite_name-wasm.expected empty_suite_name-wasm.processed)))
+
+(rule
  (target exception_in_test.actual)
  (action
   (with-outputs-to %{target}
@@ -340,6 +471,25 @@
  (package alcotest)
  (action
    (diff exception_in_test-js.expected exception_in_test-js.processed)))
+
+(rule
+ (target exception_in_test-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:exception_in_test.bc.wasm.js})))))
+
+(rule
+ (target exception_in_test-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:exception_in_test-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff exception_in_test-wasm.expected exception_in_test-wasm.processed)))
 
 (rule
  (target filter_all_tests.actual)
@@ -380,6 +530,25 @@
    (diff filter_all_tests-js.expected filter_all_tests-js.processed)))
 
 (rule
+ (target filter_all_tests-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:filter_all_tests.bc.wasm.js} test bar 1)))))
+
+(rule
+ (target filter_all_tests-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:filter_all_tests-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff filter_all_tests-wasm.expected filter_all_tests-wasm.processed)))
+
+(rule
  (target invalid_arg_in_test.actual)
  (action
   (with-outputs-to %{target}
@@ -418,42 +587,23 @@
    (diff invalid_arg_in_test-js.expected invalid_arg_in_test-js.processed)))
 
 (rule
- (target json_output_with_failed.actual)
+ (target invalid_arg_in_test-wasm.actual)
  (action
   (with-outputs-to %{target}
    (with-accepted-exit-codes (or 1 2 124 125)
-    (run %{dep:json_output_with_failed.exe})))))
+    (run node %{dep:invalid_arg_in_test.bc.wasm.js})))))
 
 (rule
- (target json_output_with_failed.processed)
+ (target invalid_arg_in_test-wasm.processed)
  (action
   (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:json_output_with_failed.actual}))))
+   (run ../../strip_randomness.exe %{dep:invalid_arg_in_test-wasm.actual}))))
 
 (rule
- (alias runtest)
+ (alias runtest-wasm)
  (package alcotest)
  (action
-   (diff json_output_with_failed.expected json_output_with_failed.processed)))
-
-(rule
- (target json_output_with_failed-js.actual)
- (action
-  (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 124 125)
-    (run node %{dep:json_output_with_failed.bc.js})))))
-
-(rule
- (target json_output_with_failed-js.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:json_output_with_failed-js.actual}))))
-
-(rule
- (alias runtest-js)
- (package alcotest)
- (action
-   (diff json_output_with_failed-js.expected json_output_with_failed-js.processed)))
+   (diff invalid_arg_in_test-wasm.expected invalid_arg_in_test-wasm.processed)))
 
 (rule
  (target long_test_case_name.actual)
@@ -494,6 +644,25 @@
    (diff long_test_case_name-js.expected long_test_case_name-js.processed)))
 
 (rule
+ (target long_test_case_name-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:long_test_case_name.bc.wasm.js})))))
+
+(rule
+ (target long_test_case_name-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:long_test_case_name-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff long_test_case_name-wasm.expected long_test_case_name-wasm.processed)))
+
+(rule
  (target outside_runner.actual)
  (action
   (with-outputs-to %{target}
@@ -530,6 +699,25 @@
  (package alcotest)
  (action
    (diff outside_runner-js.expected outside_runner-js.processed)))
+
+(rule
+ (target outside_runner-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:outside_runner.bc.wasm.js})))))
+
+(rule
+ (target outside_runner-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:outside_runner-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff outside_runner-wasm.expected outside_runner-wasm.processed)))
 
 (rule
  (target tail_errors_limit.actual)
@@ -570,6 +758,25 @@
    (diff tail_errors_limit-js.expected tail_errors_limit-js.processed)))
 
 (rule
+ (target tail_errors_limit-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:tail_errors_limit.bc.wasm.js})))))
+
+(rule
+ (target tail_errors_limit-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tail_errors_limit-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tail_errors_limit-wasm.expected tail_errors_limit-wasm.processed)))
+
+(rule
  (target tail_errors_unlimited.actual)
  (action
   (with-outputs-to %{target}
@@ -606,3 +813,22 @@
  (package alcotest)
  (action
    (diff tail_errors_unlimited-js.expected tail_errors_unlimited-js.processed)))
+
+(rule
+ (target tail_errors_unlimited-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:tail_errors_unlimited.bc.wasm.js})))))
+
+(rule
+ (target tail_errors_unlimited-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tail_errors_unlimited-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tail_errors_unlimited-wasm.expected tail_errors_unlimited-wasm.processed)))

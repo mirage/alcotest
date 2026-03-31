@@ -18,7 +18,8 @@
     "alcotest"
     --libraries
     "alcotest.engine"
-    --js))))
+    --js
+    --wasm))))
 
 (rule
  (alias runtest)
