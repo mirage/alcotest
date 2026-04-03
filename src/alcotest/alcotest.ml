@@ -81,13 +81,6 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
         | Some { columns; _ } when columns > 0 -> Some columns
         | _ -> None)
 
-  external before_test :
-    output:out_channel -> stdout:out_channel -> stderr:out_channel -> unit
-    = "alcotest_before_test"
-
-  external after_test : stdout:out_channel -> stderr:out_channel -> unit
-    = "alcotest_after_test"
-
   type file_descriptor = out_channel
 
   let log_trap_supported = true
@@ -99,11 +92,21 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     let* () = M.return () in
     Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
     Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
-    before_test ~output:fd_file ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
+    flush Stdlib.stdout;
+    flush Stdlib.stderr;
+    let stdout_redir =
+      Out_channel_redirect.Expert.redirect ~into:fd_file Stdlib.stdout
+    in
+    let stderr_redir =
+      Out_channel_redirect.Expert.redirect ~into:fd_file Stdlib.stderr
+    in
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
     Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
     Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
-    after_test ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
+    flush Stdlib.stdout;
+    flush Stdlib.stderr;
+    Out_channel_redirect.Expert.stop stderr_redir;
+    Out_channel_redirect.Expert.stop stdout_redir;
     match r with `Ok x -> x | `Error e -> raise e
 
   let contains s1 s2 =

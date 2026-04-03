@@ -1,3 +1,9 @@
+(env
+ (_
+  (wasm_of_ocaml
+   (enabled_if %{env:WASM_OF_OCAML=false})
+   (runtest_alias runtest-wasm))))
+
 (rule
  (progn
   (copy examples/simple.exe test.exe)

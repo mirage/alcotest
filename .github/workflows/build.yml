@@ -83,14 +83,26 @@ jobs:
       - name: Set-up Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: lts/*
+          node-version: latest
+
+      - name: Set-up Binaryen
+        if: ${{ matrix.runtest }}
+        uses: Aandreba/setup-binaryen@v1.0.0
+        with:
+          token: ${{ github.token }}
 
       - name: Set-up OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v3
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
-          opam-local-packages: ${{ matrix.opam-local-packages }}
+          opam-local-packages: ${{ matrix.opam-local-packages || '*.opam' }}
 
       - run: opam install ${{ matrix.packages }} --with-test --deps-only
+      - run: opam install wasm_of_ocaml-compiler
+        if: ${{ matrix.runtest }}
       - if: ${{ matrix.runtest }}
         run: opam exec -- dune build @install @check @runtest @runtest-js
+      - if: ${{ matrix.runtest }}
+        run: opam exec -- dune build @runtest-wasm
+        env:
+          WASM_OF_OCAML: true
