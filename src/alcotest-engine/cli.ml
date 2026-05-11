@@ -125,12 +125,14 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
   let test_cmd config args library_name tests =
     let ci = Config.User.ci config
     and stdout = Config.User.stdout config
+    and and_exit = Config.User.and_exit config
+    and record_backtrace = Config.User.record_backtrace config
     and stderr = Config.User.stderr config in
     let doc = "Run a subset of the tests." in
     let term =
       let+ () = set_color stdout stderr
       and+ cli_config =
-        Config.User.term ~stdout ~stderr ~and_exit:true ~record_backtrace:true
+        Config.User.term ~stdout ~stderr ~and_exit ~record_backtrace
           ~ci
       and+ args = args in
       let config = Config.User.(cli_config || config) in
