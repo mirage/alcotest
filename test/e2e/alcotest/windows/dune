@@ -1,0 +1,51 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR never))))
+
+; Uses Domain, and exercises Windows-specific HANDLE semantics of dup2.
+
+(executable
+ (name create_process_std_handles)
+ (enabled_if
+  (and
+   (= %{os_type} Win32)
+   (>= %{ocaml_version} 5.0.0)))
+ (libraries alcotest unix)
+ (modules create_process_std_handles))
+
+(rule
+ (target create_process_std_handles.actual)
+ (enabled_if
+  (and
+   (= %{os_type} Win32)
+   (>= %{ocaml_version} 5.0.0)))
+ (action
+  (with-outputs-to
+   %{target}
+   (with-accepted-exit-codes
+    (or 0 1 124 125)
+    (run %{dep:create_process_std_handles.exe})))))
+
+(rule
+ (target create_process_std_handles.processed)
+ (enabled_if
+  (and
+   (= %{os_type} Win32)
+   (>= %{ocaml_version} 5.0.0)))
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:create_process_std_handles.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (enabled_if
+  (and
+   (= %{os_type} Win32)
+   (>= %{ocaml_version} 5.0.0)))
+ (action
+  (diff
+   create_process_std_handles.expected
+   create_process_std_handles.processed)))
