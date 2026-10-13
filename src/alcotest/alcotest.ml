@@ -88,6 +88,24 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   external after_test : stdout:out_channel -> stderr:out_channel -> unit
     = "alcotest_after_test"
 
+  (* On Windows, [Unix.stdout] and [Unix.stderr] cache their HANDLE, which a
+     C-level dup2 would close. Redirecting through them keeps them valid. *)
+  let redirect_std_outputs output =
+    if Sys.win32 then (
+      let saved_stdout = Unix.dup Unix.stdout
+      and saved_stderr = Unix.dup Unix.stderr in
+      let output = Unix.descr_of_out_channel output in
+      Unix.dup2 output Unix.stdout;
+      Unix.dup2 output Unix.stderr;
+      fun () ->
+        Unix.dup2 saved_stdout Unix.stdout;
+        Unix.dup2 saved_stderr Unix.stderr;
+        Unix.close saved_stdout;
+        Unix.close saved_stderr)
+    else (
+      before_test ~output ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
+      fun () -> after_test ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr)
+
   type file_descriptor = out_channel
 
   let log_trap_supported = true
@@ -99,11 +117,11 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     let* () = M.return () in
     Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
     Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
-    before_test ~output:fd_file ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
+    let restore_std_outputs = redirect_std_outputs fd_file in
     let+ r = try fn () >|= fun o -> `Ok o with e -> M.return @@ `Error e in
     Fmt.flush (Alcotest_engine.Formatters.get_stdout () :> Format.formatter) ();
     Fmt.flush (Alcotest_engine.Formatters.get_stderr () :> Format.formatter) ();
-    after_test ~stdout:Stdlib.stdout ~stderr:Stdlib.stderr;
+    restore_std_outputs ();
     match r with `Ok x -> x | `Error e -> raise e
 
   let contains s1 s2 =
