@@ -36,6 +36,13 @@
 - Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
 - Fix the `success` count in `--json` output, which included failures
   (#432, fixes #431, @1zumiSagiri, review by @MisterDA)
+- Add conditions on tests: `test_case` and test tuples accept `` `Tag ``,
+  `` `And ``, `` `Or ``, `` `Not `` and `` `Always ``, also as `Tag` combinators, which
+  hold in a context set by a new `--tags` option or `ALCOTEST_TAGS`, as with Go
+  build tags. A new `tags` subcommand lists them. `speed_level` is now an alias
+  of the new `tag` type, which breaks code matching on it exhaustively or
+  restating it as `` [ `Quick | `Slow ] ``
+  (#448, fixes #124, #151 and #316, @samoht, report by @hannesm and @arvidj)
 - Preserve absolute log directories: `mkdir_p` turned `/foo` into `//foo`, which
   fails with `EROFS` on Cygwin (#405, fixes #404, @bbonf, review by @MisterDA
   and @samoht)
