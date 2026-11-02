@@ -3,6 +3,8 @@
 - Fix and modernise CI (#445, #446, #436, #407, @samoht, @hhugo and @MisterDA,
   report by @edwintorok and @ngorogiannis)
 - Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
+- Fix the `success` count in `--json` output, which included failures
+  (#432, fixes #431, @1zumiSagiri, review by @MisterDA)
 
 ### 1.9.1 (2025-10-01)
 
