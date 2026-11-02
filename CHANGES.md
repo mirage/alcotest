@@ -1,6 +1,6 @@
 ### unreleased
 
-- Fix CI (#445, @samoht)
+- Fix and modernise CI (#445, #446, @samoht)
 
 ### 1.9.1 (2025-10-01)
 
