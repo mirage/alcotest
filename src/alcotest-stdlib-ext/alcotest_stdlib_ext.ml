@@ -100,6 +100,24 @@ module Option = struct
     | (Some _ as x), _ | None, (Some _ as x) -> x
 end
 
+module Path = struct
+  let ancestors ~sep path =
+    let is_win_drive_letter x =
+      String.length x = 2 && x.[1] = ':' && Astring.Char.Ascii.is_letter x.[0]
+    in
+    let rec mk parent = function
+      | [] -> []
+      | name :: names ->
+          let path = parent ^ sep ^ name in
+          path :: mk path names
+    in
+    match String.cuts ~empty:true ~sep path with
+    | "" :: xs -> mk "" xs
+    (* check for Windows drive letter *)
+    | dl :: xs when is_win_drive_letter dl -> mk dl xs
+    | xs -> mk "." xs
+end
+
 module Cmdliner_syntax = struct
   open Cmdliner
 
