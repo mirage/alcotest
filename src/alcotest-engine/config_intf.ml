@@ -15,6 +15,8 @@ module Types = struct
     ; compact : bool
     ; tail_errors : bound
     ; quick_only : bool
+    ; tags : string list
+    ; strict_tags : bool
     ; show_errors : bool
     ; json : bool
     ; filter : filter option

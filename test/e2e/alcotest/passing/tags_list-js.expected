@@ -1,0 +1,8 @@
+new-api          0   no tags.
+new-api          1   [always] everything.
+new-api          2   [net or crypto] either.
+new-api          3   [not ci] not ci.
+new-api          4   [slow and (a or b)] nested.
+new-api          5   slow.
+new-api          6   [slow and db and x] slow db x.
+new-api          7   [db] A description long enough to be truncated at the en...

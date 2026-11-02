@@ -108,6 +108,23 @@ module Key = struct
       Arg.(value & flag & info ~env [ "q"; "quick-tests" ] ~docv:"" ~doc)
   end)
 
+  module Tags = struct
+    let term =
+      let env = Cmd.Env.info "ALCOTEST_TAGS" in
+      let doc =
+        "A comma-separated list of tags to also run, e.g: 'db,network'. Use \
+         $(i,-foo) to stop running a tag, e.g: '-slow'. On the command line, \
+         $(docv) must only contain tags used by the tests."
+      in
+      (* An argument that only comes from the environment is not used. *)
+      Cmdliner.Term.with_used_args
+        Arg.(
+          value
+          & opt (some (list string)) None
+          & info ~env [ "tags" ] ~docv:"TAGS" ~doc)
+      >>| fun (tags, used) -> (tags, Some (used <> []))
+  end
+
   module Tail_errors = struct
     type t = bound
 
@@ -237,6 +254,8 @@ module User = struct
     compact : Compact.t option;
     tail_errors : Tail_errors.t option;
     quick_only : Quick_only.t option;
+    tags : string list option;
+    strict_tags : bool option;
     show_errors : Show_errors.t option;
     json : Json.t option;
     filter : Filter.t option;
@@ -267,6 +286,8 @@ module User = struct
       compact = merge_on (fun t -> t.compact);
       tail_errors = merge_on (fun t -> t.tail_errors);
       quick_only = merge_on (fun t -> t.quick_only);
+      tags = merge_on (fun t -> t.tags);
+      strict_tags = merge_on (fun t -> t.strict_tags);
       show_errors = merge_on (fun t -> t.show_errors);
       json = merge_on (fun t -> t.json);
       filter = merge_on (fun t -> t.filter);
@@ -284,6 +305,7 @@ module User = struct
     and+ tail_errors = Tail_errors.term
     and+ show_errors = Show_errors.term
     and+ quick_only = Quick_only.term
+    and+ tags, strict_tags = Tags.term
     and+ json = Json.term
     and+ filter = Filter.term
     and+ log_dir = Log_dir.term
@@ -295,6 +317,8 @@ module User = struct
       tail_errors;
       show_errors;
       quick_only;
+      tags;
+      strict_tags;
       json;
       filter;
       log_dir;
@@ -318,6 +342,8 @@ module User = struct
         compact;
         tail_errors;
         quick_only;
+        tags = None;
+        strict_tags = None;
         show_errors;
         json;
         filter;
@@ -347,6 +373,8 @@ let apply_defaults ~default_log_dir : User.t -> t =
        compact;
        tail_errors;
        quick_only;
+       tags;
+       strict_tags;
        show_errors;
        json;
        filter;
@@ -364,6 +392,8 @@ let apply_defaults ~default_log_dir : User.t -> t =
     method compact = Option.value ~default:Compact.default compact
     method tail_errors = Option.value ~default:Tail_errors.default tail_errors
     method quick_only = Option.value ~default:Quick_only.default quick_only
+    method tags = Option.value ~default:[] tags
+    method strict_tags = Option.value ~default:false strict_tags
 
     method show_errors =
       match (show_errors, self#ci) with

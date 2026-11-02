@@ -25,27 +25,59 @@ module V1_types = struct
         [Alcotest_lwt] and [Alcotest_async] set [return = unit Lwt.t] and
         [return = Async_kernel.Deferred.t] respectively. *)
 
-    type speed_level = [ `Quick | `Slow ]
-    (** Speed level of a test. Tests marked as [`Quick] are always run. Tests
-        marked as [`Slow] are skipped when the `-q` flag is passed. *)
+    type tag =
+      [ `Quick
+      | `Slow
+      | `Always
+      | `Tag of string
+      | `And of tag list
+      | `Or of tag list
+      | `Not of tag ]
+    (** When a test runs. The command line sets up a context, a set of tags that
+        starts with [quick] and [slow]: [-q] removes [slow], and [--tags] adds
+        or removes tags. [`Quick], [`Slow] and [`Tag s] hold when [quick],
+        [slow] and [s] are in the context, [`And], [`Or] and [`Not] combine
+        them, and [`Always] always holds. *)
 
-    type 'a test_case = string * speed_level * ('a -> return)
-    (** A test case is a UTF-8 encoded documentation string, a speed level and a
+    type speed_level = tag
+    (** Deprecated alias of {!tag}. *)
+
+    (** Combinators for {!tag}, as in [Tag.(slow && v "db")]. *)
+    module Tag : sig
+      val v : string -> tag
+      (** [v s] is [`Tag s]. *)
+
+      val quick : tag
+      val slow : tag
+      val always : tag
+
+      val ( && ) : tag -> tag -> tag
+      (** [a && b] is [`And [ a; b ]]. *)
+
+      val ( || ) : tag -> tag -> tag
+      (** [a || b] is [`Or [ a; b ]]. *)
+
+      val not : tag -> tag
+      (** [not a] is [`Not a]. *)
+    end
+
+    type 'a test_case = string * tag * ('a -> return)
+    (** A test case is a UTF-8 encoded documentation string, when it runs and a
         function to execute. Typically, the testing function calls the helper
         functions provided below (such as [check] and [fail]). *)
 
     exception Test_error
     (** The exception return by {!run} in case of errors. *)
 
-    val test_case : string -> speed_level -> ('a -> return) -> 'a test_case
-    (** [test_case n s f] is the test case [n] running at speed [s] using the
-        function [f]. *)
+    val test_case : string -> tag -> ('a -> return) -> 'a test_case
+    (** [test_case n t f] is the test case [n] using the function [f], which
+        runs when [t] holds. *)
 
     val group : string -> 'a test_case list -> 'a test_case
     (** [group name cases] is a test case that stands for [cases], which run in
         place under the test name [test.name], so that they can be selected
-        together. Groups nest. [name] must not be empty. Speed levels are
-        ignored for groups: each of [cases] keeps its own.
+        together. Groups nest. [name] must not be empty. Tags are ignored for
+        groups: each of [cases] keeps its own.
 
         A group is recognised by physical equality on the returned tuple, so it
         can appear several times and under different parents. A new tuple built
@@ -92,8 +124,8 @@ module V1_types = struct
         - [compact] (default [false]). Compact the output of the tests.
         - [tail_errors] (default unlimited). Show only the last N lines of
           output of failed tests.
-        - [quick_only] (default [false]). Don't run tests with the
-          {{!speed_level} [`Slow] speed level}.
+        - [quick_only] (default [false]). Run the tests tagged [quick], in
+          addition to those selected by [--tags].
         - [show_errors] (default [false]). Display the test errors.
         - [json] (default [false]). Print test results in a JSON-compatible
           format.
@@ -117,6 +149,10 @@ module V1_types = struct
 
     val list_tests : 'a test list -> return
     (** Print all of the test cases in a human-readable form *)
+
+    val list_tags : 'a test list -> return
+    (** Print [quick], [slow] and the tags used by the conditions of test cases,
+        one per line. *)
 
     val run' : Config.User.t -> string -> unit test list -> return
     (** Variant of {!run} that consumes a config value. *)

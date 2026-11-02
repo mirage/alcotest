@@ -145,6 +145,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
        list_tests tests),
       Cmd.info "list" ~doc )
 
+  let tags_cmd ~stdout ~stderr tests =
+    let doc = "List the tags that $(b,--tags) can add or remove." in
+    ( (let+ () = set_color stdout stderr in
+       list_tags tests),
+      Cmd.info "tags" ~doc )
+
   let run_with_args' (type a) ~argv config name (args : a Term.t)
       (tl : a test list) =
     let ( >>= ) = M.bind in
@@ -153,7 +159,11 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     let choices =
       List.map
         (fun (term, info) -> Cmd.v info term)
-        [ list_cmd ~stdout ~stderr tl; test_cmd config args name tl ]
+        [
+          list_cmd ~stdout ~stderr tl;
+          tags_cmd ~stdout ~stderr tl;
+          test_cmd config args name tl;
+        ]
     in
     let and_exit = Config.User.and_exit config in
     let exit_or_return exit_code =

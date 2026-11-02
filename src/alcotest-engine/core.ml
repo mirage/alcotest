@@ -174,14 +174,34 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   (* Types *)
   type return = unit M.t
   type 'a run = 'a -> unit M.t
-  type speed_level = [ `Quick | `Slow ]
+
+  type tag =
+    [ `Quick
+    | `Slow
+    | `Always
+    | `Tag of string
+    | `And of tag list
+    | `Or of tag list
+    | `Not of tag ]
+
+  type speed_level = tag
+
+  module Tag = struct
+    let v s : tag = `Tag s
+    let quick : tag = `Quick
+    let slow : tag = `Slow
+    let always : tag = `Always
+    let ( && ) a b : tag = `And [ a; b ]
+    let ( || ) a b : tag = `Or [ a; b ]
+    let not a : tag = `Not a
+  end
 
   exception Test_error
 
-  type 'a test_case = string * speed_level * 'a run
+  type 'a test_case = string * tag * 'a run
 
-  let test_case n s f =
-    let case = (n, s, f) in
+  let test_case n t f =
+    let case = (n, t, f) in
     register_case_info case { location = caller_location (); children = None };
     case
 
@@ -190,7 +210,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       (fun acc (_, _, f) -> M.bind acc (fun () -> f args))
       (M.return ()) cases
 
-  (* The function and speed only matter if the user rebuilds the tuple, which
+  (* The function and tag only matter if the user rebuilds the tuple, which
      then runs the cases as a single test. *)
   let group name cases =
     if name = "" then
@@ -253,12 +273,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let stderr = config#stderr in
     { suite; errors; max_label; config; run_id; log_trap; stdout; stderr }
 
-  let compare_speed_level s1 s2 =
-    match (s1, s2) with
-    | `Quick, `Quick | `Slow, `Slow -> 0
-    | `Quick, _ -> 1
-    | _, `Quick -> -1
-
   let pp_suite_results t =
     let log_dir = Log_trap.pp_current_run_dir t.log_trap in
     Pp.suite_results ~log_dir t.config
@@ -273,10 +287,6 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
         ~selector_on_failure ~tests_so_far
     else Fmt.nop
-
-  let pp_info t =
-    Pp.info ~max_label:t.max_label
-      ~doc_of_test_name:(Suite.doc_of_test_name t.suite)
 
   let color c ppf fmt = Fmt.(styled c string) ppf fmt
   let red_s fmt = color `Red fmt
@@ -444,16 +454,37 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         else if subst then Some (skip_label tc)
         else None)
 
-  let select_speed speed_level (test_case : 'a Suite.test_case as 'tc) : 'tc =
-    if compare_speed_level test_case.speed_level speed_level >= 0 then test_case
-    else Suite.{ test_case with fn = `Skip }
+  let apply_tag context s =
+    if String.is_prefix ~affix:"-" s then
+      let removed = String.with_range ~first:1 s in
+      List.filter (fun t -> t <> removed) context
+    else s :: context
+
+  let context t =
+    let base =
+      if t.config#quick_only then [ "quick" ] else [ "quick"; "slow" ]
+    in
+    List.fold_left apply_tag base t.config#tags
+
+  let rec holds context = function
+    | `Quick -> List.mem "quick" context
+    | `Slow -> List.mem "slow" context
+    | `Always -> true
+    | `Tag s -> List.mem s context
+    | `And l -> List.for_all (holds context) l
+    | `Or l -> List.exists (holds context) l
+    | `Not c -> not (holds context c)
+
+  let is_enabled t test = holds (context t) test.Suite.condition
+
+  let select_condition t (test_case : 'a Suite.test_case as 'tc) : 'tc =
+    if is_enabled t test_case then test_case else skip_label test_case
 
   let result t test args =
     let initial_backtrace_status = Printexc.backtrace_status () in
     if t.config#record_backtrace then Printexc.record_backtrace true;
     let start_time = P.time () in
-    let speed_level = if t.config#quick_only then `Quick else `Slow in
-    let test = List.map (select_speed speed_level) test in
+    let test = List.map (select_condition t) test in
     let+ results = perform_tests t test args in
     let time = P.time () -. start_time in
     let failures = List.length (List.filter Run_result.is_failure results) in
@@ -462,19 +493,46 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       Printexc.record_backtrace initial_backtrace_status;
     Pp.{ time; success; failures; errors = List.rev t.errors }
 
+  let rec pp_condition ppf = function
+    | `Quick -> Fmt.string ppf "quick"
+    | `Slow -> Fmt.string ppf "slow"
+    | `Always -> Fmt.string ppf "always"
+    | `Tag s -> Fmt.string ppf s
+    | `And l -> pp_conditions " and " ppf l
+    | `Or l -> pp_conditions " or " ppf l
+    | `Not c -> Fmt.pf ppf "not %a" pp_operand c
+
+  and pp_conditions sep ppf =
+    Fmt.(list ~sep:(fun ppf () -> string ppf sep) pp_operand) ppf
+
+  and pp_operand ppf = function
+    | (`And _ | `Or _) as c -> Fmt.pf ppf "(%a)" pp_condition c
+    | c -> pp_condition ppf c
+
+  (* The conditions of existing tests are not worth listing. *)
+  let doc_with_condition condition doc =
+    match condition with
+    | `Quick | `Slow -> doc
+    | c -> Fmt.str "[%a] %s" pp_condition c doc
+
+  let pp_listed_test ~max_label suite ppf (test : _ Suite.test_case) =
+    let doc = Suite.doc_of_test_name suite test.name in
+    let doc = doc_with_condition test.condition doc in
+    Pp.info ~max_label ~doc_of_test_name:(fun _ -> doc) ppf test.name
+
   let list_registered_tests t () =
     Suite.tests t.suite
-    |> List.map (fun t -> t.Suite.name)
-    |> List.sort Test_name.compare
+    |> List.sort (fun a b -> Test_name.compare a.Suite.name b.Suite.name)
     |> Fmt.(
-         list ~sep:(const string "\n") (pp_info t)
+         list ~sep:(const string "\n")
+           (pp_listed_test ~max_label:t.max_label t.suite)
            (t.stdout :> Format.formatter))
 
   type 'a entry = {
     entry_name : string;
     index : int;
     doc : string;
-    speed : speed_level;
+    tag : tag;
     location : (string * int * int) option;
     run : 'a run;
   }
@@ -490,7 +548,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let rec entries name acc cases =
       List.fold_left
-        (fun acc ((doc, speed, run) as case) ->
+        (fun acc ((doc, tag, run) as case) ->
           match case_children case with
           | Some children ->
               (* A group and its cases have the same ['a]. *)
@@ -498,7 +556,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           | None ->
               let location = case_location case in
               let index = next_index name in
-              { entry_name = name; index; doc; speed; location; run } :: acc)
+              { entry_name = name; index; doc; tag; location; run } :: acc)
         acc cases
     in
     List.rev (entries name [] cases)
@@ -510,7 +568,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       else e.doc ^ "."
     in
     let test a = protect_test ~registered:e.location path e.run a in
-    match Suite.add t.suite (path, doc, e.speed, `Run test) with
+    match Suite.add t.suite (path, doc, e.tag, `Run test) with
     | Ok suite ->
         let max_label = max t.max_label (String.length_utf8 e.entry_name) in
         { t with suite; max_label }
@@ -523,12 +581,54 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let register_all t cases = List.fold_left register t cases
 
+  let nothing_selected t matching =
+    t.config#tags <> []
+    && matching <> []
+    && not (List.exists (is_enabled t) matching)
+
+  let rec condition_tags = function
+    | `Quick -> [ "quick" ]
+    | `Slow -> [ "slow" ]
+    | `Always -> []
+    | `Tag s -> [ s ]
+    | `And l | `Or l -> List.concat_map condition_tags l
+    | `Not c -> condition_tags c
+
+  let suite_tags suite =
+    List.concat_map (fun x -> condition_tags x.Suite.condition) suite
+    |> List.sort_uniq compare
+
+  let available_tags suite =
+    List.sort_uniq compare ("quick" :: "slow" :: suite_tags suite)
+
+  let tag_name s =
+    if String.is_prefix ~affix:"-" s then String.with_range ~first:1 s else s
+
+  let check_tags t suite =
+    if t.config#strict_tags then
+      let available = available_tags suite in
+      let is_unknown s = s <> "" && not (List.mem (tag_name s) available) in
+      match List.filter is_unknown t.config#tags with
+      | [] -> ()
+      | unknown ->
+          Fmt.kstr Pp.user_error "Unknown tags `%s'. Available tags: %s."
+            (String.concat ~sep:"," unknown)
+            (String.concat ~sep:", " available)
+
+  let warn_nothing_selected t suite =
+    Fmt.flush (t.stdout :> Format.formatter) ();
+    Fmt.kstr Pp.user_warning
+      "tags `%s' enable no tests. Tests use the tags: %s."
+      (String.concat ~sep:"," t.config#tags)
+      (String.concat ~sep:", " (suite_tags suite))
+
   let run_tests t () args =
     let filter = t.config#filter in
     let suite = Suite.tests t.suite in
-    let is_empty = filter_test_cases ~subst:false filter suite = [] in
+    check_tags t suite;
+    let matching = filter_test_cases ~subst:false filter suite in
     let+ result =
-      if is_empty && Option.is_some filter then (
+      if matching = [] && Option.is_some filter then (
         (* NOTE(dinosaure): [Stdlib.flush_all] is really deep in OCaml and try to flush
            all opened file descriptors (including [1] and [2]). Even if the user create
            its own [Format.formatter], if it uses a file-descriptor, it will be flushed
@@ -546,6 +646,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         result t tests args
     in
     (pp_suite_results t) (t.stdout :> Format.formatter) result;
+    if nothing_selected t matching then warn_nothing_selected t suite;
     result.failures
 
   let default_log_dir () =
@@ -554,18 +655,25 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   type 'a with_options = 'a Config.with_options
 
-  let list_tests (type a) (tl : a test list) =
+  let registered (type a) (tl : a test list) =
     (* TODO: refactor [register_all] to not require dummy state *)
     let config =
       Config.apply_defaults ~default_log_dir:"<not-shown-to-user>"
         (Config.User.create ())
     in
-    let t =
-      register_all
-        (empty ~config ~trap_logs:false ~suite_name:"<not-shown-to-user>")
-        tl
-    in
-    list_registered_tests t ();
+    register_all
+      (empty ~config ~trap_logs:false ~suite_name:"<not-shown-to-user>")
+      tl
+
+  let list_tests tl =
+    list_registered_tests (registered tl) ();
+    M.return ()
+
+  let list_tags tl =
+    let t = registered tl in
+    List.iter
+      (Fmt.pf (t.stdout :> Format.formatter) "%s@.")
+      (available_tags (Suite.tests t.suite));
     M.return ()
 
   let run_with_args' (config : Config.User.t) name (type a) (args : a)

@@ -2,13 +2,9 @@ module type V1 = sig
   include Alcotest_engine.V1.Cli.S with type return = unit Lwt.t
 
   val test_case :
-    string ->
-    Alcotest.speed_level ->
-    (Lwt_switch.t -> 'a -> unit Lwt.t) ->
-    'a test_case
+    string -> Alcotest.tag -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
 
-  val test_case_sync :
-    string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
+  val test_case_sync : string -> Alcotest.tag -> ('a -> unit) -> 'a test_case
 end
 
 module type Alcotest_lwt = sig

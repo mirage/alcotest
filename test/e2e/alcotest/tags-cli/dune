@@ -1,0 +1,74 @@
+;; `ALCOTEST_TAGS` is replaced by `--tags`, and enabling nothing warns but
+;; succeeds. One line of test results per run.
+
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR auto))))
+
+(executable
+ (name tags_cli)
+ (libraries alcotest))
+
+(rule
+ (target tags_cli.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (progn
+    (setenv
+     ALCOTEST_TAGS
+     "slow"
+     (run %{dep:tags_cli.exe} -c))
+    (setenv
+     ALCOTEST_TAGS
+     "slow"
+     (run %{dep:tags_cli.exe} -c --tags=db))
+    (setenv
+     ALCOTEST_TAGS
+     "slow"
+     (run %{dep:tags_cli.exe} -c -q))
+    (setenv
+     ALCOTEST_TAGS
+     "slow"
+     (setenv
+      ALCOTEST_QUICK_TESTS
+      true
+      (run %{dep:tags_cli.exe} -c)))
+    (setenv
+     ALCOTEST_TAGS
+     ""
+     (run %{dep:tags_cli.exe} -c))
+    (run %{dep:tags_cli.exe} test new-api -c --tags=slow)
+    ;; Not ".*": the OCaml runtime on Windows expands wildcards in argv.
+    (run %{dep:tags_cli.exe} test . 1 -c --tags=db)
+    (run %{dep:tags_cli.exe} -c --tags=-quick -q)
+    (run %{dep:tags_cli.exe} -c --tags=slow,-slow)
+    (run %{dep:tags_cli.exe} test old-api -c --tags=db)
+    (setenv
+     ALCOTEST_TAGS
+     "nope"
+     (run %{dep:tags_cli.exe} -c))))))
+
+(rule
+ (target tags_cli.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:tags_cli.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff tags_cli.expected tags_cli.processed)))
+
+;; A tag added across a workspace where one executable does not use it.
+
+(cram
+ (applies_to tags_workspace)
+ (package alcotest)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (deps
+  (package alcotest)))
