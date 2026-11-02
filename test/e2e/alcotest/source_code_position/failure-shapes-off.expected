@@ -1,0 +1,41 @@
+Testing `test/e2e/alcotest/source_code_position/test_failure_shapes.ml'.
+This run has ID `<uuid>'.
+
+  [FAIL]        shapes          0   check in body.
+  [SKIP]        shapes          1   check as tail call.
+  [SKIP]        shapes          2   check in helper.
+  [SKIP]        shapes          3   check in iter.
+  [SKIP]        shapes          4   raise as tail call.
+  [SKIP]        shapes          5   raise in body.
+  [FAIL]        shapes          6   given position.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          0   check in body.                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          6   given position.                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 26, character 22:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.006.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+2 failures! in <test-duration>s. 2 tests run.

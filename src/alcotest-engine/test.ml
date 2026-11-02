@@ -169,17 +169,13 @@ end
 type 'a extra_info =
   ?here:Source_code_position.here -> ?pos:Source_code_position.pos -> 'a
 
-let pp_location =
-  let pp =
-    Fmt.styled `Bold (fun ppf (f, l, c) ->
-        Fmt.pf ppf "File \"%s\", line %d, character %d:@," f l c)
-  in
-  fun ?here ?pos ppf ->
-    match (here, pos) with
-    | Some (here : Source_code_position.here), _ ->
-        pp ppf (here.pos_fname, here.pos_lnum, here.pos_cnum - here.pos_bol)
-    | _, Some (fname, lnum, cnum, _) -> pp ppf (fname, lnum, cnum)
-    | None, None -> ()
+let pp_location ?here ?pos ppf =
+  match (here, pos) with
+  | Some (here : Source_code_position.here), _ ->
+      Pp.location ppf
+        (here.pos_fname, here.pos_lnum, here.pos_cnum - here.pos_bol)
+  | _, Some (fname, lnum, cnum, _) -> Pp.location ppf (fname, lnum, cnum)
+  | None, None -> ()
 
 let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
   if equal t expected actual then show_assert msg
@@ -197,10 +193,6 @@ let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
       ()
     and pp_actual ppf () =
       Fmt.pf ppf "   Received: `%a'" (styled `Red (pp t)) actual
-    and here, pos =
-      match (here, pos) with
-      | None, None -> (Callsite_loc.get (), None)
-      | _ -> (here, pos)
     in
     raise
       (Core.Check_error

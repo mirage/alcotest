@@ -49,7 +49,7 @@ end
 module Run_result = struct
   type t =
     [ `Ok
-    | `Exn of Test_name.t * string * unit Fmt.t
+    | `Exn of Test_name.t * string * (string * int * int) option * unit Fmt.t
     | `Error of Test_name.t * unit Fmt.t
     | `Skip
     | `Todo of string ]

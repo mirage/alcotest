@@ -1,0 +1,109 @@
+Testing `test/e2e/alcotest/source_code_position/test_failure_shapes.ml'.
+This run has ID `<uuid>'.
+
+  [FAIL]        shapes          0   check in body.
+  [FAIL]        shapes          1   check as tail call.
+  [FAIL]        shapes          2   check in helper.
+  [FAIL]        shapes          3   check in iter.
+  [FAIL]        shapes          4   raise as tail call.
+  [FAIL]        shapes          5   raise in body.
+  [FAIL]        shapes          6   given position.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          0   check in body.                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 6, character 2:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          1   check as tail call.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 35, character 10:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.001.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          2   check in helper.                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 12, character 2:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.002.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          3   check in iter.                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 16, character 2:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.003.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          4   raise as tail call.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 38, character 10:
+[failure] boom
+          <stacktrace>
+          
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.004.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          5   raise in body.                             │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 22, character 10:
+[failure] boom
+          <stacktrace>
+          
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.005.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          6   given position.                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 26, character 22:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.006.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+7 failures! in <test-duration>s. 7 tests run.
