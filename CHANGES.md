@@ -2,6 +2,7 @@
 
 - Fix and modernise CI (#445, #446, #436, #407, @samoht, @hhugo and @MisterDA,
   report by @edwintorok and @ngorogiannis)
+- Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
 
 ### 1.9.1 (2025-10-01)
 
