@@ -15,9 +15,26 @@
    %{target}
    "let get ?__FUNCTION__ () =\n  ignore __FUNCTION__;\n  None\n")))
 
+(rule
+ (target c_library_flags.sexp)
+ (enabled_if (= %{os_type} Win32))
+ (action
+  (write-file %{target} "(-ldbghelp)")))
+
+(rule
+ (target c_library_flags.sexp)
+ (enabled_if (or (<> %{os_type} Win32) (= %{architecture} "js")))
+ (action
+  (write-file %{target} "()")))
+
 (library
  (name alcotest_engine)
  (public_name alcotest.engine)
+ (foreign_stubs
+  (language c)
+  (names stack_error_reporter))
+  (c_library_flags (:standard (:include c_library_flags.sexp)))
+ (js_of_ocaml (javascript_files stack_error_reporter.js))
  (libraries
   alcotest.stdlib_ext
   fmt
