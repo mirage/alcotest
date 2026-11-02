@@ -132,8 +132,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) :
     let term =
       let+ () = set_color stdout stderr
       and+ cli_config =
-        Config.User.term ~stdout ~stderr ~and_exit ~record_backtrace
-          ~ci
+        Config.User.term ~stdout ~stderr ~and_exit ~record_backtrace ~ci
       and+ args = args in
       let config = Config.User.(cli_config || config) in
       run_with_args' config library_name args tests
