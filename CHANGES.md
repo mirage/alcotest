@@ -14,6 +14,8 @@
   and @samoht)
 - Allow callers to override `and_exit` and `record_backtrace` in the `test`
   subcommand (#439, fixes #438, @edwintorok)
+- Keep `Unix.stdout` and `Unix.stderr` valid during tests on Windows
+  (#444, fixes #443, @ngorogiannis)
 
 ### 1.9.1 (2025-10-01)
 
