@@ -10,6 +10,8 @@
 - Preserve absolute log directories: `mkdir_p` turned `/foo` into `//foo`, which
   fails with `EROFS` on Cygwin (#405, fixes #404, @bbonf, review by @MisterDA
   and @samoht)
+- Allow callers to override `and_exit` and `record_backtrace` in the `test`
+  subcommand (#439, fixes #438, @edwintorok)
 
 ### 1.9.1 (2025-10-01)
 
