@@ -5,6 +5,9 @@
 - Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
 - Fix the `success` count in `--json` output, which included failures
   (#432, fixes #431, @1zumiSagiri, review by @MisterDA)
+- Make `alcotest-lwt` usable under js_of_ocaml. It no longer re-exports `lwt.unix`:
+  packages using `Lwt_unix` must depend on `lwt.unix` directly (#348, @hhugo,
+  review by @TheLortex)
 
 ### 1.9.1 (2025-10-01)
 
