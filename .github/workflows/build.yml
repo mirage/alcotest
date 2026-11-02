@@ -22,6 +22,8 @@ jobs:
           - "5.x"
           - "4.14"
         include:
+          # OCaml < 4.14 does not build with GCC 15 (ubuntu-latest), which defaults
+          # to C23.
           - os: macos-latest
             ocaml-compiler: "4.14"
             packages: "."
@@ -33,7 +35,7 @@ jobs:
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
             runtest: false
 
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             ocaml-compiler: "4.08"
             packages: "alcotest alcotest-js alcotest-lwt alcotest-mirage"
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
@@ -42,7 +44,7 @@ jobs:
               default: https://opam.ocaml.org
               archive: https://github.com/ocaml/opam-repository-archive.git
 
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             ocaml-compiler: "4.09"
             packages: "alcotest alcotest-js alcotest-lwt alcotest-mirage"
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
@@ -51,7 +53,7 @@ jobs:
               default: https://opam.ocaml.org
               archive: https://github.com/ocaml/opam-repository-archive.git
 
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             ocaml-compiler: "4.10"
             packages: "alcotest alcotest-js alcotest-lwt alcotest-mirage"
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
@@ -60,19 +62,19 @@ jobs:
               default: https://opam.ocaml.org
               archive: https://github.com/ocaml/opam-repository-archive.git
 
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             ocaml-compiler: "4.11"
             packages: "alcotest alcotest-js alcotest-lwt alcotest-mirage"
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
             runtest: false
 
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             ocaml-compiler: "4.12"
             packages: "alcotest alcotest-js alcotest-lwt alcotest-mirage"
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
             runtest: false
 
-          - os: ubuntu-latest
+          - os: ubuntu-24.04
             ocaml-compiler: "4.13"
             packages: "alcotest alcotest-js alcotest-lwt alcotest-mirage"
             opam-local-packages: "alcotest.opam alcotest-js.opam alcotest-lwt.opam alcotest-mirage.opam"
