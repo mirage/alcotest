@@ -1,3 +1,7 @@
+### unreleased
+
+- Fix CI (#445, @samoht)
+
 ### 1.9.1 (2025-10-01)
 
 - Remove bad test with `cmdliner` to be compatible with `cmdliner.2.0.0` (@MisterDA, #424)
