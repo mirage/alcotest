@@ -1,6 +1,7 @@
 ### unreleased
 
-- Fix and modernise CI (#445, #446, @samoht)
+- Fix and modernise CI (#445, #446, #436, #407, @samoht, @hhugo and @MisterDA,
+  report by @edwintorok and @ngorogiannis)
 
 ### 1.9.1 (2025-10-01)
 
