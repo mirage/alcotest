@@ -1,5 +1,8 @@
 ### unreleased
 
+- Fix UTF-8 locale detection, which never matched since 1.8.0, so `Fmt.if_utf_8`
+  printers always took the non-UTF-8 branch. `LC_ALL` now overrides `LC_CTYPE` and
+  `LANG`, as in POSIX, and `UTF8` also counts (#457, @samoht)
 - Recognise `Alcotest.skip` and failed checks in `alcotest-async` tests: Async
   wrapped the exceptions, so a skip counted as a failure (#278, @vbmithr)
 - Make `alcotest-async` unavailable on Windows, so that ocaml-ci tests the other
