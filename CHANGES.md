@@ -1,6 +1,7 @@
 ### unreleased
 
 - Remove stdlib-shims and ocaml-syntax-shims (#452, @copy)
+- Update ocamlformat to 0.29.0 (#450, @samoht)
 - Fix and modernise CI (#445, #446, #436, #407, @samoht, @hhugo and @MisterDA,
   report by @edwintorok and @ngorogiannis)
 - Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
