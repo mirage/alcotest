@@ -25,7 +25,6 @@ depends: [
   "astring"
   "cmdliner" {>= "1.2.0"}
   "re" {>= "1.7.2"}
-  "uutf" {>= "1.0.1"}
   "odoc" {with-doc}
 ]
 conflicts: [

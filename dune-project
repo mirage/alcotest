@@ -28,8 +28,7 @@ tests to run.
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.2.0))
-  (re (>= 1.7.2))
-  (uutf (>= 1.0.1)))
+  (re (>= 1.7.2)))
  (conflicts
   (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
   (js_of_ocaml-compiler (< 5.8)) ;; requirement for the js stubs

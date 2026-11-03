@@ -15,13 +15,23 @@ end
 module String = struct
   include Astring.String
 
-  let length_utf8 = Uutf.String.fold_utf_8 (fun count _ _ -> count + 1) 0
+  let fold_utf8 f acc s =
+    let rec go acc i =
+      if i >= String.length s then acc
+      else
+        let d = String.get_utf_8_uchar s i in
+        go (f acc i d) (i + Uchar.utf_decode_length d)
+    in
+    go acc 0
+
+  (* Use [Format.utf_8_scalar_width] once OCaml 5.4 is the minimum version. *)
+  let length_utf8 = fold_utf8 (fun count _ _ -> count + 1) 0
 
   let prefix_utf8 uchars string =
     let exception Found_new_length of int in
     try
       let (_ : int) =
-        Uutf.String.fold_utf_8
+        fold_utf8
           (fun count start_pos _ ->
             if count = uchars then raise (Found_new_length start_pos)
             else count + 1)
