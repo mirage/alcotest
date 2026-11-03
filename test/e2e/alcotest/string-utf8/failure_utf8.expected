@@ -1,0 +1,21 @@
+Testing `test/e2e/alcotest/string-utf8/failure.ml'.
+This run has ID `<uuid>'.
+
+  [FAIL]        failure          0   symbols.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        failure          0   symbols.                                  │
+└──────────────────────────────────────────────────────────────────────────────┘
+ASSERT symbols
+FAIL symbols
+
+   Expected: `"∀"'
+   Received: `"∃"'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/failure.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 1 test run.
