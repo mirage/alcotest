@@ -1,0 +1,19 @@
+Testing `test/e2e/alcotest/passing/mkdir_p_paths.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          absolute          0   root.
+  [OK]          absolute          1   double separator.
+  [OK]          absolute          2   one level.
+  [OK]          absolute          3   nested.
+  [OK]          absolute          4   trailing separator.
+  [OK]          absolute          5   cygdrive.
+  [OK]          relative          0   one level.
+  [OK]          relative          1   nested.
+  [OK]          relative          2   trailing separator.
+  [OK]          windows           0   drive letter.
+  [OK]          windows           1   nested.
+  [OK]          windows           2   rooted.
+  [OK]          windows           3   relative.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 13 tests run.

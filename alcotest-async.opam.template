@@ -1,1 +1,5 @@
 x-maintenance-intent: [ "(latest)" ]
+# Temporary, so that ocaml-ci tests the other packages on Windows: drop this
+# when ocaml-ci handles unavailable dependencies per package, or when core_unix
+# supports Windows.
+available: [os != "win32"]

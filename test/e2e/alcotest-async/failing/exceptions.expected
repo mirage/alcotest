@@ -1,0 +1,8 @@
+Testing `test/e2e/alcotest-async/failing/exceptions.ml'.
+This run has ID `<uuid>'.
+
+{
+  "success": 1,
+  "failures": 3,
+  "time": <test-duration>
+}

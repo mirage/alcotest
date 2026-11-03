@@ -28,7 +28,8 @@ module List : sig
   type 'a t = 'a list
 
   val rev_head : int -> 'a list -> 'a list
-  (** Reverse a list, taking at most the first n elements of the original list. *)
+  (** Reverse a list, taking at most the first n elements of the original list.
+  *)
 
   val concat_map : ('a -> 'b list) -> 'a list -> 'b list
   val filter_map : ('a -> 'b option) -> 'a list -> 'b list
@@ -47,6 +48,12 @@ module Option : sig
   val get_exn : 'a option -> 'a
   val value : default:'a -> 'a option -> 'a
   val ( || ) : 'a option -> 'a option -> 'a option
+end
+
+module Path : sig
+  val ancestors : sep:string -> string -> string list
+  (** [ancestors ~sep path] is the directories leading to [path], outermost
+      first. *)
 end
 
 module Cmdliner_syntax : sig

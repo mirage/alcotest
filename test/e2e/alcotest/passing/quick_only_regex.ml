@@ -2,7 +2,7 @@ let () =
   let open Alcotest in
   let id () = () in
   run
-    ~argv:[| ""; "test"; "--quick"; ".*-a" |]
+    ~argv:[| ""; "test"; "--quick-tests"; ".*-a" |]
     __FILE__
     [
       ( "test-a",
