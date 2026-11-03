@@ -7,6 +7,9 @@
 - Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
 - Fix the `success` count in `--json` output, which included failures
   (#432, fixes #431, @1zumiSagiri, review by @MisterDA)
+- Preserve absolute log directories: `mkdir_p` turned `/foo` into `//foo`, which
+  fails with `EROFS` on Cygwin (#405, fixes #404, @bbonf, review by @MisterDA
+  and @samoht)
 
 ### 1.9.1 (2025-10-01)
 

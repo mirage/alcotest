@@ -50,6 +50,12 @@ module Option : sig
   val ( || ) : 'a option -> 'a option -> 'a option
 end
 
+module Path : sig
+  val ancestors : sep:string -> string -> string list
+  (** [ancestors ~sep path] is the directories leading to [path], outermost
+      first. *)
+end
+
 module Cmdliner_syntax : sig
   open Cmdliner
 

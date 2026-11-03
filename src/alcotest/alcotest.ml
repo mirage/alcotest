@@ -2,29 +2,16 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   module M = Alcotest_engine.Monad.Extend (M)
 
   module Unix = struct
-    open Astring
     include Unix
 
     let mkdir_p path mode =
-      let is_win_drive_letter x =
-        String.length x = 2 && x.[1] = ':' && Char.Ascii.is_letter x.[0]
-      in
-      let sep = Filename.dir_sep in
-      let rec mk parent = function
-        | [] -> ()
-        | name :: names ->
-            let path = parent ^ sep ^ name in
-            (try Unix.mkdir path mode
-             with Unix.Unix_error (Unix.EEXIST, _, _) ->
-               if Sys.is_directory path then () (* the directory exists *)
-               else Fmt.str "mkdir: %s: is a file" path |> failwith);
-            mk path names
-      in
-      match String.cuts ~empty:true ~sep path with
-      | "" :: xs -> mk sep xs
-      (* check for Windows drive letter *)
-      | dl :: xs when is_win_drive_letter dl -> mk dl xs
-      | xs -> mk "." xs
+      List.iter
+        (fun path ->
+          try Unix.mkdir path mode
+          with Unix.Unix_error (Unix.EEXIST, _, _) ->
+            if Sys.is_directory path then () (* the directory exists *)
+            else Fmt.str "mkdir: %s: is a file" path |> failwith)
+        (Alcotest_stdlib_ext.Path.ancestors ~sep:Filename.dir_sep path)
   end
 
   open M.Syntax
