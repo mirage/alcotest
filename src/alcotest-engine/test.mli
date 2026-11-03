@@ -62,6 +62,9 @@ val float : float -> float testable
 val char : char testable
 (** [char] tests characters. *)
 
+val uchar : Uchar.t testable
+(** [uchar] tests Unicode characters. *)
+
 val string : string testable
 (** [string] tests OCaml strings. *)
 
@@ -78,7 +81,8 @@ val seq : 'a testable -> 'a Seq.t testable
 (** [seq t] tests sequence of [t]s. *)
 
 val slist : 'a testable -> ('a -> 'a -> int) -> 'a list testable
-(** [slist t comp] tests sorted lists of [t]s. The list are sorted using [comp]. *)
+(** [slist t comp] tests sorted lists of [t]s. The list are sorted using [comp].
+*)
 
 val array : 'a testable -> 'a array testable
 (** [array t] tests arrays of [t]s. *)
@@ -111,7 +115,8 @@ val neg : 'a testable -> 'a testable
     [false] when [t] is [true]. *)
 
 val map : ('b -> 'a) -> 'a testable -> 'b testable
-(** [map f t] lift a ['a testable] to a ['b testable], converting ['b] to ['a]. *)
+(** [map f t] lift a ['a testable] to a ['b testable], converting ['b] to ['a].
+*)
 
 (** {1 Assertion functions}
 

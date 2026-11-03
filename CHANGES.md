@@ -1,3 +1,27 @@
+### unreleased
+
+- Make `alcotest-async` unavailable on Windows, so that ocaml-ci tests the other
+  packages there (#454, @samoht, suggested by @mtelvers)
+- Remove stdlib-shims and ocaml-syntax-shims (#452, @copy)
+- Update ocamlformat to 0.29.0 (#450, @samoht)
+- Fix and modernise CI (#445, #446, #436, #407, @samoht, @hhugo and @MisterDA,
+  report by @edwintorok and @ngorogiannis)
+- Add `uchar`, a testable for `Uchar.t` (#435, @emengd, review by @dinosaure)
+- Fix the `success` count in `--json` output, which included failures
+  (#432, fixes #431, @1zumiSagiri, review by @MisterDA)
+- Preserve absolute log directories: `mkdir_p` turned `/foo` into `//foo`, which
+  fails with `EROFS` on Cygwin (#405, fixes #404, @bbonf, review by @MisterDA
+  and @samoht)
+- Allow callers to override `and_exit` and `record_backtrace` in the `test`
+  subcommand (#439, fixes #438, @edwintorok)
+- Keep `Unix.stdout` and `Unix.stderr` valid during tests on Windows
+  (#444, fixes #443, @ngorogiannis)
+- Test `alcotest-async` exception handling (#279, @craigfe)
+
+### 1.9.1 (2025-10-01)
+
+- Remove bad test with `cmdliner` to be compatible with `cmdliner.2.0.0` (@MisterDA, #424)
+
 ### 1.9.0 (2025-03-13)
 
 - Add `seq`, a testable for `Seq.t` and `contramap` (#412 @xvw)

@@ -10,11 +10,11 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   json_output_with_failed
    long_test_case_name
    outside_runner
    tail_errors_limit
    tail_errors_unlimited
-   unknown_option
  )
  (libraries alcotest alcotest.stdlib_ext alcotest.engine)
  (modes exe js)
@@ -29,11 +29,11 @@
    exception_in_test
    filter_all_tests
    invalid_arg_in_test
+   json_output_with_failed
    long_test_case_name
    outside_runner
    tail_errors_limit
    tail_errors_unlimited
-   unknown_option
  )
 )
 
@@ -418,6 +418,44 @@
    (diff invalid_arg_in_test-js.expected invalid_arg_in_test-js.processed)))
 
 (rule
+ (target json_output_with_failed.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run %{dep:json_output_with_failed.exe})))))
+
+(rule
+ (target json_output_with_failed.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:json_output_with_failed.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff json_output_with_failed.expected json_output_with_failed.processed)))
+
+(rule
+ (target json_output_with_failed-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:json_output_with_failed.bc.js})))))
+
+(rule
+ (target json_output_with_failed-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:json_output_with_failed-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff json_output_with_failed-js.expected json_output_with_failed-js.processed)))
+
+(rule
  (target long_test_case_name.actual)
  (action
   (with-outputs-to %{target}
@@ -568,41 +606,3 @@
  (package alcotest)
  (action
    (diff tail_errors_unlimited-js.expected tail_errors_unlimited-js.processed)))
-
-(rule
- (target unknown_option.actual)
- (action
-  (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 124 125)
-    (run %{dep:unknown_option.exe} --dry-runn)))))
-
-(rule
- (target unknown_option.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unknown_option.actual}))))
-
-(rule
- (alias runtest)
- (package alcotest)
- (action
-   (diff unknown_option.expected unknown_option.processed)))
-
-(rule
- (target unknown_option-js.actual)
- (action
-  (with-outputs-to %{target}
-   (with-accepted-exit-codes (or 1 2 124 125)
-    (run node %{dep:unknown_option.bc.js} --dry-runn)))))
-
-(rule
- (target unknown_option-js.processed)
- (action
-  (with-outputs-to %{target}
-   (run ../../strip_randomness.exe %{dep:unknown_option-js.actual}))))
-
-(rule
- (alias runtest-js)
- (package alcotest)
- (action
-   (diff unknown_option-js.expected unknown_option-js.processed)))

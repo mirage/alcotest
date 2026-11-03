@@ -29,9 +29,7 @@ tests to run.
   astring
   (cmdliner (>= 1.2.0))
   (re (>= 1.7.2))
-  stdlib-shims
-  (uutf (>= 1.0.1))
-  ocaml-syntax-shims)
+  (uutf (>= 1.0.1)))
  (conflicts
   (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
   (js_of_ocaml-compiler (< 5.8)) ;; requirement for the js stubs
@@ -95,4 +93,5 @@ tests to run.
   (alcotest (= :version))
   (js_of_ocaml-compiler (>= 3.11.0))
   (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 1.2.0)))))
+  (cmdliner (and :with-test (>= 1.2.0)))
+  (conf-npm :with-test)))

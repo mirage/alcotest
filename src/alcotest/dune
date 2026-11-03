@@ -1,9 +1,8 @@
 (library
  (public_name alcotest)
- (libraries alcotest.engine astring fmt fmt.tty unix)
+ (libraries alcotest.engine alcotest.stdlib_ext fmt fmt.tty unix)
  (foreign_stubs
   (language c)
   (names alcotest_stubs))
  (js_of_ocaml
-  (javascript_files runtime.js))
- (preprocess future_syntax))
+  (javascript_files runtime.js)))
