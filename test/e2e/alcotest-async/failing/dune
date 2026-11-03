@@ -2,6 +2,8 @@
 
 (executable
  (name exceptions)
+ (public_name -)
+ (package alcotest-async)
  (enabled_if
   (<> %{os_type} Win32))
  (libraries alcotest alcotest-async async async_kernel async_unix core))
