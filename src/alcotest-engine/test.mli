@@ -87,6 +87,8 @@ val slist : 'a testable -> ('a -> 'a -> int) -> 'a list testable
 val array : 'a testable -> 'a array testable
 (** [array t] tests arrays of [t]s. *)
 
+include Test_iarray.S with type 'a t := 'a testable
+
 val option : 'a testable -> 'a option testable
 (** [option t] tests optional [t]s. *)
 

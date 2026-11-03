@@ -15,6 +15,22 @@
    %{target}
    "let get ?__FUNCTION__ () =\n  ignore __FUNCTION__;\n  None\n")))
 
+(rule
+ (target test_iarray.ml)
+ (deps test_iarray.54.ml)
+ (enabled_if
+  (>= %{ocaml_version} 5.4.0))
+ (action
+  (copy %{deps} %{target})))
+
+(rule
+ (target test_iarray.ml)
+ (deps test_iarray.pre54.ml)
+ (enabled_if
+  (< %{ocaml_version} 5.4.0))
+ (action
+  (copy %{deps} %{target})))
+
 (library
  (name alcotest_engine)
  (public_name alcotest.engine)

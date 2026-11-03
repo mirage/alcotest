@@ -1,0 +1,15 @@
+; Iarray is available from OCaml 5.4. A [test] stanza would compile it anyway.
+
+(executable
+ (name test_iarray)
+ (enabled_if
+  (>= %{ocaml_version} 5.4.0))
+ (libraries alcotest fmt))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (enabled_if
+  (>= %{ocaml_version} 5.4.0))
+ (action
+  (run %{exe:test_iarray.exe})))
