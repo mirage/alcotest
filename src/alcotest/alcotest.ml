@@ -111,15 +111,30 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     restore_std_outputs ();
     match r with `Ok x -> x | `Error e -> raise e
 
-  let contains s1 s2 =
+  let contains ~affix s =
     let exception Found in
     try
-      let len = String.length s2 in
-      for i = 0 to String.length s1 - len do
-        if String.sub s1 i len = s2 then raise_notrace Found
+      let len = String.length affix in
+      for i = 0 to String.length s - len do
+        if String.sub s i len = affix then raise_notrace Found
       done;
       false
     with Found -> true
+
+  (* The locale of the character type, in the order of POSIX.1-2024, Base
+     Definitions, 8.2: "If the LC_ALL environment variable is defined and is not
+     null, the value of LC_ALL shall be used.", then LC_CTYPE and LANG. The same
+     section leaves codesets "implementation-defined", so both spellings count,
+     as in tmux (tmux.c). *)
+  let locale_is_utf_8 () =
+    let non_empty var =
+      match Sys.getenv_opt var with Some "" -> None | v -> v
+    in
+    match List.filter_map non_empty [ "LC_ALL"; "LC_CTYPE"; "LANG" ] with
+    | [] -> false
+    | locale :: _ ->
+        let locale = String.uppercase_ascii locale in
+        contains ~affix:"UTF-8" locale || contains ~affix:"UTF8" locale
 
   let setup_std_outputs ?style_renderer ?utf_8
       (stdout : Alcotest_engine.Formatters.stdout)
@@ -141,14 +156,7 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
           if (not dumb) && is_a_tty then `Ansi_tty else `None
     in
     let utf_8 =
-      match utf_8 with
-      | Some value -> value
-      | None ->
-          let has_utf_8 var =
-            try contains "UTF-8" (String.uppercase_ascii (Sys.getenv var))
-            with Not_found -> false
-          in
-          has_utf_8 "LANG" || has_utf_8 "LC_ALL" || has_utf_8 "LC_CTYPE"
+      match utf_8 with Some value -> value | None -> locale_is_utf_8 ()
     in
     Fmt.set_style_renderer
       (stdout :> Format.formatter)

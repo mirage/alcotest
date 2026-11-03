@@ -1,0 +1,25 @@
+Testing `test/e2e/alcotest/locale/test_locale.ml'.
+This run has ID `<uuid>'.
+
+  [FAIL]        locale          0   flag.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        locale          0   flag.                                      │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+   Expected: `not utf-8'
+   Received: `not utf-8'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/locale.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 1 test run.Alcotest assertion failure
+
+   Expected: `not utf-8'
+   Received: `not utf-8'
+
+
+

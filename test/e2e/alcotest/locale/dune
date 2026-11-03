@@ -1,0 +1,68 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR never)
+   (ALCOTEST_SHOW_ERRORS true))))
+
+(test
+ (name test_locale_table)
+ (modules test_locale_table)
+ (package alcotest)
+ (libraries alcotest alcotest.engine fmt unix))
+
+(executable
+ (name test_locale)
+ (modules test_locale)
+ (libraries alcotest fmt))
+
+(rule
+ (target utf8.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (setenv
+    LC_ALL
+    en_US.UTF-8
+    (run %{dep:test_locale.exe})))))
+
+(rule
+ (target c.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (setenv
+    LANG
+    C
+    (setenv
+     LC_ALL
+     C
+     (setenv
+      LC_CTYPE
+      C
+      (run %{dep:test_locale.exe})))))))
+
+(rule
+ (target utf8.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:utf8.actual}))))
+
+(rule
+ (target c.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:c.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff utf8.expected utf8.processed)))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff c.expected c.processed)))
