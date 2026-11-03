@@ -30,6 +30,8 @@ let () =
        let ppf = Format.formatter_of_buffer buf in
        Fmt.set_style_renderer ppf
          Fmt.(style_renderer (Formatters.get_stderr () :> Format.formatter));
+       Fmt.set_utf_8 ppf
+         Fmt.(utf_8 (Formatters.get_stderr () :> Format.formatter));
        fun error ->
          Fmt.pf ppf "Alcotest assertion failure@.%a@." error ();
          let contents = Buffer.contents buf in
