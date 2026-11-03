@@ -273,3 +273,10 @@ let match_raises ?here ?pos msg exnp f =
               msg Fmt.exn e)
 
 let skip () = raise Core.V1.Skip
+
+include Test_iarray.Make (struct
+  type 'a t = 'a testable
+
+  let map = map
+  let array = array
+end)
