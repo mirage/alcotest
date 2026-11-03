@@ -3,6 +3,6 @@ This run has ID `<uuid>'.
 
 {
   "success": 1,
-  "failures": 3,
+  "failures": 2,
   "time": <test-duration>
 }
