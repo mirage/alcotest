@@ -52,7 +52,6 @@ tests to run.
   (alcotest (= :version))
   (async (>= v0.16.0))
   (async_unix (>= v0.16.0))
-  (base :with-test)
   (ppx_jane :with-test)))
 
 (package
