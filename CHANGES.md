@@ -1,5 +1,7 @@
 ### unreleased
 
+- Add `iarray`, a testable for `Iarray.t`, available from OCaml 5.4
+  (#455, fixes #434, @samoht, report by @JanBeh)
 - Fix UTF-8 locale detection, which never matched since 1.8.0, so `Fmt.if_utf_8`
   printers always took the non-UTF-8 branch. `LC_ALL` now overrides `LC_CTYPE` and
   `LANG`, as in POSIX, and `UTF8` also counts (#457, @samoht)
