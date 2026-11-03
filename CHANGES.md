@@ -1,5 +1,7 @@
 ### unreleased
 
+- Recognise `Alcotest.skip` and failed checks in `alcotest-async` tests: Async
+  wrapped the exceptions, so a skip counted as a failure (#278, @vbmithr)
 - Make `alcotest-async` unavailable on Windows, so that ocaml-ci tests the other
   packages there (#454, @samoht, suggested by @mtelvers)
 - Remove stdlib-shims and ocaml-syntax-shims (#452, @copy)
