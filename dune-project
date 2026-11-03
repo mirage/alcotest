@@ -51,7 +51,9 @@ tests to run.
   (ocaml (>= 4.14.0))
   (alcotest (= :version))
   (async (>= v0.16.0))
-  (async_unix (>= v0.16.0))))
+  (async_unix (>= v0.16.0))
+  (base :with-test)
+  (ppx_jane :with-test)))
 
 (package
  (name alcotest-lwt)
