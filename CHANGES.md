@@ -16,6 +16,7 @@
   subcommand (#439, fixes #438, @edwintorok)
 - Keep `Unix.stdout` and `Unix.stderr` valid during tests on Windows
   (#444, fixes #443, @ngorogiannis)
+- Test `alcotest-async` exception handling (#279, @craigfe)
 
 ### 1.9.1 (2025-10-01)
 
