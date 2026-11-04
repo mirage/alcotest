@@ -16,6 +16,7 @@
    json_output
    list_tests
    match_raises
+   mkdir_p_paths
    only_monadic_effects
    quick_only
    quick_only_regex
@@ -43,6 +44,7 @@
    json_output
    list_tests
    match_raises
+   mkdir_p_paths
    only_monadic_effects
    quick_only
    quick_only_regex
@@ -964,6 +966,63 @@
  (package alcotest)
  (action
    (diff match_raises-wasm.expected match_raises-wasm.processed)))
+
+(rule
+ (target mkdir_p_paths.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:mkdir_p_paths.exe})))))
+
+(rule
+ (target mkdir_p_paths.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:mkdir_p_paths.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff mkdir_p_paths.expected mkdir_p_paths.processed)))
+
+(rule
+ (target mkdir_p_paths-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:mkdir_p_paths.bc.js})))))
+
+(rule
+ (target mkdir_p_paths-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:mkdir_p_paths-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff mkdir_p_paths-js.expected mkdir_p_paths-js.processed)))
+
+(rule
+ (target mkdir_p_paths-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:mkdir_p_paths.bc.wasm.js})))))
+
+(rule
+ (target mkdir_p_paths-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:mkdir_p_paths-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff mkdir_p_paths-wasm.expected mkdir_p_paths-wasm.processed)))
 
 (rule
  (target only_monadic_effects.actual)

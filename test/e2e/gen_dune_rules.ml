@@ -22,7 +22,7 @@ let global_stanza ~libraries ~js ~wasm filenames =
   let libraries = List.map (( ^ ) " ") libraries in
   let pp_sexp_list = Fmt.(list ~sep:(const string "\n   ")) in
   let modes =
-    match js, wasm with
+    match (js, wasm) with
     | false, false -> "(modes exe)"
     | true, false -> "(modes exe js)"
     | false, true -> "(modes exe wasm)"
@@ -42,8 +42,7 @@ let global_stanza ~libraries ~js ~wasm filenames =
 |}
     (pp_sexp_list Fmt.string) bases
     Fmt.(list string)
-    libraries modes
-    (pp_sexp_list Fmt.string) bases
+    libraries modes (pp_sexp_list Fmt.string) bases
 
 type mode = Native | Js | Wasm
 
