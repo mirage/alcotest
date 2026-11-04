@@ -51,25 +51,6 @@ module List = struct
     in
     aux [] n l
 
-  let concat_map f l =
-    let rec aux f acc = function
-      | [] -> rev acc
-      | x :: l ->
-          let xs = f x in
-          (aux [@tailcall]) f (rev_append xs acc) l
-    in
-    aux f [] l
-
-  let filter_map f l =
-    let rec inner acc = function
-      | [] -> rev acc
-      | x :: xs -> (
-          match f x with
-          | None -> (inner [@tailcall]) acc xs
-          | Some y -> (inner [@tailcall]) (y :: acc) xs)
-    in
-    inner [] l
-
   let lift_result l =
     List.fold_right
       (fun a b ->
@@ -79,10 +60,6 @@ module List = struct
         | Error e, Error acc -> Error (e :: acc)
         | Error e, Ok _ -> Error [ e ])
       l (Ok [])
-
-  let init n f =
-    let rec aux acc i = if i >= n then rev acc else aux (f i :: acc) (i + 1) in
-    aux [] 0
 end
 
 module Option = struct
