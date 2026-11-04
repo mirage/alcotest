@@ -1,0 +1,4 @@
+(executable
+ (name t)
+ (modes wasm)
+ (libraries alcotest))

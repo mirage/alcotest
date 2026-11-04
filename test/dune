@@ -1,0 +1,3 @@
+; A separate project, built by its run.sh against an installed alcotest.
+
+(data_only_dirs wasm-downstream)

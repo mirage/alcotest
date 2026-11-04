@@ -55,6 +55,12 @@ jobs:
         with:
           node-version: lts/*
 
+      - name: Set-up Binaryen
+        if: ${{ matrix.runtest }}
+        uses: Aandreba/setup-binaryen@v1.0.0
+        with:
+          token: ${{ github.token }}
+
       - name: Set-up OCaml ${{ matrix.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v3
         with:
@@ -73,6 +79,17 @@ jobs:
 
       - if: runner.os != 'Windows'
         run: opam exec -- dune build '@runtest-js'
+
+      - if: runner.os != 'Windows'
+        run: opam install wasm_of_ocaml-compiler
+
+      - if: runner.os != 'Windows'
+        run: opam exec -- dune build @runtest-wasm
+        env:
+          WASM_OF_OCAML: true
+
+      - if: runner.os != 'Windows'
+        run: opam exec -- sh test/wasm-downstream/run.sh
 
   lint:
     runs-on: ubuntu-latest
