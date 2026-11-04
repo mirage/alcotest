@@ -1,9 +1,5 @@
 let ( >> ) f g x = x |> f |> g
 
-module Fun = struct
-  let id x = x
-end
-
 module Int = struct
   module Set = Set.Make (struct
     type t = int
@@ -87,10 +83,6 @@ module List = struct
   let init n f =
     let rec aux acc i = if i >= n then rev acc else aux (f i :: acc) (i + 1) in
     aux [] 0
-end
-
-module Result = struct
-  let map f = function Ok x -> Ok (f x) | Error e -> Error e
 end
 
 module Option = struct
