@@ -14,6 +14,10 @@ end
 module String : sig
   include module type of Astring.String
 
+  val fold_utf8 : ('a -> int -> Uchar.utf_decode -> 'a) -> 'a -> string -> 'a
+  (** [fold_utf8 f acc s] folds [f] over the UTF-8 decodes of [s], with the byte
+      position of each. *)
+
   val length_utf8 : string -> int
   (** Get the length of a string in UTF-8 characters and malformed segments. *)
 

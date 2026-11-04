@@ -24,12 +24,11 @@ inspect), with a simple (yet expressive) query language to select the
 tests to run.
 ")
  (depends
-  (ocaml (>= 4.08))
+  (ocaml (>= 4.14))
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.2.0))
-  (re (>= 1.7.2))
-  (uutf (>= 1.0.1)))
+  (re (>= 1.7.2)))
  (conflicts
   (result (< 1.5)) ;; Ensure `Result.result` = `Stdlib.result` when possible
   (js_of_ocaml-compiler (< 5.8)) ;; requirement for the js stubs
@@ -63,7 +62,7 @@ tests to run.
   (re :with-test)
   (cmdliner (and :with-test (>= 1.2.0)))
   fmt
-  (ocaml (>= 4.08.0))
+  (ocaml (>= 4.14.0))
   (alcotest (= :version))
   lwt
   logs))
@@ -77,7 +76,7 @@ tests to run.
   (re :with-test)
   (cmdliner (and :with-test (>= 1.2.0)))
   fmt
-  (ocaml (>= 4.08.0))
+  (ocaml (>= 4.14.0))
   (alcotest (= :version))
   (mirage-clock (>= 2.0.0))
   duration

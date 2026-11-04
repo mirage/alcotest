@@ -67,8 +67,24 @@ let uchar =
   let pp_uchar ppf x = Fmt.Dump.uchar ppf x in
   testable pp_uchar ( = )
 
+(* Escapes like [String.escaped], but keeps the bytes of non-ASCII characters, as
+   the OCaml toplevel does since ocaml/ocaml#1231. *)
+let escaped_ascii s =
+  let buf = Buffer.create (String.length s) in
+  String.iter
+    (fun c ->
+      if Char.code c < 0x80 then
+        Buffer.add_string buf (String.escaped (String.make 1 c))
+      else Buffer.add_char buf c)
+    s;
+  Buffer.contents buf
+
 let string =
-  let pp_string ppf x = Fmt.pf ppf "%S" x in
+  let pp_string ppf x =
+    if Fmt.utf_8 ppf && String.is_valid_utf_8 x then
+      Fmt.pf ppf "\"%s\"" (escaped_ascii x)
+    else Fmt.pf ppf "%S" x
+  in
   testable pp_string ( = )
 
 let bytes =

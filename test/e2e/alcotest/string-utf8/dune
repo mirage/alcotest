@@ -1,0 +1,74 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR never)
+   (ALCOTEST_SHOW_ERRORS true))))
+
+(test
+ (name test_string_utf8)
+ (modules test_string_utf8)
+ (package alcotest)
+ (libraries alcotest fmt))
+
+;; A real failure, in a terminal that can display UTF-8 and in one that cannot.
+
+(executable
+ (name failure)
+ (modules failure)
+ (libraries alcotest))
+
+(rule
+ (target failure_utf8.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (with-accepted-exit-codes
+    1
+    (setenv
+     LC_ALL
+     C.UTF-8
+     (run %{dep:failure.exe}))))))
+
+(rule
+ (target failure_ascii.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (with-accepted-exit-codes
+    1
+    (setenv
+     LANG
+     C
+     (setenv
+      LC_ALL
+      C
+      (setenv
+       LC_CTYPE
+       C
+       (run %{dep:failure.exe}))))))))
+
+(rule
+ (target failure_utf8.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:failure_utf8.actual}))))
+
+(rule
+ (target failure_ascii.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:failure_ascii.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff failure_utf8.expected failure_utf8.processed)))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff failure_ascii.expected failure_ascii.processed)))

@@ -6,15 +6,14 @@ module Make (C : Mirage_clock.MCLOCK) = struct
     let stdout_columns () = None
     let setup_std_outputs ?style_renderer:_ ?utf_8:_ _stdout _stderr = ()
 
-    (* Pre-4.07 doesn't support empty variant types. *)
-    type file_descriptor = { empty : 'a. 'a }
+    type file_descriptor = |
 
     let log_trap_supported = false
     let prepare_log_trap ~root:_ = assert false
     let file_exists _ = assert false
     let open_write_only _ = assert false
-    let close = function (fd : file_descriptor) -> fd.empty
-    let with_redirect = function (fd : file_descriptor) -> fd.empty
+    let close : file_descriptor -> _ = function _ -> .
+    let with_redirect : file_descriptor -> _ = function _ -> .
 
     let home_directory () =
       Error (`Msg "Home directory not available for the MirageOS platform")

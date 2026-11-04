@@ -66,7 +66,8 @@ val uchar : Uchar.t testable
 (** [uchar] tests Unicode characters. *)
 
 val string : string testable
-(** [string] tests OCaml strings. *)
+(** [string] tests OCaml strings. When the output supports UTF-8, a valid UTF-8
+    string prints as is, apart from escaping ASCII as [%S] does. *)
 
 val bytes : bytes testable
 (** [bytes] tests OCaml bytes. *)

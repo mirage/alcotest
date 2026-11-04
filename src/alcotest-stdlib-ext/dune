@@ -1,4 +1,4 @@
 (library
  (name alcotest_stdlib_ext)
  (public_name alcotest.stdlib_ext)
- (libraries astring cmdliner uutf))
+ (libraries astring cmdliner))

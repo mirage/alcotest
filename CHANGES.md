@@ -1,5 +1,9 @@
 ### unreleased
 
+- Require OCaml 4.14 and replace `uutf` with the stdlib UTF-8 decoder. Test names
+  with invalid UTF-8 can get a different log file name (#456, @samoht)
+- Print valid UTF-8 as is in `string` failures, when the output supports it
+  (#456, fixes #408, @samoht, report by @feverdreme, suggestion by @lindig)
 - Add `iarray`, a testable for `Iarray.t`, available from OCaml 5.4
   (#455, fixes #434, @samoht, report by @JanBeh)
 - Fix UTF-8 locale detection, which never matched since 1.8.0, so `Fmt.if_utf_8`
