@@ -1,11 +1,8 @@
 Testing `test/e2e/alcotest/failing/check_long.ml'.
 This run has ID `<uuid>'.
 
-ASSERT list
   [FAIL]        wrapping          0   list.
-ASSERT array
   [FAIL]        wrapping          1   array.
-ASSERT nested options
   [FAIL]        wrapping          2   nested options.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐

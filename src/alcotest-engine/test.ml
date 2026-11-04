@@ -182,8 +182,8 @@ let pp_location =
     | None, None -> ()
 
 let check (type a) ?here ?pos (t : a testable) msg (expected : a) (actual : a) =
-  show_assert msg;
-  if not (equal t expected actual) then
+  if equal t expected actual then show_assert msg
+  else
     let open Fmt in
     let s = const string in
     let pp_error =
@@ -218,7 +218,6 @@ let check' ?here ?pos t ~msg ~expected ~actual =
   check ?here ?pos t msg expected actual
 
 let fail ?here ?pos msg =
-  show_assert msg;
   check_err (fun ppf () ->
       Fmt.pf ppf "%t%a %s" (pp_location ?here ?pos) Pp.tag `Fail msg)
 
@@ -232,7 +231,6 @@ let collect_exception f =
   with e -> Some e
 
 let check_raises ?here ?pos msg exn f =
-  show_assert msg;
   match collect_exception f with
   | None ->
       check_err (fun ppf () ->
@@ -243,9 +241,9 @@ let check_raises ?here ?pos msg exn f =
         check_err (fun ppf () ->
             Fmt.pf ppf "%t%a %s: expecting %a, got %a." (pp_location ?here ?pos)
               Pp.tag `Fail msg Fmt.exn exn Fmt.exn e)
+      else show_assert msg
 
 let match_raises ?here ?pos msg exnp f =
-  show_assert msg;
   match collect_exception f with
   | None ->
       check_err (fun ppf () ->
@@ -256,6 +254,7 @@ let match_raises ?here ?pos msg exnp f =
         check_err (fun ppf () ->
             Fmt.pf ppf "%t%a %s: got %a." (pp_location ?here ?pos) Pp.tag `Fail
               msg Fmt.exn e)
+      else show_assert msg
 
 let skip () = raise Core.V1.Skip
 
