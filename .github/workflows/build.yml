@@ -88,6 +88,9 @@ jobs:
         env:
           WASM_OF_OCAML: true
 
+      - if: runner.os != 'Windows'
+        run: opam exec -- sh test/wasm-downstream/run.sh
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 30
