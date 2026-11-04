@@ -1,25 +1,8 @@
-#include <caml/version.h>
-
-#if OCAML_VERSION < 50000
 #define CAML_NAME_SPACE
-#endif
 
 #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/mlvalues.h>
-
-#if OCAML_VERSION < 41200
-#define Val_none Val_int(0)
-#define Tag_some 0
-
-static value caml_alloc_some(value v)
-{
-	CAMLparam1(v);
-	value some = caml_alloc_small(1, Tag_some);
-	Field(some, 0) = v;
-	CAMLreturn(some);
-}
-#endif
 
 // Windows support
 #if defined(_WIN32)
