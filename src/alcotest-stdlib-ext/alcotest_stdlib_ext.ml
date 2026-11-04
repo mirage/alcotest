@@ -1,11 +1,7 @@
 let ( >> ) f g x = x |> f |> g
 
 module Int = struct
-  module Set = Set.Make (struct
-    type t = int
-
-    let compare = (compare : int -> int -> int)
-  end)
+  module Set = Set.Make (Int)
 end
 
 module String = struct
