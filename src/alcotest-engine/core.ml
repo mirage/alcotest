@@ -110,7 +110,10 @@ let backtrace_location () =
 (* The [test_case] tuple has no slot for its metadata, which is kept here and
    found by physical equality on the tuple: a function can be shared by several
    test cases. The hash is on the name, as a tuple can move in memory. *)
-type case_info = { location : (string * int * int) option }
+type case_info = {
+  location : (string * int * int) option;
+  children : Obj.t option;  (** The ['a test_case list] of a group. *)
+}
 
 let case_infos : (string, Obj.t * case_info) Hashtbl.t = Hashtbl.create 16
 
@@ -122,6 +125,9 @@ let register_case_info ((name, _, _) as case) info =
 
 let case_location case =
   match find_case_info case with None -> None | Some i -> i.location
+
+let case_children case =
+  match find_case_info case with None -> None | Some i -> i.children
 
 (* A given position is printed first, see [Test.pp_location]. *)
 let has_location pp = String.is_prefix ~affix:"File \"" (Fmt.str "%a" pp ())
@@ -164,7 +170,24 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let test_case n s f =
     let case = (n, s, f) in
-    register_case_info case { location = caller_location () };
+    register_case_info case { location = caller_location (); children = None };
+    case
+
+  let run_cases cases args =
+    List.fold_left
+      (fun acc (_, _, f) -> M.bind acc (fun () -> f args))
+      (M.return ()) cases
+
+  (* The function and speed only matter if the user rebuilds the tuple, which
+     then runs the cases as a single test. *)
+  let group name cases =
+    if name = "" then
+      Pp.user_error
+        "Group name cannot be empty. Please pass a non-empty string to `group`.";
+    let slow = cases <> [] && List.for_all (fun (_, s, _) -> s = `Slow) cases in
+    let case = (name, (if slow then `Slow else `Quick), run_cases cases) in
+    let children = Some (Obj.repr cases) in
+    register_case_info case { location = None; children };
     case
 
   type 'a test = string * 'a test_case list
@@ -444,19 +467,29 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     run : 'a run;
   }
 
-  (* The entries of a test, in the order of its cases. *)
+  (* The entries of a test, in the order of its cases. A name can come back after
+     a group, so each name keeps its own count. *)
   let compile (name, cases) =
-    List.mapi
-      (fun index ((doc, speed, run) as case) ->
-        {
-          entry_name = name;
-          index;
-          doc;
-          speed;
-          location = case_location case;
-          run;
-        })
-      cases
+    let counts = Hashtbl.create 8 in
+    let next_index name =
+      let index = Option.value ~default:0 (Hashtbl.find_opt counts name) in
+      Hashtbl.replace counts name (index + 1);
+      index
+    in
+    let rec entries name acc cases =
+      List.fold_left
+        (fun acc ((doc, speed, run) as case) ->
+          match case_children case with
+          | Some children ->
+              (* A group and its cases have the same ['a]. *)
+              entries (name ^ "." ^ doc) acc (Obj.obj children)
+          | None ->
+              let location = case_location case in
+              let index = next_index name in
+              { entry_name = name; index; doc; speed; location; run } :: acc)
+        acc cases
+    in
+    List.rev (entries name [] cases)
 
   let add_entry (type a) (t : a t) (e : a entry) : a t =
     let path = Test_name.v ~name:e.entry_name ~index:e.index in

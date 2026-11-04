@@ -1,0 +1,30 @@
+Testing `group'.
+This run has ID `<uuid>'.
+
+  [OK]          top              0   t1.
+  [OK]          top.a            0   a1.
+  [OK]          top.a.b          0   b1.
+  [OK]          top.a.b          1   slow.
+  [OK]          top.a            1   a2.
+  [OK]          top              1   t2.
+  [OK]          top              2   s1.
+  [OK]          top.a            2   s2.
+  [OK]          top              3   literal.
+  [OK]          other.c          0   c1.
+  [OK]          rebuilt          0   d.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 11 tests run.
+Testing `test/e2e/alcotest/passing/group.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          selection          0   run.
+  [OK]          selection          1   run test -q.
+  [OK]          selection          2   run test ^top$.
+  [OK]          selection          3   run test ^top\.a$.
+  [OK]          selection          4   run test ^top\.a.
+  [OK]          selection          5   run test ^top\.a\.b$.
+  [OK]          selection          6   run test ^other\.c$.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 7 tests run.

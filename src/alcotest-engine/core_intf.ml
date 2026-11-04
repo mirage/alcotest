@@ -41,6 +41,23 @@ module V1_types = struct
     (** [test_case n s f] is the test case [n] running at speed [s] using the
         function [f]. *)
 
+    val group : string -> 'a test_case list -> 'a test_case
+    (** [group name cases] is a test case that stands for [cases], which run in
+        place under the test name [test.name], so that they can be selected
+        together. Groups nest. [name] must not be empty. Speed levels are
+        ignored for groups: each of [cases] keeps its own.
+
+        A group is recognised by physical equality on the returned tuple, so it
+        can appear several times and under different parents. A new tuple built
+        from it is a plain test case, whose function runs all of [cases].
+        Functions on a list of test cases, like [List.filter], see the group and
+        not its [cases].
+
+        The [test] subcommand matches names as a regular expression, so
+        [test top] also selects [top.name]. Use [test '^top$'] to select only
+        the cases outside of groups. A test called [top.name] next to a group
+        [name] in [top] is a duplicate test path if their indices overlap. *)
+
     type 'a test = string * 'a test_case list
     (** A test is a UTF-8 encoded name and a list of test cases. The name can be
         used for filtering which tests to run on the CLI. *)
