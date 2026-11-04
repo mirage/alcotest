@@ -1,7 +1,7 @@
 (env
  (_
   (env-vars
-   (ALCOTEST_COLOR never)
+   (ALCOTEST_COLOR auto)
    (ALCOTEST_SHOW_ERRORS true))))
 
 ; Run the bytecode executable with ocamlrun to always have debug
