@@ -82,16 +82,3 @@ tests to run.
   duration
   lwt
   logs))
-
-(package
- (name alcotest-js)
- (synopsis "Virtual package containing optional JavaScript dependencies for Alcotest")
- (description "Virtual package containing optional JavaScript dependencies for Alcotest")
- (documentation "https://mirage.github.io/alcotest")
- (allow_empty)
- (depends
-  (alcotest (= :version))
-  (js_of_ocaml-compiler (>= 3.11.0))
-  (fmt (and :with-test (>= 0.8.7)))
-  (cmdliner (and :with-test (>= 1.2.0)))
-  (conf-npm :with-test)))
