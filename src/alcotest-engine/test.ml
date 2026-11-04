@@ -92,24 +92,8 @@ let bytes =
 
 let bool = testable Fmt.bool ( = )
 let unit = testable (Fmt.any "()") ( = )
-
-let list e =
-  let rec eq l1 l2 =
-    match (l1, l2) with
-    | x :: xs, y :: ys -> equal e x y && eq xs ys
-    | [], [] -> true
-    | _ -> false
-  in
-  testable (Fmt.Dump.list (pp e)) eq
-
-let seq e =
-  let rec eq s1 s2 =
-    match (s1 (), s2 ()) with
-    | Seq.Cons (x, xs), Seq.Cons (y, ys) -> equal e x y && eq xs ys
-    | Nil, Nil -> true
-    | _ -> false
-  in
-  testable (Fmt.Dump.seq (pp e)) eq
+let list e = testable (Fmt.Dump.list (pp e)) (List.equal (equal e))
+let seq e = testable (Fmt.Dump.seq (pp e)) (Seq.equal (equal e))
 
 let slist (type a) (a : a testable) compare =
   let l = list a in
@@ -143,23 +127,12 @@ let triple a b c =
   in
   testable pp eq
 
-let option e =
-  let eq x y =
-    match (x, y) with
-    | Some a, Some b -> equal e a b
-    | None, None -> true
-    | _ -> false
-  in
-  testable (Fmt.Dump.option (pp e)) eq
+let option e = testable (Fmt.Dump.option (pp e)) (Option.equal (equal e))
 
 let result a e =
-  let eq x y =
-    match (x, y) with
-    | Ok x, Ok y -> equal a x y
-    | Error x, Error y -> equal e x y
-    | _ -> false
-  in
-  testable (Fmt.Dump.result ~ok:(pp a) ~error:(pp e)) eq
+  testable
+    (Fmt.Dump.result ~ok:(pp a) ~error:(pp e))
+    (Result.equal ~ok:(equal a) ~error:(equal e))
 
 let of_pp pp = testable pp ( = )
 
