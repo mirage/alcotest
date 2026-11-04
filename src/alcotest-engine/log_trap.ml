@@ -42,13 +42,15 @@ struct
   let pp_path = Fmt.using maybe_collapse_home Fmt.string
 
   let iter_lines fpath ~f =
-    let ic = open_in fpath in
-    try
-      while true do
-        f (input_line ic)
-      done;
-      assert false
-    with End_of_file -> close_in ic
+    In_channel.with_open_text fpath (fun ic ->
+        let rec go () =
+          match In_channel.input_line ic with
+          | Some line ->
+              f line;
+              go ()
+          | None -> ()
+        in
+        go ())
 
   (** Show the last lines of a log file. *)
   let pp_tail max_lines fpath ppf =

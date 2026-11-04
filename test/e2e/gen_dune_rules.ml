@@ -1,20 +1,3 @@
-(* Copied from Filename (stdlib) for pre-4.04 compatibility *)
-let chop_extension name =
-  let is_dir_sep s i =
-    match Sys.os_type with
-    | "Unix" -> s.[i] = '/'
-    | "Win32" | "Cygwin" ->
-        let c = s.[i] in
-        c = '/' || c = '\\' || c = ':'
-    | _ -> assert false
-  in
-  let rec search_dot i =
-    if i < 0 || is_dir_sep name i then invalid_arg "Filename.chop_extension"
-    else if name.[i] = '.' then String.sub name 0 i
-    else search_dot (i - 1)
-  in
-  search_dot (String.length name - 1)
-
 (* Read a file-path to a list of strings corresponding to lines in the file. *)
 let read_file filename =
   let lines = ref [] in
@@ -31,11 +14,11 @@ let read_file filename =
 (* A test executable [foo.ml] may require certain options to be passed as
    specified in a [foo.opts] file. *)
 let options_of_test_file file =
-  let options_file = chop_extension file ^ ".opts" in
+  let options_file = Filename.chop_extension file ^ ".opts" in
   if not (Sys.file_exists options_file) then [] else read_file options_file
 
 let global_stanza ~libraries ~js filenames =
-  let bases = List.map chop_extension filenames in
+  let bases = List.map Filename.chop_extension filenames in
   let libraries = List.map (( ^ ) " ") libraries in
   let pp_sexp_list = Fmt.(list ~sep:(const string "\n   ")) in
   Fmt.pr
@@ -58,7 +41,7 @@ let global_stanza ~libraries ~js filenames =
 
 let example_rule_stanza ~js ~expect_failure filename =
   let with_suffix x = if js then x ^ "-js" else x in
-  let base = chop_extension filename in
+  let base = Filename.chop_extension filename in
   let options = options_of_test_file filename |> List.map (( ^ ) " ") in
   let accepted_exit_codes =
     Fmt.str "(or %s %d %d)"
@@ -97,7 +80,7 @@ let example_rule_stanza ~js ~expect_failure filename =
 
 let example_alias_stanza ~js ~package filename =
   let with_suffix x = if js then x ^ "-js" else x in
-  let base = chop_extension filename in
+  let base = Filename.chop_extension filename in
   Fmt.pr
     {|
 (rule

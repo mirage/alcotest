@@ -1,15 +1,7 @@
 let ( >> ) f g x = x |> f |> g
 
-module Fun = struct
-  let id x = x
-end
-
 module Int = struct
-  module Set = Set.Make (struct
-    type t = int
-
-    let compare = (compare : int -> int -> int)
-  end)
+  module Set = Set.Make (Int)
 end
 
 module String = struct
@@ -55,25 +47,6 @@ module List = struct
     in
     aux [] n l
 
-  let concat_map f l =
-    let rec aux f acc = function
-      | [] -> rev acc
-      | x :: l ->
-          let xs = f x in
-          (aux [@tailcall]) f (rev_append xs acc) l
-    in
-    aux f [] l
-
-  let filter_map f l =
-    let rec inner acc = function
-      | [] -> rev acc
-      | x :: xs -> (
-          match f x with
-          | None -> (inner [@tailcall]) acc xs
-          | Some y -> (inner [@tailcall]) (y :: acc) xs)
-    in
-    inner [] l
-
   let lift_result l =
     List.fold_right
       (fun a b ->
@@ -83,26 +56,10 @@ module List = struct
         | Error e, Error acc -> Error (e :: acc)
         | Error e, Ok _ -> Error [ e ])
       l (Ok [])
-
-  let init n f =
-    let rec aux acc i = if i >= n then rev acc else aux (f i :: acc) (i + 1) in
-    aux [] 0
-end
-
-module Result = struct
-  let map f = function Ok x -> Ok (f x) | Error e -> Error e
 end
 
 module Option = struct
-  let is_some = function Some _ -> true | None -> false
-  let map f = function Some x -> Some (f x) | None -> None
-  let bind o f = match o with Some o -> f o | None -> None
-
-  let get_exn = function
-    | Some x -> x
-    | None -> invalid_arg "Option.get_exn: None"
-
-  let value ~default = function None -> default | Some x -> x
+  include Option
 
   let ( || ) a b =
     match (a, b) with

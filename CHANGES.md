@@ -1,5 +1,8 @@
 ### unreleased
 
+- Remove code made redundant by OCaml 4.14 (#460, @samoht)
+- Close a failed test's log file when printing it raises, instead of leaking the
+  file descriptor (#460, @samoht)
 - Remove the `alcotest-js` package, which had no code and only added dependencies.
   To test with js_of_ocaml, depend on `js_of_ocaml-compiler` directly (#463, @samoht)
 - Require OCaml 4.14 and replace `uutf` with the stdlib UTF-8 decoder. Test names

@@ -270,7 +270,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let () =
       if currently_bailing state then
-        match state.tests_so_far - Option.get_exn state.first_error - 1 with
+        match state.tests_so_far - Option.get state.first_error - 1 with
         | n when n > 0 ->
             Formatters.pr "@\n  %a@\n"
               Fmt.(styled `Faint string)
