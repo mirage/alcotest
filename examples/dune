@@ -17,12 +17,12 @@
 
 (rule
  (alias runtest-js)
- (package alcotest-js)
+ (package alcotest)
  (action
   (run node %{dep:floats.bc.js})))
 
 (rule
  (alias runtest-js)
- (package alcotest-js)
+ (package alcotest)
  (action
   (run node %{dep:simple.bc.js})))

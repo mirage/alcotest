@@ -1,5 +1,7 @@
 ### unreleased
 
+- Remove the `alcotest-js` package, which had no code and only added dependencies.
+  To test with js_of_ocaml, depend on `js_of_ocaml-compiler` directly (#463, @samoht)
 - Require OCaml 4.14 and replace `uutf` with the stdlib UTF-8 decoder. Test names
   with invalid UTF-8 can get a different log file name (#456, @samoht)
 - Print valid UTF-8 as is in `string` failures, when the output supports it

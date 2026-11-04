@@ -32,8 +32,8 @@ jobs:
             ocaml-compiler: "5"
             # alcotest-async depends on core_unix, which does not support
             # Windows.
-            opam-files: ./alcotest.opam ./alcotest-js.opam ./alcotest-lwt.opam ./alcotest-mirage.opam
-            dune-flags: --only-packages alcotest,alcotest-js,alcotest-lwt,alcotest-mirage
+            opam-files: ./alcotest.opam ./alcotest-lwt.opam ./alcotest-mirage.opam
+            dune-flags: --only-packages alcotest,alcotest-lwt,alcotest-mirage
           # alcotest-async lower bound
           - os: ubuntu-latest
             ocaml-compiler: "4.14"
@@ -60,14 +60,6 @@ jobs:
         with:
           ocaml-compiler: ${{ matrix.ocaml-compiler }}
 
-      # conf-npm checks for npm by running "npm --version", but opam on
-      # Windows only resolves .exe commands and npm is a .cmd shim there.
-      # npm is provided by setup-node above, so register conf-npm without
-      # running its check.
-      - name: Register npm with opam
-        if: runner.os == 'Windows'
-        run: opam install conf-npm --fake
-
       - run: opam install ${{ matrix.opam-files || '.' }} --deps-only --with-test
 
       # The aliases are quoted because PowerShell, the default shell on
@@ -76,6 +68,9 @@ jobs:
 
       # The js_of_ocaml backend does not work on Windows yet: absolute paths
       # are mangled and caml_unix_filedescr_of_channel is missing.
+      - if: runner.os != 'Windows'
+        run: opam install js_of_ocaml-compiler
+
       - if: runner.os != 'Windows'
         run: opam exec -- dune build '@runtest-js'
 
