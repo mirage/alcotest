@@ -1,5 +1,7 @@
 ### unreleased
 
+- Print the message of a failing check once: `ASSERT` now only shows the checks
+  that passed (#465, @samoht)
 - Add wasm_of_ocaml support (#461, #436, #437, @hhugo, @samoht and @mefyl)
 - Remove code made redundant by OCaml 4.14 (#460, @samoht)
 - Close a failed test's log file when printing it raises, instead of leaking the
