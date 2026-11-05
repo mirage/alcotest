@@ -7,6 +7,7 @@
    basic
    check_basic
    cli_verbose
+   combinators
    compact
    empty_test_name
    filter_name
@@ -41,6 +42,7 @@
    basic
    check_basic
    cli_verbose
+   combinators
    compact
    empty_test_name
    filter_name
@@ -465,6 +467,63 @@
  (package alcotest)
  (action
    (diff cli_verbose-wasm.expected cli_verbose-wasm.processed)))
+
+(rule
+ (target combinators.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:combinators.exe})))))
+
+(rule
+ (target combinators.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:combinators.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff combinators.expected combinators.processed)))
+
+(rule
+ (target combinators-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:combinators.bc.js})))))
+
+(rule
+ (target combinators-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:combinators-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff combinators-js.expected combinators-js.processed)))
+
+(rule
+ (target combinators-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:combinators.bc.wasm.js})))))
+
+(rule
+ (target combinators-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:combinators-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff combinators-wasm.expected combinators-wasm.processed)))
 
 (rule
  (target compact.actual)

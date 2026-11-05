@@ -34,4 +34,5 @@ module Make (C : Mirage_clock.MCLOCK) = struct
     Lwt_switch.with_switch (fun sw -> Lwt.pick [ fn sw args; async_ex ])
 
   let test_case n s f = test_case n s (run_test f)
+  let test ?(tags = `Always) n f = test_case n tags f
 end

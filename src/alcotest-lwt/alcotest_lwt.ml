@@ -29,6 +29,7 @@ module V1 = struct
 
   let test_case_sync n s f = test_case n s (fun x -> Lwt.return (f x))
   let test_case n s f = test_case n s (run_test f)
+  let test ?(tags = `Always) n f = test_case n tags f
 end
 
 include V1

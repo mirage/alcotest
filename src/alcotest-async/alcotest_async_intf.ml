@@ -8,6 +8,13 @@ module type V1 = sig
     ('a -> unit Async.Deferred.t) ->
     'a test_case
 
+  val test :
+    ?timeout:Time_float_unix.Span.t ->
+    ?tags:Alcotest.tag ->
+    string ->
+    ('a -> unit Async_kernel.Deferred.t) ->
+    'a test_case
+
   val test_case_sync : string -> Alcotest.tag -> ('a -> unit) -> 'a test_case
 end
 

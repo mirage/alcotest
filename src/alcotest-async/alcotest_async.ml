@@ -28,6 +28,8 @@ module V1 = struct
 
   let test_case ?(timeout = Time_float_unix.Span.of_sec 2.) name s f =
     test_case name s (run_test timeout name f)
+
+  let test ?timeout ?(tags = `Always) name f = test_case ?timeout name tags f
 end
 
 include V1
