@@ -134,6 +134,23 @@ See the [examples][] directory for more examples.
 
 [examples]: https://github.com/mirage/alcotest/tree/main/examples
 
+### Grouping tests
+
+`Alcotest.group` nests test cases. They run in place, and are reported and
+selected under a dotted name:
+
+```ocaml
+Alcotest.run "suite"
+  [ ( "storage",
+      [ test_case "read" `Quick read;
+        group "backend" [ test_case "git" `Quick git ];
+        test_case "write" `Quick write ] ) ]
+```
+
+```sh-session
+$ ./test.exe test '^storage\.backend'
+```
+
 ### Quick and Slow tests
 
 In general you should use `` `Quick`` tests: tests that are ran on any

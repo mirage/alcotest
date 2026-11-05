@@ -1,5 +1,9 @@
 ### unreleased
 
+- Add `group name cases`, a `test_case` that nests `cases` to any depth. They
+  run in place, are reported as `parent.name` and are selected with
+  `test '^parent\.name'` (#453, fixes #275, @samoht, API from #294 by @craigfe,
+  dotted names suggested by @mjambon)
 - Show the file and line of every failing test, not only of a failing `check`.
   A failure in a helper points to the line of the test that calls it.
   `ALCOTEST_SOURCE_CODE_POSITION` still turns this off (#451, @samoht, based on

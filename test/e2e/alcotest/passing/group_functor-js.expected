@@ -1,0 +1,27 @@
+Testing `functor'.
+This run has ID `<uuid>'.
+
+  [OK]          mem                0   basic.
+  [OK]          mem.Graph          0   x.
+  [OK]          mem.Graph          1   y.
+  [OK]          mem                1   last.
+  [OK]          git                0   basic.
+  [OK]          git.Graph          0   x.
+  [OK]          git.Graph          1   y.
+  [OK]          git                1   last.
+  [OK]          first.g            0   z.
+  [OK]          second.g           0   z.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 10 tests run.
+Testing `test/e2e/alcotest/passing/group_functor.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          selection          0   run.
+  [OK]          selection          1   run test ^mem\.Graph$.
+  [OK]          selection          2   run test ^git\.Graph$.
+  [OK]          selection          3   run test ^git$.
+  [OK]          selection          4   run test ^second\.g$.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 5 tests run.

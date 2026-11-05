@@ -1,0 +1,9 @@
+(test
+ (name test_group_domains)
+ (package alcotest)
+ (build_if
+  (>= %{ocaml_version} 5.0))
+ (action
+  (ignore-outputs
+   (run %{test})))
+ (libraries alcotest))

@@ -12,6 +12,8 @@
    filter_name
    filter_name_regex
    filter_range
+   group
+   group_functor
    isatty
    json_output
    list_tests
@@ -40,6 +42,8 @@
    filter_name
    filter_name_regex
    filter_range
+   group
+   group_functor
    isatty
    json_output
    list_tests
@@ -738,6 +742,120 @@
  (package alcotest)
  (action
    (diff filter_range-wasm.expected filter_range-wasm.processed)))
+
+(rule
+ (target group.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:group.exe})))))
+
+(rule
+ (target group.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:group.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff group.expected group.processed)))
+
+(rule
+ (target group-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:group.bc.js})))))
+
+(rule
+ (target group-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:group-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff group-js.expected group-js.processed)))
+
+(rule
+ (target group-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:group.bc.wasm.js})))))
+
+(rule
+ (target group-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:group-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff group-wasm.expected group-wasm.processed)))
+
+(rule
+ (target group_functor.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:group_functor.exe})))))
+
+(rule
+ (target group_functor.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:group_functor.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff group_functor.expected group_functor.processed)))
+
+(rule
+ (target group_functor-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:group_functor.bc.js})))))
+
+(rule
+ (target group_functor-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:group_functor-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff group_functor-js.expected group_functor-js.processed)))
+
+(rule
+ (target group_functor-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:group_functor.bc.wasm.js})))))
+
+(rule
+ (target group_functor-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:group_functor-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff group_functor-wasm.expected group_functor-wasm.processed)))
 
 (rule
  (target isatty.actual)
