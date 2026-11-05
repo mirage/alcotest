@@ -54,7 +54,7 @@
      env
      -u
      ALCOTEST_SOURCE_CODE_POSITION
-     %{dep:caml_ld_library_path.exe}
+     ./%{dep:caml_ld_library_path.exe}
      %{dep:test_failure_shapes.bc})))))
 
 (rule
