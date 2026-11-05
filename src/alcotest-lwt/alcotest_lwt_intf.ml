@@ -4,6 +4,12 @@ module type V1 = sig
   val test_case :
     string -> Alcotest.tag -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
 
+  val test :
+    ?tags:Alcotest.tag ->
+    string ->
+    (Lwt_switch.t -> 'a -> unit Lwt.t) ->
+    'a test_case
+
   val test_case_sync : string -> Alcotest.tag -> ('a -> unit) -> 'a test_case
 end
 

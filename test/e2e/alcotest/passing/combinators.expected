@@ -1,0 +1,29 @@
+Testing `combinators'.
+This run has ID `<uuid>'.
+
+  [OK]          plain                     0   always.
+  [OK]          plain                     1   quick.
+  [OK]          plain                     2   slow.
+  [SKIP]        plain                     3   db.
+  [OK]          groups.untagged           0   u.
+  [OK]          groups.untagged           1   us.
+  [OK]          groups.slow               0   s.
+  [OK]          groups.slow               1   sq.
+  [OK]          groups.slow.deep          0   sd.
+  [SKIP]        groups.db                 0   d.
+  [SKIP]        groups.db.net             0   dn.
+  [OK]          tuple                     0   old.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 9 tests run.
+Testing `test/e2e/alcotest/passing/combinators.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          selection          0   run.
+  [OK]          selection          1   run -q.
+  [OK]          selection          2   run --tags=db.
+  [OK]          selection          3   run --tags=db,net,-quick,-slow.
+  [OK]          selection          4   run test ^groups\.slow\.deep$.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 5 tests run.

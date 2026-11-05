@@ -141,10 +141,10 @@ selected under a dotted name:
 
 ```ocaml
 Alcotest.run "suite"
-  [ ( "storage",
-      [ test_case "read" `Quick read;
-        group "backend" [ test_case "git" `Quick git ];
-        test_case "write" `Quick write ] ) ]
+  [ suite "storage"
+      [ test "read" read;
+        group ~tags:`Slow "backend" [ test "git" git ];
+        test "write" write ] ]
 ```
 
 ```sh-session
@@ -176,20 +176,20 @@ open Alcotest
 test_case "plain" `Quick f                       (* the default context *)
 test_case "big" `Slow f                          (* the default context, not -q *)
 test_case "smoke" `Always f                      (* always *)
-test_case "fetch" (`Tag "network") f             (* only when asked for *)
-test_case "tls" Tag.(v "network" || v "crypto") f  (* when asked for either *)
-test_case "dump" Tag.(slow && v "db") f          (* db, not with -q *)
+test_case "fetch" (`Tag "ci") f                  (* only when asked for *)
+test_case "tls" Tag.(v "ci" || v "release") f    (* when asked for either *)
+test_case "dump" Tag.(slow && v "release") f     (* release, not with -q *)
 test_case "local" Tag.(not (v "ci")) f           (* unless asked for ci *)
 ```
 
 ```sh-session
 $ ./test.exe                         # plain, big, smoke, local
 $ ./test.exe -q                      # plain, smoke, local
-$ ./test.exe --tags=network          # also fetch and tls
-$ ./test.exe --tags=db -q            # plain, smoke, local, no dump
+$ ./test.exe --tags=ci               # also fetch and tls, no local
+$ ./test.exe --tags=release -q       # plain, tls, smoke, local, no dump
 $ ./test.exe -q --tags=slow          # -q does not win: also big
-$ ./test.exe --tags=network,-quick,-slow  # fetch, tls, smoke, local
-$ ALCOTEST_TAGS=network dune test --force
+$ ./test.exe --tags=ci,-quick,-slow  # fetch, tls, smoke
+$ ALCOTEST_TAGS=ci dune test --force
 $ ./test.exe tags                    # the tags these tests use
 ```
 

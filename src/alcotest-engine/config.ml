@@ -112,7 +112,7 @@ module Key = struct
     let term =
       let env = Cmd.Env.info "ALCOTEST_TAGS" in
       let doc =
-        "A comma-separated list of tags to also run, e.g: 'db,network'. Use \
+        "A comma-separated list of tags to also run, e.g: 'ci,release'. Use \
          $(i,-foo) to stop running a tag, e.g: '-slow'. On the command line, \
          $(docv) must only contain tags used by the tests."
       in

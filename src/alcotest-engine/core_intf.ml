@@ -42,7 +42,7 @@ module V1_types = struct
     type speed_level = tag
     (** Deprecated alias of {!tag}. *)
 
-    (** Combinators for {!tag}, as in [Tag.(slow && v "db")]. *)
+    (** Combinators for {!tag}, as in [Tag.(slow && v "release")]. *)
     module Tag : sig
       val v : string -> tag
       (** [v s] is [`Tag s]. *)
@@ -73,11 +73,15 @@ module V1_types = struct
     (** [test_case n t f] is the test case [n] using the function [f], which
         runs when [t] holds. *)
 
-    val group : string -> 'a test_case list -> 'a test_case
+    val test : ?tags:tag -> string -> ('a -> return) -> 'a test_case
+    (** [test name f] is the test case [name] using the function [f]. It only
+        runs when [tags] hold, which defaults to [`Always]. *)
+
+    val group : ?tags:tag -> string -> 'a test_case list -> 'a test_case
     (** [group name cases] is a test case that stands for [cases], which run in
         place under the test name [test.name], so that they can be selected
-        together. Groups nest. [name] must not be empty. Tags are ignored for
-        groups: each of [cases] keeps its own.
+        together. Groups nest. [name] must not be empty. [cases] only run when
+        [tags] hold as well as their own, and [tags] defaults to [`Always].
 
         A group is recognised by physical equality on the returned tuple, so it
         can appear several times and under different parents. A new tuple built
@@ -93,6 +97,9 @@ module V1_types = struct
     type 'a test = string * 'a test_case list
     (** A test is a UTF-8 encoded name and a list of test cases. The name can be
         used for filtering which tests to run on the CLI. *)
+
+    val suite : string -> 'a test_case list -> 'a test
+    (** [suite name cases] is the test [name] with the test cases [cases]. *)
 
     type 'a with_options =
       ?stdout:Formatters.stdout ->

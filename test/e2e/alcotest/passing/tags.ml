@@ -1,5 +1,4 @@
 (* These names must stay usable under a local open of [Alcotest]. *)
-let test = 1
 let quick = 2
 let slow = 3
 let tag = 4
@@ -128,8 +127,7 @@ let test_group () =
   check "tag" [ "q"; "s"; "d"; "hd"; "hq" ] [ "--tags=db" ];
   check "only the tag" [ "d"; "hd" ] [ "--tags=db,-quick,-slow" ]
 
-let test_no_shadowing () =
-  Alcotest.(check int "values" 10 (test + quick + slow + tag))
+let test_no_shadowing () = Alcotest.(check int "values" 9 (quick + slow + tag))
 
 (* Existing ways to call [test_case], which must compile unchanged. *)
 let test_call_forms () =

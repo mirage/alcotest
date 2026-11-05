@@ -28,5 +28,8 @@ module Make (_ : Mirage_clock.MCLOCK) : sig
   val test_case :
     string -> tag -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
 
+  val test :
+    ?tags:tag -> string -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
+
   val test_case_sync : string -> tag -> ('a -> unit) -> 'a test_case
 end

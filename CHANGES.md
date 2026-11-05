@@ -1,5 +1,10 @@
 ### unreleased
 
+- Add `test ?tags name f` and `suite name cases`, to write `suite "a" [ test "b" f ]`
+  instead of `("a", [ test_case "b" `Quick f ])`. `tags` defaults to `` `Always ``
+  (#468, @samoht, combinators suggested by @yawaramin in #393)
+- Add `?tags` to `group`: its cases only run when these tags hold as well as
+  their own (#468, @samoht, API from #294 by @craigfe)
 - Add `group name cases`, a `test_case` that nests `cases` to any depth. They
   run in place, are reported as `parent.name` and are selected with
   `test '^parent\.name'` (#453, fixes #275, @samoht, API from #294 by @craigfe,

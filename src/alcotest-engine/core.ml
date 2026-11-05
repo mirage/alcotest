@@ -205,24 +205,27 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     register_case_info case { location = caller_location (); children = None };
     case
 
+  let test ?(tags = `Always) n f = test_case n tags f
+
   let run_cases cases args =
     List.fold_left
       (fun acc (_, _, f) -> M.bind acc (fun () -> f args))
       (M.return ()) cases
 
-  (* The function and tag only matter if the user rebuilds the tuple, which
-     then runs the cases as a single test. *)
-  let group name cases =
+  (* The function only matters if the user rebuilds the tuple, which then runs
+     the cases as a single test. *)
+  let group ?(tags = `Always) name cases =
     if name = "" then
       Pp.user_error
         "Group name cannot be empty. Please pass a non-empty string to `group`.";
-    let slow = cases <> [] && List.for_all (fun (_, s, _) -> s = `Slow) cases in
-    let case = (name, (if slow then `Slow else `Quick), run_cases cases) in
+    let case = (name, tags, run_cases cases) in
     let children = Some (Obj.repr cases) in
     register_case_info case { location = None; children };
     case
 
   type 'a test = string * 'a test_case list
+
+  let suite name cases = (name, cases)
 
   (* global state *)
   type 'a t = {
@@ -546,20 +549,23 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       Hashtbl.replace counts name (index + 1);
       index
     in
-    let rec entries name acc cases =
+    let rec entries name parent acc cases =
       List.fold_left
         (fun acc ((doc, tag, run) as case) ->
+          let tag =
+            match parent with `Always -> tag | _ -> Tag.(parent && tag)
+          in
           match case_children case with
           | Some children ->
               (* A group and its cases have the same ['a]. *)
-              entries (name ^ "." ^ doc) acc (Obj.obj children)
+              entries (name ^ "." ^ doc) tag acc (Obj.obj children)
           | None ->
               let location = case_location case in
               let index = next_index name in
               { entry_name = name; index; doc; tag; location; run } :: acc)
         acc cases
     in
-    List.rev (entries name [] cases)
+    List.rev (entries name `Always [] cases)
 
   let add_entry (type a) (t : a t) (e : a entry) : a t =
     let path = Test_name.v ~name:e.entry_name ~index:e.index in
