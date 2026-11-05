@@ -1,6 +1,6 @@
 (* Each run has its own directory in [run/<suite>], named after its start time
-   and ID, and [latest] points to the last one where symbolic links are
-   supported. *)
+   and ID, and its report in [junit], and [latest] points to the last run where
+   symbolic links are supported. *)
 let run root name =
   Alcotest.run ~and_exit:false ~log_dir:root name
     [ ("t", [ Alcotest.test_case "ok" `Quick ignore ]) ]
@@ -14,7 +14,9 @@ let () =
   run root "alpha";
   run root "beta";
   run root "alpha";
-  let top = if Sys.win32 then [ "run" ] else [ "latest"; "run" ] in
+  let top =
+    if Sys.win32 then [ "junit"; "run" ] else [ "junit"; "latest"; "run" ]
+  in
   check "top level" top (entries root);
   let run_dir = Filename.concat root "run" in
   check "suites" [ "alpha"; "beta" ] (entries run_dir);
@@ -29,6 +31,9 @@ let () =
           check ("name " ^ name) true
             (String.length name = 24 && name.[8] = '-' && name.[15] = '-');
           let dir = List.fold_left Filename.concat run_dir [ suite; name ] in
-          check ("logs of " ^ name) [ "t.000.output" ] (entries dir))
+          check ("logs of " ^ name) [ "t.000.output" ] (entries dir);
+          let reports = entries (Filename.concat root "junit") in
+          check ("report of " ^ name) true
+            (List.mem (Printf.sprintf "%s-%s.xml" suite name) reports))
         (runs suite))
     [ "alpha"; "beta" ]

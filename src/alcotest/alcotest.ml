@@ -23,6 +23,21 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   open M.Syntax
 
   let time = Unix.gettimeofday
+
+  let timestamp t =
+    let tm = Unix.gmtime t in
+    Fmt.str "%04d-%02d-%02dT%02d:%02d:%02dZ" (tm.tm_year + 1900) (tm.tm_mon + 1)
+      tm.tm_mday tm.tm_hour tm.tm_min tm.tm_sec
+
+  let write_file path contents =
+    (try Unix.mkdir_p (Filename.dirname path) 0o770
+     with Unix.Unix_error (e, _, p) ->
+       raise (Sys_error (p ^ ": " ^ Unix.error_message e)));
+    let oc = open_out_bin path in
+    Fun.protect
+      ~finally:(fun () -> close_out_noerr oc)
+      (fun () -> output_string oc contents)
+
   let getcwd = Sys.getcwd
 
   let unlink_if_exists file =
