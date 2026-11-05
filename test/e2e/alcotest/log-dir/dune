@@ -1,0 +1,4 @@
+(test
+ (name test_log_dir_slash)
+ (package alcotest)
+ (libraries alcotest))
