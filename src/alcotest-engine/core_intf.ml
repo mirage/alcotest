@@ -138,8 +138,9 @@ module V1_types = struct
           format.
         - [filter]. Filter tests according to [~name], the name of the test, and
           [~index], the number of the test case.
-        - [log_dir] (default ["$PWD/_build/_tests/"]). The directory in which to
-          log the output of the tests (if [verbose] is not set).
+        - [log_dir] (default ["$PWD/_build/_tests/"], or
+          ["$DUNE_SOURCEROOT/_build/_tests/"] under dune). The directory in
+          which to log the output of the tests (if [verbose] is not set).
         - [bail] (default [false]). If true, stop running the tests after the
           first failure.
         - [record_backtrace] (default [true]). Enable backtrace recording before
