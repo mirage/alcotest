@@ -4,6 +4,11 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
   module Unix = struct
     include Unix
 
+    (* Windows also accepts ['/'], which is not [Filename.dir_sep]. *)
+    let native_separators path =
+      if Sys.win32 then String.map (function '/' -> '\\' | c -> c) path
+      else path
+
     let mkdir_p path mode =
       List.iter
         (fun path ->
@@ -11,7 +16,8 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
           with Unix.Unix_error (Unix.EEXIST, _, _) ->
             if Sys.is_directory path then () (* the directory exists *)
             else Fmt.str "mkdir: %s: is a file" path |> failwith)
-        (Alcotest_stdlib_ext.Path.ancestors ~sep:Filename.dir_sep path)
+        (Alcotest_stdlib_ext.Path.ancestors ~sep:Filename.dir_sep
+           (native_separators path))
   end
 
   open M.Syntax
