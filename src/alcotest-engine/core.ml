@@ -365,7 +365,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           (* When capturing the logs of a test, also add the result of the test
              at the end. *)
           let+ result = fn args in
-          Pp.rresult_error (t.stdout :> Format.formatter) result;
+          Fmt.vbox Pp.rresult_error (t.stdout :> Format.formatter) result;
           result)
         ()
 

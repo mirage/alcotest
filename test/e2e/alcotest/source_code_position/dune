@@ -163,3 +163,12 @@
  (package alcotest)
  (action
   (diff without-position.expected without-position.processed)))
+
+(test
+ (name test_log_location)
+ (modules test_log_location)
+ (package alcotest)
+ (action
+  (ignore-outputs
+   (run %{test})))
+ (libraries alcotest))
