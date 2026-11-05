@@ -115,13 +115,25 @@ type case_info = {
   children : Obj.t option;  (** The ['a test_case list] of a group. *)
 }
 
-let case_infos : (string, Obj.t * case_info) Hashtbl.t = Hashtbl.create 16
+module Case_infos = Map.Make (String)
+
+(* Test cases can be created from any domain. *)
+let case_infos = Atomic.make Case_infos.empty
+
+let cases_named name infos =
+  Option.value ~default:[] (Case_infos.find_opt name infos)
 
 let find_case_info ((name, _, _) as case) =
-  List.assq_opt (Obj.repr case) (Hashtbl.find_all case_infos name)
+  List.assq_opt (Obj.repr case) (cases_named name (Atomic.get case_infos))
 
-let register_case_info ((name, _, _) as case) info =
-  Hashtbl.add case_infos name (Obj.repr case, info)
+let rec register_case_info ((name, _, _) as case) info =
+  let infos = Atomic.get case_infos in
+  let cases = (Obj.repr case, info) :: cases_named name infos in
+  if
+    not
+      (Atomic.compare_and_set case_infos infos
+         (Case_infos.add name cases infos))
+  then register_case_info case info
 
 let case_location case =
   match find_case_info case with None -> None | Some i -> i.location
