@@ -1,17 +1,11 @@
 Testing `test/e2e/alcotest/failing/check_located.ml'.
 This run has ID `<uuid>'.
 
-ASSERT Expected failure
   [FAIL]        check                 0   here.
-ASSERT Expected failure
   [FAIL]        check                 1   pos.
-ASSERT Expected failure
   [FAIL]        check_raises          0   here.
-ASSERT Expected failure
   [FAIL]        check_raises          1   pos.
-ASSERT Expected failure
   [FAIL]        fail                  0   here.
-ASSERT Expected failure
   [FAIL]        fail                  1   pos.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐

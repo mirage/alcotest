@@ -7,7 +7,6 @@ This run has ID `<uuid>'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetu...  │
 └──────────────────────────────────────────────────────────────────────────────┘
-ASSERT Failed
 FAIL Failed
 Logs saved to `<build-context>/_build/_tests/<test-dir>/test-a.001.output'.
  ──────────────────────────────────────────────────────────────────────────────

@@ -7,7 +7,6 @@ This run has ID `<uuid>'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        test-a          1   Lorem ipsum dolor sit amet, consectetu...  │
 └──────────────────────────────────────────────────────────────────────────────┘
-ASSERT Failed
 FAIL Failed
 <stacktrace>
 

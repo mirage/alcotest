@@ -7,7 +7,6 @@ This run has ID `<uuid>'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        to_test          0   capitalise.                               │
 └──────────────────────────────────────────────────────────────────────────────┘
-ASSERT strings
 File "test/e2e/alcotest/source_code_position/test_source_code_position.ml", line 24, character 2:
 FAIL strings
 
@@ -23,7 +22,6 @@ Logs saved to `<build-context>/_build/_tests/<test-dir>/to_test.000.output'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        to_test          1   double all.                               │
 └──────────────────────────────────────────────────────────────────────────────┘
-ASSERT int lists 1
 File "test/e2e/alcotest/source_code_position/test_source_code_position.ml", line 28, character 2:
 FAIL int lists 1
 
@@ -48,7 +46,6 @@ This run has ID `<uuid>'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        Ωèone          1   Failing test.                               │
 └──────────────────────────────────────────────────────────────────────────────┘
-ASSERT This was never going to work...
 FAIL This was never going to work...
 <stacktrace>
 

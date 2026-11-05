@@ -1,33 +1,19 @@
 Testing `test/e2e/alcotest/failing/check_basic.ml'.
 This run has ID `<uuid>'.
 
-ASSERT bool
   [FAIL]        different basic              0   bool.
-ASSERT int
   [FAIL]        different basic              1   int.
-ASSERT int32
   [FAIL]        different basic              2   int32.
-ASSERT int64
   [FAIL]        different basic              3   int64.
-ASSERT float
   [FAIL]        different basic              4   float.
-ASSERT char
   [FAIL]        different basic              5   char.
-ASSERT string
   [FAIL]        different basic              6   string.
-ASSERT bytes
   [FAIL]        different basic              7   bytes.
-ASSERT list
   [FAIL]        different composite          0   list.
-ASSERT array
   [FAIL]        different composite          1   array.
-ASSERT option some
   [FAIL]        different composite          2   option some.
-ASSERT result
   [FAIL]        different composite          3   result.
-ASSERT pair
   [FAIL]        different composite          4   pair.
-ASSERT triple
   [FAIL]        different composite          5   triple.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
