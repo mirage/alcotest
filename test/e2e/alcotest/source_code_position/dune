@@ -163,3 +163,9 @@
  (package alcotest)
  (action
   (diff without-position.expected without-position.processed)))
+
+(test
+ (name test_retention)
+ (modules test_retention)
+ (package alcotest)
+ (libraries alcotest))

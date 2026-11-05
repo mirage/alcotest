@@ -112,13 +112,31 @@ let backtrace_location () =
    test cases. The hash is on the name, as a tuple can move in memory. *)
 type case_info = { location : (string * int * int) option }
 
-let case_infos : (string, Obj.t * case_info) Hashtbl.t = Hashtbl.create 16
+(* Only the name of a case is read. The cast has no inverse. *)
+external erase_case : string * _ * _ -> string * unit * unit = "%identity"
 
-let find_case_info ((name, _, _) as case) =
-  List.assq_opt (Obj.repr case) (Hashtbl.find_all case_infos name)
+module Case_infos = Ephemeron.K1.Make (struct
+  type t = string * unit * unit
 
-let register_case_info ((name, _, _) as case) info =
-  Hashtbl.add case_infos name (Obj.repr case, info)
+  let equal = ( == )
+  let hash (name, _, _) = Hashtbl.hash name
+end)
+
+(* An entry lives as long as its tuple, and test cases can be created from any
+   domain. *)
+let case_infos = Case_infos.create 16
+let case_infos_lock = Atomic.make false
+
+let rec with_case_infos f =
+  if Atomic.compare_and_set case_infos_lock false true then
+    Fun.protect ~finally:(fun () -> Atomic.set case_infos_lock false) f
+  else with_case_infos f
+
+let find_case_info case =
+  with_case_infos (fun () -> Case_infos.find_opt case_infos (erase_case case))
+
+let register_case_info case info =
+  with_case_infos (fun () -> Case_infos.add case_infos (erase_case case) info)
 
 let case_location case =
   match find_case_info case with None -> None | Some i -> i.location
