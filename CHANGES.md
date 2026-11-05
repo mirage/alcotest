@@ -1,5 +1,7 @@
 ### unreleased
 
+- Fix creating a log directory written with `/` on Windows, as in `-o a/b`, which
+  failed with `ENOENT` (#470, @samoht)
 - Add `test ?tags name f` and `suite name cases`, to write `suite "a" [ test "b" f ]`
   instead of `("a", [ test_case "b" `Quick f ])`. `tags` defaults to `` `Always ``
   (#468, @samoht, combinators suggested by @yawaramin in #393)
