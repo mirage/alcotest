@@ -43,6 +43,10 @@ let pp_tag ~wrapped ppf typ =
 
 let tag = pp_tag ~wrapped:false
 
+let location =
+  Fmt.styled `Bold (fun ppf (file, line, char) ->
+      Fmt.pf ppf "File \"%s\", line %d, character %d:@," file line char)
+
 module Make (P : sig
   val stdout_columns : unit -> int option
 end) =
@@ -54,7 +58,8 @@ struct
 
   let rresult_error ppf = function
     | `Error (_, e) -> Fmt.pf ppf "%a@," e ()
-    | `Exn (_, n, e) -> Fmt.pf ppf "[%s] @[<v>%a@]" n e ()
+    | `Exn (_, n, l, e) ->
+        Fmt.pf ppf "%a[%s] @[<v>%a@]" (Fmt.option location) l n e ()
     | `Ok | `Todo _ | `Skip -> ()
 
   (* Colours *)

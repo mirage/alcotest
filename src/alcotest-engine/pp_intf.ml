@@ -83,6 +83,10 @@ end
 
 module type Pp = sig
   val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
+
+  val location : (string * int * int) Fmt.t
+  (** [location] prints a file, line and character as a failure header. *)
+
   val map_theta : theta -> f:(unit Fmt.t -> unit Fmt.t) -> theta
 
   val pp_plural : int Fmt.t

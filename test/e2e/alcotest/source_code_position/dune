@@ -21,6 +21,97 @@
  (modules test_source_code_position)
  (modes exe byte))
 
+(executable
+ (name test_failure_shapes)
+ (libraries alcotest)
+ (modules test_failure_shapes)
+ (modes exe byte))
+
+(rule
+ (target failure-shapes.actual)
+ (action
+  (setenv
+   ALCOTEST_SOURCE_CODE_POSITION
+   true
+   (with-accepted-exit-codes
+    (or 1 2 124 125)
+    (with-outputs-to
+     %{target}
+     (run %{dep:caml_ld_library_path.exe} %{dep:test_failure_shapes.bc}))))))
+
+; The variable is unset by default, which is not the same path as setting it.
+
+(rule
+ (target failure-shapes-unset.actual)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (with-accepted-exit-codes
+   (or 1 2 124 125)
+   (with-outputs-to
+    %{target}
+    (run
+     env
+     -u
+     ALCOTEST_SOURCE_CODE_POSITION
+     %{dep:caml_ld_library_path.exe}
+     %{dep:test_failure_shapes.bc})))))
+
+(rule
+ (target failure-shapes-unset.processed)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:failure-shapes-unset.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (diff failure-shapes.expected failure-shapes-unset.processed)))
+
+(rule
+ (target failure-shapes-off.actual)
+ (action
+  (setenv
+   ALCOTEST_SOURCE_CODE_POSITION
+   false
+   (with-accepted-exit-codes
+    (or 1 2 124 125)
+    (with-outputs-to
+     %{target}
+     (run %{dep:test_failure_shapes.exe} test shapes 0,6))))))
+
+(rule
+ (target failure-shapes.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:failure-shapes.actual}))))
+
+(rule
+ (target failure-shapes-off.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:failure-shapes-off.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff failure-shapes.expected failure-shapes.processed)))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff failure-shapes-off.expected failure-shapes-off.processed)))
+
 (rule
  (target with-position.actual)
  (action

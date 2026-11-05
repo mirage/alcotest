@@ -1,5 +1,9 @@
 ### unreleased
 
+- Show the file and line of every failing test, not only of a failing `check`.
+  A failure in a helper points to the line of the test that calls it.
+  `ALCOTEST_SOURCE_CODE_POSITION` still turns this off (#451, @samoht, based on
+  `B0_testing` by @dbuenzli and the b0 programmers)
 - Print the message of a failing check once: `ASSERT` now only shows the checks
   that passed (#465, @samoht)
 - Add wasm_of_ocaml support (#461, #436, #437, @hhugo, @samoht and @mefyl)

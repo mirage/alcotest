@@ -42,6 +42,104 @@ let () =
     | Check_error err -> Some (Lazy.force print_error err)
     | _ -> None)
 
+let frame_name slot = Option.value ~default:"" (Printexc.Slot.name slot)
+
+let is_alcotest_frame slot =
+  String.is_prefix ~affix:"Alcotest" (frame_name slot)
+
+(* The compilation unit of a frame such as [Stdlib__List.iter]. *)
+let frame_library slot =
+  let before sep s =
+    match String.cut ~sep s with Some (x, _) -> x | None -> s
+  in
+  before "__" (before "." (frame_name slot))
+
+(* Library frames, which are not where a test failed. A frame without a name has
+   no location to report. *)
+let is_internal_frame slot =
+  let library = frame_library slot in
+  library = ""
+  || List.mem library [ "Stdlib"; "Base"; "Core" ]
+  || List.exists
+       (fun affix -> String.is_prefix ~affix library)
+       [ "Alcotest"; "Lwt"; "Async" ]
+
+(* Reading locations from [Printexc] slots, rather than parsing backtrace text,
+   follows [Test_fmt.bt_slot_loc] in B0_testing by Daniel Bünzli:
+   src/std/b0_testing.ml in https://github.com/b0-system/b0, copyright The b0
+   programmers, ISC. *)
+let frame_location slot =
+  match Printexc.Slot.location slot with
+  | Some { filename; line_number; start_char; _ }
+    when not (is_internal_frame slot) ->
+      Some (filename, line_number, start_char)
+  | _ -> None
+
+let first_location slots =
+  match List.filter_map frame_location slots with
+  | location :: _ -> Some location
+  | [] -> None
+
+(* The first caller outside Alcotest, if the executable has debug information. *)
+let caller_location () =
+  match Printexc.(backtrace_slots (get_callstack 16)) with
+  | None -> None
+  | Some slots -> first_location (Array.to_list slots)
+
+let rec drop_alcotest_frames = function
+  | slot :: slots when is_alcotest_frame slot -> drop_alcotest_frames slots
+  | slots -> slots
+
+(* The frames between the raise and Alcotest, innermost first: the last one with
+   a location is in the test body, the others may be in libraries it calls. *)
+let rec test_body_location acc = function
+  | [] -> acc
+  | slot :: _ when is_alcotest_frame slot -> acc
+  | slot :: slots ->
+      let acc =
+        match frame_location slot with Some _ as l -> l | None -> acc
+      in
+      test_body_location acc slots
+
+let backtrace_location () =
+  match Printexc.(backtrace_slots (get_raw_backtrace ())) with
+  | None -> None
+  | Some slots ->
+      test_body_location None (drop_alcotest_frames (Array.to_list slots))
+
+(* The [test_case] tuple has no slot for its metadata, which is kept here and
+   found by physical equality on the tuple: a function can be shared by several
+   test cases. The hash is on the name, as a tuple can move in memory. *)
+type case_info = { location : (string * int * int) option }
+
+let case_infos : (string, Obj.t * case_info) Hashtbl.t = Hashtbl.create 16
+
+let find_case_info ((name, _, _) as case) =
+  List.assq_opt (Obj.repr case) (Hashtbl.find_all case_infos name)
+
+let register_case_info ((name, _, _) as case) info =
+  Hashtbl.add case_infos name (Obj.repr case, info)
+
+let case_location case =
+  match find_case_info case with None -> None | Some i -> i.location
+
+(* A given position is printed first, see [Test.pp_location]. *)
+let has_location pp = String.is_prefix ~affix:"File \"" (Fmt.str "%a" pp ())
+
+(* See the documentation of this variable in [Cli]. It is read once, at startup:
+   [Sys.getenv] raises when it is unset, which would overwrite the backtrace of
+   the failure being reported. *)
+let guess_location =
+  match Sys.getenv "ALCOTEST_SOURCE_CODE_POSITION" with
+  | "" | "false" | "no" | "n" | "0" -> false
+  | _ | (exception Not_found) -> true
+
+(* A failed check already shows where it failed if given a position. *)
+let with_location location pp =
+  match location with
+  | Some l when not (has_location pp) -> Fmt.(const Pp.location l ++ pp)
+  | _ -> pp
+
 module Make (P : Platform.MAKER) (M : Monad.S) = struct
   module P = P (M)
 
@@ -64,7 +162,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   type 'a test_case = string * speed_level * 'a run
 
-  let test_case n s f = (n, s, f)
+  let test_case n s f =
+    let case = (n, s, f) in
+    register_case_info case { location = caller_location () };
+    case
 
   type 'a test = string * 'a test_case list
 
@@ -148,7 +249,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let pp_error t ppf e =
     let path, error_fmt =
-      match e with `Error (p, f) -> (p, f) | `Exn (p, _, f) -> (p, f)
+      match e with
+      | `Error (p, f) -> (p, f)
+      | `Exn (p, _, l, f) -> (p, with_location l f)
     in
     let pp_logs ppf () =
       let pp_logs =
@@ -180,21 +283,28 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | `Skip | `Todo _ -> false
 
   let bt () = match Printexc.get_backtrace () with "" -> "" | s -> "\n" ^ s
-  let exn path name pp = `Exn (path, name, Fmt.(pp ++ const lines (bt ())))
 
-  let protect_test path (f : 'a run) : 'a -> Run_result.t M.t =
+  let exn path name location pp =
+    `Exn (path, name, location, Fmt.(pp ++ const lines (bt ())))
+
+  let result_of_exn ~registered path e =
+    let location =
+      if guess_location then Option.(backtrace_location () || registered)
+      else None
+    in
+    match e with
+    | Check_error err ->
+        `Error (path, with_location location Fmt.(err ++ const string (bt ())))
+    | Skip -> `Skip
+    | Failure s -> exn path "failure" location Fmt.(const string s)
+    | Invalid_argument s -> exn path "invalid" location Fmt.(const string s)
+    | e -> exn path "exception" location Fmt.(const exn e)
+
+  let protect_test ~registered path (f : 'a run) : 'a -> Run_result.t M.t =
    fun args ->
     M.catch
       (fun () -> f args >|= fun () -> `Ok)
-      (( function
-       | Check_error err ->
-           let err = Fmt.(err ++ const string (bt ())) in
-           `Error (path, err)
-       | Skip -> `Skip
-       | Failure s -> exn path "failure" Fmt.(const string s)
-       | Invalid_argument s -> exn path "invalid" Fmt.(const string s)
-       | e -> exn path "exception" Fmt.(const exn e) )
-      >> M.return)
+      (fun e -> M.return (result_of_exn ~registered path e))
 
   type running_state = { tests_so_far : int; first_error : int option }
   (** State that is kept during the test executions. *)
@@ -233,8 +343,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           let errored : bool =
             let error, errored =
               match result with
-              | (`Error _ | `Exn (_, _, _)) as e ->
-                  ([ Fmt.const (pp_error t) e ], true)
+              | (`Error _ | `Exn _) as e -> ([ Fmt.const (pp_error t) e ], true)
               | _ -> ([], false)
             in
             t.errors <- error @ t.errors;
@@ -326,30 +435,46 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
          list ~sep:(const string "\n") (pp_info t)
            (t.stdout :> Format.formatter))
 
-  let register (type a) (t : a t) (name, (ts : a test_case list)) : a t =
-    let max_label = max t.max_label (String.length_utf8 name) in
-    let test_details =
-      List.mapi
-        (fun index (doc, speed, test) ->
-          let path = Test_name.v ~name ~index in
-          let doc =
-            if doc = "" || doc.[String.length doc - 1] = '.' then doc
-            else doc ^ "."
-          in
-          let test a = protect_test path test a in
-          (path, doc, speed, `Run test))
-        ts
+  type 'a entry = {
+    entry_name : string;
+    index : int;
+    doc : string;
+    speed : speed_level;
+    location : (string * int * int) option;
+    run : 'a run;
+  }
+
+  (* The entries of a test, in the order of its cases. *)
+  let compile (name, cases) =
+    List.mapi
+      (fun index ((doc, speed, run) as case) ->
+        {
+          entry_name = name;
+          index;
+          doc;
+          speed;
+          location = case_location case;
+          run;
+        })
+      cases
+
+  let add_entry (type a) (t : a t) (e : a entry) : a t =
+    let path = Test_name.v ~name:e.entry_name ~index:e.index in
+    let doc =
+      if e.doc = "" || e.doc.[String.length e.doc - 1] = '.' then e.doc
+      else e.doc ^ "."
     in
-    let suite =
-      List.fold_left
-        (fun acc td ->
-          match Suite.add acc td with
-          | Ok acc -> acc
-          | Error (`Duplicate_test_path path) ->
-              Fmt.kstr Pp.user_error "Duplicate test path: `%s'" path)
-        t.suite test_details
-    in
-    { t with suite; max_label }
+    let test a = protect_test ~registered:e.location path e.run a in
+    match Suite.add t.suite (path, doc, e.speed, `Run test) with
+    | Ok suite ->
+        let max_label = max t.max_label (String.length_utf8 e.entry_name) in
+        { t with suite; max_label }
+    | Error (`Duplicate_test_path path) ->
+        Fmt.kstr Pp.user_error "Duplicate test path: `%s'" path
+
+  let register (type a) (t : a t) ((name, _) as test : a test) : a t =
+    let t = { t with max_label = max t.max_label (String.length_utf8 name) } in
+    List.fold_left add_entry t (compile test)
 
   let register_all t cases = List.fold_left register t cases
 
