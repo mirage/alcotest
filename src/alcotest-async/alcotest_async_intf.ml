@@ -4,12 +4,11 @@ module type V1 = sig
   val test_case :
     ?timeout:Time_float_unix.Span.t ->
     string ->
-    Alcotest.speed_level ->
+    Alcotest.tag ->
     ('a -> unit Async.Deferred.t) ->
     'a test_case
 
-  val test_case_sync :
-    string -> Alcotest.speed_level -> ('a -> unit) -> 'a test_case
+  val test_case_sync : string -> Alcotest.tag -> ('a -> unit) -> 'a test_case
 end
 
 module type Alcotest_async = sig

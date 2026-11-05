@@ -8,6 +8,9 @@ COMMANDS
        list [--color=WHEN] [OPTION]…
            List all available tests.
 
+       tags [--color=WHEN] [OPTION]…
+           List the tags that --tags can add or remove.
+
        test [OPTION]… [NAME_REGEX] [TESTCASES]
            Run a subset of the tests.
 
@@ -43,6 +46,11 @@ OPTIONS
 
        -q, --quick-tests (absent ALCOTEST_QUICK_TESTS env)
            Run only the quick tests.
+
+       --tags=TAGS (absent ALCOTEST_TAGS env)
+           A comma-separated list of tags to also run, e.g: 'db,network'. Use
+           -foo to stop running a tag, e.g: '-slow'. On the command line,
+           TAGS must only contain tags used by the tests.
 
        --tail-errors=N (absent ALCOTEST_TAIL_ERRORS env)
            Show only the last N lines of output in case of an error.
@@ -95,6 +103,9 @@ ENVIRONMENT
            Whether Alcotest should guess the source code position of test
            failures, if any. Defaults to true, set to a falsy value to
            disable.
+
+       ALCOTEST_TAGS
+           See option --tags.
 
        ALCOTEST_TAIL_ERRORS
            See option --tail-errors.

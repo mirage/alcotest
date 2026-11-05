@@ -1,0 +1,4 @@
+Testing `test/e2e/alcotest/failing/tags_refused.ml'.
+This run has ID `<uuid>'.
+
+ERROR: Unknown tags `dbb,-nope'. Available tags: db, net, quick, slow.

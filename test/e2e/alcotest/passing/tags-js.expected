@@ -1,0 +1,32 @@
+Testing `test/e2e/alcotest/passing/tags.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          selection          0   run.
+  [OK]          selection          1   run -q.
+  [OK]          selection          2   run --tags=slow.
+  [OK]          selection          3   run -q --tags=slow.
+  [OK]          selection          4   run --tags=-slow.
+  [OK]          selection          5   run --tags=-quick.
+  [OK]          selection          6   run --tags=db.
+  [OK]          selection          7   run -q --tags=db.
+  [OK]          selection          8   run --tags=db,-slow.
+  [OK]          selection          9   run --tags=net.
+  [OK]          selection         10   run --tags=crypto.
+  [OK]          selection         11   run --tags=ci.
+  [OK]          selection         12   run --tags=net,-quick,-slow.
+  [OK]          selection         13   run --tags=.
+  [OK]          selection         14   run --tags=db,,r.
+  [OK]          selection         15   run --tags=r.
+  [OK]          selection         16   run --tags=w.
+  [OK]          selection         17   run --tags=t.
+  [OK]          selection         18   run --tags=db,-db.
+  [OK]          selection         19   run -e --tags=db.
+  [OK]          others             0   quick_only.
+  [OK]          others             1   shared function.
+  [OK]          others             2   always.
+  [OK]          others             3   group.
+  [OK]          others             4   no shadowing.
+  [OK]          others             5   call forms.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 26 tests run.

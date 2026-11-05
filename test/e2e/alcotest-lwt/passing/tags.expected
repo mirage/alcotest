@@ -1,0 +1,11 @@
+Testing `test/e2e/alcotest-lwt/passing/tags.ml'.
+This run has ID `<uuid>'.
+
+  [OK]          tagged           0   db.
+  [OK]          tagged           1   no tags.
+  [OK]          tagged           2   sync slow db.
+  [OK]          tagged           3   sync.
+  [OK]          rebuilt          0   renamed db.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 5 tests run.

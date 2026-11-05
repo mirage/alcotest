@@ -1,0 +1,56 @@
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.S.S
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+...S
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.S.S
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.S.S
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.S.S
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.SSS
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+S.SS
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+SSSS
+
+WARNING: tags `-quick' enable no tests. Tests use the tags: db, net, quick, slow.
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.SSS
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+SS.S
+
+Testing `tags-cli'.
+This run has ID `<uuid>'.
+
+.S.S
+

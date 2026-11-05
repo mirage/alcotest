@@ -26,7 +26,7 @@ module Make (_ : Mirage_clock.MCLOCK) : sig
   include Alcotest_engine.V1.Cli.S with type return = unit Lwt.t
 
   val test_case :
-    string -> speed_level -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
+    string -> tag -> (Lwt_switch.t -> 'a -> unit Lwt.t) -> 'a test_case
 
-  val test_case_sync : string -> speed_level -> ('a -> unit) -> 'a test_case
+  val test_case_sync : string -> tag -> ('a -> unit) -> 'a test_case
 end

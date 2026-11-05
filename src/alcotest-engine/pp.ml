@@ -245,6 +245,9 @@ struct
           pp_summary ppf r);
         Format.pp_close_box ppf ()
 
+  let user_warning msg =
+    Formatters.epr "%a: %s\n%!" Fmt.(styled `Yellow string) "WARNING" msg
+
   let user_error msg =
     Formatters.epr "%a: %s\n" Fmt.(styled `Red string) "ERROR" msg;
     exit 1

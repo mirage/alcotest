@@ -24,6 +24,10 @@
    quick_only_regex
    separator_testname
    skip_in_test
+   tags
+   tags_command
+   tags_list
+   tags_unknown
    unicode_testname
    verbose_newlines
  )
@@ -54,6 +58,10 @@
    quick_only_regex
    separator_testname
    skip_in_test
+   tags
+   tags_command
+   tags_list
+   tags_unknown
    unicode_testname
    verbose_newlines
  )
@@ -1426,6 +1434,234 @@
  (package alcotest)
  (action
    (diff skip_in_test-wasm.expected skip_in_test-wasm.processed)))
+
+(rule
+ (target tags.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:tags.exe})))))
+
+(rule
+ (target tags.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff tags.expected tags.processed)))
+
+(rule
+ (target tags-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags.bc.js})))))
+
+(rule
+ (target tags-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff tags-js.expected tags-js.processed)))
+
+(rule
+ (target tags-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags.bc.wasm.js})))))
+
+(rule
+ (target tags-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tags-wasm.expected tags-wasm.processed)))
+
+(rule
+ (target tags_command.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:tags_command.exe} tags)))))
+
+(rule
+ (target tags_command.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_command.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff tags_command.expected tags_command.processed)))
+
+(rule
+ (target tags_command-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags_command.bc.js} tags)))))
+
+(rule
+ (target tags_command-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_command-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff tags_command-js.expected tags_command-js.processed)))
+
+(rule
+ (target tags_command-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags_command.bc.wasm.js} tags)))))
+
+(rule
+ (target tags_command-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_command-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tags_command-wasm.expected tags_command-wasm.processed)))
+
+(rule
+ (target tags_list.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:tags_list.exe} list)))))
+
+(rule
+ (target tags_list.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_list.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff tags_list.expected tags_list.processed)))
+
+(rule
+ (target tags_list-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags_list.bc.js} list)))))
+
+(rule
+ (target tags_list-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_list-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff tags_list-js.expected tags_list-js.processed)))
+
+(rule
+ (target tags_list-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags_list.bc.wasm.js} list)))))
+
+(rule
+ (target tags_list-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_list-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tags_list-wasm.expected tags_list-wasm.processed)))
+
+(rule
+ (target tags_unknown.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run %{dep:tags_unknown.exe} --tags=-quick,-slow)))))
+
+(rule
+ (target tags_unknown.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_unknown.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff tags_unknown.expected tags_unknown.processed)))
+
+(rule
+ (target tags_unknown-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags_unknown.bc.js} --tags=-quick,-slow)))))
+
+(rule
+ (target tags_unknown-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_unknown-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff tags_unknown-js.expected tags_unknown-js.processed)))
+
+(rule
+ (target tags_unknown-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 0 124 125)
+    (run node %{dep:tags_unknown.bc.wasm.js} --tags=-quick,-slow)))))
+
+(rule
+ (target tags_unknown-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_unknown-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tags_unknown-wasm.expected tags_unknown-wasm.processed)))
 
 (rule
  (target unicode_testname.actual)

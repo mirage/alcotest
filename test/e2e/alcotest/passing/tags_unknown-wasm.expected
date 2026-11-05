@@ -1,0 +1,9 @@
+Testing `test/e2e/alcotest/passing/tags_unknown.ml'.
+This run has ID `<uuid>'.
+
+  [SKIP]        tags-suite          0   db.
+  [SKIP]        tags-suite          1   s.
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 0 test run.
+WARNING: tags `-quick,-slow' enable no tests. Tests use the tags: db, slow.

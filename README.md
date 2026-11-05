@@ -164,6 +164,42 @@ $ ./test.exe -q # run only the quick tests
 $ ./test.exe    # run quick and slow tests
 ```
 
+### Tags
+
+A test says when it runs, and the command line sets up the context it runs in.
+The context is a set of tags that starts with `quick` and `slow`: `-q` removes
+`slow`, and `--tags` or `ALCOTEST_TAGS` add tags, or remove them with `-`.
+
+```ocaml
+open Alcotest
+
+test_case "plain" `Quick f                       (* the default context *)
+test_case "big" `Slow f                          (* the default context, not -q *)
+test_case "smoke" `Always f                      (* always *)
+test_case "fetch" (`Tag "network") f             (* only when asked for *)
+test_case "tls" Tag.(v "network" || v "crypto") f  (* when asked for either *)
+test_case "dump" Tag.(slow && v "db") f          (* db, not with -q *)
+test_case "local" Tag.(not (v "ci")) f           (* unless asked for ci *)
+```
+
+```sh-session
+$ ./test.exe                         # plain, big, smoke, local
+$ ./test.exe -q                      # plain, smoke, local
+$ ./test.exe --tags=network          # also fetch and tls
+$ ./test.exe --tags=db -q            # plain, smoke, local, no dump
+$ ./test.exe -q --tags=slow          # -q does not win: also big
+$ ./test.exe --tags=network,-quick,-slow  # fetch, tls, smoke, local
+$ ALCOTEST_TAGS=network dune test --force
+$ ./test.exe tags                    # the tags these tests use
+```
+
+`--tags` replaces `ALCOTEST_TAGS`. Tags passed to `--tags` must be used by a test
+in that executable, or it stops with an error. `ALCOTEST_TAGS` applies to a whole
+dune workspace, where many executables do not use a tag, so it does not check
+them. An executable whose tests are all disabled
+exits 0 with a warning naming the tags they use, and `list` shows each condition
+other than `` `Quick `` and `` `Slow ``.
+
 ### Passing custom options to the tests
 
 In most cases, the base tests are `unit -> unit` functions. However,

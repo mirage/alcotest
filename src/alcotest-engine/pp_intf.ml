@@ -77,6 +77,9 @@ module type S = sig
   (** Horizontal rule of length {!_.stdout_columns}. Uses box-drawing characters
       from code page 437. *)
 
+  val user_warning : string -> unit
+  (** Print a warning on the standard error. *)
+
   val user_error : string -> _
   (** Raise a user error, then fail. *)
 end

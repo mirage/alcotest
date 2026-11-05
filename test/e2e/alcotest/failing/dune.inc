@@ -14,6 +14,7 @@
    json_output_with_failed
    long_test_case_name
    outside_runner
+   tags_refused
    tail_errors_limit
    tail_errors_unlimited
  )
@@ -34,6 +35,7 @@
    json_output_with_failed
    long_test_case_name
    outside_runner
+   tags_refused
    tail_errors_limit
    tail_errors_unlimited
  )
@@ -836,6 +838,63 @@
  (package alcotest)
  (action
    (diff outside_runner-wasm.expected outside_runner-wasm.processed)))
+
+(rule
+ (target tags_refused.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run %{dep:tags_refused.exe} --tags=dbb,-nope,-quick)))))
+
+(rule
+ (target tags_refused.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_refused.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+   (diff tags_refused.expected tags_refused.processed)))
+
+(rule
+ (target tags_refused-js.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:tags_refused.bc.js} --tags=dbb,-nope,-quick)))))
+
+(rule
+ (target tags_refused-js.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_refused-js.actual}))))
+
+(rule
+ (alias runtest-js)
+ (package alcotest)
+ (action
+   (diff tags_refused-js.expected tags_refused-js.processed)))
+
+(rule
+ (target tags_refused-wasm.actual)
+ (action
+  (with-outputs-to %{target}
+   (with-accepted-exit-codes (or 1 2 124 125)
+    (run node %{dep:tags_refused.bc.wasm.js} --tags=dbb,-nope,-quick)))))
+
+(rule
+ (target tags_refused-wasm.processed)
+ (action
+  (with-outputs-to %{target}
+   (run ../../strip_randomness.exe %{dep:tags_refused-wasm.actual}))))
+
+(rule
+ (alias runtest-wasm)
+ (package alcotest)
+ (action
+   (diff tags_refused-wasm.expected tags_refused-wasm.processed)))
 
 (rule
  (target tail_errors_limit.actual)

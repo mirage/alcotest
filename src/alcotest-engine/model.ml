@@ -1,7 +1,5 @@
 open! Import
 
-type speed_level = [ `Quick | `Slow ]
-
 module Test_name : sig
   type t
 
@@ -60,13 +58,22 @@ module Run_result = struct
     | `Error _ | `Exn _ | `Todo _ -> true
 end
 
+type condition =
+  [ `Quick
+  | `Slow
+  | `Always
+  | `Tag of string
+  | `And of condition list
+  | `Or of condition list
+  | `Not of condition ]
+
 module Suite (M : Monad.S) : sig
   type 'a t
   type 'a test_fn = [ `Skip | `Run of 'a -> Run_result.t M.t ]
 
   type 'a test_case = {
     name : Test_name.t;
-    speed_level : speed_level;
+    condition : condition;
     fn : 'a test_fn;
   }
 
@@ -82,7 +89,7 @@ module Suite (M : Monad.S) : sig
 
   val add :
     'a t ->
-    Test_name.t * string * speed_level * 'a test_fn ->
+    Test_name.t * string * condition * 'a test_fn ->
     ('a t, [ `Duplicate_test_path of string ]) result
 
   val tests : 'a t -> 'a test_case list
@@ -94,7 +101,7 @@ end = struct
 
   type 'a test_case = {
     name : Test_name.t;
-    speed_level : speed_level;
+    condition : condition;
     fn : 'a test_fn;
   }
 
@@ -124,11 +131,11 @@ end = struct
     | false -> Ok ()
     | true -> Error (`Duplicate_test_path (Fmt.to_to_string Test_name.pp tname))
 
-  let add t (tname, doc, speed_level, fn) =
+  let add t (tname, doc, condition, fn) =
     match check_path_is_unique t tname with
     | Error _ as e -> e
     | Ok () ->
-        let tests = { name = tname; speed_level; fn } :: t.tests in
+        let tests = { name = tname; condition; fn } :: t.tests in
         let filepaths = String_set.add (Test_name.file tname) t.filepaths in
         Hashtbl.add t.doc tname doc;
         Ok { t with tests; filepaths }
