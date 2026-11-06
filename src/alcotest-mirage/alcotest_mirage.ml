@@ -9,7 +9,7 @@ module Make (C : Mirage_clock.MCLOCK) = struct
     type file_descriptor = |
 
     let log_trap_supported = false
-    let prepare_log_trap ~root:_ = assert false
+    let prepare_log_trap ~root:_ ~suite:_ ~uuid:_ = assert false
     let file_exists _ = assert false
     let open_write_only _ = assert false
     let close : file_descriptor -> _ = function _ -> .
