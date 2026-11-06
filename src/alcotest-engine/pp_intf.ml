@@ -70,11 +70,11 @@ module type S = sig
   (** Wraps a formatter with `GNU-style quotation marks'. *)
 
   val with_surrounding_box : 'a Fmt.t -> 'a Fmt.t
-  (** Wraps a formatter with a Unicode box with width given by
-      {!_.stdout_columns}. Uses box-drawing characters from code page 437. *)
+  (** Wraps a formatter with a Unicode box with width given by [stdout_columns].
+      Uses box-drawing characters from code page 437. *)
 
   val horizontal_rule : _ Fmt.t
-  (** Horizontal rule of length {!_.stdout_columns}. Uses box-drawing characters
+  (** Horizontal rule of length [stdout_columns]. Uses box-drawing characters
       from code page 437. *)
 
   val user_warning : string -> unit
