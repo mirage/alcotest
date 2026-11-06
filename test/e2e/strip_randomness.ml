@@ -22,9 +22,9 @@ let build_context_replace =
         dir_sep;
         str "_tests";
         opt dir_sep;
-        group (rep (diff any (set "\\/")))
-        (* <test-dir>: May be a UUID or a suite name (symlink), depending on
-           whether or not we're running on Windows *);
+        opt (seq [ str "run"; dir_sep; rep (diff any (set "\\/")); dir_sep ]);
+        (* <test-dir>: the time and ID of the run, after the suite name *)
+        group (rep (diff any (set "\\/")));
         group (opt (seq [ dir_sep; rep any ]));
         rterm;
       ]

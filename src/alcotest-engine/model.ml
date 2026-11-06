@@ -26,9 +26,7 @@ end = struct
   let v ~name ~index =
     let name = Safe_string.v name in
     let file =
-      let name =
-        match Safe_string.to_string name with "" -> "" | n -> n ^ "."
-      in
+      let name = match Safe_string.file name with "" -> "" | n -> n ^ "." in
       Fmt.str "%s%03d.output" name index
     in
     { name; file; index }
@@ -82,7 +80,7 @@ module Suite (M : Monad.S) : sig
       with {!add}. *)
 
   val name : _ t -> string
-  (** An escaped form of the suite name. *)
+  (** The suite name as a file name, see {!Safe_string.file}. *)
 
   val pp_name : _ t Fmt.t
   (** Pretty-print the unescaped suite name. *)
@@ -123,7 +121,7 @@ end = struct
         let doc = Hashtbl.create 0 in
         Ok { name; tests; filepaths; doc }
 
-  let name { name; _ } = Safe_string.to_string name
+  let name { name; _ } = Safe_string.file name
   let pp_name ppf { name; _ } = Safe_string.pp ppf name
 
   let check_path_is_unique t tname =

@@ -50,19 +50,23 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     in
     inner ~retries:0
 
-  let prepare_log_trap ~root ~uuid ~name =
-    let dir = Filename.concat root uuid in
+  (* The time comes first, so that the runs of a suite are listed in order. *)
+  let prepare_log_trap ~root ~suite ~uuid =
+    let tm = Unix.gmtime (Unix.time ()) in
+    let name =
+      Fmt.str "%04d%02d%02d-%02d%02d%02d-%s" (tm.tm_year + 1900) (tm.tm_mon + 1)
+        tm.tm_mday tm.tm_hour tm.tm_min tm.tm_sec uuid
+    in
+    let dir = List.fold_left Filename.concat root [ "run"; suite; name ] in
     if not (Sys.file_exists dir) then (
       Unix.mkdir_p dir 0o770;
       if (Sys.unix || Sys.cygwin) && Unix.has_symlink () then (
-        let this_exe = Filename.concat root name
-        and latest = Filename.concat root "latest" in
-        unlink_if_exists this_exe;
+        let latest = Filename.concat root "latest" in
         unlink_if_exists latest;
-        symlink ~to_dir:true ~target:dir ~link_name:this_exe;
         symlink ~to_dir:true ~target:dir ~link_name:latest))
     else if not (Sys.is_directory dir) then
-      Fmt.failwith "exists but is not a directory: %S" dir
+      Fmt.failwith "exists but is not a directory: %S" dir;
+    dir
 
   let stdout_isatty () = Unix.(isatty stdout)
 

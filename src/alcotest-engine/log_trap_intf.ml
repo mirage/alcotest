@@ -8,15 +8,14 @@ open Model
 
     {[
       <log_capture_root_dir>
-      ├── E0965BF9/...
-      ├── 6DDB68D5/                 ;; ID for each test run
-      │   │
-      │   ├── alpha.000.output      ;; ... containing files for individual tests
-      │   ├── alpha.001.output      ;;     with format <test_name>.<index>.output.
-      │   └── beta.000.output
-      │
-      ├── latest/                   ;; Symlink to most recent UUID
-      └── <suite_name>/             ;; Symlink to most recent <suite_name> UUID
+      ├── run/
+      │   └── <suite_name>/
+      │       ├── 20261106-101455-E0965BF9/...
+      │       └── 20261106-101502-6DDB68D5/  ;; time and ID of each run
+      │           ├── alpha.000.output       ;; ... containing files for
+      │           ├── alpha.001.output       ;;     individual tests, named
+      │           └── beta.000.output        ;;     <test_name>.<index>.output.
+      └── latest/                            ;; Symlink to the most recent run
     ]} *)
 module type S = sig
   type 'a promise

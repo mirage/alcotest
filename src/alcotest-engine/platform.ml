@@ -33,12 +33,11 @@ module type S = sig
   (** Whether or not the test runner should trap test logs. The following
       functions are used iff this is set to [true]. *)
 
-  val prepare_log_trap : root:string -> uuid:string -> name:string -> unit
-  (** [prepare ~root ~uuid ~name] is called before test suite execution.
-
-      - [root] is the directory used for log capturing;
-      - [uuid] is the unique test execution ID;
-      - [name] is the suite name. *)
+  val prepare_log_trap : root:string -> suite:string -> uuid:string -> string
+  (** [prepare_log_trap ~root ~suite ~uuid] is called before test suite
+      execution. It creates a directory for the logs of the run of [suite] with
+      ID [uuid] under [root/run/suite], makes [root/latest] point to it if
+      possible, and returns it. *)
 
   type file_descriptor
 

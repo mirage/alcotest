@@ -10,6 +10,13 @@ val to_string : t -> string
 val to_unescaped_string : t -> string
 (** Get the raw, unescaped string initially passed to [v]. *)
 
+val file : t -> string
+(** [file t] is the escaped form of [t] as a file name on any system. A leading
+    dot is escaped, so that it is never [.] or [..] nor hidden, and so are a
+    trailing dot or space and the first character of a Windows device name such
+    as [NUL]. A name longer than 128 bytes is cut and ends with a digest of [t],
+    so that cut names stay distinct. *)
+
 val pp : t Fmt.t
 (** Pretty-print the unescaped string. *)
 
