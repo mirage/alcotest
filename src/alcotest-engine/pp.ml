@@ -241,7 +241,9 @@ struct
            r.errors)
           ppf ();
         if print_summary then (
-          if not config#verbose then pp_full_logs ppf log_dir;
+          (match log_dir with
+          | Some log_dir when not config#verbose -> pp_full_logs ppf log_dir
+          | _ -> ());
           pp_summary ppf r);
         Format.pp_close_box ppf ()
 

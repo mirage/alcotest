@@ -66,6 +66,7 @@ struct
 
   let log_dir { dir } = dir
   let output_fpath t tname = Filename.concat (log_dir t) (Test_name.file tname)
+  let run_dir = function Inactive -> None | Active t -> Some (log_dir t)
 
   let active_or_exn = function
     | Active t -> t

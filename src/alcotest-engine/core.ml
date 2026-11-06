@@ -277,7 +277,11 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     { suite; errors; max_label; config; run_id; log_trap; stdout; stderr }
 
   let pp_suite_results t =
-    let log_dir = Log_trap.pp_current_run_dir t.log_trap in
+    let log_dir =
+      Option.map
+        (fun _ -> Log_trap.pp_current_run_dir t.log_trap)
+        (Log_trap.run_dir t.log_trap)
+    in
     Pp.suite_results ~log_dir t.config
 
   let pp_event ~isatty ~prior_error ~tests_so_far t =
@@ -687,7 +691,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let config =
       Config.apply_defaults ~default_log_dir:(default_log_dir ()) config
     in
-    let t = empty ~config ~trap_logs:(not config#verbose) ~suite_name:name in
+    let trap_logs = P.log_trap_supported && not config#verbose in
+    let t = empty ~config ~trap_logs ~suite_name:name in
     let t = register_all t tl in
     let stdout' = Formatters.get_stdout () in
     let stderr' = Formatters.get_stderr () in

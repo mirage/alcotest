@@ -62,7 +62,7 @@ module type S = sig
     event Fmt.t
 
   val suite_results :
-    log_dir:theta ->
+    log_dir:theta option ->
     < verbose : bool ; show_errors : bool ; json : bool ; compact : bool ; .. > ->
     result Fmt.t
 

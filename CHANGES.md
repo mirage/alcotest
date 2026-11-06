@@ -1,5 +1,7 @@
 ### unreleased
 
+- Fix `alcotest-mirage`, which failed with `Assertion failed` in every run
+  without `--verbose` (#473, @samoht)
 - Keep the logs of each run in `run/<name>/<time>-<id>`, where `<name>` is the
   name given to `run`, so that the runs of each test executable are listed in
   order. `latest` still points to the last run (#472, @samoht)
