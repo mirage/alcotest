@@ -1,5 +1,16 @@
 ### unreleased
 
+- Keep the logs of each run in `run/<name>/<time>-<id>`, where `<name>` is the
+  name given to `run`, so that the runs of each test executable are listed in
+  order. `latest` still points to the last run (#472, @samoht)
+- Fix the link named after each test executable, which did not always point to
+  its last run. It is replaced by the `run/<name>` folder (#472, @samoht)
+- Fix a crash when the name of a `suite` or `group` is longer than a file name
+  can be (#472, @samoht)
+- Fix log files hidden when the name of a `suite` or `group` starts with a dot
+  (#472, @samoht)
+- Custom platforms: `prepare_log_trap` takes the name given to `run` and returns
+  the folder of the run (#472, @samoht)
 - Fix creating a log directory written with `/` on Windows, as in `-o a/b`, which
   failed with `ENOENT` (#470, @samoht)
 - Add `test ?tags name f` and `suite name cases`, to write `suite "a" [ test "b" f ]`
