@@ -1,11 +1,15 @@
 ### unreleased
 
+- Write a JUnit XML report of each run to `junit/<name>-<time>-<id>.xml` of the
+  log directory, with the `file` and `line` of each test, or of its failure
+  (#449, fixes #130, @samoht, report by @pbiggar)
+- `Platform.S` now requires `timestamp` and `write_file` (#449, @samoht)
 - Under dune, keep the output of tests in `_build/_tests` of the workspace,
   where dune does not delete it, rather than in `_build/default`. With #472, each
   `dune test` adds its runs to `_build/_tests/run/<name>/<time>-<id>`, which gives
   a local history of test results (#471, @samoht)
 - Fix `alcotest-mirage`, which failed with `Assertion failed` in every run
-  without `--verbose` (#473, @samoht)
+  without `--verbose` since 1.5.0 (#473, @samoht)
 - Keep the logs of each run in `run/<name>/<time>-<id>`, where `<name>` is the
   name given to `run`, so that the runs of each test executable are listed in
   order. `latest` still points to the last run (#472, @samoht)
