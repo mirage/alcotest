@@ -1,5 +1,9 @@
 ### unreleased
 
+- Under dune, keep the output of tests in `_build/_tests` of the workspace,
+  where dune does not delete it, rather than in `_build/default`. With #472, each
+  `dune test` adds its runs to `_build/_tests/run/<name>/<time>-<id>`, which gives
+  a local history of test results (#471, @samoht)
 - Fix `alcotest-mirage`, which failed with `Assertion failed` in every run
   without `--verbose` (#473, @samoht)
 - Keep the logs of each run in `run/<name>/<time>-<id>`, where `<name>` is the

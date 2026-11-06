@@ -1,4 +1,4 @@
 (tests
- (names test_log_dir_slash test_layout test_names)
+ (names test_log_dir_slash test_layout test_names test_log_root)
  (package alcotest)
  (libraries alcotest))

@@ -659,9 +659,15 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     if nothing_selected t matching then warn_nothing_selected t suite;
     result.failures
 
+  (* Under dune, the current directory is in [_build/default], where dune deletes
+     the files that no rule produced: the logs go to the workspace instead. *)
   let default_log_dir () =
-    let fname_concat l = List.fold_left Filename.concat "" l in
-    fname_concat [ P.getcwd (); "_build"; "_tests" ]
+    let root =
+      match Sys.getenv_opt "DUNE_SOURCEROOT" with
+      | Some root when not (Filename.is_relative root) -> root
+      | _ -> P.getcwd ()
+    in
+    List.fold_left Filename.concat root [ "_build"; "_tests" ]
 
   type 'a with_options = 'a Config.with_options
 
