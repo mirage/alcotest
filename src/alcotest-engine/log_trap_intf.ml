@@ -37,6 +37,9 @@ module type S = sig
       [tail] determines whether to show all lines in the captured log or just a
       suffix of them. *)
 
+  val run_dir : t -> string option
+  (** The folder of the current test run, if traces are recorded. *)
+
   val pp_current_run_dir : t -> Format.formatter -> unit
   (** Print the folder containing all captured traces for the current test run.
       Raises an exception if traces are not being recorded. *)
