@@ -72,6 +72,7 @@ module Suite (M : Monad.S) : sig
   type 'a test_case = {
     name : Test_name.t;
     condition : condition;
+    location : (string * int * int) option;
     fn : 'a test_fn;
   }
 
@@ -87,7 +88,7 @@ module Suite (M : Monad.S) : sig
 
   val add :
     'a t ->
-    Test_name.t * string * condition * 'a test_fn ->
+    Test_name.t * string * condition * (string * int * int) option * 'a test_fn ->
     ('a t, [ `Duplicate_test_path of string ]) result
 
   val tests : 'a t -> 'a test_case list
@@ -100,6 +101,7 @@ end = struct
   type 'a test_case = {
     name : Test_name.t;
     condition : condition;
+    location : (string * int * int) option;
     fn : 'a test_fn;
   }
 
@@ -129,11 +131,11 @@ end = struct
     | false -> Ok ()
     | true -> Error (`Duplicate_test_path (Fmt.to_to_string Test_name.pp tname))
 
-  let add t (tname, doc, condition, fn) =
+  let add t (tname, doc, condition, location, fn) =
     match check_path_is_unique t tname with
     | Error _ as e -> e
     | Ok () ->
-        let tests = { name = tname; condition; fn } :: t.tests in
+        let tests = { name = tname; condition; location; fn } :: t.tests in
         let filepaths = String_set.add (Test_name.file tname) t.filepaths in
         Hashtbl.add t.doc tname doc;
         Ok { t with tests; filepaths }

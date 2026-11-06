@@ -200,6 +200,83 @@ them. An executable whose tests are all disabled
 exits 0 with a warning naming the tags they use, and `list` shows each condition
 other than `` `Quick `` and `` `Slow ``.
 
+### JUnit XML reports
+
+Each run also writes a JUnit XML report, for CI systems such as GitLab, Jenkins
+or CircleCI. The reports of all runs are in the same directory:
+
+```
+<log directory>/junit/<name>-<time>-<id>.xml
+```
+
+`<name>` is the name given to `run`. The log directory is `_build/_tests` of the
+dune workspace under `dune test`, or the one given by `-o`.
+
+Each test has the `file` and `line` where it is defined, or where it failed. A
+test written as a plain tuple has no location: use `test` or `test_case`. The
+`<testsuite>` has the `file` that calls `run`.
+
+As in other JUnit reports, a test that fails a `check` or calls `fail` is a
+`<failure>`, and a test that raises any other exception, such as `failwith` or
+`assert false`, is an `<error>`. Both make the run fail; CI systems count them
+separately.
+
+The report is written at the end of the run, or when the process exits early, in
+which case it marks the running test as an `<error>`. Nothing is written if the
+process is killed.
+
+After `dune test`, the reports are in `_build/_tests/junit`. Upload them even
+when tests fail. A CI job usually starts from a clean `_build`;
+otherwise the pattern also matches the reports of earlier runs. A test that dune
+does not run again, because its result is cached, writes no report: use
+`dune test --force` to run them all.
+
+GitLab:
+
+```yaml
+test:
+  script:
+    - dune test
+  artifacts:
+    when: always
+    reports:
+      junit: _build/_tests/junit/*.xml
+```
+
+GitHub Actions, with [action-junit-report][]:
+
+```yaml
+- run: opam exec -- dune test
+- uses: mikepenz/action-junit-report@v6
+  if: success() || failure()
+  with:
+    report_paths: _build/_tests/junit/*.xml
+```
+
+CircleCI:
+
+```yaml
+- run: dune test
+- store_test_results:
+    path: _build/_tests/junit
+```
+
+Jenkins:
+
+```groovy
+junit '_build/_tests/junit/*.xml'
+```
+
+Locally, the reports of earlier runs stay in `_build/_tests/junit`, so a JUnit
+tool such as [junit2html][] can show how each test did across runs:
+
+```sh
+junit2html --report-matrix history.html _build/_tests/junit/*.xml
+```
+
+[action-junit-report]: https://github.com/mikepenz/action-junit-report
+[junit2html]: https://github.com/inorton/junit2html
+
 ### Passing custom options to the tests
 
 In most cases, the base tests are `unit -> unit` functions. However,

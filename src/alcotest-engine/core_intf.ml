@@ -140,7 +140,9 @@ module V1_types = struct
           [~index], the number of the test case.
         - [log_dir] (default ["$PWD/_build/_tests/"], or
           ["$DUNE_SOURCEROOT/_build/_tests/"] under dune). The directory in
-          which to log the output of the tests (if [verbose] is not set).
+          which to log the output of the tests. Each run also writes a JUnit XML
+          report in its [junit] directory, where a failed [check] or [fail] is a
+          [<failure>] and any other exception is an [<error>].
         - [bail] (default [false]). If true, stop running the tests after the
           first failure.
         - [record_backtrace] (default [true]). Enable backtrace recording before

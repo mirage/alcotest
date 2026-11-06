@@ -62,7 +62,7 @@ let is_internal_frame slot =
   || List.mem library [ "Stdlib"; "Base"; "Core" ]
   || List.exists
        (fun affix -> String.is_prefix ~affix library)
-       [ "Alcotest"; "Lwt"; "Async" ]
+       [ "Alcotest"; "Lwt"; "Async"; "Cmdliner" ]
 
 (* Reading locations from [Printexc] slots, rather than parsing backtrace text,
    follows [Test_fmt.bt_slot_loc] in B0_testing by Daniel Bünzli:
@@ -80,9 +80,10 @@ let first_location slots =
   | location :: _ -> Some location
   | [] -> None
 
-(* The first caller outside Alcotest, if the executable has debug information. *)
-let caller_location () =
-  match Printexc.(backtrace_slots (get_callstack 16)) with
+(* The first caller outside Alcotest within [depth] frames, if the executable
+   has debug information. *)
+let caller_location ~depth =
+  match Printexc.(backtrace_slots (get_callstack depth)) with
   | None -> None
   | Some slots -> first_location (Array.to_list slots)
 
@@ -202,7 +203,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   let test_case n t f =
     let case = (n, t, f) in
-    register_case_info case { location = caller_location (); children = None };
+    register_case_info case
+      { location = caller_location ~depth:16; children = None };
     case
 
   let test ?(tags = `Always) n f = test_case n tags f
@@ -241,6 +243,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     log_trap : Log_trap.t;
     stdout : Formatters.stdout;
     stderr : Formatters.stderr;
+    file : string option;
+        (** The source file that calls [run], for the JUnit report. *)
   }
 
   let gen_run_id =
@@ -274,7 +278,17 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     let stdout = config#stdout in
     let stderr = config#stderr in
-    { suite; errors; max_label; config; run_id; log_trap; stdout; stderr }
+    {
+      suite;
+      errors;
+      max_label;
+      config;
+      run_id;
+      log_trap;
+      stdout;
+      stderr;
+      file = None;
+    }
 
   let pp_suite_results t =
     let log_dir =
@@ -416,16 +430,105 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     (state, result)
 
-  let perform_tests t tests args =
+  (* [running] is the test that runs, which the report marks as stopped if the
+     process exits during it. *)
+  type junit = {
+    path : string option;
+    mutable report : Junit.t;
+    mutable running : (unit -> Junit.case) option;
+  }
+
+  let junit_write t j =
+    let report =
+      Option.fold ~none:j.report
+        ~some:(fun c -> Junit.add j.report (c ()))
+        j.running
+    in
+    try Option.iter (fun p -> P.write_file p (Junit.to_string report)) j.path
+    with Sys_error msg ->
+      Fmt.pf
+        (t.stderr :> Format.formatter)
+        "cannot write the JUnit report: %s@." msg
+
+  (* The reports of all runs are in one directory, so that tools can read them
+     together. The report of the run in [run/<name>/<time>-<id>] is
+     [junit/<name>-<time>-<id>.xml]. *)
+  let junit_file t dir =
+    let file =
+      Fmt.str "%s-%s.xml" (Suite.name t.suite) (Filename.basename dir)
+    in
+    List.fold_left Filename.concat t.config#log_dir [ "junit"; file ]
+
+  let junit_open t =
+    let path = Option.map (junit_file t) (Log_trap.run_dir t.log_trap) in
+    let suite = Fmt.to_to_string Suite.pp_name t.suite in
+    let report =
+      Junit.v ~suite ~file:t.file ~timestamp:(P.timestamp (P.time ()))
+    in
+    let j = { path; report; running = None } in
+    at_exit (fun () -> junit_write t j);
+    j
+
+  let junit_outcome (result : Run_result.t) : Junit.outcome =
+    (* The console prints this in a box too, which keeps the location on its own
+       line. *)
+    let text = Fmt.str "%a" (Fmt.vbox Pp.rresult_error) result in
+    match result with
+    | `Ok -> Passed
+    | `Skip -> Skipped
+    | `Error _ -> Failed { kind = "Check_error"; text }
+    | `Todo _ -> Failed { kind = "todo"; text }
+    | `Exn (_, kind, _, _) -> Errored { kind; text }
+
+  let junit_output t name (result : Run_result.t) =
+    if Run_result.is_failure result then
+      Log_trap.recover_logs ~tail:t.config#tail_errors t.log_trap name
+      |> Option.map (Fmt.str "%t")
+    else None
+
+  let junit_case t (test : _ Suite.test_case) result ~time : Junit.case =
+    let doc = Suite.doc_of_test_name t.suite test.name in
+    {
+      group = Safe_string.to_unescaped_string (Test_name.name test.name);
+      name =
+        (if String.is_suffix ~affix:"." doc then
+           String.with_range ~len:(String.length doc - 1) doc
+         else doc);
+      index = Test_name.index test.name;
+      time;
+      location = Option.map (fun (f, l, _) -> (f, l)) test.location;
+      outcome = junit_outcome result;
+      output = junit_output t test.name result;
+    }
+
+  let junit_running t j (test : _ Suite.test_case) =
+    match test.fn with
+    | `Skip -> ()
+    | `Run _ ->
+        let msg = "The process stopped while this test was running." in
+        let crash = `Exn (test.name, "crash", None, Fmt.(const string msg)) in
+        j.running <- Some (fun () -> junit_case t test crash ~time:0.)
+
+  let junit_finished t j test result ~time =
+    j.report <- Junit.add j.report (junit_case t test result ~time);
+    j.running <- None
+
+  let perform_tests t junit tests args =
     let currently_bailing acc =
       Option.is_some acc.first_error && t.config#bail
     in
     let+ state, test_results =
       M.List.fold_map_s
         (fun acc test ->
-          if currently_bailing acc then
-            M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip)
-          else perform_test t args acc test)
+          if currently_bailing acc then (
+            junit_finished t junit test `Skip ~time:0.;
+            M.return ({ acc with tests_so_far = succ acc.tests_so_far }, `Skip))
+          else (
+            junit_running t junit test;
+            let start_time = P.time () in
+            let+ acc, result = perform_test t args acc test in
+            junit_finished t junit test result ~time:(P.time () -. start_time);
+            (acc, result)))
         { tests_so_far = 0; first_error = None }
         tests
     in
@@ -492,7 +595,9 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     if t.config#record_backtrace then Printexc.record_backtrace true;
     let start_time = P.time () in
     let test = List.map (select_condition t) test in
-    let+ results = perform_tests t test args in
+    let junit = junit_open t in
+    let+ results = perform_tests t junit test args in
+    junit_write t junit;
     let time = P.time () -. start_time in
     let failures = List.length (List.filter Run_result.is_failure results) in
     let success = List.length (List.filter has_run results) - failures in
@@ -578,7 +683,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       else e.doc ^ "."
     in
     let test a = protect_test ~registered:e.location path e.run a in
-    match Suite.add t.suite (path, doc, e.tag, `Run test) with
+    match Suite.add t.suite (path, doc, e.tag, e.location, `Run test) with
     | Ok suite ->
         let max_label = max t.max_label (String.length_utf8 e.entry_name) in
         { t with suite; max_label }
@@ -697,9 +802,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let config =
       Config.apply_defaults ~default_log_dir:(default_log_dir ()) config
     in
-    let trap_logs = P.log_trap_supported && not config#verbose in
-    let t = empty ~config ~trap_logs ~suite_name:name in
-    let t = register_all t tl in
+    let t = empty ~config ~trap_logs:P.log_trap_supported ~suite_name:name in
+    (* Read now: with a concurrency monad, the report is opened later, from a
+       call stack that no longer reaches the caller. Async calls [run] from its
+       scheduler, about 30 frames away from the caller. *)
+    let file = Option.map (fun (f, _, _) -> f) (caller_location ~depth:64) in
+    let t = register_all { t with file } tl in
     let stdout' = Formatters.get_stdout () in
     let stderr' = Formatters.get_stderr () in
     Formatters.set_stdout t.stdout;
