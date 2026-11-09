@@ -433,7 +433,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
   (* [running] is the test that runs, which the report marks as stopped if the
      process exits during it. *)
   type junit = {
-    path : string option;
+    path : string;
     mutable report : Junit.t;
     mutable running : (unit -> Junit.case) option;
   }
@@ -444,7 +444,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
         ~some:(fun c -> Junit.add j.report (c ()))
         j.running
     in
-    try Option.iter (fun p -> P.write_file p (Junit.to_string report)) j.path
+    try P.write_file j.path (Junit.to_string report)
     with Sys_error msg ->
       Fmt.pf
         (t.stderr :> Format.formatter)
@@ -459,15 +459,19 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     List.fold_left Filename.concat t.config#log_dir [ "junit"; file ]
 
+  (* The report is opt-in, with [--junit] or [ALCOTEST_JUNIT], and needs the
+     directory of the run. *)
   let junit_open t =
-    let path = Option.map (junit_file t) (Log_trap.run_dir t.log_trap) in
-    let suite = Fmt.to_to_string Suite.pp_name t.suite in
-    let report =
-      Junit.v ~suite ~file:t.file ~timestamp:(P.timestamp (P.time ()))
-    in
-    let j = { path; report; running = None } in
-    at_exit (fun () -> junit_write t j);
-    j
+    match Log_trap.run_dir t.log_trap with
+    | Some dir when t.config#junit ->
+        let suite = Fmt.to_to_string Suite.pp_name t.suite in
+        let report =
+          Junit.v ~suite ~file:t.file ~timestamp:(P.timestamp (P.time ()))
+        in
+        let j = { path = junit_file t dir; report; running = None } in
+        at_exit (fun () -> junit_write t j);
+        Some j
+    | _ -> None
 
   let junit_outcome (result : Run_result.t) : Junit.outcome =
     (* The console prints this in a box too, which keeps the location on its own
@@ -501,17 +505,20 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       output = junit_output t test.name result;
     }
 
-  let junit_running t j (test : _ Suite.test_case) =
-    match test.fn with
-    | `Skip -> ()
-    | `Run _ ->
+  let junit_running t junit (test : _ Suite.test_case) =
+    match (junit, test.fn) with
+    | None, _ | _, `Skip -> ()
+    | Some j, `Run _ ->
         let msg = "The process stopped while this test was running." in
         let crash = `Exn (test.name, "crash", None, Fmt.(const string msg)) in
         j.running <- Some (fun () -> junit_case t test crash ~time:0.)
 
-  let junit_finished t j test result ~time =
-    j.report <- Junit.add j.report (junit_case t test result ~time);
-    j.running <- None
+  let junit_finished t junit test result ~time =
+    Option.iter
+      (fun j ->
+        j.report <- Junit.add j.report (junit_case t test result ~time);
+        j.running <- None)
+      junit
 
   let perform_tests t junit tests args =
     let currently_bailing acc =
@@ -597,7 +604,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let test = List.map (select_condition t) test in
     let junit = junit_open t in
     let+ results = perform_tests t junit test args in
-    junit_write t junit;
+    Option.iter (junit_write t) junit;
     let time = P.time () -. start_time in
     let failures = List.length (List.filter Run_result.is_failure results) in
     let success = List.length (List.filter has_run results) - failures in
@@ -802,7 +809,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     let config =
       Config.apply_defaults ~default_log_dir:(default_log_dir ()) config
     in
-    let t = empty ~config ~trap_logs:P.log_trap_supported ~suite_name:name in
+    (* [--verbose] does not capture the output of tests, but the JUnit report
+       is named after the directory of the run. *)
+    let trap_logs =
+      P.log_trap_supported && (config#junit || not config#verbose)
+    in
+    let t = empty ~config ~trap_logs ~suite_name:name in
     (* Read now: with a concurrency monad, the report is opened later, from a
        call stack that no longer reaches the caller. Async calls [run] from its
        scheduler, about 30 frames away from the caller. *)

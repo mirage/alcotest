@@ -202,8 +202,10 @@ other than `` `Quick `` and `` `Slow ``.
 
 ### JUnit XML reports
 
-Each run also writes a JUnit XML report, for CI systems such as GitLab, Jenkins
-or CircleCI. The reports of all runs are in the same directory:
+With `--junit`, or `ALCOTEST_JUNIT=1` in the environment, each run also writes a
+JUnit XML report, for CI systems such as GitLab, Jenkins or CircleCI. This is
+experimental: the location and contents of the report may change. The reports of
+all runs are in the same directory:
 
 ```
 <log directory>/junit/<name>-<time>-<id>.xml
@@ -225,16 +227,19 @@ The report is written at the end of the run, or when the process exits early, in
 which case it marks the running test as an `<error>`. Nothing is written if the
 process is killed.
 
-After `dune test`, the reports are in `_build/_tests/junit`. Upload them even
-when tests fail. A CI job usually starts from a clean `_build`;
+After `ALCOTEST_JUNIT=1 dune test`, the reports are in `_build/_tests/junit`.
+Upload them even when tests fail. A CI job usually starts from a clean `_build`;
 otherwise the pattern also matches the reports of earlier runs. A test that dune
 does not run again, because its result is cached, writes no report: use
-`dune test --force` to run them all.
+`dune test --force` to run them all. Dune does not run a test again when only
+`ALCOTEST_JUNIT` changes.
 
 GitLab:
 
 ```yaml
 test:
+  variables:
+    ALCOTEST_JUNIT: "1"
   script:
     - dune test
   artifacts:
@@ -247,6 +252,8 @@ GitHub Actions, with [action-junit-report][]:
 
 ```yaml
 - run: opam exec -- dune test
+  env:
+    ALCOTEST_JUNIT: 1
 - uses: mikepenz/action-junit-report@v6
   if: success() || failure()
   with:
@@ -256,7 +263,10 @@ GitHub Actions, with [action-junit-report][]:
 CircleCI:
 
 ```yaml
-- run: dune test
+- run:
+    command: dune test
+    environment:
+      ALCOTEST_JUNIT: 1
 - store_test_results:
     path: _build/_tests/junit
 ```
@@ -264,11 +274,13 @@ CircleCI:
 Jenkins:
 
 ```groovy
+// after a `dune test` with ALCOTEST_JUNIT=1 in its environment
 junit '_build/_tests/junit/*.xml'
 ```
 
-Locally, the reports of earlier runs stay in `_build/_tests/junit`, so a JUnit
-tool such as [junit2html][] can show how each test did across runs:
+Locally, with `ALCOTEST_JUNIT=1` exported, the reports of earlier runs stay in
+`_build/_tests/junit`, so a JUnit tool such as [junit2html][] can show how each
+test did across runs:
 
 ```sh
 junit2html --report-matrix history.html _build/_tests/junit/*.xml

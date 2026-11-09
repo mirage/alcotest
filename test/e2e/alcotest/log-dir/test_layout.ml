@@ -1,8 +1,9 @@
 (* Each run has its own directory in [run/<suite>], named after its start time
-   and ID, and its report in [junit], and [latest] points to the last run where
-   symbolic links are supported. *)
-let run root name =
-  Alcotest.run ~and_exit:false ~log_dir:root name
+   and ID, and [latest] points to the last run where symbolic links are
+   supported. With [--junit], its report is in [junit]. *)
+let run ?(junit = true) root name =
+  let argv = if junit then [| name; "--junit" |] else [| name |] in
+  Alcotest.run ~argv ~and_exit:false ~log_dir:root name
     [ ("t", [ Alcotest.test_case "ok" `Quick ignore ]) ]
 
 let entries dir = List.sort compare (Array.to_list (Sys.readdir dir))
@@ -36,4 +37,10 @@ let () =
           check ("report of " ^ name) true
             (List.mem (Printf.sprintf "%s-%s.xml" suite name) reports))
         (runs suite))
-    [ "alpha"; "beta" ]
+    [ "alpha"; "beta" ];
+  (* Without [--junit], there is no report. *)
+  let root = Filename.temp_file "alcotest" "" in
+  Sys.remove root;
+  run ~junit:false root "alpha";
+  let top = if Sys.win32 then [ "run" ] else [ "latest"; "run" ] in
+  check "no report" top (entries root)

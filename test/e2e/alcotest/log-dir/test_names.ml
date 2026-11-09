@@ -90,7 +90,8 @@ let test_suites () =
   let root = Filename.concat parent "logs" in
   List.iter
     (fun name ->
-      Alcotest.run ~and_exit:false ~log_dir:root name
+      Alcotest.run ~argv:[| name; "--junit" |] ~and_exit:false ~log_dir:root
+        name
         [ ("t", [ Alcotest.test_case "ok" `Quick ignore ]) ])
     names;
   check_outside parent;
@@ -115,7 +116,8 @@ let test_groups () =
   Sys.mkdir parent 0o755;
   let root = Filename.concat parent "logs" in
   let test name = (name, [ Alcotest.test_case "ok" `Quick ignore ]) in
-  Alcotest.run ~and_exit:false ~log_dir:root "groups" (List.map test names);
+  Alcotest.run ~argv:[| "groups"; "--junit" |] ~and_exit:false ~log_dir:root
+    "groups" (List.map test names);
   check_outside parent;
   match runs root with
   | [ dir ] ->

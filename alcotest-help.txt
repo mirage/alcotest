@@ -41,6 +41,10 @@ OPTIONS
        --json
            Display JSON for the results, to be used by a script.
 
+       --junit (absent ALCOTEST_JUNIT env)
+           Write a JUnit XML report of the run in junit/ of the log
+           directory.
+
        -o DIR
            Where to store the log files of the tests.
 
@@ -92,6 +96,9 @@ ENVIRONMENT
 
        ALCOTEST_COMPACT
            See option --compact.
+
+       ALCOTEST_JUNIT
+           See option --junit.
 
        ALCOTEST_QUICK_TESTS
            See option --quick-tests.

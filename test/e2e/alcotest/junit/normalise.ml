@@ -36,7 +36,7 @@ let () =
   in
   let command =
     Filename.quote_command ~stdout:Filename.null ~stderr:Filename.null exe
-      [ "-o"; dir ]
+      [ "--junit"; "-o"; dir ]
   in
   let (_ : int) = Sys.command command in
   let report =
