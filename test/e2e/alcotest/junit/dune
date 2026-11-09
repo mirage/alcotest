@@ -47,3 +47,29 @@
  (package alcotest)
  (action
   (diff long.expected long.processed)))
+
+; Windows has no [fork].
+
+(executable
+ (name test_fork)
+ (modules test_fork)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (libraries alcotest unix))
+
+(rule
+ (target fork.processed)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (with-stdout-to
+   %{target}
+   (run ./normalise.exe %{exe:test_fork.exe}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (enabled_if
+  (<> %{os_type} Win32))
+ (action
+  (diff fork.expected fork.processed)))
