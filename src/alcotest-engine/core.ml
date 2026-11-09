@@ -469,7 +469,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           Junit.v ~suite ~file:t.file ~timestamp:(P.timestamp (P.time ()))
         in
         let j = { path = junit_file t dir; report; running = None } in
-        at_exit (fun () -> junit_write t j);
+        (* The report of each run has its own path, so an existing one was
+           written at the end of the run. A process forked by a test inherits
+           this handler and must not replace that report when it exits. *)
+        at_exit (fun () -> if not (P.file_exists j.path) then junit_write t j);
         Some j
     | _ -> None
 
