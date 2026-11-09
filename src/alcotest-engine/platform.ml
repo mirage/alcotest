@@ -51,6 +51,17 @@ module type S = sig
 
   val home_directory : unit -> (string, [ `Msg of string ]) result
   (** [home_directory ()] is the current user's HOME directory, if it exists. *)
+
+  val timestamp : float -> string
+  (** [timestamp t] is [t], in seconds since the epoch, as a UTC ISO 8601 date
+      and time such as [2026-11-02T10:00:00Z]. *)
+
+  val write_file : string -> string -> unit
+  (** [write_file path contents] replaces the file at [path] with [contents],
+      creating its directory if needed. On a platform without a file system, it
+      does nothing.
+
+      @raise Sys_error if the file cannot be written. *)
 end
 
 module type MAKER = functor (M : Monad.S) -> S with type 'a promise := 'a M.t

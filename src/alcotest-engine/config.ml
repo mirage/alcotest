@@ -94,6 +94,16 @@ module Key = struct
       Arg.(value & flag & info [ "json" ] ~docv:"" ~doc)
   end)
 
+  module Junit = Flag (struct
+    let term =
+      let env = Cmd.Env.info "ALCOTEST_JUNIT" in
+      let doc =
+        "Write a JUnit XML report of the run in $(i,junit/) of the log \
+         directory."
+      in
+      Arg.(value & flag & info ~env [ "junit" ] ~docv:"" ~doc)
+  end)
+
   module Show_errors = Flag (struct
     let term =
       let env = Cmd.Env.info "ALCOTEST_SHOW_ERRORS" in
@@ -258,6 +268,7 @@ module User = struct
     strict_tags : bool option;
     show_errors : Show_errors.t option;
     json : Json.t option;
+    junit : Junit.t option;
     filter : Filter.t option;
     (* TODO: set Log_dir default internally *)
     log_dir : Log_dir.t;
@@ -290,6 +301,7 @@ module User = struct
       strict_tags = merge_on (fun t -> t.strict_tags);
       show_errors = merge_on (fun t -> t.show_errors);
       json = merge_on (fun t -> t.json);
+      junit = merge_on (fun t -> t.junit);
       filter = merge_on (fun t -> t.filter);
       log_dir = merge_on (fun t -> t.log_dir);
       bail = merge_on (fun t -> t.bail);
@@ -307,6 +319,7 @@ module User = struct
     and+ quick_only = Quick_only.term
     and+ tags, strict_tags = Tags.term
     and+ json = Json.term
+    and+ junit = Junit.term
     and+ filter = Filter.term
     and+ log_dir = Log_dir.term
     and+ bail = Bail.term in
@@ -320,6 +333,7 @@ module User = struct
       tags;
       strict_tags;
       json;
+      junit;
       filter;
       log_dir;
       bail;
@@ -346,6 +360,7 @@ module User = struct
         strict_tags = None;
         show_errors;
         json;
+        junit = None;
         filter;
         log_dir;
         bail;
@@ -377,6 +392,7 @@ let apply_defaults ~default_log_dir : User.t -> t =
        strict_tags;
        show_errors;
        json;
+       junit;
        filter;
        log_dir;
        bail;
@@ -402,6 +418,7 @@ let apply_defaults ~default_log_dir : User.t -> t =
       | None, _ -> true
 
     method json = Option.value ~default:Json.default json
+    method junit = Option.value ~default:Junit.default junit
     method filter = filter
     method log_dir = Option.value ~default:default_log_dir log_dir
     method bail = Option.value ~default:Bail.default bail

@@ -70,7 +70,9 @@ let check_outside parent =
 
 (* The directories of the runs of each suite. *)
 let runs root =
-  let top = if Sys.win32 then [ "run" ] else [ "latest"; "run" ] in
+  let top =
+    if Sys.win32 then [ "junit"; "run" ] else [ "junit"; "latest"; "run" ]
+  in
   if entries root <> top then
     fail "unexpected entries: %s" (String.concat ", " (entries root));
   let run = Filename.concat root "run" in
@@ -88,7 +90,8 @@ let test_suites () =
   let root = Filename.concat parent "logs" in
   List.iter
     (fun name ->
-      Alcotest.run ~and_exit:false ~log_dir:root name
+      Alcotest.run ~argv:[| name; "--junit" |] ~and_exit:false ~log_dir:root
+        name
         [ ("t", [ Alcotest.test_case "ok" `Quick ignore ]) ])
     names;
   check_outside parent;
@@ -97,7 +100,14 @@ let test_suites () =
     fail "expected %d runs, found %d" (List.length names) (List.length runs);
   List.iter
     (fun dir ->
-      if entries dir <> [ "t.000.output" ] then fail "unexpected run %S" dir)
+      if entries dir <> [ "t.000.output" ] then fail "unexpected run %S" dir;
+      let report =
+        Printf.sprintf "%s-%s.xml"
+          (Filename.basename (Filename.dirname dir))
+          (Filename.basename dir)
+      in
+      if not (List.mem report (entries (Filename.concat root "junit"))) then
+        fail "no report %S" report)
     runs
 
 let test_groups () =
@@ -106,7 +116,8 @@ let test_groups () =
   Sys.mkdir parent 0o755;
   let root = Filename.concat parent "logs" in
   let test name = (name, [ Alcotest.test_case "ok" `Quick ignore ]) in
-  Alcotest.run ~and_exit:false ~log_dir:root "groups" (List.map test names);
+  Alcotest.run ~argv:[| "groups"; "--junit" |] ~and_exit:false ~log_dir:root
+    "groups" (List.map test names);
   check_outside parent;
   match runs root with
   | [ dir ] ->

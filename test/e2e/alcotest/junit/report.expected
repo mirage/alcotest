@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites time="<time>"><testsuite name="junit" file="test/e2e/alcotest/junit/test_junit.ml" tests="14" failures="3" errors="1" time="<time>" timestamp="<date>"><testcase name="pass" classname="junit.outcomes" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="23"/>
+<testcase name="skip" classname="junit.outcomes" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="24"><skipped/>
+</testcase>
+<testcase name="not selected" classname="junit.outcomes" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="25"><skipped/>
+</testcase>
+<testcase name="check" classname="junit.outcomes" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="6"><failure message="FAIL different" type="Check_error">File "test/e2e/alcotest/junit/test_junit.ml", line 6, character 31:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+</failure>
+</testcase>
+<testcase name="output" classname="junit.outcomes" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="27"><failure message="FAIL boom" type="Check_error">File "test/e2e/alcotest/junit/test_junit.ml", line 27, character 10:
+FAIL boom
+</failure>
+<system-out>a line of output</system-out>
+</testcase>
+<testcase name="exception" classname="junit.outcomes" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="28"><error message="[failure] raised" type="failure">File "test/e2e/alcotest/junit/test_junit.ml", line 28, character 10:
+[failure] raised</error>
+</testcase>
+<testcase name="same" classname="junit.names" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="32"/>
+<testcase name="same #1" classname="junit.names" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="33"/>
+<testcase name="" classname="junit.names" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="34"/>
+<testcase name="a&amp;b&lt;c&gt;&quot;d'&#9;e" classname="junit.names" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="35"/>
+<testcase name="control � and invalid �" classname="junit.names" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="36"/>
+<testcase name="grouped" classname="junit.names.nested.deep" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="37"/>
+<testcase name="tuple" classname="junit.names" time="<time>"/>
+<testcase name="]]&gt;&lt;![CDATA[ &amp;#0; &amp;#xD800; ���" classname="junit.&lt;/testsuite&gt;&lt;x a=&quot;&amp;bogus;&quot;&gt;" time="<time>" file="test/e2e/alcotest/junit/test_junit.ml" line="48"><failure message="FAIL &lt;/failure&gt;&lt;error&gt;&amp;lt;&amp;#1;�" type="Check_error">File "test/e2e/alcotest/junit/test_junit.ml", line 48, character 10:
+FAIL &lt;/failure&gt;&lt;error&gt;&amp;lt;&amp;#1;�
+</failure>
+<system-out>&lt;/system-out&gt;&lt;/testcase&gt;&lt;testcase name="x"/&gt;&amp;amp; &amp;bogus; &amp;#0; ]]&gt; �� �( ���</system-out>
+</testcase>
+</testsuite>
+</testsuites>

@@ -19,6 +19,7 @@ module Types = struct
     ; strict_tags : bool
     ; show_errors : bool
     ; json : bool
+    ; junit : bool
     ; filter : filter option
     ; log_dir : string
     ; bail : bool

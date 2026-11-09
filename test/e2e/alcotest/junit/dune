@@ -1,0 +1,49 @@
+(executables
+ (names test_junit test_crash test_long)
+ (modules test_junit test_crash test_long)
+ (libraries alcotest))
+
+(executable
+ (name normalise)
+ (modules normalise)
+ (libraries re))
+
+; The location of failures is off in the other e2e tests.
+
+(env
+ (_
+  (env-vars
+   (ALCOTEST_SOURCE_CODE_POSITION true))))
+
+(rule
+ (with-stdout-to
+  report.processed
+  (run ./normalise.exe %{exe:test_junit.exe})))
+
+(rule
+ (with-stdout-to
+  crash.processed
+  (run ./normalise.exe %{exe:test_crash.exe})))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff report.expected report.processed)))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff crash.expected crash.processed)))
+
+(rule
+ (with-stdout-to
+  long.processed
+  (run ./normalise.exe %{exe:test_long.exe} --sizes)))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff long.expected long.processed)))
