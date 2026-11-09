@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites time="<time>"><testsuite name="fork" file="test/e2e/alcotest/junit/test_fork.ml" tests="1" failures="0" errors="1" time="<time>" timestamp="<date>"><testcase name="fork" classname="fork.t" time="<time>" file="test/e2e/alcotest/junit/test_fork.ml" line="16"><error message="[crash] The process stopped while this test was running." type="crash">[crash] The process stopped while this test was running.</error>
-</testcase>
+<testsuites time="<time>"><testsuite name="fork" file="test/e2e/alcotest/junit/test_fork.ml" tests="1" failures="0" errors="0" time="<time>" timestamp="<date>"><testcase name="fork" classname="fork.t" time="<time>" file="test/e2e/alcotest/junit/test_fork.ml" line="16"/>
 </testsuite>
 </testsuites>
