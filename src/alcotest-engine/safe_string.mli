@@ -21,7 +21,7 @@ val pp : t Fmt.t
 (** Pretty-print the unescaped string. *)
 
 val length : t -> int
-(** The approximate number of terminal columns consumed by [pp_name]. *)
+(** The approximate number of terminal columns consumed by [pp]. *)
 
 val equal : t -> t -> bool
 val compare : t -> t -> int

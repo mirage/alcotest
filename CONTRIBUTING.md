@@ -42,14 +42,15 @@ The high-level project structure is as follows:
 │   │   ├── cli.ml            # Extends `core.ml` with a command-line API
 │   │   │
 │   │   ├── pp.ml             # Pretty-printers for Alcotest output
-│   │   ├── test.ml           # Combinators for test assertions (with `Alcotest.check`)
-│   │   └── utils.ml          # Standard-library extension
+│   │   └── test.ml           # Combinators for test assertions (with `Alcotest.check`)
 │   │
 │   │                         # Specific backends:
 │   ├── alcotest/             # - Unix-specific API (compatible with js_of_ocaml)
 │   ├── alcotest-async/       # - Extends `alcotest/` for test-suites using Async concurrency
 │   ├── alcotest-lwt/         # - Extends `alcotest/` for test-suites using Lwt concurrency
-│   └── alcotest-mirage/      # - MirageOS-specific API
+│   ├── alcotest-mirage/      # - MirageOS-specific API
+│   │
+│   └── alcotest-stdlib-ext/  # Standard-library extension
 │
 ├── test/                     # Project tests (see '§ Expect tests' below)
 │
@@ -106,8 +107,8 @@ When running an expect test, these portions of the output are sanitized by
 the `.expected` file, resulting in files with portable placeholders:
 
 ```
-The full test results are available in `<build-context>/_build/_tests/<uuid>`.
-Test Successful in <test-duration>s. 4 tests run.
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 1 test run.
 ```
 
 If your change adds non-determinism to the Alcotest output, you may need to

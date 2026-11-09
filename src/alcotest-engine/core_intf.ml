@@ -23,7 +23,7 @@ module V1_types = struct
     (** The return type of each test case run by Alcotest. For the standard
         {!Alcotest} module, [return = unit]. The concurrent backends
         [Alcotest_lwt] and [Alcotest_async] set [return = unit Lwt.t] and
-        [return = Async_kernel.Deferred.t] respectively. *)
+        [return = unit Async.Deferred.t] respectively. *)
 
     type tag =
       [ `Quick
@@ -131,9 +131,10 @@ module V1_types = struct
         - [compact] (default [false]). Compact the output of the tests.
         - [tail_errors] (default unlimited). Show only the last N lines of
           output of failed tests.
-        - [quick_only] (default [false]). Run the tests tagged [quick], in
-          addition to those selected by [--tags].
-        - [show_errors] (default [false]). Display the test errors.
+        - [quick_only] (default [false]). Do not run the [`Slow] tests, unless
+          [--tags] selects them.
+        - [show_errors] (default [false], or [true] when a CI is detected).
+          Display the test errors.
         - [json] (default [false]). Print test results in a JSON-compatible
           format.
         - [filter]. Filter tests according to [~name], the name of the test, and
@@ -181,8 +182,8 @@ module type Core = sig
     (** Functor for building a tester that sequences tests of type
         [('a -> unit M.t)] within a given concurrency monad [M.t]. The [run] and
         [run_with_args] functions must be scheduled in a global event loop.
-        Intended for use by the {!Alcotest_lwt} and {!Alcotest_async} backends.
-    *)
+        Backends such as [Alcotest_lwt] and [Alcotest_async] use it through
+        [Cli.V1.Make], which adds the command line. *)
 
     exception Skip
   end
