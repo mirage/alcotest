@@ -1,4 +1,4 @@
-### unreleased
+### 1.10.0 (09/11/2026)
 
 - Experimental: with `--junit` or `ALCOTEST_JUNIT=1`, write a JUnit XML report
   of each run to `junit/<name>-<time>-<id>.xml` of the log directory, with the
