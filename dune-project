@@ -25,6 +25,7 @@ tests to run.
 ")
  (depends
   (ocaml (>= 4.14))
+  base-unix
   (fmt (>= 0.8.7))
   astring
   (cmdliner (>= 1.2.0))
@@ -61,6 +62,7 @@ tests to run.
  (depends
   (re :with-test)
   (cmdliner (and :with-test (>= 1.2.0)))
+  base-unix
   fmt
   (ocaml (>= 4.14.0))
   (alcotest (= :version))
@@ -75,6 +77,7 @@ tests to run.
  (depends
   (re :with-test)
   (cmdliner (and :with-test (>= 1.2.0)))
+  (base-unix :with-test)
   fmt
   (ocaml (>= 4.14.0))
   (alcotest (= :version))

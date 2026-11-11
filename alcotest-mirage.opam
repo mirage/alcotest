@@ -12,6 +12,7 @@ depends: [
   "dune" {>= "3.17"}
   "re" {with-test}
   "cmdliner" {with-test & >= "1.2.0"}
+  "base-unix" {with-test}
   "fmt"
   "ocaml" {>= "4.14.0"}
   "alcotest" {= version}

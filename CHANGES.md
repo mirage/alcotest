@@ -1,3 +1,8 @@
+### unreleased
+
+- Declare `base-unix`, which `alcotest` and `alcotest-lwt` need at runtime and
+  the tests of `alcotest-mirage` need (#486, @samoht)
+
 ### 1.10.0 (09/11/2026)
 
 - Experimental: with `--junit` or `ALCOTEST_JUNIT=1`, write a JUnit XML report
