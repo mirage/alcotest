@@ -12,7 +12,7 @@ let () =
   in
   Unix.putenv "CAML_LD_LIBRARY_PATH" paths;
   let child =
-    Unix.create_process test [||] Unix.stdin Unix.stdout Unix.stderr
+    Unix.create_process test [| test |] Unix.stdin Unix.stdout Unix.stderr
   in
   match Unix.waitpid [ WUNTRACED ] child with
   | _, WEXITED c -> exit c
