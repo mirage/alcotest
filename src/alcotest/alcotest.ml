@@ -40,30 +40,14 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
 
   let getcwd = Sys.getcwd
 
-  let unlink_if_exists file =
-    let rec inner ~retries =
-      try Unix.unlink file with
-      | Unix.Unix_error (Unix.ENOENT, _, _) -> ()
-      | Unix.Unix_error (Unix.EINTR, _, _) ->
-          if retries > 5 then
-            Fmt.failwith "Failed %d times to unlink file %s (Unix.EINTR)."
-              retries file
-          else inner ~retries:(retries + 1)
-    in
-    inner ~retries:0
-
-  let symlink ~to_dir ~target ~link_name =
-    let rec inner ~retries =
-      try Unix.symlink ~to_dir target link_name
-      with Unix.Unix_error (Unix.EEXIST, _, _) ->
-        if retries > 5 then
-          Fmt.failwith "Failed %d times to create symlink %s (Unix.EEXIST)"
-            retries target
-        else (
-          unlink_if_exists link_name;
-          inner ~retries:(retries + 1))
-    in
-    inner ~retries:0
+  (* Test executables running in parallel share [root], so [latest] is
+     replaced with a rename, which is atomic, and never removed. [target] is
+     relative to [root]. *)
+  let link_latest ~root ~uuid target =
+    let latest = Filename.concat root "latest" in
+    let tmp = latest ^ "." ^ uuid in
+    Unix.symlink ~to_dir:true target tmp;
+    Unix.rename tmp latest
 
   (* The time comes first, so that the runs of a suite are listed in order. *)
   let prepare_log_trap ~root ~suite ~uuid =
@@ -72,13 +56,12 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
       Fmt.str "%04d%02d%02d-%02d%02d%02d-%s" (tm.tm_year + 1900) (tm.tm_mon + 1)
         tm.tm_mday tm.tm_hour tm.tm_min tm.tm_sec uuid
     in
-    let dir = List.fold_left Filename.concat root [ "run"; suite; name ] in
+    let target = List.fold_left Filename.concat "run" [ suite; name ] in
+    let dir = Filename.concat root target in
     if not (Sys.file_exists dir) then (
       Unix.mkdir_p dir 0o770;
-      if (Sys.unix || Sys.cygwin) && Unix.has_symlink () then (
-        let latest = Filename.concat root "latest" in
-        unlink_if_exists latest;
-        symlink ~to_dir:true ~target:dir ~link_name:latest))
+      if (Sys.unix || Sys.cygwin) && Unix.has_symlink () then
+        link_latest ~root ~uuid target)
     else if not (Sys.is_directory dir) then
       Fmt.failwith "exists but is not a directory: %S" dir;
     dir
