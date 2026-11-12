@@ -1,0 +1,20 @@
+Testing `test/e2e/alcotest/source_code_position/test_putenv.ml'.
+This run has ID `<uuid>'.
+
+  [FAIL]        putenv          0   check.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        putenv          0   check.                                     │
+└──────────────────────────────────────────────────────────────────────────────┘
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/putenv.000.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 1 test run.
