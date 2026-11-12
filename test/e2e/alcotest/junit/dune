@@ -6,7 +6,7 @@
 (executable
  (name normalise)
  (modules normalise)
- (libraries re))
+ (libraries re unix))
 
 ; The location of failures is off in the other e2e tests.
 
