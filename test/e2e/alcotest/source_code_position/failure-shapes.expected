@@ -110,7 +110,7 @@ Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.006.output'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        shapes          7   check in scheduler.                        │
 └──────────────────────────────────────────────────────────────────────────────┘
-File "test/e2e/alcotest/source_code_position/eio_sim.ml", line 3, character 52:
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 6, character 2:
 FAIL different
 
    Expected: `1'
