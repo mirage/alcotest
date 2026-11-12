@@ -102,8 +102,8 @@ let rec test_body_location acc = function
       in
       test_body_location acc slots
 
-let backtrace_location () =
-  match Printexc.(backtrace_slots (get_raw_backtrace ())) with
+let backtrace_location bt =
+  match Printexc.backtrace_slots bt with
   | None -> None
   | Some slots ->
       test_body_location None (drop_alcotest_frames (Array.to_list slots))
@@ -145,13 +145,12 @@ let case_children case =
 (* A given position is printed first, see [Test.pp_location]. *)
 let has_location pp = String.is_prefix ~affix:"File \"" (Fmt.str "%a" pp ())
 
-(* See the documentation of this variable in [Cli]. It is read once, at startup:
-   [Sys.getenv] raises when it is unset, which would overwrite the backtrace of
-   the failure being reported. *)
-let guess_location =
-  match Sys.getenv "ALCOTEST_SOURCE_CODE_POSITION" with
-  | "" | "false" | "no" | "n" | "0" -> false
-  | _ | (exception Not_found) -> true
+(* See the documentation of this variable in [Cli]. It is read at each failure,
+   so that a program can set it before calling [run]. *)
+let guess_location () =
+  match Sys.getenv_opt "ALCOTEST_SOURCE_CODE_POSITION" with
+  | Some ("" | "false" | "no" | "n" | "0") -> false
+  | _ -> true
 
 (* A failed check already shows where it failed if given a position. *)
 let with_location location pp =
@@ -348,23 +347,30 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | `Ok | `Error _ | `Exn _ -> true
     | `Skip | `Todo _ -> false
 
-  let bt () = match Printexc.get_backtrace () with "" -> "" | s -> "\n" ^ s
+  let lines_of_bt bt =
+    match Printexc.raw_backtrace_to_string bt with "" -> "" | s -> "\n" ^ s
 
-  let exn path name location pp =
-    `Exn (path, name, location, Fmt.(pp ++ const lines (bt ())))
-
+  (* Read the backtrace before [guess_location]: up to OCaml 5.3,
+     [Sys.getenv_opt] raises and catches [Not_found], which replaces the
+     backtrace. *)
   let result_of_exn ~registered path e =
+    let bt = Printexc.get_raw_backtrace () in
     let location =
-      if guess_location then Option.(backtrace_location () || registered)
+      if guess_location () then Option.(backtrace_location bt || registered)
       else None
+    in
+    let exn name pp =
+      `Exn (path, name, location, Fmt.(pp ++ const lines (lines_of_bt bt)))
     in
     match e with
     | Check_error err ->
-        `Error (path, with_location location Fmt.(err ++ const string (bt ())))
+        `Error
+          ( path,
+            with_location location Fmt.(err ++ const string (lines_of_bt bt)) )
     | Skip -> `Skip
-    | Failure s -> exn path "failure" location Fmt.(const string s)
-    | Invalid_argument s -> exn path "invalid" location Fmt.(const string s)
-    | e -> exn path "exception" location Fmt.(const exn e)
+    | Failure s -> exn "failure" Fmt.(const string s)
+    | Invalid_argument s -> exn "invalid" Fmt.(const string s)
+    | e -> exn "exception" Fmt.(const exn e)
 
   let protect_test ~registered path (f : 'a run) : 'a -> Run_result.t M.t =
    fun args ->

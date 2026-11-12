@@ -163,3 +163,33 @@
  (package alcotest)
  (action
   (diff without-position.expected without-position.processed)))
+
+(executable
+ (name test_putenv)
+ (libraries alcotest unix)
+ (modules test_putenv))
+
+(rule
+ (target putenv.actual)
+ (action
+  (setenv
+   ALCOTEST_SOURCE_CODE_POSITION
+   true
+   (with-accepted-exit-codes
+    (or 1 2 124 125)
+    (with-outputs-to
+     %{target}
+     (run %{dep:test_putenv.exe}))))))
+
+(rule
+ (target putenv.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:putenv.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff putenv.expected putenv.processed)))

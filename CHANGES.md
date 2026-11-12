@@ -4,6 +4,8 @@
   a dangling `latest` link (#479, @samoht, fixes #471 and #472 in 1.10.0)
 - Fix tests failing with `EACCES` on a read-only source tree or with
   `DUNE_BUILD_DIR` (#480, @samoht, fixes #471 in 1.10.0)
+- Honour `ALCOTEST_SOURCE_CODE_POSITION` when set by the program before `run`
+  (#481, @samoht, fixes #451 in 1.10.0)
 
 ### 1.10.0 (09/11/2026)
 
