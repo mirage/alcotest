@@ -83,7 +83,8 @@
   hold in a context set by a new `--tags` option or `ALCOTEST_TAGS`, as with Go
   build tags. A new `tags` subcommand lists them. `speed_level` is now an alias
   of the new `tag` type, which breaks code matching on it exhaustively or
-  restating it as `` [ `Quick | `Slow ] ``
+  restating it as `` [ `Quick | `Slow ] ``. A term passed to `run_with_args`
+  that defines `--tags`, or `--junit` from #449, fails at startup
   (#448, fixes #124, #151 and #316, @samoht, report by @hannesm and @arvidj)
 - Preserve absolute log directories: `mkdir_p` turned `/foo` into `//foo`, which
   fails with `EROFS` on Cygwin (#405, fixes #404, @bbonf, review by @MisterDA
