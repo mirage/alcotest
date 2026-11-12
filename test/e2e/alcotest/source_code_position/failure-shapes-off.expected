@@ -9,6 +9,7 @@ This run has ID `<uuid>'.
   [SKIP]        shapes          5   raise in body.
   [FAIL]        shapes          6   given position.
   [SKIP]        shapes          7   check in scheduler.
+  [SKIP]        shapes          8   check in iterated helper.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        shapes          0   check in body.                             │
@@ -27,7 +28,7 @@ Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.000.output'.
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        shapes          6   given position.                            │
 └──────────────────────────────────────────────────────────────────────────────┘
-File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 26, character 22:
+File "test/e2e/alcotest/source_code_position/test_failure_shapes.ml", line 34, character 22:
 FAIL different
 
    Expected: `1'
