@@ -21,9 +21,13 @@
  (modules test_source_code_position)
  (modes exe byte))
 
+(library
+ (name eio_sim)
+ (modules eio_sim))
+
 (executable
  (name test_failure_shapes)
- (libraries alcotest)
+ (libraries alcotest eio_sim)
  (modules test_failure_shapes)
  (modes exe byte))
 

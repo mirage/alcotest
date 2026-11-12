@@ -38,5 +38,7 @@ let () =
           Alcotest.test_case "raise as tail call" `Quick raise_as_tail_call;
           Alcotest.test_case "raise in body" `Quick raise_in_body;
           Alcotest.test_case "given position" `Quick given_position;
+          Alcotest.test_case "check in scheduler" `Quick (fun () ->
+              Eio_sim.run check_in_body);
         ] );
     ]

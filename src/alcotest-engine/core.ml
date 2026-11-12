@@ -62,7 +62,7 @@ let is_internal_frame slot =
   || List.mem library [ "Stdlib"; "Base"; "Core" ]
   || List.exists
        (fun affix -> String.is_prefix ~affix library)
-       [ "Alcotest"; "Lwt"; "Async"; "Cmdliner" ]
+       [ "Alcotest"; "Lwt"; "Async"; "Eio"; "Cmdliner" ]
 
 (* Reading locations from [Printexc] slots, rather than parsing backtrace text,
    follows [Test_fmt.bt_slot_loc] in B0_testing by Daniel Bünzli:

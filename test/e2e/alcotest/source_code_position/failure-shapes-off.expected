@@ -8,6 +8,7 @@ This run has ID `<uuid>'.
   [SKIP]        shapes          4   raise as tail call.
   [SKIP]        shapes          5   raise in body.
   [FAIL]        shapes          6   given position.
+  [SKIP]        shapes          7   check in scheduler.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        shapes          0   check in body.                             │
