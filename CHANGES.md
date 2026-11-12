@@ -1,3 +1,8 @@
+### unreleased
+
+- Fix parallel test runs failing with `Failed 6 times to create symlink`, and
+  a dangling `latest` link (#479, @samoht, fixes #471 and #472 in 1.10.0)
+
 ### 1.10.0 (09/11/2026)
 
 - Experimental: with `--junit` or `ALCOTEST_JUNIT=1`, write a JUnit XML report
