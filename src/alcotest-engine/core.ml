@@ -774,15 +774,27 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     if nothing_selected t matching then warn_nothing_selected t suite;
     result.failures
 
-  (* Under dune, the current directory is in [_build/default], where dune deletes
-     the files that no rule produced: the logs go to the workspace instead. *)
+  (* Dune deletes unknown files from its build context ([_build/default]),
+     so under dune the logs go next to it, in [_build/_tests]. *)
   let default_log_dir () =
-    let root =
-      match Sys.getenv_opt "DUNE_SOURCEROOT" with
-      | Some root when not (Filename.is_relative root) -> root
-      | _ -> P.getcwd ()
+    let cwd = P.getcwd () in
+    (* Windows paths are case-insensitive, and [INSIDE_DUNE] may mix [/] and
+       [\\]. *)
+    let normalise path =
+      if Sys.win32 then
+        String.Ascii.lowercase
+          (String.map (function '/' -> '\\' | c -> c) path)
+      else path
     in
-    List.fold_left Filename.concat root [ "_build"; "_tests" ]
+    let in_context context =
+      let cwd = normalise cwd and context = normalise context in
+      cwd = context || String.is_prefix ~affix:(context ^ Filename.dir_sep) cwd
+    in
+    match Sys.getenv_opt "INSIDE_DUNE" with
+    | Some context
+      when (not (Filename.is_relative context)) && in_context context ->
+        Filename.concat (Filename.dirname context) "_tests"
+    | _ -> List.fold_left Filename.concat cwd [ "_build"; "_tests" ]
 
   type 'a with_options = 'a Config.with_options
 
