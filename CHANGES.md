@@ -6,6 +6,8 @@
   `DUNE_BUILD_DIR` (#480, @samoht, fixes #471 in 1.10.0)
 - Honour `ALCOTEST_SOURCE_CODE_POSITION` when set by the program before `run`
   (#481, @samoht, fixes #451 in 1.10.0)
+- Fix slow runs of suites with many cases of the same name (#482, @samoht,
+  fixes #451 in 1.10.0)
 
 ### 1.10.0 (09/11/2026)
 

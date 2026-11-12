@@ -124,9 +124,6 @@ let case_infos = Atomic.make Case_infos.empty
 let cases_named name infos =
   Option.value ~default:[] (Case_infos.find_opt name infos)
 
-let find_case_info ((name, _, _) as case) =
-  List.assq_opt (Obj.repr case) (cases_named name (Atomic.get case_infos))
-
 let rec register_case_info ((name, _, _) as case) info =
   let infos = Atomic.get case_infos in
   let cases = (Obj.repr case, info) :: cases_named name infos in
@@ -136,11 +133,45 @@ let rec register_case_info ((name, _, _) as case) info =
          (Case_infos.add name cases infos))
   then register_case_info case info
 
-let case_location case =
-  match find_case_info case with None -> None | Some i -> i.location
+(* A suite looks up its cases in creation order, or in reverse order for a
+   list literal, so [find] tries the neighbours of the last match before
+   scanning. This keeps suites with many cases of the same name linear. *)
+module Case_lookup = struct
+  type t = {
+    infos : (Obj.t * case_info) list Case_infos.t;
+    named : (string, (Obj.t * case_info) array * int ref) Hashtbl.t;
+  }
 
-let case_children case =
-  match find_case_info case with None -> None | Some i -> i.children
+  let v () = { infos = Atomic.get case_infos; named = Hashtbl.create 8 }
+
+  let named t name =
+    match Hashtbl.find_opt t.named name with
+    | Some n -> n
+    | None ->
+        let n = (Array.of_list (cases_named name t.infos), ref 0) in
+        Hashtbl.add t.named name n;
+        n
+
+  let find t ((name, _, _) as case) =
+    let cases, last = named t name in
+    let key = Obj.repr case in
+    let is i = i >= 0 && i < Array.length cases && fst cases.(i) == key in
+    let rec scan i =
+      if i >= Array.length cases then None
+      else if is i then Some i
+      else scan (i + 1)
+    in
+    let found =
+      if is (!last + 1) then Some (!last + 1)
+      else if is (!last - 1) then Some (!last - 1)
+      else scan 0
+    in
+    Option.map
+      (fun i ->
+        last := i;
+        snd cases.(i))
+      found
+end
 
 (* A given position is printed first, see [Test.pp_location]. *)
 let has_location pp = String.is_prefix ~affix:"File \"" (Fmt.str "%a" pp ())
@@ -667,7 +698,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
 
   (* The entries of a test, in the order of its cases. A name can come back after
      a group, so each name keeps its own count. *)
-  let compile (name, cases) =
+  let compile lookup (name, cases) =
     let counts = Hashtbl.create 8 in
     let next_index name =
       let index = Option.value ~default:0 (Hashtbl.find_opt counts name) in
@@ -680,12 +711,13 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           let tag =
             match parent with `Always -> tag | _ -> Tag.(parent && tag)
           in
-          match case_children case with
+          let info = Case_lookup.find lookup case in
+          match Option.bind info (fun i -> i.children) with
           | Some children ->
               (* A group and its cases have the same ['a]. *)
               entries (name ^ "." ^ doc) tag acc (Obj.obj children)
           | None ->
-              let location = case_location case in
+              let location = Option.bind info (fun i -> i.location) in
               let index = next_index name in
               { entry_name = name; index; doc; tag; location; run } :: acc)
         acc cases
@@ -706,11 +738,12 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     | Error (`Duplicate_test_path path) ->
         Fmt.kstr Pp.user_error "Duplicate test path: `%s'" path
 
-  let register (type a) (t : a t) ((name, _) as test : a test) : a t =
+  let register (type a) lookup (t : a t) ((name, _) as test : a test) : a t =
     let t = { t with max_label = max t.max_label (String.length_utf8 name) } in
-    List.fold_left add_entry t (compile test)
+    List.fold_left add_entry t (compile lookup test)
 
-  let register_all t cases = List.fold_left register t cases
+  let register_all t cases =
+    List.fold_left (register (Case_lookup.v ())) t cases
 
   let nothing_selected t matching =
     t.config#tags <> []
