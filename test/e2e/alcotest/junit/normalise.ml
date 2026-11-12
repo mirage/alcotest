@@ -28,19 +28,22 @@ let () =
   let dir = Filename.temp_file "alcotest" "" in
   Sys.remove dir;
   Sys.mkdir dir 0o755;
-  (* Without a directory, the shell would look the executable up in [PATH]. *)
+  (* Without a directory, the executable would be looked up in [PATH]. *)
   let exe =
     if Filename.is_implicit Sys.argv.(1) then
       Filename.concat Filename.current_dir_name Sys.argv.(1)
     else Sys.argv.(1)
   in
-  let command =
-    Filename.quote_command ~stdout:Filename.null ~stderr:Filename.null exe
-      [ "--junit"; "-o"; dir ]
+  let null = Unix.openfile Filename.null [ Unix.O_WRONLY ] 0 in
+  let pid =
+    Unix.create_process exe [| exe; "--junit"; "-o"; dir |] Unix.stdin null null
   in
-  let (_ : int) = Sys.command command in
+  let _, status = Unix.waitpid [] pid in
   let report =
-    In_channel.with_open_bin (Option.get (find_report dir)) In_channel.input_all
+    match (find_report dir, status) with
+    | Some report, _ -> In_channel.with_open_bin report In_channel.input_all
+    | None, (WEXITED n | WSIGNALED n | WSTOPPED n) ->
+        Printf.ksprintf failwith "%s wrote no report (status %d)" exe n
   in
   (* [--sizes] prints the size of the output of each test instead. *)
   if Array.length Sys.argv > 2 && Sys.argv.(2) = "--sizes" then
