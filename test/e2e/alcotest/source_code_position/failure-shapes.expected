@@ -8,6 +8,7 @@ This run has ID `<uuid>'.
   [FAIL]        shapes          4   raise as tail call.
   [FAIL]        shapes          5   raise in body.
   [FAIL]        shapes          6   given position.
+  [FAIL]        shapes          7   check in scheduler.
 
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │ [FAIL]        shapes          0   check in body.                             │
@@ -105,5 +106,21 @@ FAIL different
 Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.006.output'.
  ──────────────────────────────────────────────────────────────────────────────
 
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        shapes          7   check in scheduler.                        │
+└──────────────────────────────────────────────────────────────────────────────┘
+File "test/e2e/alcotest/source_code_position/eio_sim.ml", line 3, character 52:
+FAIL different
+
+   Expected: `1'
+   Received: `2'
+
+<stacktrace>
+Re-raised at Eio_sim.run in file "test/e2e/alcotest/source_code_position/eio_sim.ml", line 3, characters 52-59
+
+Logs saved to `<build-context>/_build/_tests/<test-dir>/shapes.007.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
-7 failures! in <test-duration>s. 7 tests run.
+8 failures! in <test-duration>s. 8 tests run.
