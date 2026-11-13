@@ -92,21 +92,23 @@ let rec drop_alcotest_frames = function
   | slots -> slots
 
 (* The frames between the raise and Alcotest, innermost first: the last one with
-   a location is in the test body, the others may be in libraries it calls. *)
-let rec test_body_location acc = function
+   a location is in the test body, the others may be in libraries it calls. The
+   first one with a location is the call of a failed [check]. *)
+let rec test_body_location ~innermost acc = function
   | [] -> acc
   | slot :: _ when is_alcotest_frame slot -> acc
-  | slot :: slots ->
-      let acc =
-        match frame_location slot with Some _ as l -> l | None -> acc
-      in
-      test_body_location acc slots
+  | slot :: slots -> (
+      match frame_location slot with
+      | Some _ as l when innermost -> l
+      | Some _ as l -> test_body_location ~innermost l slots
+      | None -> test_body_location ~innermost acc slots)
 
-let backtrace_location bt =
+let backtrace_location ~innermost bt =
   match Printexc.backtrace_slots bt with
   | None -> None
   | Some slots ->
-      test_body_location None (drop_alcotest_frames (Array.to_list slots))
+      test_body_location ~innermost None
+        (drop_alcotest_frames (Array.to_list slots))
 
 (* The [test_case] tuple has no slot for its metadata, which is kept here and
    found by physical equality on the tuple: a function can be shared by several
@@ -386,8 +388,11 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
      backtrace. *)
   let result_of_exn ~registered path e =
     let bt = Printexc.get_raw_backtrace () in
+    (* A failed check points to its call, as documented in [Test.check]. *)
+    let innermost = match e with Check_error _ -> true | _ -> false in
     let location =
-      if guess_location () then Option.(backtrace_location bt || registered)
+      if guess_location () then
+        Option.(backtrace_location ~innermost bt || registered)
       else None
     in
     let exn name pp =

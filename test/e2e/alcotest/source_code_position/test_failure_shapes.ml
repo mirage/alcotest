@@ -16,6 +16,14 @@ let check_in_iter () =
   List.iter (fun x -> Alcotest.(check int) "different" 1 x) [ 2 ];
   ()
 
+let check_then_return x =
+  Alcotest.(check int) "different" 1 x;
+  ()
+
+let check_in_iterated_helper () =
+  List.iter check_then_return [ 2 ];
+  ()
+
 let raise_as_tail_call () = failwith "boom"
 
 let raise_in_body () =
@@ -40,5 +48,7 @@ let () =
           Alcotest.test_case "given position" `Quick given_position;
           Alcotest.test_case "check in scheduler" `Quick (fun () ->
               Eio_sim.run check_in_body);
+          Alcotest.test_case "check in iterated helper" `Quick
+            check_in_iterated_helper;
         ] );
     ]

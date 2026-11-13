@@ -10,6 +10,8 @@
   fixes #451 in 1.10.0)
 - Under Eio, point the failure locations added in 1.10.0 (#451) at the test,
   not at the scheduler (#484, fixes #478, @samoht, report by @talex5)
+- Point a failed `check` in a helper at the `check`, as in 1.9.1, not at the
+  test that calls the helper (#488, @samoht, fixes #451 in 1.10.0)
 
 ### 1.10.0 (09/11/2026)
 
