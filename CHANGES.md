@@ -1,4 +1,4 @@
-### unreleased
+### 1.10.1 (16/11/2026)
 
 - Fix parallel test runs failing with `Failed 6 times to create symlink`, and
   a dangling `latest` link (#479, @samoht, fixes #471 and #472 in 1.10.0)
