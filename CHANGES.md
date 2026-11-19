@@ -1,3 +1,8 @@
+### unreleased
+
+- Fix a crash under js_of_ocaml < 6.0 (#491, fixes #490 in 1.10.1,
+  @samoht, report by @7h3kk1d)
+
 ### 1.10.1 (16/11/2026)
 
 - Fix parallel test runs failing with `Failed 6 times to create symlink`, and
