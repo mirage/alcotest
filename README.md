@@ -204,6 +204,27 @@ them. An executable whose tests the tags all disable
 exits 0 with a warning naming the tags they use, and `list` shows each condition
 other than `` `Quick `` and `` `Slow ``.
 
+### Incomplete tests
+
+A test that reaches unfinished code is reported as `[INCOMPLETE]`. Unfinished
+code raises `Failure` with a message that starts with `TODO:`, and the rest of
+the message is the reason:
+
+```ocaml
+let rec eval = function
+  | Num n -> n
+  | Add (a, b) -> eval a + eval b
+  | Mul _ -> failwith "TODO: multiplication"
+```
+
+```
+  [OK]          eval          0   sums.
+  [INCOMPLETE]  eval          1   products.
+                multiplication
+```
+
+An incomplete test does not fail the run.
+
 ### JUnit XML reports
 
 With `--junit`, or `ALCOTEST_JUNIT=1` in the environment, each run also writes a
@@ -225,7 +246,8 @@ test written as a plain tuple has no location: use `test` or `test_case`. The
 As in other JUnit reports, a test that fails a `check` or calls `fail` is a
 `<failure>`, and a test that raises any other exception, such as `failwith` or
 `assert false`, is an `<error>`. Both make the run fail; CI systems count them
-separately.
+separately. An [incomplete test](#incomplete-tests) is a `<skipped>`, with its
+reason as `message`.
 
 The report is written at the end of the run, or when the process exits early, in
 which case it marks the running test as an `<error>`. Nothing is written if the

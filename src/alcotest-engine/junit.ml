@@ -3,6 +3,7 @@ open! Import
 type outcome =
   | Passed
   | Skipped
+  | Incomplete of string
   | Failed of { kind : string; text : string }
   | Errored of { kind : string; text : string }
 
@@ -91,7 +92,7 @@ let failure_location text =
   with Scanf.Scan_failure _ | Failure _ | End_of_file -> None
 
 let failure_text = function
-  | Passed | Skipped -> ""
+  | Passed | Skipped | Incomplete _ -> ""
   | Failed { text; _ } | Errored { text; _ } -> text
 
 let first_line s =
@@ -111,7 +112,8 @@ let problem tag kind body =
 
 let outcome_body = function
   | Passed -> []
-  | Skipped -> [ elt "skipped" [] [] ]
+  | Skipped | Incomplete "" -> [ elt "skipped" [] [] ]
+  | Incomplete reason -> [ elt "skipped" [ ("message", reason) ] [] ]
   | Failed { kind; text = s } -> [ problem "failure" kind s ]
   | Errored { kind; text = s } -> [ problem "error" kind s ]
 
@@ -170,7 +172,7 @@ let add t case =
     }
   in
   match case.outcome with
-  | Passed | Skipped -> t
+  | Passed | Skipped | Incomplete _ -> t
   | Failed _ -> { t with failures = t.failures + 1 }
   | Errored _ -> { t with errors = t.errors + 1 }
 

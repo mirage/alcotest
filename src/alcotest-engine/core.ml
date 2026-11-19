@@ -21,6 +21,14 @@ open Model
 exception Check_error of unit Fmt.t
 exception Skip
 
+(* Unfinished code is signalled by [failwith "TODO:<reason>"]. *)
+let todo = "TODO:"
+
+let incomplete_reason = function
+  | Failure s when String.is_prefix ~affix:todo s ->
+      Some (String.trim (String.with_range ~first:(String.length todo) s))
+  | _ -> None
+
 let () =
   let print_error =
     (* We instantiate the error print buffer lazily, so as to be sensitive to
@@ -377,7 +385,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
       ppf ()
 
   let has_run : Run_result.t -> bool = function
-    | `Ok | `Error _ | `Exn _ -> true
+    | `Ok | `Error _ | `Exn _ | `Incomplete _ -> true
     | `Skip | `Todo _ -> false
 
   let lines_of_bt bt =
@@ -404,7 +412,10 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
           ( path,
             with_location location Fmt.(err ++ const string (lines_of_bt bt)) )
     | Skip -> `Skip
-    | Failure s -> exn "failure" Fmt.(const string s)
+    | Failure s -> (
+        match incomplete_reason e with
+        | Some reason -> `Incomplete reason
+        | None -> exn "failure" Fmt.(const string s))
     | Invalid_argument s -> exn "invalid" Fmt.(const string s)
     | e -> exn "exception" Fmt.(const exn e)
 
@@ -525,6 +536,7 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     match result with
     | `Ok -> Passed
     | `Skip -> Skipped
+    | `Incomplete reason -> Incomplete reason
     | `Error _ -> Failed { kind = "Check_error"; text }
     | `Todo _ -> Failed { kind = "todo"; text }
     | `Exn (_, kind, _, _) -> Errored { kind; text }

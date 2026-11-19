@@ -85,7 +85,7 @@ module type S = sig
 end
 
 module type Pp = sig
-  val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert ] Fmt.t
+  val tag : [ `Ok | `Fail | `Skip | `Todo | `Assert | `Incomplete ] Fmt.t
 
   val location : (string * int * int) Fmt.t
   (** [location] prints a file, line and character as a failure header. *)

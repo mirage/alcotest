@@ -1,0 +1,16 @@
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+  [OK]          outcomes          0   pass.
+  [INCOMPLETE]  outcomes          1   reason.
+                write this test
+  [INCOMPLETE]  outcomes          2   no reason.
+  [INCOMPLETE]  outcomes          3   lines.
+                first
+                second
+  [SKIP]        outcomes          4   skipped.
+  [INCOMPLETE]  outcomes          5   last.
+                x
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Successful in <test-duration>s. 5 tests run.

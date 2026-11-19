@@ -1,0 +1,35 @@
+(env
+ (_
+  (env-vars
+   (ALCOTEST_COLOR auto))))
+
+(executable
+ (name test_incomplete)
+ (modules test_incomplete)
+ (libraries alcotest))
+
+(rule
+ (target incomplete.actual)
+ (action
+  (with-outputs-to
+   %{target}
+   (run %{dep:test_incomplete.exe}))))
+
+(rule
+ (target incomplete.processed)
+ (action
+  (with-outputs-to
+   %{target}
+   (run ../../strip_randomness.exe %{dep:incomplete.actual}))))
+
+(rule
+ (alias runtest)
+ (package alcotest)
+ (action
+  (diff incomplete.expected incomplete.processed)))
+
+(test
+ (name test_log)
+ (modules test_log)
+ (package alcotest)
+ (libraries alcotest))

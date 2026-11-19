@@ -3,6 +3,8 @@
 type outcome =
   | Passed
   | Skipped
+  | Incomplete of string
+      (** An incomplete test, rendered as [<skipped>] with its reason. *)
   | Failed of { kind : string; text : string }
       (** A failed [check] or [fail], rendered as [<failure>]. *)
   | Errored of { kind : string; text : string }

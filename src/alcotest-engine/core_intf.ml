@@ -64,7 +64,10 @@ module V1_types = struct
     type 'a test_case = string * tag * ('a -> return)
     (** A test case is a UTF-8 encoded documentation string, when it runs and a
         function to execute. Typically, the testing function calls the helper
-        functions provided below (such as [check] and [fail]). *)
+        functions provided below (such as [check] and [fail]).
+
+        A test that raises [Failure] with a message starting with ["TODO:"] is
+        reported as incomplete, with the rest of the message as its reason. *)
 
     exception Test_error
     (** The exception return by {!run} in case of errors. *)
@@ -143,7 +146,8 @@ module V1_types = struct
           ["$DUNE_SOURCEROOT/_build/_tests/"] under dune). The directory in
           which to log the output of the tests. Each run also writes a JUnit XML
           report in its [junit] directory, where a failed [check] or [fail] is a
-          [<failure>] and any other exception is an [<error>].
+          [<failure>], an incomplete test is a [<skipped>] and any other
+          exception is an [<error>].
         - [bail] (default [false]). If true, stop running the tests after the
           first failure.
         - [record_backtrace] (default [true]). Enable backtrace recording before
