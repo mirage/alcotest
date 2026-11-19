@@ -11,6 +11,11 @@ This run has ID `<uuid>'.
   [SKIP]        outcomes          4   skipped.
   [INCOMPLETE]  outcomes          5   last.
                 x
+  [OK]          raises            0   expected.
+  [INCOMPLETE]  raises            1   check_raises.
+                reject negative numbers
+  [INCOMPLETE]  raises            2   match_raises.
+                reject negative numbers
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
-Test Successful in <test-duration>s. 5 tests run.
+Test Successful in <test-duration>s. 8 tests run.

@@ -162,13 +162,15 @@ val failf : (('a, Format.formatter, unit, 'b) format4 -> 'a) extra_info
 (** Simply fail with a formatted message. *)
 
 val check_raises : (string -> exn -> (unit -> unit) -> unit) extra_info
-(** Check that an exception is raised. *)
+(** Check that an exception is raised. An exception that makes the test
+    incomplete is only caught if it is the expected one. *)
 
 val match_raises :
   (string -> (exn -> bool) -> (unit -> unit) -> unit) extra_info
 (** [match_raises msg exception_is_expected f] Runs [f ()], and passes the
     raised exception to [exception_is_expected]. The check fails when no
-    exception is raised, or [exception_is_expected] returns false. *)
+    exception is raised, or [exception_is_expected] returns false. An exception
+    that makes the test incomplete is not caught. *)
 
 val skip : unit -> 'a
 (** Skip the current test case.

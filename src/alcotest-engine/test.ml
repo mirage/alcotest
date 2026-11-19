@@ -216,14 +216,16 @@ let fail ?here ?pos msg =
 let failf ?here ?pos fmt = Fmt.kstr (fun msg -> fail ?here ?pos msg) fmt
 let neg t = testable (pp t) (fun x y -> not (equal t x y))
 
-let collect_exception f =
+(* The signal of an incomplete test is left to the runner, unless it is
+   [expected]. *)
+let collect_exception ?expected f =
   try
     f ();
     None
-  with e -> Some e
+  with e when Core.incomplete_reason e = None || expected = Some e -> Some e
 
 let check_raises ?here ?pos msg exn f =
-  match collect_exception f with
+  match collect_exception ~expected:exn f with
   | None ->
       check_err (fun ppf () ->
           Fmt.pf ppf "%t%a %s: expecting %a, got nothing."

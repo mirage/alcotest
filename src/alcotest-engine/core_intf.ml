@@ -180,6 +180,9 @@ end
 module type Core = sig
   exception Check_error of unit Fmt.t
 
+  val incomplete_reason : exn -> string option
+  (** The reason of an exception that signals an incomplete test. *)
+
   module V1 : sig
     module type S = V1_types.S
     module type MAKER = V1_types.MAKER
