@@ -3,9 +3,9 @@
   (env-vars
    (ALCOTEST_COLOR auto))))
 
-(executable
- (name test_incomplete)
- (modules test_incomplete)
+(executables
+ (names test_incomplete test_mixed)
+ (modules test_incomplete test_mixed)
  (libraries alcotest))
 
 (rule
@@ -13,7 +13,13 @@
  (action
   (with-outputs-to
    %{target}
-   (run %{dep:test_incomplete.exe}))))
+   (progn
+    (run %{dep:test_incomplete.exe})
+    (run %{dep:test_incomplete.exe} -c)
+    (run %{dep:test_incomplete.exe} --json)
+    (with-accepted-exit-codes
+     1
+     (run %{dep:test_mixed.exe}))))))
 
 (rule
  (target incomplete.processed)

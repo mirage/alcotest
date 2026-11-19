@@ -26,6 +26,7 @@ module Types = struct
   type result = {
     success : int;
     failures : int;
+    incomplete : int;
     time : float;
     errors : unit Fmt.t list;
   }

@@ -230,25 +230,36 @@ struct
       (map_theta ~f:Fmt.(styled `Cyan >> quoted) log_dir)
 
   let pp_summary ppf r =
-    let pp_failures ppf = function
-      | 0 -> green_s ppf "Test Successful"
-      | n -> red ppf "%d failure%a!" n pp_plural n
+    let pp_outcome ppf r =
+      match (r.failures, r.incomplete) with
+      | 0, 0 -> green_s ppf "Test Successful"
+      | 0, _ -> yellow_s ppf "Test Incomplete"
+      | n, _ -> red ppf "%d failure%a!" n pp_plural n
     in
-    Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
-      (r.success + r.failures) pp_plural (r.success + r.failures)
+    let pp_incomplete ppf = function
+      | 0 -> ()
+      | n -> Fmt.pf ppf ", %d incomplete" n
+    in
+    let tests = r.success + r.failures + r.incomplete in
+    Fmt.pf ppf "%a in %.3fs. %d test%a run%a.@," pp_outcome r r.time tests
+      pp_plural tests pp_incomplete r.incomplete
 
   let suite_results ~log_dir config ppf r =
-    let print_summary = (not config#compact) || r.failures > 0 in
+    let print_summary =
+      (not config#compact) || r.failures > 0 || r.incomplete > 0
+    in
     match config#json with
     | true ->
         (* Return the json for the api, dirty out, to avoid new dependencies *)
-        Fmt.pf ppf {|{
+        Fmt.pf ppf
+          {|{
   "success": %i,
   "failures": %i,
+  "incomplete": %i,
   "time": %f
 }
 |}
-          r.success r.failures r.time
+          r.success r.failures r.incomplete r.time
     | false ->
         Format.pp_force_newline ppf ();
         Format.pp_open_vbox ppf 0;

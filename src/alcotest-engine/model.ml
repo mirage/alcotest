@@ -55,6 +55,8 @@ module Run_result = struct
   let is_failure : t -> bool = function
     | `Ok | `Skip | `Incomplete _ -> false
     | `Error _ | `Exn _ | `Todo _ -> true
+
+  let is_incomplete : t -> bool = function `Incomplete _ -> true | _ -> false
 end
 
 type condition =

@@ -664,10 +664,15 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     Option.iter (junit_write t) junit;
     let time = P.time () -. start_time in
     let failures = List.length (List.filter Run_result.is_failure results) in
-    let success = List.length (List.filter has_run results) - failures in
+    let incomplete =
+      List.length (List.filter Run_result.is_incomplete results)
+    in
+    let success =
+      List.length (List.filter has_run results) - failures - incomplete
+    in
     if t.config#record_backtrace then
       Printexc.record_backtrace initial_backtrace_status;
-    Pp.{ time; success; failures; errors = List.rev t.errors }
+    Pp.{ time; success; failures; incomplete; errors = List.rev t.errors }
 
   let rec pp_condition ppf = function
     | `Quick -> Fmt.string ppf "quick"

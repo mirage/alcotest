@@ -18,4 +18,36 @@ This run has ID `<uuid>'.
                 reject negative numbers
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
-Test Successful in <test-duration>s. 8 tests run.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+.IIISI.II
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+{
+  "success": 2,
+  "failures": 0,
+  "incomplete": 6,
+  "time": <test-duration>
+}
+Testing `mixed'.
+This run has ID `<uuid>'.
+
+  [INCOMPLETE]  s          0   todo.
+                later
+> [FAIL]        s          1   fail.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        s          1   fail.                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+[failure] broken
+Logs saved to `<build-context>/_build/_tests/<test-dir>/s.001.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 2 tests run, 1 incomplete.
