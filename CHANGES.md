@@ -1,3 +1,10 @@
+### unreleased
+
+- Report a test that raises `Failure "TODO:<reason>"` as `[INCOMPLETE]` rather
+  than `[FAIL]`. Incomplete tests are counted in the summary and in the
+  `--json` output, are `<skipped>` in the JUnit report, and only fail the run
+  with `--fail-incomplete` or `ALCOTEST_FAIL_INCOMPLETE` (@PabloBenario)
+
 ### 1.10.2 (20/11/2026)
 
 - Fix a crash under js_of_ocaml < 6.0 (#491, fixes #490 in 1.10.1,
