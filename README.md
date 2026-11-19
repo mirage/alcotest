@@ -223,7 +223,8 @@ let rec eval = function
                 multiplication
 ```
 
-An incomplete test does not fail the run.
+An incomplete test does not fail the run, unless `--fail-incomplete` is passed
+or `ALCOTEST_FAIL_INCOMPLETE=1` is in the environment.
 
 ### JUnit XML reports
 

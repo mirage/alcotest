@@ -833,7 +833,8 @@ module Make (P : Platform.MAKER) (M : Monad.S) = struct
     in
     (pp_suite_results t) (t.stdout :> Format.formatter) result;
     if nothing_selected t matching then warn_nothing_selected t suite;
-    result.failures
+    if t.config#fail_incomplete then result.failures + result.incomplete
+    else result.failures
 
   (* Dune deletes unknown files from its build context ([_build/default]),
      so under dune the logs go next to it, in [_build/_tests]. *)

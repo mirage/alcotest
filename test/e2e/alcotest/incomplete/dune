@@ -19,7 +19,16 @@
     (run %{dep:test_incomplete.exe} --json)
     (with-accepted-exit-codes
      1
-     (run %{dep:test_mixed.exe}))))))
+     (run %{dep:test_mixed.exe}))
+    (with-accepted-exit-codes
+     1
+     (run %{dep:test_incomplete.exe} -c --fail-incomplete))
+    (setenv
+     ALCOTEST_FAIL_INCOMPLETE
+     true
+     (with-accepted-exit-codes
+      1
+      (run %{dep:test_incomplete.exe} -c)))))))
 
 (rule
  (target incomplete.processed)

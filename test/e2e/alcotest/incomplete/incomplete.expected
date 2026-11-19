@@ -51,3 +51,17 @@ Logs saved to `<build-context>/_build/_tests/<test-dir>/s.001.output'.
 
 Full test results in `<build-context>/_build/_tests/<test-dir>'.
 1 failure! in <test-duration>s. 2 tests run, 1 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+.IIISI.II
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+.IIISI.II
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.

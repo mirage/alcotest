@@ -88,6 +88,13 @@ module Key = struct
       Arg.(value & flag & info ~env [ "bail" ] ~docv:"" ~doc)
   end)
 
+  module Fail_incomplete = Flag (struct
+    let term =
+      let env = Cmd.Env.info "ALCOTEST_FAIL_INCOMPLETE" in
+      let doc = "Fail the run if a test is incomplete." in
+      Arg.(value & flag & info ~env [ "fail-incomplete" ] ~docv:"" ~doc)
+  end)
+
   module Json = Flag (struct
     let term =
       let doc = "Display JSON for the results, to be used by a script." in
@@ -273,6 +280,7 @@ module User = struct
     (* TODO: set Log_dir default internally *)
     log_dir : Log_dir.t;
     bail : Bail.t option;
+    fail_incomplete : Fail_incomplete.t option;
     record_backtrace : Record_backtrace.t option;
     ci : CI.t option;
     stdout : Formatters.stdout;
@@ -305,6 +313,7 @@ module User = struct
       filter = merge_on (fun t -> t.filter);
       log_dir = merge_on (fun t -> t.log_dir);
       bail = merge_on (fun t -> t.bail);
+      fail_incomplete = merge_on (fun t -> t.fail_incomplete);
       record_backtrace = merge_on (fun t -> t.record_backtrace);
       ci = merge_on (fun t -> t.ci);
       stdout;
@@ -322,7 +331,8 @@ module User = struct
     and+ junit = Junit.term
     and+ filter = Filter.term
     and+ log_dir = Log_dir.term
-    and+ bail = Bail.term in
+    and+ bail = Bail.term
+    and+ fail_incomplete = Fail_incomplete.term in
     {
       and_exit = Some and_exit;
       verbose;
@@ -337,6 +347,7 @@ module User = struct
       filter;
       log_dir;
       bail;
+      fail_incomplete;
       record_backtrace = Some record_backtrace;
       ci = Some ci;
       stdout;
@@ -364,6 +375,7 @@ module User = struct
         filter;
         log_dir;
         bail;
+        fail_incomplete = None;
         record_backtrace;
         ci;
         stdout;
@@ -396,6 +408,7 @@ let apply_defaults ~default_log_dir : User.t -> t =
        filter;
        log_dir;
        bail;
+       fail_incomplete;
        record_backtrace;
        ci;
        stdout;
@@ -422,6 +435,9 @@ let apply_defaults ~default_log_dir : User.t -> t =
     method filter = filter
     method log_dir = Option.value ~default:default_log_dir log_dir
     method bail = Option.value ~default:Bail.default bail
+
+    method fail_incomplete =
+      Option.value ~default:Fail_incomplete.default fail_incomplete
 
     method record_backtrace =
       Option.value ~default:Record_backtrace.default record_backtrace
