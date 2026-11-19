@@ -34,9 +34,10 @@ jobs:
             # Windows.
             opam-files: ./alcotest.opam ./alcotest-lwt.opam ./alcotest-mirage.opam
             dune-flags: --only-packages alcotest,alcotest-lwt,alcotest-mirage
-          # alcotest-async lower bound
+          # alcotest-async and js_of_ocaml-compiler lower bounds
           - os: ubuntu-latest
-            ocaml-compiler: "4.14"
+            ocaml-compiler: "4.14.2"
+            js_of_ocaml-compiler: "5.8.1"
 
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
@@ -75,7 +76,7 @@ jobs:
       # The js_of_ocaml backend does not work on Windows yet: absolute paths
       # are mangled and caml_unix_filedescr_of_channel is missing.
       - if: runner.os != 'Windows'
-        run: opam install js_of_ocaml-compiler
+        run: opam install "js_of_ocaml-compiler${{ matrix.js_of_ocaml-compiler && format('.{0}', matrix.js_of_ocaml-compiler) || '' }}"
 
       - if: runner.os != 'Windows'
         run: opam exec -- dune build '@runtest-js'
