@@ -47,7 +47,7 @@ module Unix_platform (M : Alcotest_engine.Monad.S) = struct
     let latest = Filename.concat root "latest" in
     let tmp = latest ^ "." ^ uuid in
     Unix.symlink ~to_dir:true target tmp;
-    Unix.rename tmp latest
+    Sys.rename tmp latest
 
   (* The time comes first, so that the runs of a suite are listed in order. *)
   let prepare_log_trap ~root ~suite ~uuid =
