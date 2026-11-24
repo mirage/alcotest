@@ -38,6 +38,9 @@ OPTIONS
        -e, --show-errors (absent ALCOTEST_SHOW_ERRORS env)
            Display the test errors.
 
+       --fail-incomplete (absent ALCOTEST_FAIL_INCOMPLETE env)
+           Fail the run if a test is incomplete.
+
        --json
            Display JSON for the results, to be used by a script.
 
@@ -96,6 +99,9 @@ ENVIRONMENT
 
        ALCOTEST_COMPACT
            See option --compact.
+
+       ALCOTEST_FAIL_INCOMPLETE
+           See option --fail-incomplete.
 
        ALCOTEST_JUNIT
            See option --junit.

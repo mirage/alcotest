@@ -48,12 +48,15 @@ module Run_result = struct
     | `Exn of Test_name.t * string * (string * int * int) option * unit Fmt.t
     | `Error of Test_name.t * unit Fmt.t
     | `Skip
-    | `Todo of string ]
+    | `Todo of string
+    | `Incomplete of string ]
 
   (** [is_failure] holds for test results that are error states. *)
   let is_failure : t -> bool = function
-    | `Ok | `Skip -> false
+    | `Ok | `Skip | `Incomplete _ -> false
     | `Error _ | `Exn _ | `Todo _ -> true
+
+  let is_incomplete : t -> bool = function `Incomplete _ -> true | _ -> false
 end
 
 type condition =

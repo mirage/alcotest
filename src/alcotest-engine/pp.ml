@@ -26,7 +26,7 @@ let pp_plural ppf x = Fmt.pf ppf (if x < 2 then "" else "s")
 let colour_of_tag = function
   | `Ok -> `Green
   | `Fail -> `Red
-  | `Skip | `Todo | `Assert -> `Yellow
+  | `Skip | `Todo | `Assert | `Incomplete -> `Yellow
 
 let string_of_tag = function
   | `Ok -> "OK"
@@ -34,6 +34,7 @@ let string_of_tag = function
   | `Skip -> "SKIP"
   | `Todo -> "TODO"
   | `Assert -> "ASSERT"
+  | `Incomplete -> "INCOMPLETE"
 
 let pp_tag ~wrapped ppf typ =
   let colour = colour_of_tag typ in
@@ -60,6 +61,9 @@ struct
     | `Error (_, e) -> Fmt.pf ppf "%a@," e ()
     | `Exn (_, n, l, e) ->
         Fmt.pf ppf "%a[%s] @[<v>%a@]" (Fmt.option location) l n e ()
+    | `Incomplete reason ->
+        let sep = if reason = "" then "" else " " in
+        Fmt.pf ppf "[incomplete]%s@[<v>%a@]" sep Fmt.lines reason
     | `Ok | `Todo _ | `Skip -> ()
 
   (* Colours *)
@@ -110,6 +114,7 @@ struct
     | `Exn _ | `Error _ -> `Fail
     | `Skip -> `Skip
     | `Todo _ -> `Todo
+    | `Incomplete _ -> `Incomplete
 
   let pp_result ppf result =
     let tag = tag_of_result result in
@@ -123,6 +128,7 @@ struct
       | `Exn _ | `Error _ -> 'F'
       | `Skip -> 'S'
       | `Todo _ -> 'T'
+      | `Incomplete _ -> 'I'
     in
     Fmt.(styled colour char) ppf char
 
@@ -150,6 +156,13 @@ struct
           ppf p
     | _ -> assert false
 
+  (* The reason of an incomplete test, under the name of the test. Its newlines
+     are forced, as a cut only breaks a line that is full. *)
+  let pp_reason ppf reason =
+    let pad = String.v ~len:left_total (fun _ -> ' ') in
+    List.iter (Fmt.pf ppf "@\n%s%s" pad) (String.cuts ~sep:"\n" reason);
+    Fmt.pf ppf "@\n"
+
   let event ~isatty ~compact ~max_label ~doc_of_test_name ~selector_on_failure
       ~tests_so_far ppf event =
     match (compact, isatty, event) with
@@ -170,11 +183,15 @@ struct
         if (tests_so_far + 1) mod Lazy.force terminal_width = 0 then
           Format.pp_force_newline ppf ();
         ()
-    | false, _, `Result (tname, r) ->
+    | false, _, `Result (tname, r) -> (
         if isatty then Fmt.pf ppf "\r";
-        Fmt.pf ppf "%a@,"
-          (pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure)
-          (tname, r)
+        let pp_line =
+          pp_result_full ~max_label ~doc_of_test_name ~selector_on_failure
+        in
+        match r with
+        | `Incomplete reason when reason <> "" ->
+            Fmt.pf ppf "%a%a" pp_line (tname, r) pp_reason reason
+        | _ -> Fmt.pf ppf "%a@," pp_line (tname, r))
 
   let pp_suite_errors ~show_all = function
     | [] -> Fmt.nop
@@ -213,25 +230,36 @@ struct
       (map_theta ~f:Fmt.(styled `Cyan >> quoted) log_dir)
 
   let pp_summary ppf r =
-    let pp_failures ppf = function
-      | 0 -> green_s ppf "Test Successful"
-      | n -> red ppf "%d failure%a!" n pp_plural n
+    let pp_outcome ppf r =
+      match (r.failures, r.incomplete) with
+      | 0, 0 -> green_s ppf "Test Successful"
+      | 0, _ -> yellow_s ppf "Test Incomplete"
+      | n, _ -> red ppf "%d failure%a!" n pp_plural n
     in
-    Fmt.pf ppf "%a in %.3fs. %d test%a run.@," pp_failures r.failures r.time
-      (r.success + r.failures) pp_plural (r.success + r.failures)
+    let pp_incomplete ppf = function
+      | 0 -> ()
+      | n -> Fmt.pf ppf ", %d incomplete" n
+    in
+    let tests = r.success + r.failures + r.incomplete in
+    Fmt.pf ppf "%a in %.3fs. %d test%a run%a.@," pp_outcome r r.time tests
+      pp_plural tests pp_incomplete r.incomplete
 
   let suite_results ~log_dir config ppf r =
-    let print_summary = (not config#compact) || r.failures > 0 in
+    let print_summary =
+      (not config#compact) || r.failures > 0 || r.incomplete > 0
+    in
     match config#json with
     | true ->
         (* Return the json for the api, dirty out, to avoid new dependencies *)
-        Fmt.pf ppf {|{
+        Fmt.pf ppf
+          {|{
   "success": %i,
   "failures": %i,
+  "incomplete": %i,
   "time": %f
 }
 |}
-          r.success r.failures r.time
+          r.success r.failures r.incomplete r.time
     | false ->
         Format.pp_force_newline ppf ();
         Format.pp_open_vbox ppf 0;

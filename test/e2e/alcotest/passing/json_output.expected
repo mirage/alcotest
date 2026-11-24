@@ -4,5 +4,6 @@ This run has ID `<uuid>'.
 {
   "success": 3,
   "failures": 0,
+  "incomplete": 0,
   "time": <test-duration>
 }

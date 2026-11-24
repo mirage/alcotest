@@ -59,6 +59,7 @@ let time_replace =
              [
                (* Maybe ANSI escape, depending on [--color] *)
                opt cntrl ^^ str "Test Successful" ^^ opt cntrl ^^ str " in ";
+               opt cntrl ^^ str "Test Incomplete" ^^ opt cntrl ^^ str " in ";
                rep1 digit ^^ str " failure! in ";
                rep1 digit ^^ str " failures! in ";
                str "\"time\": ";

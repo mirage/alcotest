@@ -1,0 +1,67 @@
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+  [OK]          outcomes          0   pass.
+  [INCOMPLETE]  outcomes          1   reason.
+                write this test
+  [INCOMPLETE]  outcomes          2   no reason.
+  [INCOMPLETE]  outcomes          3   lines.
+                first
+                second
+  [SKIP]        outcomes          4   skipped.
+  [INCOMPLETE]  outcomes          5   last.
+                x
+  [OK]          raises            0   expected.
+  [INCOMPLETE]  raises            1   check_raises.
+                reject negative numbers
+  [INCOMPLETE]  raises            2   match_raises.
+                reject negative numbers
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+.IIISI.II
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+{
+  "success": 2,
+  "failures": 0,
+  "incomplete": 6,
+  "time": <test-duration>
+}
+Testing `mixed'.
+This run has ID `<uuid>'.
+
+  [INCOMPLETE]  s          0   todo.
+                later
+> [FAIL]        s          1   fail.
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ [FAIL]        s          1   fail.                                           │
+└──────────────────────────────────────────────────────────────────────────────┘
+[failure] broken
+Logs saved to `<build-context>/_build/_tests/<test-dir>/s.001.output'.
+ ──────────────────────────────────────────────────────────────────────────────
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+1 failure! in <test-duration>s. 2 tests run, 1 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+.IIISI.II
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.
+Testing `incomplete'.
+This run has ID `<uuid>'.
+
+.IIISI.II
+
+Full test results in `<build-context>/_build/_tests/<test-dir>'.
+Test Incomplete in <test-duration>s. 8 tests run, 6 incomplete.

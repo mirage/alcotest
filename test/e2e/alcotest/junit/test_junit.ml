@@ -51,4 +51,9 @@ let () =
                 "&amp; &bogus; &#0; ]]> \x00\x1b \xc3\x28 \xed\xa0\x80\n";
               fail "</failure><error>&lt;&#1;\x0b");
         ];
+      suite "incomplete"
+        [
+          test "todo" (fun () -> failwith "TODO: a \"reason\"");
+          test "no reason" (fun () -> failwith "TODO:");
+        ];
     ]

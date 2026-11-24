@@ -23,6 +23,7 @@ module Types = struct
     ; filter : filter option
     ; log_dir : string
     ; bail : bool
+    ; fail_incomplete : bool
     ; record_backtrace : bool
     ; ci : ci >
 
